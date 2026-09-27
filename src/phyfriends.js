@@ -38,6 +38,42 @@
     };
   }
 
+  // The house shade (STYLE.md §6): the one shade layer every friend shares. A palette role
+  // `<name>Shade` that the spec leaves out is <name> one fixed step darker in CIELAB lightness,
+  // its own hue a little richer (chroma x1.2, kept inside sRGB); near-whites, which have no hue
+  // of their own, lean to lavender instead, as the artists' own shading does. Every friend's
+  // shades are the same step.
+  const SHADE = { dL: -10, chroma: 1.2, lavender: [2, -6], neutral: 10 };
+  function shadeOf(hex, by = SHADE) {
+    let h = hex.replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&');
+    const lin = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+    const [r, g, b] = [0, 2, 4].map(k => lin(parseInt(h.slice(k, k + 2), 16) / 255));
+    const f = t => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
+    const fx = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047), fy = f(0.2126 * r + 0.7152 * g + 0.0722 * b),
+      fz = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883);
+    const L = 116 * fy - 16 + by.dL, a0 = 500 * (fx - fy), b0 = 200 * (fy - fz);
+    const C = Math.hypot(a0, b0), hue = Math.atan2(b0, a0), w = Math.max(0, 1 - C / by.neutral);
+    const toRGB = c2 => {
+      const A = c2 * Math.cos(hue) + by.lavender[0] * w, B = c2 * Math.sin(hue) + by.lavender[1] * w;
+      const gy = (L + 16) / 116, gx = gy + A / 500, gz = gy - B / 200;
+      const inv = t => (t ** 3 > 216 / 24389 ? t ** 3 : (116 * t - 16) / (24389 / 27));
+      const X = inv(gx) * 0.95047, Y = inv(gy), Z = inv(gz) * 1.08883;
+      const gam = c => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055);
+      return [3.2406 * X - 1.5372 * Y - 0.4986 * Z, -0.9689 * X + 1.8758 * Y + 0.0415 * Z, 0.0557 * X - 0.2040 * Y + 1.0570 * Z].map(gam);
+    };
+    let c2 = C * by.chroma, rgb = toRGB(c2);
+    for (let i = 0; i < 30 && rgb.some(c => c < -0.002 || c > 1.002); i++) rgb = toRGB(c2 *= 0.95);
+    return '#' + rgb.map(c => Math.max(0, Math.min(255, Math.round(c * 255))).toString(16).padStart(2, '0')).join('');
+  }
+  function withShades(palette) {
+    const P = {}; // each derived shade right after its colour
+    for (const [k, v] of Object.entries(palette)) {
+      P[k] = v;
+      if (typeof v === 'string' && /^#[0-9a-f]{3,6}$/i.test(v) && !(`${k}Shade` in palette)) P[`${k}Shade`] = shadeOf(v);
+    }
+    return P;
+  }
+
   function hash(str) { // FNV-1a
     let h = 2166136261;
     for (const ch of String(str)) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
@@ -443,7 +479,7 @@
     const view = resolveView(spec, opts.view, opts.size);
     // a view may carry the pose its reference was drawn in; opts.pose overrides it
     const st = poseState(spec, view.pose ? { ...view.pose, ...opts.pose } : opts.pose);
-    const P = spec.palette || {};
+    const P = withShades(spec.palette || {});
     const col = c => (c && P[c]) || c || '#000';
     const seed = part => hash(`${spec.name || ''}/${part}`);
     const defs = [];
@@ -521,20 +557,22 @@
     // iris, a lighter crescent peeking in at the bottom, then a white glint.
     const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
     let eyeClip = '';
-    if (eye.shine) {
+    if (eye.shine || (eye.right && eye.right.shine)) {
       const { w, h } = eye, r = Math.min(w, h) / 2, round = eye.shape === 'dot' || eye.shape === 'round';
       eyeClip = clipUrl('eye', round
         ? `M${num(-w / 2)} 0A${num(w / 2)} ${num(h / 2)} 0 1 1 ${num(w / 2)} 0A${num(w / 2)} ${num(h / 2)} 0 1 1 ${num(-w / 2)} 0Z`
         : `M${num(-w / 2)} ${num(-h / 2 + r)}A${num(r)} ${num(r)} 0 0 1 ${num(w / 2)} ${num(-h / 2 + r)}V${num(h / 2 - r)}` +
           `A${num(r)} ${num(r)} 0 0 1 ${num(-w / 2)} ${num(h / 2 - r)}Z`);
     }
+    // eyes.right overrides the right eye's colour and shine (for odd-coloured eyes)
     const eyeShape = side => {
-      const { w, h } = eye, c = col(eye.color || 'eye'), tilt = (eye.tilt || 0) * (side === 'L' ? 1 : -1);
+      const e = side === 'R' && eye.right ? { ...eye, ...eye.right } : eye;
+      const { w, h } = eye, c = col(e.color || 'eye'), tilt = (eye.tilt || 0) * (side === 'L' ? 1 : -1);
       let open;
       if (eye.shape === 'dot' || eye.shape === 'round') open = `<ellipse rx="${w / 2}" ry="${h / 2}" fill="${c}"/>`;
       else open = `<rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="${w / 2}" fill="${c}"/>`;
-      if (eye.shine) {
-        const marks = [].concat(eye.shine).map(s => {
+      if (e.shine) {
+        const marks = [].concat(e.shine).map(s => {
           const x = num(s.x ?? w * 0.15), y = num(s.y ?? -h * 0.22), f = col(s.color || '#fff');
           return s.rx ? `<ellipse cx="${x}" cy="${y}" rx="${num(s.rx)}" ry="${num(s.ry ?? s.rx)}" fill="${f}"/>`
             : `<circle cx="${x}" cy="${y}" r="${num(s.r ?? w * 0.2)}" fill="${f}"/>`;
@@ -665,6 +703,11 @@
     define, get: resolve, list: () => [...registry.keys()], merge,
     render, mount, poseState, resolveView,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
-    rng, hash,
+    rng, hash, SHADE, shadeOf,
+    // the palette a render uses: the spec's colours plus the house shades it refers to
+    palette: specOrName => {
+      const spec = resolve(specOrName), P = withShades(spec.palette || {}), used = JSON.stringify(spec);
+      return Object.fromEntries(Object.entries(P).filter(([k]) => (spec.palette || {})[k] !== undefined || used.includes(`"${k}"`)));
+    },
   };
 });

@@ -69,17 +69,17 @@ outwards); a render's own pose overrides it field by field.
 
 ```js
 PhyFriends.define('name', {
-  palette: { bg, fur, face, hair, hairShade, earInner, stripe, eye, blush, chest, tailTip },
+  palette: { bg, fur, face, hair, earInner, stripe, eye, blush, chest, tailTip },  // furShade etc. are derived
   head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // fluffy ellipse
   face:  { ... same as head ... },                                     // pale mask
   ears:  { base, angle, width, length, lean, tip, inner, stripes, right: {...overrides} },
   hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // spiky star
-  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc },  // shine: a glint, or a list of marks (iris, glint)
+  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { color, shine } },  // shine: a glint, or a list of marks (iris, glint); right: the right eye's own colour
   blush: { x, y, rx, ry, tilt },                                      // tilt > 0 raises the outer ends
   mouth: { x, y, size, shape, fang, tongue },                         // shape: the default mouth
   body:  { ...fluffy ellipse... },
   tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // optional
-  extras: [{ on: 'hair', clip: true, fill: 'hairShade', ...shape }],   // markings, shading; on: 'ears' = both ears
+  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // markings, the shade layer; on: 'ears' = both ears
   order: ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   views: { ref: { w, h, x, y, scale, rotate, pose } },
@@ -94,6 +94,12 @@ Every character file is laid out the same way, so two specs read side by side:
 - `views` last, with `ref` first.
 
 Friends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
+
+Shades are derived (STYLE.md §6): any `<name>Shade` a spec uses and leaves out of
+its palette is `<name>` one fixed step darker (`PhyFriends.shadeOf`: CIELAB L* −10,
+its hue a little richer, near-whites leaning to lavender), so every friend's one
+shade layer matches. Set one by hand only where the derived one looks wrong.
+`PhyFriends.palette(spec)` lists a spec's colours with the shades it uses.
 
 Shape primitives (`PhyFriends.shapes`):
 

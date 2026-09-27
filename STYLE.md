@@ -59,8 +59,9 @@ Each page has four parts, in this order:
      smallest phones.
    - Ears and tails may reach outside a friend's box, as they would in a
      photo. A tail that sticks out at ground level gets room beside it.
-   - On phones the friends stand in a row while they fit, then wrap onto
-     more rows, each grounded on a rule.
+   - The friends stand in a row while they fit (on wide monitors the page
+     widens so all of them do), then wrap onto more rows, each grounded on a
+     rule (on phones, two to a row).
    - A loose pencil ring circles one name: the host's, phy.
    - Every friend can be greeted (see §5). A pencilled note says so: in the
      margin beside the stage with an arrow, or one line under it on narrow
@@ -75,8 +76,9 @@ Each character gets a small handwritten label:
   if someone else drew it). phy's reads "that's me". Other people's fursonas
   appear only with their owner's consent.
 
-Names keep their owner's capitalisation: **Howdi** and **Yuda** are
-capitalised, but **phy** is always lower case, even at the start of a line.
+Names keep their owner's capitalisation: **Howdi**, **Yuda** and **Terry** are
+capitalised, but **phy** and **mumuyou** are always lower case, even at the
+start of a line.
 Everything else on the page is written in lower case.
 
 ## 3. Type
@@ -140,10 +142,24 @@ when reproducing a new image or design sheet.
 - **Flat vector:**
   - no outlines, no gradients, no textures
   - 8–12 colours per character, each with a named role in `palette`: `fur`,
-    `face`, `hair`, `hairShade`, `earInner`, `stripe`, `eye`, `blush`,
+    `face`, `hair`, `earInner`, `stripe`, `eye`, `blush`,
     `chest`, …
-  - shading, when used at all, is one darker flat shape of the same hue
-    (e.g. `hairShade`)
+  - **one shade layer, the same for every friend:** every colour is one the
+    character really has (its fur, hair, markings, accessories), plus at most
+    one shade of it. `<name>Shade` in the palette is derived by the library
+    from `<name>` (one fixed step darker, CIELAB L* −10, its own hue a little
+    richer; near-whites lean to lavender), so the shades match across friends.
+    A spec sets one by hand only where the derived one looks wrong (mumuyou's
+    gold hair, Howdi's navy, whose derived shade is nearly black), and says so
+    in a comment.
+    It goes only on a part that sits behind a neighbour of the same colour, to
+    tell them apart: Terry's ears behind the face, a body under the head, the
+    back layer of a ruff, locks of hair behind the mop, a bandana's band behind
+    its point.
+  - no other shading: no second step, no highlights, and nothing copied from a
+    reference's lighting (a pale rim of light along an ear, a darker far side).
+  - a pale colour that would vanish on the paper takes one slightly deeper flat
+    tint, used wherever that colour appears (mumuyou's white, #efeef3).
 - **Chibi proportions, in head space:**
   - the origin sits between the eyes, and the head is about 200 units wide
   - ear tips reach about −140, the paws about +130 (`rig.ground`), and a tail may curl out to one side
@@ -157,7 +173,8 @@ when reproducing a new image or design sheet.
     small curved fur tufts
   - *a star hair mop*: broad, curved, flame-like locks, with some hanging
     over the face
-  - *rounded-triangle ears* with a pale inner ear and optional stripe bands
+  - *rounded-triangle ears*, with an inner ear and stripe bands only where the
+    character really has them
   - *pill eyes*: solid, no whites, no highlight by default
   - soft *blush* ovals
   - no mouth by default

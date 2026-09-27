@@ -2,18 +2,15 @@
 PhyFriends.define('howdi', {
   palette: {
     bg: '#1c1d21',
-    fur: '#84cefd',
-    earFur: '#76c8fd',
-    furShade: '#5c9ed9',
+    fur: '#84cefd',        // its house shade (furShade) is the body, under the head
     face: '#e7f6fd',
     hair: '#253d79',
-    hairShade: '#1d3068',
+    hairShade: '#1d3068',  // its one shade, set by hand: the derived shade of this navy is nearly black
     earInner: '#e4f5fd',
     stripe: '#29417d',
     eye: '#1c1d22',
     blush: '#e9d3e0',
-    chest: '#bfd7f3',
-    chestLight: '#e3f4fe',
+    chest: '#e3f4fe',      // the ruff; its house shade (chestShade) is the layer behind its clumps
     tailTip: '#29417d',
   },
   // the cheek fluff draws the lower outline, so the head itself stays inside its notches
@@ -34,15 +31,13 @@ PhyFriends.define('howdi', {
   // taller, with a long convex outer edge.
   ears: {
     base: [-73, -59], angle: 32, width: 96.5, length: 82, lean: 36, tip: 5, b1: -15.5, b2: -17,
-    color: 'earFur',
     // a sail-shaped inner ear, drawn in front of the head so it runs down over the fur
     inner: { front: true, scale: 1, dx: -8, dy: -5, width: 35, length: 56, lean: 36, tip: 3, b1: -38, b2: -4 },
     stripes: [{ t: 0.3, w: 13, a: 5 }],
-    // the right ear is shorter and broader (as drawn in the reference); below its
-    // navy band it takes the head's fur colour, so it melts into the head
+    // the right ear is shorter and broader (as drawn in the reference), its navy band lower
     right: {
       base: [-72, -57.5], width: 98, length: 63, lean: 35, b1: -25, b2: -17,
-      stripes: [{ t: -0.3, w: 60, a: 45, color: 'fur' }, { t: 0.17, w: 17, a: 45 }],
+      stripes: [{ t: 0.17, w: 17, a: 45 }],
       inner: { front: true, scale: 1, dx: -7.5, dy: -9, width: 38, length: 41, lean: 32, tip: 5.5, b1: -20, b2: 7.5 },
     },
   },
@@ -69,7 +64,8 @@ PhyFriends.define('howdi', {
   },
   eyes: { x: 34.7, y: 0.4, w: 11.5, h: 31, tilt: -3 },
   blush: { x: 53, y: 21.3, rx: 11, ry: 6.5 },
-  // compact body in shade: shoulder tufts reach up and out under the cheeks, small hip tufts below
+  // compact body under the head, in the house shade: shoulder tufts reach up and out under the
+  // cheeks, small hip tufts below
   body: {
     cx: -5, cy: 75.4, rx: 68.6, ry: 56, color: 'furShade',
     fluff: [{ from: -70.1, to: -20.7, n: 2, len: 18, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
@@ -85,27 +81,27 @@ PhyFriends.define('howdi', {
         { from: -21, to: 46, n: 4, len: 1, lean: -4, depth: 0.1, b1: 0, b2: -14, jit: 0.87, seed: 71, sym: true },
         { from: 46, to: 128, n: 1, len: -19, b1: 14, b2: 8 },
       ] },
-    // darker strand along the lower right lock (its lower edge is the lock's, via the clip)
+    // darker strand along the lower right lock, in the hair's shade (its lower edge is the lock's, via the clip)
     { on: 'hair', clip: true, fill: 'hairShade', nodes: [[19, -54, 1, 29], [55, -38, 1, 0], [58, -29, 1, 0], [27, -33, 1, -10]] },
-    // chest ruff: pale clumps over a blue-grey bib, which shows as a collar under the chin
-    // and in the gaps between clumps. Tufts are shingles: a long convex sweep into a point,
+    // chest ruff: pale clumps over their back layer in the house shade, which shows as a collar
+    // under the chin and in the gaps between clumps. Tufts are shingles: a long convex sweep into a point,
     // then a short notch back in, leaning outwards. jit: 0 keeps them fixed whatever their
     // index in this list.
-    { on: 'body', clip: true, fill: 'chest', cx: -12, cy: 65.3, rx: 96, ry: 25.3, rot: -1.2,
+    { on: 'body', clip: true, fill: 'chestShade', cx: -12, cy: 65.3, rx: 96, ry: 25.3, rot: -1.2,
       fluff: [{ from: -42.6, to: -8.2, n: 3, len: 0, lean: -6, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
         { from: 95, to: 160, n: 3, len: 9, lean: 7.6, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
     // forepaws, peeking out under the ruff
     { on: 'body', kind: 'ellipse', fill: 'fur', cx: -28, cy: 121, rx: 14, ry: 9 },
     { on: 'body', kind: 'ellipse', fill: 'fur', cx: 16, cy: 121, rx: 14, ry: 9 },
     // left clump: a rounded end under the left cheek
-    { on: 'body', clip: true, fill: 'chestLight', cx: -65.9, cy: 65.8, rx: 24.7, ry: 14.2, rot: -7.1,
+    { on: 'body', clip: true, fill: 'chest', cx: -65.9, cy: 65.8, rx: 24.7, ry: 14.2, rot: -7.1,
       fluff: [{ from: 70, to: 190, n: 3, len: 9, lean: 12, depth: 0.2, b1: -25, b2: 5, jit: 0 }] },
     // middle clump: one broad point hidden under the chin
-    { on: 'body', clip: true, fill: 'chestLight', cx: -11.6, cy: 80.1, rx: 31.6, ry: 24, rot: -14.6,
+    { on: 'body', clip: true, fill: 'chest', cx: -11.6, cy: 80.1, rx: 31.6, ry: 24, rot: -14.6,
       fluff: [{ from: 172.2, to: 303.4, n: 1, len: 11.2, lean: -22.4, b1: -40, b2: -37.8, jit: 0 },
         { from: 30, to: 160, n: 4, len: 10, lean: 9.8, depth: 0.2, b1: -25, b2: 5, jit: 0 }] },
     // right clump: its point peeks out under the chin; tufts lean the other way
-    { on: 'body', clip: true, fill: 'chestLight', cx: 31.3, cy: 84.7, rx: 24.9, ry: 15, rot: 4,
+    { on: 'body', clip: true, fill: 'chest', cx: 31.3, cy: 84.7, rx: 24.9, ry: 15, rot: 4,
       fluff: [{ from: 223, to: 331.8, n: 1, len: 12.6, lean: -21.5, b1: -17.1, b2: 8, jit: 0 },
         { from: 20, to: 150, n: 3, len: 10, lean: -13, depth: 0.2, b1: 5, b2: -25, jit: 0 }] },
   ],

@@ -327,8 +327,8 @@ def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', siz
 
 
 def palette_classes(name, merge=24):
-    """The spec's palette as colour classes; near-identical colours share a class."""
-    pal = evaluate(f'PhyFriends.get({json.dumps(name)}).palette')
+    """The spec's palette, with the house shades it uses, as colour classes; near-identical colours share a class."""
+    pal = evaluate(f'PhyFriends.palette({json.dumps(name)})')
     classes = []  # [(label, (r, g, b))]
     for key, col in pal.items():
         if not (isinstance(col, str) and col.startswith('#') and len(col) in (4, 7)):

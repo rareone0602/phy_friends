@@ -17,7 +17,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Howdi, a sky-blue wolf, and phy, a tuxedo Eevee, standing on a pencilled line on lined notebook paper">
+<meta property="og:image:alt" content="Howdi, a sky-blue wolf, phy, a tuxedo Eevee, Yuda, a slate-blue wolf in a cyan bandana, Terry, a yellow plush toy with huge floppy ears, and mumuyou, a white fox with a blonde mop, standing on pencilled lines on lined notebook paper">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -32,7 +32,8 @@
      neighbours stand close but never tread on a tail. */
   :root { --size: calc(var(--L) * 7); }
   .stage { margin-top: calc(var(--L) * 2); }
-  .friends { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; }
+  /* the friends stand in one row while they fit, then wrap onto more rows, each grounded on a rule */
+  .friends { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center; }
   .friend {
     width: calc(var(--size) * (270 + var(--pl, 0) + var(--pr, 0)) / 270);
     position: relative; margin: 0 calc(var(--size) * -0.03); z-index: var(--z, 1);
@@ -59,21 +60,25 @@
   .note .touch { display: none; }
   .arrow { overflow: visible; filter: url(#graphite); }
   @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
-  @media (min-width: 1071px) {
-    .note { position: absolute; left: calc(100% - 24px); top: calc(var(--L) * 2 + 6px); padding-left: 62px; transform: rotate(-2deg); transform-origin: 0 50%; }
+  @media (min-width: 1200px) {
+    /* the troupe keeps room on its right for the note, so the two are centred together */
+    .troupe { --room: 190px; padding-right: var(--room); }
+    .note { position: absolute; left: calc(100% - var(--room) - 24px); top: calc(var(--L) * 2 + 6px); padding-left: 62px; transform: rotate(-2deg); transform-origin: 0 50%; }
     .arrow { position: absolute; left: 0; top: 14px; width: 56px; height: 40px; }
   }
-  @media (max-width: 1070px) {
+  /* wide monitors: the page widens so all the friends stand in one row, the note beside them */
+  @media (min-width: 1720px) { main { max-width: 1720px; } }
+  @media (max-width: 1199px) {
     .note { height: var(--L); margin-top: var(--L); position: relative; top: 6px; text-align: center; font-size: 25px; }
     .note .long, .arrow { display: none; }
   }
 
-  /* The box must be a whole number of rules tall so the ground lands on a rule. */
-  @media (max-width: 1070px) { :root { --size: calc(var(--L) * 6); } }
+  /* The box must be a whole number of rules tall so the ground lands on a rule. It
+     steps down as the page narrows, so three friends still stand in a row. */
+  @media (max-width: 999px) { :root { --size: calc(var(--L) * 6); } }
+  @media (max-width: 879px) { :root { --size: calc(var(--L) * 5); } }
   @media (max-width: 720px) {
-    :root { --size: calc(var(--L) * 5); }
     .stage { margin-top: var(--L); }
-    .friends { flex-wrap: wrap; row-gap: var(--L); }
     /* too narrow to leave room for tails: they reach into the space beside the pair instead */
     .friend { width: var(--size); }
     .rig, figcaption { margin-left: 0; }
@@ -122,6 +127,18 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours with cookie crumbs on its ruff and tail"></div>
           <figcaption><span class="name">phy</span><span class="sp">tuxedo eevee</span><span class="by"><span class="me">that's me<span class="dot"> · </span></span><a href="https://x.com/rareone0602" rel="me">@rareone0602</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="yuda"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana"></div>
+          <figcaption><span class="name">Yuda</span><span class="sp">slate-blue wolf</span><span class="by"><a href="https://x.com/YuDa_Hay">@YuDa_Hay</a></span></figcaption>
+        </figure></li>
+        <li class="friend" data-friend="terry"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles"></div>
+          <figcaption><span class="name">Terry</span><span class="sp">yellow plush toy</span><span class="by"><a href="https://x.com/FreshSnails_x_6">@FreshSnails_x_6</a></span></figcaption>
+        </figure></li>
+        <li class="friend" data-friend="mumuyou"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou, a white fox with a blonde mop, sky-blue ears, one blue eye and one yellow"></div>
+          <figcaption><span class="name">mumuyou</span><span class="sp">white fox</span><span class="by"><a href="https://www.facebook.com/MuMuYouo">fb/MuMuYouo</a></span></figcaption>
+        </figure></li>
       </ul>
       <p class="note"><svg class="arrow" viewBox="0 0 56 40" aria-hidden="true"><path d="M53 9C41 3 22 5 8 27M8 27l10-3M8 27l2-10" fill="none" stroke="#6d6a63" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="long">psst: they watch<br>your cursor.<br></span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
     </div>
@@ -139,6 +156,9 @@
 <script src="src/phyfriends.js"></script>
 <script src="characters/howdi/howdi.js"></script>
 <script src="characters/phy/phy.js"></script>
+<script src="characters/yuda/yuda.js"></script>
+<script src="characters/terry/terry.js"></script>
+<script src="characters/mumuyou/mumuyou.js"></script>
 <script src="src/anim.js"></script>
 <script>
   // Camera: 270 head units square, the character's ground on the bottom edge.

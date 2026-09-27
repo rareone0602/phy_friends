@@ -3,12 +3,10 @@
 PhyFriends.define('phy', {
   palette: {
     bg: '#1c1d21',
-    fur: '#8c7979',        // the cat's black, as the icon draws it
-    furShade: '#706161',   // the ears' folded tips and the crest's top
+    fur: '#8c7979',        // the cat's black, as the icon draws it; its house shade (furShade) is the ears' folded tips and the crest's top
     face: '#fcf5ef',       // the cat's white
-    earInner: '#f9bcaa',
-    earInnerDeep: '#ef9c8c',
-    marble: '#d8bab0',     // the cookies-and-cream marbling, and the pale ear and crest bands
+    earInner: '#f9bcaa',   // the lighter almond in the ear; its house shade (earInnerShade) is the rim round it
+    marble: '#d8bab0',     // the cookies-and-cream marbling, and the pale crest bands
     eye: '#2e2020',
     blush: '#fdcabc',
     chest: '#fcf5ef',      // the ruff: the cream of the Oreo
@@ -34,7 +32,7 @@ PhyFriends.define('phy', {
   // ear is the deep pink, with a lighter almond inside it (an extra)
   ears: {
     base: [-42.5, -37], angle: 36.2, width: 65.7, length: 107, lean: 27, tip: 1, b1: -25.1, b2: -39.3,
-    inner: { scale: 1, width: 39.5, length: 47.9, lean: 23.3, tip: 2.8, b1: -32.4, b2: -15.3, dx: -1.1, dy: -23.5, color: 'earInnerDeep' },
+    inner: { scale: 1, width: 39.5, length: 47.9, lean: 23.3, tip: 2.8, b1: -32.4, b2: -15.3, dx: -1.1, dy: -23.5, color: 'earInnerShade' },
   },
   // the crest: one big lock rising to a point left of centre, its right side a dome; the
   // second tip hides in the head. Tips: [x, y, bendIn, bendOut, following valley]
@@ -75,8 +73,6 @@ PhyFriends.define('phy', {
     { on: 'ears', clip: true, fill: 'furShade', cx: 27.7, cy: -84, rx: 43, ry: 20.9, rot: 14.8,
       fluff: [{ from: 64.6, to: 94.6, n: 1, len: 14.8, depth: 0, b1: -25, b2: 10, jit: 0 }] },
     { on: 'ears', fill: 'furShade', nodes: [[3, -89, 1, -25], [-9, -79, 1, 15], [3, -77, 1, 0]] },
-    // pale band down the inner edge, from the cap
-    { on: 'ears', kind: 'ellipse', clip: true, fill: 'marble', cx: 56.8, cy: -24.4, rx: 14.3, ry: 50.6, rot: -16.5 },
     // the crest's dark top, with a fur lock rising into it; a pale band down its left
     // edge, and a pale lock below it
     { on: 'hair', clip: true, fill: 'furShade', nodes: [[-48, -72, 1], [-40, -115, 1], [25, -110, 1], [17.5, -73.8, 1, -4], [-23.1, -84.7, 1, -52], [-28.4, -60, 1]] },

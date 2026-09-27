@@ -103,7 +103,7 @@
 <ul>
 <li>Every friend is drawn at the same scale, with its own ground (<code>rig.ground</code>) on the line. The stage box is 7 rules tall, stepping down to 6, 5 and then 4 on narrow screens, so two friends still fit side by side on the smallest phones.</li>
 <li>Ears and tails may reach outside a friend's box, as they would in a photo. A tail that sticks out at ground level gets room beside it.</li>
-<li>On phones the friends stand in a row while they fit, then wrap onto more rows, each grounded on a rule.</li>
+<li>The friends stand in a row while they fit (on wide monitors the page widens so all of them do), then wrap onto more rows, each grounded on a rule (on phones, two to a row).</li>
 <li>A loose pencil ring circles one name: the host's, phy.</li>
 <li>Every friend can be greeted (see §5). A pencilled note says so: in the margin beside the stage with an arrow, or one line under it on narrow screens ("click one to say hi", or "tap" on touch screens).</li>
 </ul></li>
@@ -115,7 +115,7 @@
 <li>species (optional)</li>
 <li>a credit line: the owner's handle, linking to their page (and the artist's, if someone else drew it). phy's reads "that's me". Other people's fursonas appear only with their owner's consent.</li>
 </ul>
-<p>Names keep their owner's capitalisation: <strong>Howdi</strong> and <strong>Yuda</strong> are capitalised, but <strong>phy</strong> is always lower case, even at the start of a line. Everything else on the page is written in lower case.</p>
+<p>Names keep their owner's capitalisation: <strong>Howdi</strong>, <strong>Yuda</strong> and <strong>Terry</strong> are capitalised, but <strong>phy</strong> and <strong>mumuyou</strong> are always lower case, even at the start of a line. Everything else on the page is written in lower case.</p>
 <h2 id="3-type">3. Type</h2>
 <p class="lead">Two pencil hands, both from Google Fonts, and very little text:</p>
 <ul>
@@ -163,8 +163,10 @@
 <li><strong>Flat vector:</strong>
 <ul>
 <li>no outlines, no gradients, no textures</li>
-<li>8–12 colours per character, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>hairShade</code>, <code>earInner</code>, <code>stripe</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, …</li>
-<li>shading, when used at all, is one darker flat shape of the same hue (e.g. <code>hairShade</code>)</li>
+<li>8–12 colours per character, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>stripe</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, …</li>
+<li><strong>one shade layer, the same for every friend:</strong> every colour is one the character really has (its fur, hair, markings, accessories), plus at most one shade of it. <code>&lt;name&gt;Shade</code> in the palette is derived by the library from <code>&lt;name&gt;</code> (one fixed step darker, CIELAB L* −10, its own hue a little richer; near-whites lean to lavender), so the shades match across friends. A spec sets one by hand only where the derived one looks wrong (mumuyou's gold hair, Howdi's navy, whose derived shade is nearly black), and says so in a comment. It goes only on a part that sits behind a neighbour of the same colour, to tell them apart: Terry's ears behind the face, a body under the head, the back layer of a ruff, locks of hair behind the mop, a bandana's band behind its point.</li>
+<li>no other shading: no second step, no highlights, and nothing copied from a reference's lighting (a pale rim of light along an ear, a darker far side).</li>
+<li>a pale colour that would vanish on the paper takes one slightly deeper flat tint, used wherever that colour appears (mumuyou's white, #efeef3).</li>
 </ul></li>
 <li><strong>Chibi proportions, in head space:</strong>
 <ul>
@@ -177,7 +179,7 @@
 <ul>
 <li><em>fluffy ellipses</em>: the head, face mask and chest, whose outlines grow small curved fur tufts</li>
 <li><em>a star hair mop</em>: broad, curved, flame-like locks, with some hanging over the face</li>
-<li><em>rounded-triangle ears</em> with a pale inner ear and optional stripe bands</li>
+<li><em>rounded-triangle ears</em>, with an inner ear and stripe bands only where the character really has them</li>
 <li><em>pill eyes</em>: solid, no whites, no highlight by default</li>
 <li>soft <em>blush</em> ovals</li>
 <li>no mouth by default</li>
