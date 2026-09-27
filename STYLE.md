@@ -1,4 +1,4 @@
-# phy's friends style guide
+# phy's fwiends style guide
 
 The one rule behind everything below: **a page from a sketchbook.** The
 characters are the only saturated things on it; everything else is graphite on
@@ -40,26 +40,26 @@ mockups in `design/`; A and B are kept as backups in `design/backup/`). It has p
 rules, a red margin line on the left and a little paper tooth, and
 **everything is written on the rules**:
 - every vertical measure is a whole number of rules, and text sits on them;
-- the friends' ground line is a rule, gone over in pencil;
+- the fwiends' ground line is a rule, gone over in pencil;
 - the rule spacing is 32px, or 30px on phones.
 
 The files are `index.html` (the gallery), `style.html` (this guide) and
 `site/notebook.css`, which the two share.
 
 Each page has four parts, in this order:
-1. A handwritten title: `phy's friends`. That is the project's name wherever
+1. A handwritten title: `phy's fwiends`. That is the project's name wherever
    people see it (titles, headings, labels, copy); `phy_friends` is only the
    repository and code name.
 2. One short, honest line of intro.
-3. **The stage.** It's a group photo: the friends stand together on one
+3. **The stage.** It's a group photo: the fwiends stand together on one
    pencilled ground line and all watch the cursor.
    - Every friend is drawn at the same scale, with its own ground (`rig.ground`)
      on the line. The stage box is 7 rules tall, stepping down to 6, 5 and
-     then 4 on narrow screens, so two friends still fit side by side on the
+     then 4 on narrow screens, so two fwiends still fit side by side on the
      smallest phones.
    - Ears and tails may reach outside a friend's box, as they would in a
      photo. A tail that sticks out at ground level gets room beside it.
-   - The friends stand in a row while they fit (on wide monitors the page
+   - The fwiends stand in a row while they fit (on wide monitors the page
      widens so all of them do), then wrap onto more rows, each grounded on a
      rule (on phones, two to a row).
    - A loose pencil ring circles one name: the host's, phy.
@@ -87,7 +87,7 @@ Two pencil hands, both from Google Fonts, and very little text:
 - **Reenie Beanie** for the handwriting:
   - the title, 92px (66px on phones), three rules tall (two on phones), tilted
     by −1° and gone over with the graphite filter;
-  - the friends' names, 36px (31px on phones);
+  - the fwiends' names, 36px (31px on phones);
   - headings on the style guide.
 - **The Girl Next Door** for everything else:
   - the intro, 21px (17px on phones);
@@ -130,11 +130,11 @@ shows a dark version, should that change.
 - **Saying hi:** each friend is a button. Hovering over it (or tabbing to it)
   perks it up: ears in, eyes a touch wider. A click, a tap, Enter or Space
   plays the library's happy hop (happy eyes, a small mouth, two bounces), and
-  the other friends glance at the one being greeted.
+  the other fwiends glance at the one being greeted.
 - **`prefers-reduced-motion`:** eyes only, with no idle motion; saying hi
   changes just the face.
 
-## 6. Characters: what makes one of phy's friends
+## 6. Characters: what makes one of phy's fwiends
 
 These are the rules the factory (`src/phyfriends.js`) encodes. Follow them
 when reproducing a new image or design sheet.
@@ -148,7 +148,7 @@ when reproducing a new image or design sheet.
     character really has (its fur, hair, markings, accessories), plus at most
     one shade of it. `<name>Shade` in the palette is derived by the library
     from `<name>` (one fixed step darker, CIELAB L* −10, its own hue a little
-    richer; near-whites lean to lavender), so the shades match across friends.
+    richer; near-whites lean to lavender), so the shades match across fwiends.
     A spec sets one by hand only where the derived one looks wrong (mumuyou's
     gold hair, Howdi's navy, whose derived shade is nearly black), and says so
     in a comment.
@@ -198,6 +198,6 @@ later changes can be checked against it.
 > glassmorphism, glows, heavy drop shadows, emoji bullets, marketing hero
 > copy, generic SaaS card grids). Aim for handmade, honest and quiet, like a
 > page of someone's sketchbook where the characters are the only saturated
-> things on it. The friends stand together on one shared stage and all watch
+> things on it. The fwiends stand together on one shared stage and all watch
 > the cursor (falling back to a grid or rows on narrow screens), each with a
 > small handwritten label: name, maybe species, and a credit/owner line.

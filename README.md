@@ -1,4 +1,4 @@
-# phy's friends
+# phy's fwiends
 
 A tiny factory for flat-vector chibi characters. The repository and the code
 are named `phy_friends`.
@@ -93,7 +93,7 @@ Every character file is laid out the same way, so two specs read side by side:
 - extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `tail`), each with a short comment saying what it depicts;
 - `views` last, with `ref` first.
 
-Friends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
+Fwiends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
 
 Shades are derived (STYLE.md §6): any `<name>Shade` a spec uses and leaves out of
 its palette is `<name>` one fixed step darker (`PhyFriends.shadeOf`: CIELAB L* −10,

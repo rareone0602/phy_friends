@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""phy's friends command line — render characters with headless Chrome.
+"""phy's fwiends command line — render characters with headless Chrome.
 
   python3 tools/pf.py list
   python3 tools/pf.py render howdi                      # -> out/howdi/portrait.png
@@ -532,7 +532,7 @@ STYLE_PAGE = Template("""<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>$title</title>
-<meta name="description" content="how phy's friends are drawn, and how their page behaves.">
+<meta name="description" content="how phy's fwiends are drawn, and how their page behaves.">
 <meta name="theme-color" content="#fbf9f3">
 <link rel="icon" href="site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
@@ -587,7 +587,7 @@ STYLE_PAGE = Template("""<!doctype html>
 <main>
   <header>
     <h1>style guide</h1>
-    <p class="intro">how <a href="index.html">phy's friends</a> are drawn, and how their page behaves.</p>
+    <p class="intro">how <a href="index.html">phy's fwiends</a> are drawn, and how their page behaves.</p>
   </header>
 
   <article class="doc">
@@ -597,7 +597,7 @@ $body
   <footer>
     <ul>
       <li>characters belong to the people named under them</li>
-      <li><a href="index.html">back to the friends</a></li>
+      <li><a href="index.html">back to the fwiends</a></li>
       <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
     </ul>
   </footer>
@@ -611,7 +611,7 @@ def style_page(src=ROOT / 'STYLE.md', out=ROOT / 'style.html'):
     """Write STYLE.md out as style.html. Its # title becomes the <title>; the page's
     own handwritten h1 and intro come from STYLE_PAGE."""
     lines = Path(src).read_text(encoding='utf-8').splitlines()
-    title = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else "phy's friends style guide"
+    title = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else "phy's fwiends style guide"
     Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(title, quote=False), body=md_blocks(lines)), encoding='utf-8')
     return out
 
