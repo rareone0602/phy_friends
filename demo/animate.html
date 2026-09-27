@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>phy's friends · animate</title>
+<style>
+  :root { --bg: #16171a; --panel: #23252b; --line: #363941; --text: #e8eaf0; --muted: #9aa0ad; --accent: #84cdfd; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--text);
+         font: 14px/1.4 system-ui, -apple-system, sans-serif; }
+  main { width: min(540px, 100vw - 32px); display: grid; gap: 12px; padding: 24px 0; }
+  #stage { aspect-ratio: 1; border-radius: 16px; overflow: hidden; background: var(--panel); }
+  #stage svg { display: block; width: 100%; height: 100%; }
+  .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  select, input[type=text], button { font: inherit; color: var(--text); background: var(--panel);
+         border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; }
+  button { min-width: 80px; cursor: pointer; }
+  button:hover, select:hover { border-color: var(--accent); }
+  #expr { flex: 1; min-width: 180px; font-family: ui-monospace, Menlo, monospace; font-size: 13px; }
+  #scrub { flex: 1; accent-color: var(--accent); }
+  #time { min-width: 96px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); cursor: pointer; }
+  #msg { margin: 0; min-height: 1.4em; color: var(--muted); font-size: 12px; }
+  #msg.err { color: #ff9a9a; font-family: ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <div id="stage"></div>
+  <div class="row">
+    <select id="char" aria-label="Character"></select>
+    <select id="clip" aria-label="Clip"></select>
+    <input id="expr" type="text" spellcheck="false" aria-label="Clip expression"
+           placeholder="or an expression: layer(idle, curious)">
+  </div>
+  <div class="row">
+    <button id="play" type="button">Play</button>
+    <input id="scrub" type="range" min="0" max="1" step="0.001" value="0" aria-label="Time">
+    <span id="time">0.00 / 0.00 s</span>
+  </div>
+  <div class="row">
+    <label>Speed <select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option></select></label>
+    <label><input id="loop" type="checkbox" checked> Loop</label>
+    <label><input id="look" type="checkbox" checked> Look at pointer</label>
+  </div>
+  <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim.</p>
+</main>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../src/anim.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script>
+  const PF = PhyFriends, A = PF.anim, $ = id => document.getElementById(id);
+  const LOOK_OFF = { lookX: null, lookY: null, turnX: null, turnY: null };
+  let rig = null, player = null;
+
+  for (const n of PF.list()) $('char').add(new Option(n));
+  for (const n of Object.keys(A.clips)) $('clip').add(new Option(n));
+
+  // Portrait zoomed out about the bottom edge, so hops stay in frame.
+  function stageView(spec, k = 0.85) {
+    const v = PF.resolveView(spec, 'portrait');
+    return { ...v, x: v.w / 2 + (v.x - v.w / 2) * k, y: v.h + (v.y - v.h) * k, scale: v.scale * k };
+  }
+
+  function say(text, err = false) { $('msg').textContent = text; $('msg').className = err ? 'err' : ''; }
+
+  function currentClip() {
+    const src = $('expr').value.trim() || $('clip').value;
+    try { return A.parse(src); } catch (e) { say(String(e.message || e), true); return null; }
+  }
+
+  function sync(p = player) { // also the player's onFrame, which can fire before play() returns
+    const d = p.duration;
+    $('play').textContent = p.playing ? 'Pause' : 'Play';
+    $('scrub').disabled = !(d > 0);
+    if (d > 0) { $('scrub').max = d; $('scrub').value = p.time; }
+    $('time').textContent = `${p.time.toFixed(2)} / ${d > 0 ? d.toFixed(2) : '∞'} s`;
+  }
+
+  function mountCharacter() {
+    const spec = PF.get($('char').value);
+    const clip = player ? player.clip : currentClip() || A.clips.idle, start = player ? player.time : 0;
+    const wasPlaying = player ? player.playing : true;
+    if (player) player.destroy();
+    rig = PF.mount($('stage'), spec, { view: stageView(spec) });
+    player = A.play(rig, clip, {
+      start, speed: +$('speed').value, loop: $('loop').checked, autoplay: wasPlaying, onFrame: sync, onEnd: sync,
+    });
+    if (player.reduced && !player.playing) say('Reduced motion is on, so nothing plays until you press Play.');
+    sync();
+  }
+
+  function changeClip() {
+    const clip = currentClip();
+    if (!clip) return;
+    say(`${$('expr').value.trim() || $('clip').value}: ${clip.duration != null ? clip.duration + ' s' : 'endless'}${clip.loop ? ', loops' : ''}`);
+    player.setClip(clip);
+    if (!player.reduced) player.play();
+    sync();
+  }
+
+  function lookAtPointer(e) {
+    if ($('look').checked && rig) player.override(A.lookAt(rig, e.clientX, e.clientY));
+  }
+
+  $('char').addEventListener('change', mountCharacter);
+  $('clip').addEventListener('change', () => { $('expr').value = ''; changeClip(); });
+  $('expr').addEventListener('change', changeClip);
+  $('play').addEventListener('click', () => { player.toggle(); sync(); });
+  $('scrub').addEventListener('input', e => { player.pause().seek(+e.target.value); sync(); });
+  $('speed').addEventListener('change', e => { player.speed = +e.target.value; });
+  $('loop').addEventListener('change', e => { player.loop = e.target.checked; });
+  $('look').addEventListener('change', e => { if (!e.target.checked) player.override(LOOK_OFF); });
+  window.addEventListener('pointermove', lookAtPointer);
+  window.addEventListener('pointerdown', lookAtPointer);
+  document.documentElement.addEventListener('pointerleave', () => player.override(LOOK_OFF));
+  window.addEventListener('blur', () => player.override(LOOK_OFF));
+  window.addEventListener('keydown', e => {
+    if (e.code !== 'Space' || /^(INPUT|SELECT|BUTTON)$/.test(e.target.tagName) && e.target.type !== 'range') return;
+    e.preventDefault(); player.toggle(); sync();
+  });
+
+  mountCharacter();
+</script>
+</body>
+</html>

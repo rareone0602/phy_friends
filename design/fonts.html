@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>phy's friends · pencil font specimen</title>
+<!-- Design scratch, not the site: comparing handwriting fonts for the gallery. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=Waiting+for+the+Sunrise&family=Gochi+Hand&family=Patrick+Hand&family=Caveat:wght@400;500&family=Shadows+Into+Light&family=Covered+By+Your+Grace&family=Nanum+Pen+Script&family=Kalam:wght@300;400&family=Coming+Soon&family=Nothing+You+Could+Do&family=Loved+by+the+King&family=The+Girl+Next+Door&family=Sue+Ellen+Francisco&family=Schoolbell&family=Klee+One&family=Yomogi&family=Gaegu&family=Zeyada&family=Just+Me+Again+Down+Here&family=Grape+Nuts&family=Mynerve&family=Indie+Flower&family=Gamja+Flower&family=Zen+Kurenaido&family=Annie+Use+Your+Telescope&display=block">
+<style>
+  :root {
+    --paper: #f3efe4;
+    --graphite: #3d3c3a;
+    --soft: #8a867d;
+    --rule: #d9d3c4;
+  }
+  html { background: var(--paper); }
+  body {
+    margin: 0; padding: 40px 48px 56px; color: var(--graphite);
+    font: 13px/1.4 ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  h1 { font: 500 13px/1.4 ui-monospace, Menlo, monospace; margin: 0 0 4px; letter-spacing: .02em; }
+  .note { color: var(--soft); margin: 0 0 28px; max-width: 70ch; }
+  h2 { font: 500 12px/1 ui-monospace, Menlo, monospace; color: var(--soft); text-transform: uppercase;
+       letter-spacing: .12em; margin: 36px 0 8px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; }
+  .row { border-top: 1px solid var(--rule); padding: 14px 0 16px; position: relative; }
+  .meta { display: flex; justify-content: space-between; color: var(--soft); font-size: 12px; }
+  .meta b { color: var(--graphite); font-weight: 500; }
+  .sample { font-size-adjust: ex-height 0.42; }  /* level x-heights so the comparison is fair */
+  .title { font-size: 64px; line-height: 1.05; margin: 6px 0 4px; }
+  .label { font-size: 23px; line-height: 1.15; }
+  .label .sp { color: #6b6862; }
+  .label .by { color: #8a867d; font-size: .8em; }
+  .intro { font-size: 18px; margin-top: 6px; color: #55534f; }
+  .pick { position: absolute; right: 0; top: 36px; color: #b04a2f; font: 22px "Reenie Beanie", cursive;
+          transform: rotate(-6deg); font-size-adjust: none; }
+  .graphite { filter: url(#graphite); }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; column-gap: 48px; }
+  .pair > div > .meta { margin-top: 2px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Graphite grain: noise eats into the stroke a little, plus a sub-pixel wobble. -->
+  <filter id="graphite" x="-2%" y="-10%" width="104%" height="120%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.2" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<h1>phy's friends — pencil font specimen</h1>
+<p class="note">Every sample is set with <code>font-size-adjust: ex-height 0.42</code> so x-heights match; real use would tune each size by hand. Title 64px, label 23px, intro 18px. Red notes mark the shortlist.</p>
+<p class="note">Verdict: the thin, uneven hands (Reenie Beanie, The Girl Next Door, Coming Soon, Waiting for the Sunrise, Nothing You Could Do) read as graphite. Gochi, Patrick, Caveat, Covered By Your Grace, Nanum, Gaegu, Gamja, Mynerve and Indie Flower read as felt-tip or marker. Klee One / Yomogi are lovely but too tidy. The grain filter sells "pencil" at title size and is too much below ~24px, so use it on the title only.</p>
+
+<h2>asked about</h2>
+<div class="grid" id="asked"></div>
+
+<h2>other candidates</h2>
+<div class="grid" id="extra"></div>
+
+<h2>shortlist, plain vs. with a subtle graphite-grain filter</h2>
+<div id="grain"></div>
+
+<script>
+  const asked = [
+    ['Reenie Beanie', 'ballpoint scrawl, tiny x-height'],
+    ['Waiting for the Sunrise', 'thin, loose, lively'],
+    ['Gochi Hand', 'felt marker, heavy'],
+    ['Patrick Hand', 'clean felt tip'],
+    ['Caveat', 'brush pen, very common'],
+    ['Shadows Into Light', 'thin marker, rounded'],
+    ['Covered By Your Grace', 'marker caps'],
+    ['Nanum Pen Script', 'narrow pen (Korean font, Latin shown)'],
+    ['Kalam', 'Devanagari hand, weight 300'],
+  ];
+  const extra = [
+    ['Coming Soon', 'thin, childlike pencil'],
+    ['Nothing You Could Do', 'fast pencil scrawl'],
+    ['Loved by the King', 'scratchy thin pencil'],
+    ['The Girl Next Door', 'light pencil, airy'],
+    ['Sue Ellen Francisco', 'tall, narrow pencil'],
+    ['Schoolbell', 'school ballpoint'],
+    ['Klee One', 'textbook pencil (Japanese font, Latin shown)'],
+    ['Yomogi', 'soft pencil (Japanese font, Latin shown)'],
+    ['Gaegu', 'pencil hand (Korean font, Latin shown)'],
+    ['Zeyada', 'loose ink scrawl'],
+    ['Just Me Again Down Here', 'slanted, sketchy'],
+    ['Grape Nuts', 'plain pencil print'],
+    ['Mynerve', 'neat pencil print'],
+    ['Indie Flower', 'round felt tip'],
+    ['Gamja Flower', 'soft hand (Korean font, Latin shown)'],
+    ['Zen Kurenaido', 'crayon-ish (Japanese font, Latin shown)'],
+    ['Annie Use Your Telescope', 'thin, bouncy'],
+  ];
+  // Filled in after looking at the first render.
+  const picks = {
+    'Reenie Beanie': 'pick: title + doodle notes',
+    'The Girl Next Door': 'pick: labels',
+    'Coming Soon': 'pick: small print',
+    'Waiting for the Sunrise': 'runner-up',
+    'Nothing You Could Do': 'runner-up',
+  };
+  const weights = { 'Kalam': 300 };
+
+  const row = ([name, note]) => `
+    <div class="row">
+      <div class="meta"><span><b>${name}</b></span><span>${note}</span></div>
+      <div class="sample" style="font-family:'${name}';font-weight:${weights[name] || 400}">
+        <div class="title">phy's friends</div>
+        <div class="label">Howdi <span class="sp">· sky-blue wolf</span> <span class="by">drawn by phy</span></div>
+        <div class="intro">a few friends who like to watch your cursor.</div>
+      </div>
+      ${picks[name] ? `<div class="pick">${picks[name]}</div>` : ''}
+    </div>`;
+  document.getElementById('asked').innerHTML = asked.map(row).join('');
+  document.getElementById('extra').innerHTML = extra.map(row).join('');
+
+  const grainFonts = Object.keys(picks);
+  document.getElementById('grain').innerHTML = grainFonts.map(name => `
+    <div class="row pair">
+      ${['', 'graphite'].map(cls => `
+        <div>
+          <div class="meta"><span><b>${name}</b></span><span>${cls ? 'graphite filter' : 'plain'}</span></div>
+          <div class="sample ${cls}" style="font-family:'${name}';font-weight:${weights[name] || 400}">
+            <div class="title">phy's friends</div>
+            <div class="label">Howdi <span class="sp">· sky-blue wolf</span> <span class="by">drawn by phy</span></div>
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+</script>
+</body>
+</html>

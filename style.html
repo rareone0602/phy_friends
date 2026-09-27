@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>phy's friends style guide</title>
+<meta name="description" content="how phy's friends are drawn, and how their page behaves.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="site/apple-touch-icon.png">
+<!-- Generated from STYLE.md by `python3 tools/pf.py style`: edit STYLE.md, not this file. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=The+Girl+Next+Door&display=swap">
+<link rel="stylesheet" href="site/notebook.css">
+<style>
+  .doc { --lift: calc(var(--L) / 2 - 7px); position: relative; top: var(--lift); max-width: 42em; margin-top: calc(var(--L) * 2); overflow-wrap: break-word; text-wrap: pretty; }
+  .doc * { margin: 0; }
+  .doc > * + *, .doc blockquote > * + * { margin-top: var(--L); }   /* a blank rule between blocks */
+  .doc :is(h2, hr, .lead) + * { margin-top: 0; }                   /* but none under a heading, squiggle or lead-in */
+  .doc h2 { font: 400 44px/calc(var(--L) * 2) var(--hand); position: relative; top: 11px; }
+  .doc ul, .doc ol { padding-left: 1.4em; }
+  .doc ul { list-style-type: '\2013  '; }
+  .doc li::marker { color: var(--ink-3); }
+  .doc ol { list-style: none; }  /* numbered by hand; out of flow, so the number can't stretch a line */
+  .doc ol > li::before { content: counter(list-item) '.'; position: absolute; margin-left: -.9em; font: 25px/var(--L) var(--hand); color: var(--ink-2); }
+  .doc blockquote { padding-left: 1.6em; color: var(--ink-2); position: relative; }
+  .doc blockquote::before {  /* a thin pencil line down the side */
+    content: ''; position: absolute; left: .45em; top: 2px; bottom: 6px; width: 4px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 100' preserveAspectRatio='none'><path d='M2 0C2.9 22 1.3 41 2.2 63S1.5 88 2 100' fill='none' stroke='%2397938a' stroke-width='1.1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>") 0 0 / 100% 100% no-repeat;
+  }
+  .doc code { font: 15px/1 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--ink-2); }
+  .doc hr {  /* a short squiggle on the rule */
+    border: 0; height: var(--L);
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2397938a' stroke-width='1.3' stroke-linecap='round'/></svg>") 0 calc(100% - var(--lift) - 2px) / 90px 10px no-repeat;
+  }
+  @media (max-width: 720px) {
+    .doc { margin-top: var(--L); }
+    .doc h2 { font-size: 38px; top: 12px; }
+    .doc ul, .doc ol { padding-left: 1.2em; }
+    .doc blockquote { padding-left: 1.3em; }
+    .doc blockquote::before { left: .3em; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- graphite grain + a hair of wobble, for the title -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <h1>style guide</h1>
+    <p class="intro">how <a href="index.html">phy's friends</a> are drawn, and how their page behaves.</p>
+  </header>
+
+  <article class="doc">
+<p>The one rule behind everything below: <strong>a page from a sketchbook.</strong> The characters are the only saturated things on it; everything else is graphite on paper. It should feel drawn, not designed.</p>
+<p>Read this before building a page or adding a character. The site's <code>style.html</code> is made from this file with <code>python3 tools/pf.py style</code>; run it again after editing.</p>
+<hr>
+<h2 id="1-principles">1. Principles</h2>
+<ul>
+<li><strong>Handmade, honest, quiet.</strong> Small, plain words and hand-drawn marks. Whitespace is part of the drawing.</li>
+<li><strong>Characters first.</strong> If an element does not help you meet the characters, leave it out.</li>
+<li><strong>Slightly imperfect on purpose.</strong> Tilt things ±1–2°, leave spacing a little uneven, and let lines wobble. Mechanical perfection is what makes a page look generated.</li>
+</ul>
+<p class="lead"><strong>Do:</strong></p>
+<ul>
+<li>paper as the background</li>
+<li>pencil handwriting for the title and labels</li>
+<li>hand-drawn ground lines, arrows and underlines</li>
+<li>lots of space</li>
+</ul>
+<p class="lead"><strong>Don't:</strong></p>
+<ul>
+<li>gradients, glassmorphism, glows, or heavy drop shadows</li>
+<li>emoji bullets or stock icons</li>
+<li>marketing hero copy or calls to action</li>
+<li>generic card grids</li>
+<li>perfectly aligned everything</li>
+</ul>
+<h2 id="2-page">2. Page</h2>
+<p class="lead">The page is a sheet of <strong>lined notebook paper</strong> (design C, chosen from the mockups in <code>design/</code>; A and B are kept as backups in <code>design/backup/</code>). It has pale blue rules, a red margin line on the left and a little paper tooth, and <strong>everything is written on the rules</strong>:</p>
+<ul>
+<li>every vertical measure is a whole number of rules, and text sits on them;</li>
+<li>the friends' ground line is a rule, gone over in pencil;</li>
+<li>the rule spacing is 32px, or 30px on phones.</li>
+</ul>
+<p>The files are <code>index.html</code> (the gallery), <code>style.html</code> (this guide) and <code>site/notebook.css</code>, which the two share.</p>
+<p class="lead">Each page has four parts, in this order:</p>
+<ol>
+<li>A handwritten title: <code>phy's friends</code>. That is the project's name wherever people see it (titles, headings, labels, copy); <code>phy_friends</code> is only the repository and code name.</li>
+<li>One short, honest line of intro.</li>
+<li><strong>The stage.</strong> It's a group photo: the friends stand together on one pencilled ground line and all watch the cursor.
+<ul>
+<li>Every friend is drawn at the same scale, with its own ground (<code>rig.ground</code>) on the line. The stage box is 7 rules tall, stepping down to 6, 5 and then 4 on narrow screens, so two friends still fit side by side on the smallest phones.</li>
+<li>Ears and tails may reach outside a friend's box, as they would in a photo. A tail that sticks out at ground level gets room beside it.</li>
+<li>On phones the friends stand in a row while they fit, then wrap onto more rows, each grounded on a rule.</li>
+<li>A loose pencil ring circles one name: the host's, phy.</li>
+<li>Every friend can be greeted (see §5). A pencilled note says so: in the margin beside the stage with an arrow, or one line under it on narrow screens ("click one to say hi", or "tap" on touch screens).</li>
+</ul></li>
+<li>A small footer: who the characters belong to, a link to the style guide and a link to the repo.</li>
+</ol>
+<p class="lead">Each character gets a small handwritten label:</p>
+<ul>
+<li>name</li>
+<li>species (optional)</li>
+<li>a credit line: the owner's handle, linking to their page (and the artist's, if someone else drew it). phy's reads "that's me". Other people's fursonas appear only with their owner's consent.</li>
+</ul>
+<p>Names keep their owner's capitalisation: <strong>Howdi</strong> and <strong>Yuda</strong> are capitalised, but <strong>phy</strong> is always lower case, even at the start of a line. Everything else on the page is written in lower case.</p>
+<h2 id="3-type">3. Type</h2>
+<p class="lead">Two pencil hands, both from Google Fonts, and very little text:</p>
+<ul>
+<li><strong>Reenie Beanie</strong> for the handwriting:
+<ul>
+<li>the title, 92px (66px on phones), three rules tall (two on phones), tilted by −1° and gone over with the graphite filter;</li>
+<li>the friends' names, 36px (31px on phones);</li>
+<li>headings on the style guide.</li>
+</ul></li>
+<li><strong>The Girl Next Door</strong> for everything else:
+<ul>
+<li>the intro, 21px (17px on phones);</li>
+<li>species, credits and the footer, 14–17px, in the lighter inks;</li>
+<li>body text on the style guide, 18px.</li>
+</ul></li>
+</ul>
+<p>The line height is always the rule spacing, and each block is nudged down a few pixels so its baseline lands on a rule.</p>
+<p>These fonts don't cover Chinese or Japanese; pick a companion font if CJK text is ever needed.</p>
+<h2 id="4-colour">4. Colour</h2>
+<p class="lead">Page chrome uses only paper and ink tones; saturated colour belongs to the characters.</p>
+<ul>
+<li>paper <code>#fbf9f3</code>, with a fine noise overlay for tooth</li>
+<li>rules <code>#cfdbe8</code>, pale blue</li>
+<li>the margin line <code>#e6aaa3</code>, faded red</li>
+<li>ink <code>#3d3c39</code> (graphite) for the title and names, <code>#6d6a63</code> for the intro and species, and <code>#97938a</code> for credits and the footer</li>
+</ul>
+<p>There is no dark theme: the page is paper. Backup B (<code>design/backup/b.html</code>) shows a dark version, should that change.</p>
+<h2 id="5-motion">5. Motion</h2>
+<ul>
+<li><strong>Eye-follow:</strong>
+<ul>
+<li>Each character works out the direction from its own head to the pointer, so the whole group converges on it.</li>
+<li>The eyes take the full offset (<code>lookX/lookY</code>) and the head turns about half as much (<code>turnX/turnY</code>, drawn as layer parallax).</li>
+<li>Motion is smoothed with a spring or lerp; it never jitters.</li>
+</ul></li>
+<li><strong>Idle underneath:</strong> breathing, blinks at irregular intervals, a slow tail sway and an occasional ear flick. Nothing bounces all the time.</li>
+<li><strong>Pointer leaves the window</strong> (or sits still for a while): they drift back to centre or glance around.</li>
+<li><strong>Touch:</strong> follow the finger while touching, otherwise glance around. No gyroscope.</li>
+<li><strong>Saying hi:</strong> each friend is a button. Hovering over it (or tabbing to it) perks it up: ears in, eyes a touch wider. A click, a tap, Enter or Space plays the library's happy hop (happy eyes, a small mouth, two bounces), and the other friends glance at the one being greeted.</li>
+<li><strong><code>prefers-reduced-motion</code>:</strong> eyes only, with no idle motion; saying hi changes just the face.</li>
+</ul>
+<h2 id="6-characters-what-makes-one-of-phy-s-friends">6. Characters: what makes one of phy's friends</h2>
+<p>These are the rules the factory (<code>src/phyfriends.js</code>) encodes. Follow them when reproducing a new image or design sheet.</p>
+<ul>
+<li><strong>Flat vector:</strong>
+<ul>
+<li>no outlines, no gradients, no textures</li>
+<li>8–12 colours per character, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>hairShade</code>, <code>earInner</code>, <code>stripe</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, …</li>
+<li>shading, when used at all, is one darker flat shape of the same hue (e.g. <code>hairShade</code>)</li>
+</ul></li>
+<li><strong>Chibi proportions, in head space:</strong>
+<ul>
+<li>the origin sits between the eyes, and the head is about 200 units wide</li>
+<li>ear tips reach about −140, the paws about +130 (<code>rig.ground</code>), and a tail may curl out to one side</li>
+<li>every friend shares one scale, so they stand together as a set: pill eyes about 12 × 32 units, centred about 31–35 either side of the origin, and a reference in the house template (a 1254px close-up, head tipped 20°) is matched at <code>scale: 5.5</code></li>
+<li>the head is widest around eye level</li>
+</ul></li>
+<li><strong>Shape vocabulary:</strong>
+<ul>
+<li><em>fluffy ellipses</em>: the head, face mask and chest, whose outlines grow small curved fur tufts</li>
+<li><em>a star hair mop</em>: broad, curved, flame-like locks, with some hanging over the face</li>
+<li><em>rounded-triangle ears</em> with a pale inner ear and optional stripe bands</li>
+<li><em>pill eyes</em>: solid, no whites, no highlight by default</li>
+<li>soft <em>blush</em> ovals</li>
+<li>no mouth by default</li>
+</ul></li>
+<li><strong>Layering:</strong> ears, head, face mask, blush, eyes, mouth, then hair on top. Bangs may cross the face.</li>
+<li><strong>Expressions come from the pose, not new drawings:</strong> <code>eyes: 'happy' | 'closed'</code>, <code>mouth</code>, <code>blink</code>, ear angles.</li>
+<li><strong>Keep the spec small.</strong> A character is about 100 lines of parameters, not a traced path. Prefer tuning <code>fluffy</code> / <code>star</code> / ear parameters over raw <code>nodes</code>.</li>
+</ul>
+<hr>
+<h2 id="appendix-original-brief">Appendix: original brief</h2>
+<p>This is the brief the design direction came from, kept verbatim-in-spirit so later changes can be checked against it.</p>
+<blockquote>
+<p>A pencil font. Don't make the design too artificial: no glossy, over-designed, template-y "AI landing page" look (no gradients, glassmorphism, glows, heavy drop shadows, emoji bullets, marketing hero copy, generic SaaS card grids). Aim for handmade, honest and quiet, like a page of someone's sketchbook where the characters are the only saturated things on it. The friends stand together on one shared stage and all watch the cursor (falling back to a grid or rows on narrow screens), each with a small handwritten label: name, maybe species, and a credit/owner line.</p>
+</blockquote>
+  </article>
+
+  <footer>
+    <ul>
+      <li>characters belong to the people named under them</li>
+      <li><a href="index.html">back to the friends</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+    </ul>
+  </footer>
+</main>
+</body>
+</html>

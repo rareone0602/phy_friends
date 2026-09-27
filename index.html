@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>phy's friends</title>
+<meta name="description" content="a few chibi friends, each one drawn from a hundred-odd lines of code. they watch your cursor.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="site/apple-touch-icon.png">
+<!-- the preview where the link is shared; the icons and site/preview.png come from design/site_assets.py -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="phy's friends">
+<meta property="og:description" content="a few chibi friends, each one drawn from a hundred-odd lines of code. they watch your cursor.">
+<meta property="og:url" content="https://rareone0602.github.io/phy_friends/">
+<meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Howdi, a sky-blue wolf, and phy, a tuxedo Eevee, standing on a pencilled line on lined notebook paper">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=The+Girl+Next+Door&display=swap">
+<link rel="stylesheet" href="site/notebook.css">
+<style>
+  /* The stage (STYLE.md §2). --size is one rule-aligned box: the friends' ground
+     (each character's rig.ground) is its bottom edge, and the box is 270 head units
+     tall, so every friend is drawn at the same scale. Ears and tails may reach
+     outside it, as in a group photo; --pl / --pr (head units, measured on load)
+     widen a friend's slot where the body or tail sticks out at ground level, so
+     neighbours stand close but never tread on a tail. */
+  :root { --size: calc(var(--L) * 7); }
+  .stage { margin-top: calc(var(--L) * 2); }
+  .friends { list-style: none; margin: 0; padding: 0; display: flex; justify-content: center; }
+  .friend {
+    width: calc(var(--size) * (270 + var(--pl, 0) + var(--pr, 0)) / 270);
+    position: relative; margin: 0 calc(var(--size) * -0.03); z-index: var(--z, 1);
+  }
+  .rig, figcaption { width: var(--size); margin-left: calc(var(--size) * var(--pl, 0) / 270); }
+  .friend figure { margin: 0; }
+  /* each friend is a button: hovering (or focusing) perks it up; a click, tap or Enter says hi */
+  .rig { height: var(--size); cursor: pointer; border-radius: 18px; -webkit-tap-highlight-color: transparent; }
+  .rig:focus { outline: none; }
+  .rig:focus-visible { outline: 1.5px dashed var(--ink-2); outline-offset: 4px; }
+  .rig svg { display: block; width: 100%; height: auto; overflow: visible; }
+  .ground { position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; pointer-events: none; z-index: 5; }
+
+  figcaption { text-align: center; }
+  .name { display: block; height: var(--L); font: 36px/var(--L) var(--hand); position: relative; top: 6px; }
+  .sp, .by { display: block; height: var(--L); font-size: 16.5px; color: var(--ink-2); white-space: nowrap; position: relative; top: 8px; }
+  .by { color: var(--ink-3); font-size: 15.5px; top: 9px; }
+  .ring { position: absolute; left: 50%; top: -12px; width: 104px; height: 46px; transform: translateX(-50%); overflow: visible; pointer-events: none; }
+
+  /* A pencilled note: what the friends do, and how to say hi. On wide screens it sits
+     in the margin beside them with an arrow; otherwise it is one line under them. */
+  .troupe { position: relative; width: fit-content; margin: 0 auto; }
+  .note { margin: 0; font: 27px/var(--L) var(--hand); color: var(--ink-2); white-space: nowrap; }
+  .note .touch { display: none; }
+  .arrow { overflow: visible; filter: url(#graphite); }
+  @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
+  @media (min-width: 1071px) {
+    .note { position: absolute; left: calc(100% - 24px); top: calc(var(--L) * 2 + 6px); padding-left: 62px; transform: rotate(-2deg); transform-origin: 0 50%; }
+    .arrow { position: absolute; left: 0; top: 14px; width: 56px; height: 40px; }
+  }
+  @media (max-width: 1070px) {
+    .note { height: var(--L); margin-top: var(--L); position: relative; top: 6px; text-align: center; font-size: 25px; }
+    .note .long, .arrow { display: none; }
+  }
+
+  /* The box must be a whole number of rules tall so the ground lands on a rule. */
+  @media (max-width: 1070px) { :root { --size: calc(var(--L) * 6); } }
+  @media (max-width: 720px) {
+    :root { --size: calc(var(--L) * 5); }
+    .stage { margin-top: var(--L); }
+    .friends { flex-wrap: wrap; row-gap: var(--L); }
+    /* too narrow to leave room for tails: they reach into the space beside the pair instead */
+    .friend { width: var(--size); }
+    .rig, figcaption { margin-left: 0; }
+    .name { font-size: 31px; }
+    .sp, .by { font-size: 14.5px; }
+    .by { font-size: 13.5px; }
+  }
+  /* the smallest phones: one more step down, so a pair still stands side by side */
+  @media (max-width: 359px) {
+    :root { --size: calc(var(--L) * 4); }
+    .name { font-size: 28px; }
+    .by { height: auto; } .by .me { display: block; } .by .dot { display: none; }  /* a long credit takes two lines */
+  }
+  /* phones on their side (after the width steps, so it wins over them) */
+  @media (max-height: 500px) and (orientation: landscape) { :root { --size: calc(var(--L) * 5); } .stage { margin-top: var(--L); } }
+  .nojs { margin: 0; height: var(--L); color: var(--ink-2); position: relative; top: 8px; text-align: center; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- graphite grain + a hair of wobble, for the title and the pencil lines -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <h1>phy's friends</h1>
+    <p class="intro">a few chibi friends, each one drawn from a hundred-odd lines of code.</p>
+  </header>
+
+  <section class="stage" aria-label="the friends">
+    <noscript><p class="nojs">the friends are drawn live, so they need JavaScript to appear.</p></noscript>
+    <div class="troupe">
+      <ul class="friends">
+        <li class="friend" data-friend="howdi" style="--z:2"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Howdi, a sky-blue wolf with a navy mop of hair"></div>
+          <figcaption><span class="name">Howdi</span><span class="sp">sky-blue wolf</span><span class="by"><a href="https://x.com/howdi1129">@howdi1129</a></span></figcaption>
+        </figure></li>
+        <li class="friend" data-friend="phy" data-first><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours with cookie crumbs on its ruff and tail"></div>
+          <figcaption><span class="name">phy</span><span class="sp">tuxedo eevee</span><span class="by"><span class="me">that's me<span class="dot"> · </span></span><a href="https://x.com/rareone0602" rel="me">@rareone0602</a></span></figcaption>
+        </figure></li>
+      </ul>
+      <p class="note"><svg class="arrow" viewBox="0 0 56 40" aria-hidden="true"><path d="M53 9C41 3 22 5 8 27M8 27l10-3M8 27l2-10" fill="none" stroke="#6d6a63" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="long">psst: they watch<br>your cursor.<br></span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
+    </div>
+  </section>
+
+  <footer>
+    <ul>
+      <li>characters belong to the people named under them</li>
+      <li><a href="style.html">style guide</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+    </ul>
+  </footer>
+</main>
+
+<script src="src/phyfriends.js"></script>
+<script src="characters/howdi/howdi.js"></script>
+<script src="characters/phy/phy.js"></script>
+<script src="src/anim.js"></script>
+<script>
+  // Camera: 270 head units square, the character's ground on the bottom edge.
+  const view = spec => ({ w: 270, h: 270, x: 135, y: 270 - ((spec.rig && spec.rig.ground) ?? 120), scale: 1, rotate: 0 });
+
+  // ---- pencil marks (seeded wobble, drawn with the library's own pathD) -----
+  const R = PhyFriends.rng(5);
+  const wobble = (x0, x1, y, amp, step) => {
+    const n = Math.max(1, Math.round((x1 - x0) / step)), pts = [];
+    for (let i = 0; i <= n; i++) pts.push({ x: x0 + (i * (x1 - x0)) / n, y: y + (R() - 0.5) * amp });
+    return PhyFriends.shapes.pathD(pts, false);
+  };
+  // the friends' patch of rule, gone over in pencil
+  const drawGround = li => li.insertAdjacentHTML('beforeend',
+    `<svg class="ground" viewBox="0 0 200 12" preserveAspectRatio="none" style="filter:url(#graphite)" aria-hidden="true">` +
+    `<path d="${wobble(R() * 6, 200 - R() * 6, 6.5, 1.6, 50)}" fill="none" stroke="#3d3c39" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`);
+  // a loose pencil ring around the first friend's name
+  const first = document.querySelector('[data-first] .name');
+  first.insertAdjacentHTML('beforeend', `<svg class="ring" viewBox="0 0 104 46" aria-hidden="true"><path d="M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7" fill="none" stroke="#6d6a63" stroke-width="1.2" stroke-linecap="round"/></svg>`);
+
+  // ---- mount the friends; widen a slot where a tail or an ear sticks out ----
+  const HI = PhyFriends.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 }); // saying hi: a happy hop
+  const friends = [...document.querySelectorAll('.friend')].map((el, i) => {
+    const spec = PhyFriends.get(el.dataset.friend), v = view(spec);
+    const box = el.querySelector('.rig'), rig = PhyFriends.mount(box, spec, { bg: false, view: v });
+    // how far the body and tail reach past the box, in head units (the ears may overlap)
+    const r = box.getBoundingClientRect(), unit = box.offsetWidth / v.w, slack = 6;
+    let left = r.left, right = r.right;
+    for (const k of ['body', 'tail']) if (rig.parts[k]) {
+      const b = rig.parts[k].getBoundingClientRect();
+      left = Math.min(left, b.left); right = Math.max(right, b.right);
+    }
+    el.style.setProperty('--pl', Math.round((r.left - left) / unit + (left < r.left ? slack : 0)));
+    el.style.setProperty('--pr', Math.round((right - r.right) / unit + (right > r.right ? slack : 0)));
+    drawGround(el);
+    const f = { rig, v, lx: 0, ly: 0, phase: i * 1.7, blinkAt: 1 + Math.random() * 3, flickAt: 4 + Math.random() * 8, flick: 'earL', hi: -9, near: false, perk: 0 };
+    // a click, a tap, or Enter / Space says hi; hovering, or tabbing to a friend, perks it up
+    const hi = () => { f.hi = performance.now() / 1000; };
+    box.addEventListener('click', hi);
+    box.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); hi(); } });
+    box.addEventListener('pointerenter', e => { if (e.pointerType !== 'touch') f.near = true; });
+    box.addEventListener('pointerleave', () => { f.near = false; });
+    box.addEventListener('focus', () => { f.near = box.matches(':focus-visible'); });
+    box.addEventListener('blur', () => { f.near = false; });
+    return f;
+  });
+  // where a friend's eyes are on screen (the origin of head space)
+  const eyesOf = f => {
+    const r = f.rig.svg.getBoundingClientRect();
+    return { x: r.left + r.width * f.v.x / f.v.w, y: r.top + r.height * f.v.y / f.v.h, w: r.width };
+  };
+
+  // ---- eye-follow: every friend looks from its own head toward the pointer ----
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  // for screenshots: ?px=..&py=.. (CSS px) pins a pretend pointer, and ?hi=<friend> pins that friend mid-hop
+  const q = new URLSearchParams(location.search), fake = q.has('px') ? { x: +q.get('px'), y: +q.get('py') } : null;
+  const pinned = friends.find((f, i) => document.querySelectorAll('.friend')[i].dataset.friend === q.get('hi'));
+  let ptr = fake, idleSince = performance.now();
+  if (!fake) {
+    addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { ptr = { x: e.clientX, y: e.clientY }; idleSince = performance.now(); } });
+    document.addEventListener('mouseout', e => { if (!e.relatedTarget) ptr = null; });
+    const touch = e => { const t = e.touches[0]; ptr = t ? { x: t.clientX, y: t.clientY } : null; idleSince = performance.now(); };
+    for (const ev of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) addEventListener(ev, touch, { passive: true });
+  }
+
+  let last = performance.now();
+  requestAnimationFrame(function tick(now) {
+    const dt = Math.min(0.1, (now - last) / 1000), t = now / 1000, k = fake ? 1 : 1 - Math.exp(-dt * 7), kp = 1 - Math.exp(-dt * 10);
+    last = now;
+    const resting = !ptr || (!fake && now - idleSince > 8000); // pointer gone or still for a while: glance around
+    const alive = !still.matches && !fake;
+    if (pinned) pinned.hi = t - 0.3;
+    // a friend who has just been greeted draws the others' eyes
+    const greeted = friends.filter(f => t - f.hi < HI.duration).sort((a, b) => b.hi - a.hi)[0];
+    for (const f of friends) {
+      let tx = 0, ty = 0;
+      const at = greeted && greeted !== f ? eyesOf(greeted) : !resting && ptr;
+      if (!at && !still.matches) { tx = 0.3 * Math.sin(t * 0.5 + f.phase); ty = 0.15 * Math.sin(t * 0.37 + f.phase * 2); }
+      if (at) {
+        const e = eyesOf(f), dx = at.x - e.x, dy = at.y - e.y;
+        const d = Math.max(Math.hypot(dx, dy), e.w * 0.6); // near the face -> softer look
+        tx = dx / d; ty = dy / d;
+      }
+      f.lx += (tx - f.lx) * k; f.ly += (ty - f.ly) * k;
+      f.perk += ((f.near && !still.matches ? 1 : 0) - f.perk) * (fake ? 1 : kp);
+      // idle underneath: irregular blinks, breathing, a slow tail sway and the odd ear flick
+      const s = t - f.blinkAt, blink = alive && s > 0 && s < 0.16 ? Math.sin((s / 0.16) * Math.PI) : 0;
+      if (s >= 0.16) f.blinkAt = t + 2 + Math.random() * 4;
+      const e = t - f.flickAt, flick = alive && e > 0 && e < 0.35 ? 9 * Math.sin((e / 0.35) * Math.PI) : 0;
+      if (e >= 0.35) { f.flickAt = t + 5 + Math.random() * 9; f.flick = Math.random() < 0.5 ? 'earL' : 'earR'; }
+      const breathe = alive ? 0.012 * Math.sin(t * 1.7 + f.phase) : 0, sway = alive ? 3 * Math.sin(t * 0.8 + f.phase) : 0;
+      // saying hi: the happy hop, faded in and out (reduced motion keeps just the happy face)
+      const u = t - f.hi, hi = u >= 0 && u < HI.duration ? HI(u) : null;
+      const env = hi ? Math.min(1, u / 0.08, (HI.duration - u) / 0.2) : 0, m = still.matches ? 0 : env;
+      const n = key => (hi && typeof hi[key] === 'number' ? hi[key] * m : 0);
+      const smile = env > 0.3;
+      // reduced motion: the eyes follow, nothing else moves
+      const turn = still.matches ? 0 : 0.5;
+      f.rig.setPose({ lookX: f.lx, lookY: f.ly, turnX: f.lx * turn, turnY: f.ly * turn + n('turnY'),
+        blink: smile ? 0 : blink, squash: breathe + n('squash'), tail: sway + n('tail'),
+        earL: (f.flick === 'earL' ? flick : 0) - 6 * f.perk + n('earL'), earR: (f.flick === 'earR' ? flick : 0) - 6 * f.perk + n('earR'),
+        widen: 0.06 * f.perk, y: n('y'), tilt: n('tilt'), hair: n('hair'), headY: n('headY'),
+        eyes: smile ? 'happy' : 'open', mouth: smile ? 'w' : null });
+    }
+    requestAnimationFrame(tick);
+  });
+</script>
+</body>
+</html>

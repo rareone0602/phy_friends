@@ -1,0 +1,7 @@
+out/
+.DS_Store
+.claude/settings.local.json
+__pycache__/
+
+# per-character material that informs a design but is not published (e.g. photos of a real pet)
+characters/*/private/
