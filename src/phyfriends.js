@@ -462,35 +462,42 @@
   // as the paper would. It is an image; a live rig swaps it for a bitmap (see pencilBitmap).
   const PENCIL = {
     angle: -40,              // The strokes rise to the right, as a right hand shades.
-    strokes: '0.035 0.9',    // Streaky noise: long along a stroke and fine across it.
-    tooth: 1.2,              // The paper's grain.
-    pressure: 0.02,          // The size of the lighter patches.
     margin: 0.5,             // The mask reaches this fraction of the view past each edge, for ears and tails.
     paper: '#fbf9f3',        // The paper of site/notebook.css, laid under a character drawn on a background of its own.
   };
-  // Noise seeds for the strokes, the tooth and the pressure: [seed of variant 0, step per variant].
-  const PENCIL_SEEDS = [[11, 17], [7, 13], [4, 5]];
+  // The texture's three noises, in the order in which they are mixed: the strokes, streaky noise long
+  // along a stroke and fine across it; the paper's tooth; and the pressure, whose lighter patches are
+  // this large. Each has a base frequency (along the stroke, across it), a number of octaves, a weight
+  // in the mix and a seed ([seed of variant 0, step per variant]). The mix becomes the alpha that keeps
+  // the color: slope * mix + offset.
+  const PENCIL_NOISES = [
+    { name: 'strokes', frequency: [0.035, 0.9], octaves: 2, weight: 0.6, seed: [11, 17] },
+    { name: 'tooth', frequency: [1.2, 1.2], octaves: 1, weight: 0.25, seed: [7, 13] },
+    { name: 'pressure', frequency: [0.02, 0.02], octaves: 2, weight: 0.35, seed: [4, 5] },
+  ];
+  const PENCIL_ALPHA = { slope: -3, offset: 2.7 };
   const pencilTextures = new Map();
 
-  // The texture for a sheet (x, y, w, h), as an SVG image. Its filter mixes the three noises
-  // (strokes 0.6, tooth 0.25, then pressure 0.35) and turns the mix into an alpha that keeps most of
-  // the color, so that the paper shows only in specks and streaks. The rectangle is turned to the
-  // stroke angle and reaches past the sheet's farthest corner. Views of one size share one image.
+  // The texture for a sheet (x, y, w, h), as an SVG image. Its filter mixes the three noises (the
+  // strokes and the tooth, then the pressure) and turns the mix into an alpha that keeps most of the
+  // color, so that the paper shows only in specks and streaks. The rectangle is turned to the stroke
+  // angle and reaches past the sheet's farthest corner. Views of one size share one image.
   // Variant 0 is the texture every still uses; other variants reseed the noises, so that a film can
   // redraw the texture every few frames, as hand-drawn animation does (src/scene.js, boil).
   function pencilTexture(x, y, w, h, variant = 0) {
     const box = [x, y, w, h].join(' '), key = `${box} ${variant}`;
     if (!pencilTextures.has(key)) {
       const reach = Math.hypot(Math.abs(x) + w, Math.abs(y) + h);
-      const [strokes, tooth, pressure] = PENCIL_SEEDS.map(([seed, step]) => seed + step * variant);
-      const noise = (frequency, octaves, seed, result) =>
-        `<feTurbulence type='fractalNoise' baseFrequency='${frequency}' numOctaves='${octaves}' seed='${seed}' result='${result}'/>`;
+      const [strokes, tooth, pressure] = PENCIL_NOISES;
+      const noise = ({ name, frequency: [along, across], octaves, seed: [seed, step] }) =>
+        `<feTurbulence type='fractalNoise' baseFrequency='${along === across ? along : `${along} ${across}`}' ` +
+        `numOctaves='${octaves}' seed='${seed + step * variant}' result='${name}'/>`;
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${box}' width='${w}' height='${h}'>` +
         `<filter id='p' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'>` +
-        noise(PENCIL.strokes, 2, strokes, 'strokes') + noise(PENCIL.tooth, 1, tooth, 'tooth') + noise(PENCIL.pressure, 2, pressure, 'pressure') +
-        `<feComposite in='strokes' in2='tooth' operator='arithmetic' k2='0.6' k3='0.25' result='grain'/>` +
-        `<feComposite in='grain' in2='pressure' operator='arithmetic' k2='1' k3='0.35' result='mix'/>` +
-        `<feColorMatrix in='mix' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.7' result='alpha'/>` +
+        PENCIL_NOISES.map(noise).join('') +
+        `<feComposite in='strokes' in2='tooth' operator='arithmetic' k2='${strokes.weight}' k3='${tooth.weight}' result='grain'/>` +
+        `<feComposite in='grain' in2='pressure' operator='arithmetic' k2='1' k3='${pressure.weight}' result='mix'/>` +
+        `<feColorMatrix in='mix' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 ${PENCIL_ALPHA.slope} ${PENCIL_ALPHA.offset}' result='alpha'/>` +
         `<feComposite in='SourceGraphic' in2='alpha' operator='in'/></filter>` +
         `<rect x='${-reach}' y='${-reach}' width='${2 * reach}' height='${2 * reach}' fill='#fff' filter='url(#p)' transform='rotate(${PENCIL.angle})'/></svg>`;
       // Encoded, so that the render stays well-formed XML when it is saved or shown as a standalone SVG.
@@ -501,44 +508,147 @@
 
   // A browser draws the texture's noise again whenever the drawing under it changes, which for a live
   // rig is every frame, and on a phone that is most of the frame's work. So mount() swaps the texture
-  // for a bitmap of it, drawn once at the density at which the rig is shown (device pixels per unit,
-  // rounded up to a step) and again if the rig grows. The bitmap is grey on black, which masks as the
-  // white texture does, so that it can be a JPEG, which is quick to encode. It is drawn a tile at a
-  // time, one task each, so that the page stays responsive meanwhile. Rigs whose views are the same
-  // size share one bitmap per density. A browser that cannot make the bitmap keeps the texture.
-  const BITMAP = { step: 0.5, maxDensity: 4, maxPixels: 4096, tiles: 8, quality: 0.92 };
+  // for a bitmap of it, made once at the density at which the rig is shown (device pixels per unit,
+  // rounded up to a step) and again if the rig grows. The bitmap's noise is computed here rather than
+  // drawn from the texture's filter, since Safari drew the filter into a canvas in one piece that held
+  // the page up for seconds; it is computed a slice of rows at a time, no slice longer than `slice`
+  // milliseconds, so that the page stays responsive meanwhile. The bitmap is grey on black, which
+  // masks as the white texture does, so that it can be a JPEG, which is quick to encode. Rigs whose
+  // views are the same size share one bitmap per density. A browser that cannot make the bitmap
+  // keeps the texture.
+  const BITMAP = { step: 0.5, maxDensity: 4, maxPixels: 4096, quality: 0.92, slice: 8 };
   const pencilBitmaps = new Map();
   const bitmapDensities = new WeakMap();  // For each texture image swapped for a bitmap, the bitmap's density.
 
-  // The bitmap of a texture at a density, as a promise of a blob URL.
-  function pencilBitmap(href, w, h, density) {
-    const key = `${density} ${href}`;
-    if (!pencilBitmaps.has(key)) pencilBitmaps.set(key, drawBitmap(href, w, h, density));
+  // The bitmap of the texture for a sheet (x, y, w, h) at a density, as a promise of a blob URL.
+  function pencilBitmap(x, y, w, h, density) {
+    const key = [x, y, w, h, density].join(' ');
+    if (!pencilBitmaps.has(key)) pencilBitmaps.set(key, drawBitmap(x, y, w, h, density));
     return pencilBitmaps.get(key);
   }
 
-  async function drawBitmap(href, w, h, density) {
-    const image = new Image();
-    await new Promise((resolve, reject) => {
-      image.onload = resolve;
-      image.onerror = reject;
-      image.src = href;
-    });
-    const { tiles } = BITMAP, canvas = document.createElement('canvas');
-    canvas.width = Math.ceil((w * density) / tiles) * tiles;
-    canvas.height = Math.ceil((h * density) / tiles) * tiles;
-    const context = canvas.getContext('2d'), tileW = canvas.width / tiles, tileH = canvas.height / tiles;
-    context.fillRect(0, 0, canvas.width, canvas.height);  // Black, where the texture lets the paper through.
-    for (let i = 0; i < tiles; i++) {
-      for (let j = 0; j < tiles; j++) {
-        await new Promise(resolve => setTimeout(resolve));
-        context.drawImage(image, (i * w) / tiles, (j * h) / tiles, w / tiles, h / tiles, i * tileW, j * tileH, tileW, tileH);
+  // Computes variant 0 of the texture as a browser draws pencilTexture's filter: on a grid in the
+  // turned rectangle's frame, a point every 1/density units, from which each pixel is then read
+  // between its four nearest points. Reading the grid rather than the noise itself softens the
+  // finest grain as much as the browser's drawing does.
+  async function drawBitmap(x, y, w, h, density) {
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(w * density);
+    canvas.height = Math.ceil(h * density);
+    const context = canvas.getContext('2d'), pixels = context.createImageData(canvas.width, canvas.height);
+    const noises = PENCIL_NOISES.map(noise => ({ ...noise, ...turbulenceTables(noise.seed[0]) }));
+    let sliceStart = performance.now();
+    const yieldEverySlice = async () => {
+      if (performance.now() - sliceStart < BITMAP.slice) return;
+      await new Promise(resolve => setTimeout(resolve));
+      sliceStart = performance.now();
+    };
+    // The rectangle's frame: `along` the strokes and `across` them, turned by PENCIL.angle from the sheet's.
+    const cos = Math.cos(-PENCIL.angle * DEG), sin = Math.sin(-PENCIL.angle * DEG);
+    const corners = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]];
+    const alongs = corners.map(([cx, cy]) => cx * cos - cy * sin), acrosses = corners.map(([cx, cy]) => cx * sin + cy * cos);
+    const firstColumn = Math.floor(Math.min(...alongs) * density) - 1, firstRow = Math.floor(Math.min(...acrosses) * density) - 1;
+    const columns = Math.ceil(Math.max(...alongs) * density) + 2 - firstColumn, rows = Math.ceil(Math.max(...acrosses) * density) + 2 - firstRow;
+    const grid = new Uint8ClampedArray(columns * rows);
+    for (let row = 0; row < rows; row++) {
+      await yieldEverySlice();
+      const across = (firstRow + row) / density;
+      for (let column = 0; column < columns; column++) grid[row * columns + column] = 255 * pencilAlpha(noises, (firstColumn + column) / density, across);
+    }
+    for (let row = 0; row < canvas.height; row++) {
+      await yieldEverySlice();
+      const sheetY = y + ((row + 0.5) * h) / canvas.height;
+      for (let column = 0; column < canvas.width; column++) {
+        const sheetX = x + ((column + 0.5) * w) / canvas.width;
+        const u = (sheetX * cos - sheetY * sin) * density - firstColumn, v = (sheetX * sin + sheetY * cos) * density - firstRow;
+        const u0 = Math.floor(u), v0 = Math.floor(v), k = v0 * columns + u0;
+        const value = lerp(v - v0, lerp(u - u0, grid[k], grid[k + 1]), lerp(u - u0, grid[k + columns], grid[k + columns + 1]));
+        const i = 4 * (row * canvas.width + column);
+        pixels.data[i] = pixels.data[i + 1] = pixels.data[i + 2] = value;
+        pixels.data[i + 3] = 255;
       }
     }
+    context.putImageData(pixels, 0, 0);
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', BITMAP.quality));
     canvas.width = canvas.height = 0;  // Frees the canvas now; Safari limits the memory that canvases hold.
     if (!blob) throw new Error('the pencil texture could not be drawn as a bitmap');
     return URL.createObjectURL(blob);
+  }
+
+  // The noise of feTurbulence as the SVG 1.1 specification's reference code computes it, which the
+  // browsers follow: a Perlin noise whose lattice and gradients come from a seeded Park-Miller
+  // generator. Only the alpha channel, the fourth, is kept, since the texture uses no other.
+  const TURBULENCE = { size: 256, offset: 4096, modulus: 2147483647, multiplier: 16807, quotient: 127773, remainder: 2836 };
+
+  // The lattice and the alpha channel's gradients for a seed.
+  function turbulenceTables(seed) {
+    const { size, modulus, multiplier, quotient, remainder } = TURBULENCE;
+    const random = () => {
+      seed = multiplier * (seed % quotient) - remainder * Math.trunc(seed / quotient);
+      if (seed <= 0) seed += modulus;
+      return seed;
+    };
+    seed = Math.trunc(seed);
+    if (seed <= 0) seed = -(seed % (modulus - 1)) + 1;
+    if (seed > modulus - 1) seed = modulus - 1;
+    const lattice = new Int32Array(2 * size + 2);
+    let gradient;
+    for (let channel = 0; channel < 4; channel++) {  // Every channel draws its gradients, so that the generator reaches alpha's.
+      gradient = new Float64Array(2 * (2 * size + 2));
+      for (let i = 0; i < size; i++) {
+        lattice[i] = i;
+        const gx = ((random() % (2 * size)) - size) / size, gy = ((random() % (2 * size)) - size) / size;
+        const length = Math.hypot(gx, gy) || 1;
+        gradient[2 * i] = gx / length;
+        gradient[2 * i + 1] = gy / length;
+      }
+    }
+    for (let i = size - 1; i > 0; i--) {
+      const j = random() % size;
+      [lattice[i], lattice[j]] = [lattice[j], lattice[i]];
+    }
+    for (let i = 0; i < size + 2; i++) {
+      lattice[size + i] = lattice[i];
+      gradient[2 * (size + i)] = gradient[2 * i];
+      gradient[2 * (size + i) + 1] = gradient[2 * i + 1];
+    }
+    return { lattice, gradient };
+  }
+
+  // The texture's alpha at a point in its rectangle's frame: the noises mixed as pencilTexture's filter mixes them.
+  function pencilAlpha([strokes, tooth, pressure], along, across) {
+    const clamp = v => Math.min(1, Math.max(0, v));
+    const grain = clamp(strokes.weight * fractalNoise(strokes, along, across) + tooth.weight * fractalNoise(tooth, along, across));
+    const mix = clamp(grain + pressure.weight * fractalNoise(pressure, along, across));
+    return clamp(PENCIL_ALPHA.slope * mix + PENCIL_ALPHA.offset);
+  }
+
+  // Fractal noise at a point, from 0 to 1: octaves of noise, each at twice the frequency and half the weight.
+  function fractalNoise({ lattice, gradient, frequency, octaves }, x, y) {
+    let sum = 0, vx = x * frequency[0], vy = y * frequency[1], weight = 1;
+    for (let octave = 0; octave < octaves; octave++) {
+      sum += perlinNoise(lattice, gradient, vx, vy) / weight;
+      vx *= 2;
+      vy *= 2;
+      weight *= 2;
+    }
+    return Math.min(1, Math.max(0, (sum + 1) / 2));
+  }
+
+  function perlinNoise(lattice, gradient, x, y) {
+    const tx = x + TURBULENCE.offset, ty = y + TURBULENCE.offset, ix = Math.trunc(tx), iy = Math.trunc(ty);
+    const bx0 = ix & 0xff, bx1 = (bx0 + 1) & 0xff, by0 = iy & 0xff, by1 = (by0 + 1) & 0xff;
+    const rx0 = tx - ix, rx1 = rx0 - 1, ry0 = ty - iy, ry1 = ry0 - 1;
+    const i = lattice[bx0], j = lattice[bx1];
+    const b00 = 2 * lattice[i + by0], b10 = 2 * lattice[j + by0], b01 = 2 * lattice[i + by1], b11 = 2 * lattice[j + by1];
+    const sx = rx0 * rx0 * (3 - 2 * rx0), sy = ry0 * ry0 * (3 - 2 * ry0);
+    const top = lerp(sx, rx0 * gradient[b00] + ry0 * gradient[b00 + 1], rx1 * gradient[b10] + ry0 * gradient[b10 + 1]);
+    const bottom = lerp(sx, rx0 * gradient[b01] + ry1 * gradient[b01 + 1], rx1 * gradient[b11] + ry1 * gradient[b11 + 1]);
+    return lerp(sy, top, bottom);
+  }
+
+  function lerp(t, a, b) {
+    return a + t * (b - a);
   }
 
   // Gives a mounted drawing's texture a bitmap dense enough for the width (in CSS pixels) at which it is shown.
@@ -550,7 +660,7 @@
     const density = Math.min(wanted, BITMAP.maxDensity, BITMAP.maxPixels / Math.max(w, h));
     if (density <= (bitmapDensities.get(image) || 0)) return;
     bitmapDensities.set(image, density);
-    pencilBitmap(pencilTexture(x, y, w, h), w, h, density).then(
+    pencilBitmap(x, y, w, h, density).then(
       url => { if (bitmapDensities.get(image) === density) image.setAttribute('href', url); },
       () => {});  // The texture stays as it was.
   }
@@ -855,7 +965,7 @@
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
     rng, hash, SHADE, shadeOf,
     // The pencil, for drawing props in the characters' texture and for redrawing it (src/scene.js).
-    pencil: { settings: PENCIL, texture: pencilTexture, svg: pencilSVG },
+    pencil: { settings: PENCIL, texture: pencilTexture, svg: pencilSVG, bitmap: pencilBitmap },
     // The palette a render uses: the spec's colors plus the house shades that the spec refers to.
     palette: specOrName => {
       const spec = resolve(specOrName), P = withShades(spec.palette || {}), used = JSON.stringify(spec);

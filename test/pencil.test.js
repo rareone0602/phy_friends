@@ -1,0 +1,41 @@
+// Tests for the pencil texture's bitmap (src/phyfriends.js), which a live rig shows in place of the
+// texture's filter: it must have the grain of the filter as the browser draws it.
+(function () {
+  'use strict';
+  const PF = PhyFriends;
+
+  test('the pencil bitmap has the grain of the texture it stands in for', async () => {
+    const [x, y, w, h, density] = [-100, -100, 200, 200, 2];
+    const bitmap = grainOf(await pixelsOf(await PF.pencil.bitmap(x, y, w, h, density), w * density, h * density));
+    const texture = grainOf(await pixelsOf(PF.pencil.texture(x, y, w, h), w * density, h * density));
+    assert(Math.abs(bitmap.mean - texture.mean) < 2, `mean ${bitmap.mean} against ${texture.mean}`);
+    assert(Math.abs(bitmap.spread - texture.spread) < 3, `spread ${bitmap.spread} against ${texture.spread}`);
+    assert(Math.abs(bitmap.paper - texture.paper) < 0.01, `paper let through ${bitmap.paper} against ${texture.paper}`);
+  });
+
+  // The grey levels of an image drawn over black, as the rig's mask reads it.
+  async function pixelsOf(src, width, height) {
+    const image = new Image();
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = src;
+    });
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d');
+    context.fillRect(0, 0, width, height);
+    context.drawImage(image, 0, 0, width, height);
+    const { data } = context.getImageData(0, 0, width, height);
+    return data.filter((_, i) => i % 4 === 0);
+  }
+
+  // The mean and the standard deviation of the grey levels, and the share of pixels that let the paper through.
+  function grainOf(levels) {
+    const mean = levels.reduce((sum, v) => sum + v, 0) / levels.length;
+    const spread = Math.sqrt(levels.reduce((sum, v) => sum + (v - mean) ** 2, 0) / levels.length);
+    const paper = levels.filter(v => v < 128).length / levels.length;
+    return { mean, spread, paper };
+  }
+})();
