@@ -459,7 +459,7 @@
   // picture's own units, not head units, because the pencil is the same size however large the
   // drawing is; the gallery draws at about one unit to the pixel. It sits outside the camera, so the
   // strokes keep their angle when a view tips the head, and it stays put while the character moves,
-  // as the paper would. It is an image, so a browser draws its noise once rather than on every frame.
+  // as the paper would. It is an image; a live rig swaps it for a bitmap (see pencilBitmap).
   const PENCIL = {
     angle: -40,              // The strokes rise to the right, as a right hand shades.
     strokes: '0.035 0.9',    // Streaky noise: long along a stroke and fine across it.
@@ -494,6 +494,70 @@
     return pencilTextures.get(key);
   }
 
+  // A browser draws the texture's noise again whenever the drawing under it changes, which for a live
+  // rig is every frame, and on a phone that is most of the frame's work. So mount() swaps the texture
+  // for a bitmap of it, drawn once at the density at which the rig is shown (device pixels per unit,
+  // rounded up to a step) and again if the rig grows. The bitmap is grey on black, which masks as the
+  // white texture does, so that it can be a JPEG, which is quick to encode. It is drawn a tile at a
+  // time, one task each, so that the page stays responsive meanwhile. Rigs whose views are the same
+  // size share one bitmap per density. A browser that cannot make the bitmap keeps the texture.
+  const BITMAP = { step: 0.5, maxDensity: 4, maxPixels: 4096, tiles: 8, quality: 0.92 };
+  const pencilBitmaps = new Map();
+  const bitmapDensities = new WeakMap();  // For each texture image swapped for a bitmap, the bitmap's density.
+
+  // The bitmap of a texture at a density, as a promise of a blob URL.
+  function pencilBitmap(href, w, h, density) {
+    const key = `${density} ${href}`;
+    if (!pencilBitmaps.has(key)) pencilBitmaps.set(key, drawBitmap(href, w, h, density));
+    return pencilBitmaps.get(key);
+  }
+
+  async function drawBitmap(href, w, h, density) {
+    const image = new Image();
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = reject;
+      image.src = href;
+    });
+    const { tiles } = BITMAP, canvas = document.createElement('canvas');
+    canvas.width = Math.ceil((w * density) / tiles) * tiles;
+    canvas.height = Math.ceil((h * density) / tiles) * tiles;
+    const context = canvas.getContext('2d'), tileW = canvas.width / tiles, tileH = canvas.height / tiles;
+    context.fillRect(0, 0, canvas.width, canvas.height);  // Black, where the texture lets the paper through.
+    for (let i = 0; i < tiles; i++) {
+      for (let j = 0; j < tiles; j++) {
+        await new Promise(resolve => setTimeout(resolve));
+        context.drawImage(image, (i * w) / tiles, (j * h) / tiles, w / tiles, h / tiles, i * tileW, j * tileH, tileW, tileH);
+      }
+    }
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', BITMAP.quality));
+    canvas.width = canvas.height = 0;  // Frees the canvas now; Safari limits the memory that canvases hold.
+    if (!blob) throw new Error('the pencil texture could not be drawn as a bitmap');
+    return URL.createObjectURL(blob);
+  }
+
+  // Gives a mounted drawing's texture a bitmap dense enough for the width (in CSS pixels) at which it is shown.
+  function sharpenTexture(svg, width) {
+    const image = svg.querySelector('image[data-pf-texture]'), units = svg.viewBox.baseVal.width;
+    if (!image || !width || !units) return;
+    const [x, y, w, h] = ['x', 'y', 'width', 'height'].map(name => +image.getAttribute(name));
+    const wanted = Math.ceil(((width / units) * (self.devicePixelRatio || 1)) / BITMAP.step) * BITMAP.step;
+    const density = Math.min(wanted, BITMAP.maxDensity, BITMAP.maxPixels / Math.max(w, h));
+    if (density <= (bitmapDensities.get(image) || 0)) return;
+    bitmapDensities.set(image, density);
+    pencilBitmap(pencilTexture(x, y, w, h), w, h, density).then(
+      url => { if (bitmapDensities.get(image) === density) image.setAttribute('href', url); },
+      () => {});  // The texture stays as it was.
+  }
+
+  // Watches the size of every mounted drawing, and forgets a drawing once it leaves the page.
+  const textureWatch = typeof ResizeObserver === 'function' && new ResizeObserver(entries => {
+    for (const { target, contentRect } of entries) {
+      if (target.isConnected) sharpenTexture(target, contentRect.width);
+      else textureWatch.unobserve(target);
+    }
+  });
+
   // A sheet of paper cut to the character's outline, for a render with a background of its own: the
   // pencil lets paper through, never the background (STYLE.md §4, on a dark host).
   function paperSheet(id) {
@@ -506,7 +570,7 @@
     const x = num(-view.w * PENCIL.margin), y = num(-view.h * PENCIL.margin);
     const w = num(view.w * (1 + 2 * PENCIL.margin)), h = num(view.h * (1 + 2 * PENCIL.margin));
     return `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x}" y="${y}" width="${w}" height="${h}">` +
-      `<image href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
+      `<image data-pf-texture href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
   }
 
   function resolveView(spec, v, size) {
@@ -743,6 +807,9 @@
     const spec = resolve(specOrName);
     el.innerHTML = render(spec, { fluid: true, ...opts });
     const svg = el.querySelector('svg');
+    // opts.bitmap: false keeps the texture as it is drawn in a still, for a page that must come out the
+    // same every time, such as a film.
+    if (textureWatch && opts.bitmap !== false) textureWatch.observe(svg);
     const parts = {};
     svg.querySelectorAll('[data-pf]').forEach(n => { parts[n.getAttribute('data-pf')] = n; });
     const toggles = [...svg.querySelectorAll('[data-pf-when]')].map(n => {

@@ -230,6 +230,10 @@
   const SMILE_THRESHOLD = 0.3;           // The happy face shows once the greeting is this far faded in.
   const HELD_HOP_SECONDS = 0.3;          // How far into its hop ?hi holds a friend.
   const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
+  // With no pointer to follow and no one greeted, the friends only breathe and glance about, slowly
+  // enough that 30 frames a second look as smooth as more, so a frame is drawn at most every 1/30 s
+  // (a little under, so that a 60 Hz screen draws every other frame). This halves a phone's work.
+  const CALM_FRAME_SECONDS = 0.85 / 30;
   // What the live region says when a friend is greeted: GREETING has two bounces, and under reduced
   // motion only the face changes.
   const ANNOUNCEMENT = { hop: name => `${name} hops twice.`, smile: name => `${name} smiles.` };
@@ -242,6 +246,7 @@
   const announcer = document.querySelector('.announcer');
 
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
+  widenSlots(friends);
   const heldMidHop = friends.find(friend => friend.name === params.get('hi'));
   let pointer = simulatedPointer, pointerMovedAt = performance.now();
   // The stage keeps its own clock, which stands still while the stage is out of sight, so that the idle
@@ -250,15 +255,13 @@
   if (!simulatedPointer) followPointer();
   animateWhileVisible();
 
-  // Mounts one friend in its slot, widens the slot for its body and tail, draws its ground and
-  // listens for greetings.
+  // Mounts one friend in its slot, draws its ground and listens for greetings.
   function mountFriend(element, index) {
     const spec = PhyFriends.get(element.dataset.friend), view = cameraFor(spec);
     const box = element.querySelector('.rig'), rig = PhyFriends.mount(box, spec, { bg: false, view });
-    widenSlot(element, box, rig, view);
     drawGround(element);
     const friend = { name: element.dataset.friend, displayName: element.querySelector('.name').textContent,
-      rig, view, lookX: 0, lookY: 0, phase: index * PHASE_STEP,
+      element, rig, view, lookX: 0, lookY: 0, phase: index * PHASE_STEP,
       blinkAt: randomIn(BLINK.first), flickAt: randomIn(EAR_FLICK.first), flickEar: 'earL',
       greetedAt: -Infinity, hovered: false, focused: false, perk: 0 };
     listenForGreetings(box, friend);
@@ -271,17 +274,29 @@
     return { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 };
   }
 
-  // Sets --reach-left and --reach-right to how far the body and tail extend past the box, in head
-  // units. Ears are left out, since they may overlap a neighbor.
-  function widenSlot(element, box, rig, view) {
-    const boxRect = box.getBoundingClientRect(), unit = box.offsetWidth / view.w;
+  // Sets each slot's --reach-left and --reach-right. Every slot is measured before any is widened, so
+  // that the page is laid out once rather than once per friend.
+  function widenSlots(friends) {
+    const reaches = friends.map(reachOf);
+    friends.forEach(({ element }, i) => {
+      element.style.setProperty('--reach-left', reaches[i].left);
+      element.style.setProperty('--reach-right', reaches[i].right);
+    });
+  }
+
+  // How far the body and tail extend past the box on each side, in head units. Ears are left out,
+  // since they may overlap a neighbor.
+  function reachOf({ rig, view }) {
+    const boxRect = rig.el.getBoundingClientRect(), unit = rig.el.offsetWidth / view.w;
     let left = boxRect.left, right = boxRect.right;
     for (const part of ['body', 'tail']) if (rig.parts[part]) {
       const partRect = rig.parts[part].getBoundingClientRect();
       left = Math.min(left, partRect.left); right = Math.max(right, partRect.right);
     }
-    element.style.setProperty('--reach-left', Math.round((boxRect.left - left) / unit + (left < boxRect.left ? SLOT_CLEARANCE : 0)));
-    element.style.setProperty('--reach-right', Math.round((right - boxRect.right) / unit + (right > boxRect.right ? SLOT_CLEARANCE : 0)));
+    return {
+      left: Math.round((boxRect.left - left) / unit + (left < boxRect.left ? SLOT_CLEARANCE : 0)),
+      right: Math.round((right - boxRect.right) / unit + (right > boxRect.right ? SLOT_CLEARANCE : 0)),
+    };
   }
 
   // Traces the friend's patch of rule in pencil.
@@ -381,18 +396,25 @@
   // Each frame, every friend looks at a friend being greeted, or else at the pointer, or else
   // around; its idle motion and any greeting play underneath.
   function animate(now) {
-    const elapsed = Math.max(0, (now - lastFrame) / 1000), dt = Math.min(MAX_EASING_SECONDS, elapsed);
-    lastFrame = now;
-    stageSeconds += elapsed;
-    const seconds = stageSeconds;
-    const gazeEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * GAZE_RATE);
-    const perkEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * PERK_RATE);
+    const elapsed = Math.max(0, (now - lastFrame) / 1000), seconds = stageSeconds + elapsed;
     const pointerGone = !pointer || (!simulatedPointer && now - pointerMovedAt > POINTER_TIMEOUT_MS);
     if (heldMidHop) heldMidHop.greetedAt = seconds - HELD_HOP_SECONDS;
     const greeted = latestGreeted(seconds);
+    if (pointerGone && !greeted && elapsed < CALM_FRAME_SECONDS) {
+      frameRequest = requestAnimationFrame(animate);
+      return;
+    }
+    const dt = Math.min(MAX_EASING_SECONDS, elapsed);
+    lastFrame = now;
+    stageSeconds = seconds;
+    const gazeEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * GAZE_RATE);
+    const perkEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * PERK_RATE);
+    // Every friend's eyes are found before any friend is posed, since finding them after a pose would
+    // make the browser lay out the page again, once for each friend.
+    const eyes = greeted || !pointerGone ? new Map(friends.map(friend => [friend, eyesOf(friend)])) : null;
     for (const friend of friends) {
-      const target = greeted && greeted !== friend ? eyesOf(greeted) : !pointerGone && pointer;
-      const [lookX, lookY] = target ? gazeToward(friend, target) : glanceAround(friend, seconds);
+      const target = greeted && greeted !== friend ? eyes.get(greeted) : !pointerGone && pointer;
+      const [lookX, lookY] = target ? gazeToward(eyes.get(friend), target) : glanceAround(friend, seconds);
       friend.lookX += (lookX - friend.lookX) * gazeEase;
       friend.lookY += (lookY - friend.lookY) * gazeEase;
       const perked = (friend.hovered || friend.focused) && !reducedMotion.matches;
@@ -419,8 +441,8 @@
   }
 
   // The direction from a friend's eyes to the target, at full length unless the target is near the face.
-  function gazeToward(friend, target) {
-    const eyes = eyesOf(friend), dx = target.x - eyes.x, dy = target.y - eyes.y;
+  function gazeToward(eyes, target) {
+    const dx = target.x - eyes.x, dy = target.y - eyes.y;
     const distance = Math.max(Math.hypot(dx, dy), eyes.width * SOFT_GAZE_RADIUS);
     return [dx / distance, dy / distance];
   }
