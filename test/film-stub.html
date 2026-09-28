@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>phy's fwiends · film stub</title>
+<style>
+  /* A test fixture for `pf.py film`: the smallest page that follows the film contract (tools/pf.py, film).
+     The face comes from the repository rather than Google Fonts, so that filming works offline and gives
+     the same frames every time. */
+  @font-face { font-family: 'Shantell Sans'; src: url('../figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
+  :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --box: 60vh; --ground: 18vh; --x: 0; }
+  html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); }
+  /* Every measure is in viewport units, so the scene fills whatever frame it is filmed at. */
+  .stage { position: fixed; inset: 0; }
+  .hand { font-family: 'Shantell Sans', sans-serif; font-weight: 300; font-variation-settings: 'INFM' 100, 'BNCE' 50; }
+  .friend { position: absolute; bottom: var(--ground); left: calc(var(--x) * (100vw - var(--box))); width: var(--box); height: var(--box); }
+  .friend svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .ground { position: absolute; left: 4vw; bottom: calc(var(--ground) - 0.5vh); width: 92vw; height: 1vh; overflow: visible; }
+  .caption { position: absolute; left: 0; right: 0; bottom: 5vh; margin: 0; text-align: center; font-size: 7vh; transform: rotate(-1deg); }
+  .draft { position: absolute; top: 4vh; right: 5vh; margin: 0; font-size: 6vh; color: var(--ink-2); transform: rotate(-2deg); }
+  .note { position: absolute; top: 2vh; left: 2vw; margin: 0; font: 15px/1.5 system-ui, sans-serif; color: var(--ink-2); }
+  .filming .note, .draft[hidden] { display: none; }
+</style>
+</head>
+<body>
+<main class="stage">
+  <p class="note">a test fixture for pf.py film. open it with ?film to see what the film sees, and add &amp;draft or &amp;unagreed=Terry to try the consent check.</p>
+  <p class="draft hand" hidden>draft</p>
+  <svg class="ground" viewBox="0 0 100 2" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 1.2 L30 0.8 L65 1.3 L100 0.9" fill="none" stroke="currentColor" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+  </svg>
+  <div class="friend" aria-label="phy, hopping across the page"></div>
+  <p class="caption hand">phy crosses the page</p>
+</main>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../src/anim.js"></script>
+<script>
+  const DURATION = 2;                   // Seconds.
+  const FRAME = { width: 1280, height: 720, fps: 30 };
+  const VIEW_SIZE = 270;                // The gallery's camera, in head units (FWIENDS.md).
+  const DEFAULT_GROUND = 120;           // The ground line for a spec without rig.ground, in head units.
+  const PATH = { from: 0.08, to: 0.92 };  // Where the friend starts and ends, as a fraction of the free width.
+  const HOP_START = 0.4;                // Seconds.
+  const A = PhyFriends.anim;
+  const MOTION = A.layer(A.delay(A.clips.hop, HOP_START), { lookX: 0.5, turnX: 0.2 });
+
+  const params = new URLSearchParams(location.search);
+  const filming = params.has('film');
+  const box = document.querySelector('.friend');
+  const spec = PhyFriends.get('phy');
+  const ground = (spec.rig && spec.rig.ground) ?? DEFAULT_GROUND;
+  const rig = PhyFriends.mount(box, spec, { bg: false, view: { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 } });
+
+  document.querySelector('.draft').hidden = !params.has('draft');
+  document.body.classList.toggle('filming', filming);
+
+  // Draws the frame at t seconds: a pure function of t, so that the same t always gives the same picture.
+  function seek(t) {
+    const progress = A.ease.smooth(Math.min(1, Math.max(0, t / DURATION)));
+    document.documentElement.style.setProperty('--x', PATH.from + (PATH.to - PATH.from) * progress);
+    rig.setPose(A.sample(MOTION, t), true);
+  }
+
+  window.film = {
+    ...FRAME,
+    duration: DURATION,
+    unagreed: (params.get('unagreed') || '').split(',').filter(Boolean),
+    ready: Promise.all([
+      document.fonts.load("300 1em 'Shantell Sans'"),
+      ...[...box.querySelectorAll('image')].map(image => image.decode()),
+    ]).then(() => undefined),
+    seek,
+  };
+
+  seek(0);
+  // Outside film mode the stub plays on its own, so that a person can watch it; under reduced motion it holds still.
+  if (!filming && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    requestAnimationFrame(function play(now) {
+      seek((now / 1000) % DURATION);
+      requestAnimationFrame(play);
+    });
+  }
+</script>
+</body>
+</html>

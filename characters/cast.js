@@ -1,0 +1,49 @@
+/*
+ * The cast: every friend's owner, how the friend is written, and who knows whom (src/cast.js).
+ *
+ * name     The friend's name as its owner writes it.
+ * pronoun  As the owner gave it; "they" until told.
+ * credit   The owner's handle and page, as the gallery credits them.
+ * agreed   The media the owner has agreed to: 'gallery', 'video', 'games'. Work in any other medium
+ *          that shows the friend is a draft until the owner agrees.
+ * voice    true only if the owner has given the friend lines; otherwise the friend speaks in marks.
+ *
+ * know lists pairs of friends whose owners know each other in real life; everyone else is a
+ * stranger to everyone but the host. optIn lists pairs whose owners have both agreed to touch or
+ * rivalry. Add a pair only when phy says so.
+ */
+PhyFriends.cast.define({
+  host: 'phy',
+  friends: {
+    howdi: {
+      name: 'Howdi', pronoun: 'he', species: 'sky-blue wolf',
+      credit: { handle: '@howdi1129', href: 'https://x.com/howdi1129' }, agreed: ['gallery'],
+    },
+    phy: {
+      name: 'phy', pronoun: 'they', species: 'tuxedo eevee',
+      credit: { handle: '@rareone0602', href: 'https://x.com/rareone0602' }, agreed: ['gallery', 'video', 'games'], voice: true,
+    },
+    yuda: {
+      name: 'Yuda', pronoun: 'he', species: 'slate-blue wolf',
+      credit: { handle: '@YuDa_Hay', href: 'https://x.com/YuDa_Hay' }, agreed: ['gallery'],
+    },
+    terry: {
+      name: 'Terry', pronoun: 'they', species: 'yellow plush toy',
+      credit: { handle: '@FreshSnails_x_6', href: 'https://x.com/FreshSnails_x_6' }, agreed: ['gallery'],
+    },
+    mumuyou: {
+      name: 'mumuyou', pronoun: 'he', species: 'white fox',
+      credit: { handle: 'fb/MuMuYouo', href: 'https://www.facebook.com/MuMuYouo' }, agreed: ['gallery'],
+    },
+    kevin: {
+      name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
+      credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
+    },
+    brian: {
+      name: 'Brian', pronoun: 'he', species: 'cream fox',
+      credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
+    },
+  },
+  know: [],
+  optIn: [],
+});

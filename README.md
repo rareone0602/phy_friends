@@ -25,15 +25,21 @@ GitHub Pages.
 | path | what |
 |---|---|
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig |
-| `src/anim.js` | animation clips, composition, and a browser player |
+| `src/anim.js` | animation clips, composition, a browser player, and the hop by which a friend gets about |
+| `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
+| `src/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
+| `src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
+| `characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
 | `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`) and `examples/` |
-| `tools/pf.py` | CLI: render stills, compare with a reference, and export animations (headless Chrome + ffmpeg) |
+| `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages and run the tests (headless Chrome + ffmpeg) |
+| `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
+| `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
-| `FWIENDS.md` | what only this project adds to it: the gallery page and the rules for drawing a friend |
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site (GitHub Pages): the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper and `site/pencil.css` everything drawn on it |
+| `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site (GitHub Pages): the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
-| `demo/` | local dev pages |
-| `design/` | design scratch: `index.html` lists the mockups (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`), `shoot.py` takes page screenshots, and `site_assets.py` rebuilds the site's icons and link preview after a character changes |
+| `demo/` | the demos (`index.html` lists them): short films built with `src/scene.js`; `animate.html` is a dev page for trying clips |
+| `design/` | design scratch: `index.html` lists the mockups (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken), `shoot.py` takes page screenshots, `site_assets.py` rebuilds the site's icons and link preview after a character changes, and `title_pen.py` derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/scratch/` for experiments |
 
 ## Characters and examples
@@ -43,7 +49,7 @@ characters/
   howdi/
     howdi.js            the spec, with views.ref lining the render up with ref.jpg
     examples/
-      ref.jpg           the picture Howdi is reproduced from
+      ref.jpg           an early close-up of Howdi in the house template
 ```
 
 An example is any picture of the character: the original drawing, a sheet, a
@@ -151,12 +157,50 @@ Shape primitives (`PhyFriends.shapes`):
 strokes, fine tooth and patches of lighter pressure. There are no outlines.
 The mask is measured in the picture's own units rather than head units,
 since a pencil is the same size however large the drawing; it stays put while
-the character moves, and, being an image, costs a browser one draw rather
+the character breathes or turns (in a scene, a character that travels takes its
+paper with it, as a figure cut out of paper would), and, being an image, costs a browser one draw rather
 than one per frame. A render with a background of its own lays a sheet of
 paper, cut to the character's outline, under the drawing, so the pencil shows
 paper rather than the background. `{ pencil: false }` draws the flat shapes
 alone, for an icon too small to hold the texture or for matching a flat
 reference picture.
+
+## Scenes
+
+`src/scene.js` puts several friends on one sheet of ruled paper, measured in
+head units (a rule every 54, so a friend stands five rules tall). Everything in
+it is a cue at a time on the scene's clock, and a frame depends on the time
+alone, so a film plays in a page and `pf.py film` films it frame by frame from
+the same script, while a game adds cues as it goes.
+
+```js
+const scene = PhyFriends.scene.create(document.querySelector('#stage'), { width: 1600, height: 900 });
+const phy = scene.add('phy', { x: 520 }), yuda = scene.add('yuda', { x: 1100 });
+yuda.enter({ from: 'right', at: 0.5 });
+phy.look(yuda, { at: 1 }).say('hi, Yuda', { to: yuda, at: 1.2 });
+yuda.emote('♪', { at: 2 });
+if (!scene.film({ duration: 4 })) scene.play();   // Filmed by pf.py film; played live otherwise.
+```
+
+Friends hop, look, show marks and play clips; phy, the host, may also speak.
+`src/cast.js` holds the rules for friends together (FWIENDS.md, "scenes"), and
+the scene enforces them: two friends are strangers unless `characters/cast.js`
+says their owners know each other, strangers keep a strip of paper between them
+and neither talk to nor hand things to each other, and only a friend with a
+voice says words. A broken rule throws, saying what would allow it. Each frame
+credits the owners of the friends in it, and a friend whose owner has not agreed
+to films or games marks the scene "draft". A game that runs only in the page may
+turn the frame's credits off (`credits: false`) and link each owner in the
+page's small print instead; a film keeps them, since they travel with the video.
+`paper: false` leaves the scene's ruled paper out so the page's own shows
+through, and `write(text, { graphite: true })` is for a title only (STYLE.md
+§6); `write(text, { pen: TITLE_PEN })` writes the gallery's title stroke by
+stroke (`src/pen.js`). A page loads, in order, `src/phyfriends.js`, the
+characters, `src/anim.js`, `src/cast.js`, `characters/cast.js` and
+`src/scene.js`, with `src/pen.js` and `site/title-pen.js` before the scene where
+a title writes itself. The demos in `demo/` are built this way: `python3
+tools/pf.py film demo/roll-call.html --draft -o out/roll-call.mp4` films one
+while its friends' owners have yet to agree to video.
 
 ## Pose
 
@@ -191,12 +235,25 @@ python3 tools/pf.py compare howdi                           # Every example: out
 python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example, metrics and a zoomed crop for a box
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
+python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
+python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
+python3 tools/pf.py test                                    # The in-browser tests in test/index.html
 ```
 
 `compare` snaps every pixel of the reference and the render to the nearest
 palette colour and paints the disagreements red in `compare/<example>-diff.png`; it prints
 the mismatch on a 4×4 grid and the per-colour overlap (IoU), which is a far
 better guide than the mean pixel error.
+
+`film` films any page that keeps the film contract (the docstring of `film` in
+`tools/pf.py`): opened with `?film`, the page fills the window, and `pf.py` seeks
+it to each frame's time in turn and takes a screenshot. The video is therefore
+frame-exact however slow the machine, and filming a page twice gives the same
+frames, byte for byte. A film with a friend whose owner has not agreed to video
+is refused unless `--draft` is given, in which case the page marks it as a draft.
+
+`test` runs `test/index.html` in headless Chrome, prints each failure, and exits
+non-zero on a failure or a page error. The page also works opened by hand.
 
 The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
 ffmpeg for video.

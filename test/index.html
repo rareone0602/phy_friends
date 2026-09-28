@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>phy's fwiends · tests</title>
+<style>
+  body { margin: 0; padding: 32px; background: #fbf9f3; color: #3d3c39; font: 16px/1.5 ui-monospace, Menlo, monospace; }
+  h1 { margin: 0 0 16px; font-size: 22px; font-weight: 400; }
+  #failures { padding-left: 1.5em; color: #a64a3f; }
+</style>
+</head>
+<body>
+<main>
+  <h1>tests</h1>
+  <p id="summary">running…</p>
+  <ul id="failures"></ul>
+</main>
+
+<!-- The library and the friends, loaded as index.html loads them. `python3 tools/pf.py test` runs this page headless. -->
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../characters/yuda/yuda.js"></script>
+<script src="../characters/terry/terry.js"></script>
+<script src="../characters/mumuyou/mumuyou.js"></script>
+<script src="../characters/kevin/kevin.js"></script>
+<script src="../characters/brian/brian.js"></script>
+<script src="../src/anim.js"></script>
+<script src="../src/pen.js"></script>
+<script src="../src/cast.js"></script>
+<script src="../characters/cast.js"></script>
+<script src="../src/scene.js"></script>
+
+<script src="harness.js"></script>
+<script src="anim.test.js"></script>
+<script src="cast.test.js"></script>
+<script src="pen.test.js"></script>
+<script src="scene.test.js"></script>
+</body>
+</html>

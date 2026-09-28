@@ -480,7 +480,7 @@ tests.
 
 | series | colour | shade |
 |---|---|---|
-| 1, blue | `#179ad0` | `#087fad` |
+| 1, blue | `#1092ca` | `#1777a4` |
 | 2, red | `#a74126` | `#931800` |
 | 3, slate | `#4d6295` | `#284a85` |
 | 4, ochre | `#a98f12` | `#8c7609` |
@@ -492,8 +492,8 @@ tests.
   figure into small panels.
 - Take the colours in order. A series keeps its colour from figure to figure,
   never its rank.
-- **Data on a scale** takes the blue in the same steps: `#e3f3ff` `#a7dbfe`
-  `#7cc1eb` `#49a7d9` `#158dbf` `#0f729b` `#01597a`. The lightest two are for
+- **Data on a scale** takes the blue in the same steps: `#e4f3ff` `#abdafe`
+  `#83c0ea` `#55a6d7` `#0c8dc3` `#09729f` `#06587c`. The lightest two are for
   fills only.
 - **Data either side of a middle** takes the blue and the red, with the
   paper in the middle.
@@ -572,11 +572,13 @@ type. `figures/phy-diagram.sty` carries it for TikZ, and
 - **The pencil is one texture over the whole character**, which the factory
   lays on: strokes rising to the right, the paper's tooth, and patches where
   the hand pressed more lightly. The paper, rules and all, shows through.
-  The texture belongs to the paper, so it stays put while a character moves.
-  On a background of its own, such as a dark close-up, a character is drawn
-  on a sheet of paper cut to its outline, so the pencil shows paper, never
-  the background. An icon too small to hold it, such as a favicon, is drawn
-  flat.
+  The texture belongs to the paper the character is drawn on: it stays put
+  while the character breathes, turns or hops on the spot, and where a
+  character travels about a page, its paper travels with it, as a figure cut
+  out of paper would. On a background of its own, such as a dark close-up, a
+  character is drawn on a sheet of paper cut to its outline, so the pencil
+  shows paper, never the background. An icon too small to hold it, such as a
+  favicon, is drawn flat.
 - The shapes came from the template of the
   [Grokbot Icon](https://grokbot-icon-studio.serio-ai.chatgpt.site/) prompt:
   a close-up with the head tipped, pill eyes and blush on a dark ground.

@@ -1,0 +1,34 @@
+/*
+ * The pen strokes that write the gallery's title, made by design/title_pen.py; do not edit by hand.
+ *
+ * Each stroke follows the centerline of a letter of "phy's fwiends" in the order and direction a hand
+ * writes it, as Shantell Sans sets the title in the gallery ("BNCE" 50, "INFM" 100, weight 300).
+ * Lengths are in thousandths of an em, from the start of the text on its baseline, y downward.
+ * width is the text's width in em, by which src/pen.js checks that the face still matches. For each
+ * stroke, letter indexes the character in the text, width is how wide a pen reveals the whole
+ * letter, and length is how long the stroke is.
+ */
+self.TITLE_PEN = Object.freeze({
+  text: "phy's fwiends",
+  width: 6.5620,
+  strokes: [
+    { letter: 0, width: 104, length: 638, d: 'M100 -450L92 -420L100 -320L132 -148L145 -122L150 -30L148 82L138 138L120 175' },
+    { letter: 0, width: 113, length: 903, d: 'M102 -460L112 -470L155 -482L225 -482L315 -462L370 -432L412 -392L445 -340L458 -302L462 -245L452 -185L438 -158L405 -128L360 -108L318 -100L245 -102L145 -120' },
+    { letter: 1, width: 134, length: 685, d: 'M730 -700L718 -520L678 -328L660 -200L658 -125L675 -108L672 -28' },
+    { letter: 1, width: 135, length: 1012, d: 'M670 -112L678 -108L722 -138L748 -208L795 -308L852 -395L922 -458L960 -472L1000 -472L1022 -452L1045 -402L1065 -292L1085 -110L1102 -52L1125 -12' },
+    { letter: 2, width: 124, length: 1876, d: 'M1292 -400L1285 -348L1285 -222L1305 -110L1325 -65L1360 -28L1410 -12L1460 -20L1485 -35L1522 -80L1555 -150L1595 -175L1610 -365L1608 -400L1608 -328L1592 -178L1612 -160L1615 -150L1632 30L1630 118L1618 180L1595 228L1562 260L1505 282L1418 285L1348 270L1322 252' },
+    { letter: 3, width: 94, length: 209, d: 'M1830 -712L1832 -605L1810 -505' },
+    { letter: 4, width: 89, length: 1174, d: 'M2260 -525L2238 -532L2172 -530L2135 -520L2088 -498L2020 -430L2000 -388L1998 -348L2010 -315L2060 -272L2102 -250L2212 -208L2262 -180L2308 -125L2308 -70L2285 -30L2252 2L2185 35L2120 45L2075 45L2033 40L1995 22' },
+    { letter: 6, width: 99, length: 920, d: 'M3038 -770L2985 -758L2948 -740L2908 -705L2868 -642L2848 -578L2838 -485L2840 -342L2870 50' },
+    { letter: 6, width: 109, length: 241, d: 'M2845 -488L3028 -502L3085 -498' },
+    { letter: 7, width: 98, length: 1750, d: 'M3190 -422L3230 -375L3258 -320L3322 -102L3345 -58L3368 -50L3398 -65L3435 -140L3482 -275L3530 -375L3555 -405L3580 -410L3600 -405L3635 -365L3770 -100L3815 -50L3832 -45L3860 -48L3882 -85L3925 -288L3945 -352L3960 -382L4000 -418' },
+    { letter: 8, width: 99, length: 398, d: 'M4160 -378L4160 -5L4165 20' },
+    { letter: 8, width: 144, length: 2, d: 'M4160 -600L4162 -600' },
+    { letter: 9, width: 99, length: 1596, d: 'M4405 -270L4492 -258L4570 -260L4650 -282L4695 -312L4720 -342L4732 -370L4740 -408L4738 -455L4718 -502L4670 -535L4602 -542L4550 -532L4495 -502L4458 -468L4418 -408L4390 -335L4380 -268L4388 -182L4415 -118L4452 -80L4500 -58L4555 -50L4632 -58L4675 -70L4732 -100L4785 -150' },
+    { letter: 10, width: 133, length: 364, d: 'M4992 -362L4992 -298L4972 -185L4970 -102L4975 -65L5002 -48L5005 -15' },
+    { letter: 10, width: 115, length: 1019, d: 'M4998 -52L5015 -55L5035 -75L5072 -202L5138 -345L5172 -398L5212 -438L5262 -452L5292 -440L5312 -395L5322 -318L5325 -142L5335 -68L5350 -20L5380 22' },
+    { letter: 11, width: 96, length: 1081, d: 'M5888 -362L5870 -362L5840 -398L5810 -415L5782 -422L5708 -425L5660 -415L5622 -395L5590 -362L5570 -328L5558 -278L5558 -200L5580 -110L5618 -48L5658 -12L5685 0L5720 5L5765 -2L5810 -38L5852 -105L5880 -182L5900 -195' },
+    { letter: 11, width: 119, length: 702, d: 'M5938 -685L5938 -555L5915 -205L5932 -188L5940 -138L5960 -72L6000 -5' },
+    { letter: 12, width: 91, length: 1125, d: 'M6422 -588L6402 -592L6338 -590L6300 -580L6252 -558L6200 -510L6182 -485L6170 -452L6170 -422L6188 -388L6230 -355L6388 -292L6432 -268L6460 -240L6470 -220L6472 -178L6465 -152L6420 -102L6352 -72L6292 -62L6235 -62L6180 -72L6160 -85' },
+  ],
+});

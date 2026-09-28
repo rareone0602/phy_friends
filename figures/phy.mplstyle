@@ -22,7 +22,7 @@ figure.constrained_layout.use: True
 ## Data: the five characters in stage order (Howdi, phy, Yuda, Terry, mumuyou).
 ## Each is the character's own color, darkened in house steps (L* -10) until it has 3:1 contrast on paper;
 ## phy and Yuda take one more step to stay distinct from mumuyou and Howdi (see figures/palette.py).
-axes.prop_cycle: cycler('color', ['179ad0', 'a74126', '4d6295', 'a98f12', 'd56b75'])
+axes.prop_cycle: cycler('color', ['1092ca', 'a74126', '4d6295', 'a98f12', 'd56b75'])
 
 ## Ink: graphite, never black. --ink for text, --ink-2 for spines, ticks and numbers.
 text.color:        3d3c39

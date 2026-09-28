@@ -189,7 +189,7 @@ if __name__ == '__main__':
         got = de2000(np.array(l1), np.array(l2))
         print(f'dE00 {got:.4f} want {want:.4f}', 'ok' if abs(got - want) < 1e-3 else 'FAIL')
     # Check shadeOf against the behavior documented in the library.
-    print('shadeOf #84cefd ->', shadeOf('#84cefd'), ' #fce08e ->', shadeOf('#fce08e'))
+    print('shadeOf #6ec7ff ->', shadeOf('#6ec7ff'), ' #fce08e ->', shadeOf('#fce08e'))
     print('contrast ink on paper', round(contrast('#3d3c39', '#fbf9f3'), 2), 'ink-2', round(contrast('#6d6a63', '#fbf9f3'), 2), 'ink-3', round(contrast('#97938a', '#fbf9f3'), 2))
 
 # ------------------------------------------------------------------ OKLab (cross-check with the dataviz validator)

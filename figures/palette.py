@@ -12,7 +12,7 @@ from colormath import (KINDS, contrast, de2000, dok, lab, lch, okC, shadeOf, sim
 
 PAPER, WHITE, INK = '#fbf9f3', '#ffffff', '#3d3c39'
 SOURCES = [  # Name, source part, source color, extra steps beyond 3:1, and the reason for them.
-    ('Howdi', 'fur (sky blue)', '#84cefd', 0, ''),
+    ('Howdi', 'fur (sky blue)', '#6ec7ff', 0, ''),
     ('phy', 'inner-ear almond', '#f9bcaa', 1, 'parts it from mumuyou'),
     ('Yuda', 'fur (slate blue)', '#6c7ba7', 1, 'parts it from Howdi'),
     ('Terry', 'plush (butter yellow)', '#fce08e', 0, ''),
@@ -45,7 +45,7 @@ for k in KINDS:
 
 print('\nWhat the extra steps fixed (CIEDE2000 normal / protan / deutan / tritan):')
 for a, b, label in [('#bb6147', '#d56b75', 'phy at 3:1 vs mumuyou'), ('#a74126', '#d56b75', 'phy one step on'),
-                    ('#6c7ba7', '#179ad0', 'Yuda at 3:1 vs Howdi'), ('#4d6295', '#179ad0', 'Yuda one step on')]:
+                    ('#6c7ba7', '#1092ca', 'Yuda at 3:1 vs Howdi'), ('#4d6295', '#1092ca', 'Yuda one step on')]:
     print(f'  {label:24}', ' '.join(f'{de2000(sim_lab(a, k), sim_lab(b, k)):5.1f}' for k in KINDS))
 
 print('\nOKLCH chroma (dataviz floor 0.10):', ' '.join(f'{n} {okC(c):.3f}' for n, c in zip(names, cols)))

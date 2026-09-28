@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>roll call · phy's fwiends</title>
+<meta name="description" content="the register, taken in pencil: seven fwiends hop on to the page one at a time and sign in.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="../site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="../site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="stylesheet" href="../site/notebook.css">
+<link rel="stylesheet" href="../site/pencil.css">
+<link rel="stylesheet" href="film.css">
+<style>
+  :root { --informal: 100; }  /* A hobby project sits at the top of the dial (STYLE.md §5). */
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Graphite grain and a slight displacement wobble for the title and the pencil lines. -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <h1>roll call</h1>
+    <p class="intro">the register, taken in pencil: seven fwiends hop on to the page one at a time and sign in.</p>
+    <nav aria-label="pages">
+      <ul>
+        <li><a href="../index.html">fwiends</a></li>
+        <li><a href="index.html">demos</a></li>
+        <li><a href="../style.html">style guide</a></li>
+        <li><a href="../specimen.html">specimen</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="film" aria-label="the film">
+    <div class="stage" role="img"></div>
+    <div class="doc">
+      <noscript><p class="nojs">the film is drawn live, so it needs JavaScript to play.</p></noscript>
+      <ul class="meta credits" aria-label="the fwiends' owners"></ul>
+      <p class="actions"><button class="btn quiet replay" type="button">play</button></p>
+    </div>
+  </section>
+
+  <footer>
+    <ul>
+      <li>characters belong to the people named under them</li>
+      <li><a href="../style.html">style guide</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+    </ul>
+  </footer>
+</main>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../characters/yuda/yuda.js"></script>
+<script src="../characters/terry/terry.js"></script>
+<script src="../characters/mumuyou/mumuyou.js"></script>
+<script src="../characters/kevin/kevin.js"></script>
+<script src="../characters/brian/brian.js"></script>
+<script src="../src/anim.js"></script>
+<script src="../src/pen.js"></script>
+<script src="../site/title-pen.js"></script>
+<script src="../src/cast.js"></script>
+<script src="../characters/cast.js"></script>
+<script src="../src/scene.js"></script>
+<script src="film.js"></script>
+<script>
+  // The film (src/scene.js): the register, taken on a ruled page. The title writes itself stroke by
+  // stroke, as in the gallery, then the seven fwiends hop in to their places in the gallery's order.
+  // The one whose place is farthest from its own side of the frame comes first, so nobody hops past
+  // anybody already standing. Each greets the viewer as it lands, its name is written under it, and
+  // the friend beside its place watches it come in. phy, the host and the only one with words, has
+  // the last word.
+  const PF = PhyFriends, RULE = PF.scene.RULE;
+  const ROW = ['howdi', 'phy', 'yuda', 'terry', 'mumuyou', 'kevin', 'brian'];  // Left to right, as in the gallery.
+  const GAP = 40;                                // Paper between neighbors' outlines: what strangers need (src/cast.js).
+  // The sheet is as small as the row allows, so that the fwiends are drawn as large as they can be:
+  // the row and a little paper either side, 16:9, and a whole number of rules tall (25).
+  const WORLD = { width: 2400, height: 1350 };
+  // The floor leaves a rule for the names, and under them room for the scene's credit line, which on
+  // a phone-sized film wraps to three lines of its 10px least size (about 310 head units).
+  const GROUND = RULE * 17;
+  const PAGE_RULE_PX = 32;                       // The page's rule (site/notebook.css), for sizes taken from the gallery.
+  const LETTERS_PER_SECOND = 9;                  // How fast the hand writes a name.
+  // The gallery's title, written as the gallery writes it: stroke by stroke (src/pen.js).
+  const TITLE = { text: "phy's fwiends", size: RULE * 64 / PAGE_RULE_PX, x: RULE, y: RULE * 3, at: 0.2,
+    seconds: PF.pen.duration(TITLE_PEN.strokes) };
+  const NAME = { size: RULE * 31 / PAGE_RULE_PX, y: GROUND + RULE, delay: 0.3 };  // The gallery's names, on the rule under the floor.
+  // The ring round the host's name, as in the gallery: 104 by 46px, from 26px above the name's
+  // baseline to 20px below it. It is drawn in a few strokes, each a little longer than the last.
+  const RING = {
+    path: 'M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7', viewWidth: 104, viewHeight: 46, below: 20, stroke: 1.2,
+    strokes: 8, seconds: 0.5,
+  };
+  // An entrance takes the scene's hop at two and a half times its length, and a little higher, so
+  // that a friend crosses half the frame in about two seconds. It starts just out of the frame.
+  const ENTRY = { stride: 200, hopSeconds: PF.scene.HOP.seconds, height: 46, clearance: 24, cadence: 0.7 };
+  const GREETING = { clip: PF.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 }), delay: 0.15 };  // The gallery's hop.
+  const GLANCE = { lead: 0.6, hold: 0.9 };       // Seconds before and after a landing that its neighbor watches it.
+  // phy's last word, at the names' size, centered above phy (film.css) on the seventh rule above the
+  // floor, clear of the tallest ears in the row.
+  const CLOSING = { words: "that's everyone", size: NAME.size, rulesAboveFloor: 7, delay: 1.0, seconds: 2.2, end: 0.5 };
+
+  const scene = PF.scene.create(document.querySelector('.stage'), { ...WORLD, ground: GROUND, boil: filmPage.boilRate() });
+  const places = placeInRow(ROW.map(name => scene.add(name, { at: Infinity, look: 'viewer' })));
+  const arrivals = scheduleArrivals(places);
+  writeTitle();
+  arrivals.forEach(stageArrival);
+  arrivals.forEach(watchArrival);
+  const duration = closeTheRegister(arrivals.at(-1).land);
+  describe();
+  filmPage.listCredits(document.querySelector('.credits'), ROW);
+  filmPage.present(scene, { duration, button: document.querySelector('.replay') });
+
+  // Places the friends in one row, centered in the frame, with GAP between neighboring outlines.
+  function placeInRow(actors) {
+    const outlines = actors.map(actor => actor.extent());
+    const width = outlines.reduce((sum, o) => sum + o.left + o.right, 0) + GAP * (actors.length - 1);
+    let x = (WORLD.width - width) / 2;
+    if (x < 0) throw new Error(`roll call: the row is ${Math.round(width)} head units wide and does not fit the frame; widen WORLD`);
+    return actors.map((actor, index) => {
+      x += outlines[index].left;
+      const place = { actor, index, x, outline: outlines[index] };
+      x += outlines[index].right + GAP;
+      return place;
+    });
+  }
+
+  // Each friend enters from the nearer side of the frame, the one farthest from its side first. The
+  // first starts as the title is finished; the rest land one cadence apart.
+  function scheduleArrivals(rowPlaces) {
+    const titleDone = TITLE.at + TITLE.seconds;
+    const fromSide = place => (place.x < WORLD.width / 2 ? place.x : WORLD.width - place.x);
+    const order = [...rowPlaces].sort((a, b) => fromSide(b) - fromSide(a));
+    let land = 0;
+    return order.map((place, k) => {
+      const side = place.x < WORLD.width / 2 ? 'left' : 'right';
+      const from = side === 'left' ? -(place.outline.right + ENTRY.clearance) : WORLD.width + place.outline.left + ENTRY.clearance;
+      const hops = Math.max(1, Math.round(Math.abs(place.x - from) / ENTRY.stride));
+      const travel = hops * ENTRY.hopSeconds;
+      land = k === 0 ? titleDone + travel : land + ENTRY.cadence;
+      return { ...place, side, from, hops, travel, start: land - travel, land };
+    });
+  }
+
+  function writeTitle() {
+    scene.write(TITLE.text, { x: TITLE.x, y: TITLE.y, size: TITLE.size, at: TITLE.at, seconds: TITLE.seconds, graphite: true, pen: TITLE_PEN });
+  }
+
+  // A friend hops in, greets the viewer on landing, and its name is written under it.
+  function stageArrival({ actor, x, from, hops, travel, start, land }) {
+    actor.enter({ from, to: x, at: start, hops, duration: travel, height: ENTRY.height });
+    const greetAt = land + GREETING.delay;
+    actor.play(GREETING.clip, { at: greetAt, until: greetAt + GREETING.clip.duration });  // The clip loops; one round is the greeting.
+    writeName(actor, x, land + NAME.delay);
+  }
+
+  function writeName(actor, x, at) {
+    const seconds = writingSeconds(actor.displayName);
+    scene.write(actor.displayName, { x, y: NAME.y, size: NAME.size, at, seconds, rotate: 0, align: 'center' });
+    if (actor.name === PF.cast.host) drawRing(x, at + seconds);
+  }
+
+  // The ring round the host's name, drawn as a few ever longer strokes shown one after another.
+  function drawRing(x, at) {
+    const unit = RULE / PAGE_RULE_PX, w = RING.viewWidth * unit, h = RING.viewHeight * unit;
+    const step = RING.seconds / RING.strokes;
+    for (let k = 1; k <= RING.strokes; k++) {
+      const svg = `<path d="${RING.path}" transform="scale(${w / RING.viewWidth} ${h / RING.viewHeight})" pathLength="1" ` +
+        `stroke-dasharray="${k / RING.strokes} 1" fill="none" style="stroke: var(--ink-2)" stroke-width="${RING.stroke}" stroke-linecap="round"/>`;
+      scene.prop({ w, h, svg }, { x, y: NAME.y + RING.below * unit, at: at + (k - 1) * step, until: k < RING.strokes ? at + k * step : Infinity, flat: true });
+    }
+  }
+
+  // The friend already standing beside an arrival's place watches it land, then looks back at the viewer.
+  function watchArrival(arrival, k) {
+    const besideIndex = arrival.index + (arrival.side === 'left' ? 1 : -1);
+    const neighbor = arrivals.slice(0, k).find(earlier => earlier.index === besideIndex);
+    if (!neighbor) return;
+    neighbor.actor.look(arrival.actor, { at: arrival.land - GLANCE.lead });
+    neighbor.actor.look('viewer', { at: arrival.land + GLANCE.hold });
+  }
+
+  // With everyone in and facing the viewer, the host says so, with a nod. The words' baseline sits
+  // WORDS.y above the eyes, which sit rig.ground above the floor; rise takes it the rest of the way
+  // to its rule. Returns the film's length in seconds.
+  function closeTheRegister(lastLanding) {
+    const host = places.find(place => place.actor.name === PF.cast.host).actor;
+    const at = lastLanding + CLOSING.delay;
+    const rise = CLOSING.rulesAboveFloor * RULE - host.spec.rig.ground + PF.scene.WORDS.y;
+    host.say(CLOSING.words, { at, seconds: CLOSING.seconds, side: 0, size: CLOSING.size, rise }).play('nod', { at });
+    return at + CLOSING.seconds + CLOSING.end;
+  }
+
+  // What the film shows, for a screen reader. It names no pronouns: several friends are described
+  // at once, and they do not share one.
+  function describe() {
+    const names = list => list.map(place => place.actor.displayName).join(', ').replace(/, ([^,]*)$/, ' and $1');
+    scene.el.setAttribute('aria-label', `a short film on a ruled page. the title, ${TITLE.text}, writes itself. then, one at a time, ` +
+      `${names(arrivals)} hop in and greet you, and a name writes itself under each of the seven. they end up in a row, ` +
+      `left to right: ${names(places)}. at the end phy says: ${CLOSING.words}.`);
+  }
+
+  function writingSeconds(text) {
+    return text.length / LETTERS_PER_SECOND;
+  }
+</script>
+</body>
+</html>

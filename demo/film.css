@@ -1,0 +1,32 @@
+/* A film on a demo page (demo/roll-call.html, demo/card.html): the stage, and the credits and
+   controls under it. Load it after site/notebook.css and site/pencil.css. */
+
+/* As in the gallery, the page widens so that the one picture on it can; the header, the text under
+   the film and the footer keep to their column. */
+main { max-width: 1720px; }
+
+/* The film is a sheet of its own ruled paper laid on the page. It is a picture, so it is a whole
+   number of the page's rules tall (STYLE.md §7), and 16:9 wide. Its rules are spaced by the
+   film's scale, not the page's, so a faint edge in the rules' blue shows where the sheet lies; a
+   film being recorded (tools/pf.py film) is the whole frame, and has no edge. */
+.film { container-type: inline-size; margin-top: calc(var(--L) * 2); }
+.stage { height: round(down, 100cqw * 9 / 16, var(--L)); aspect-ratio: 16 / 9; max-width: 100%; }
+:root:not(.pf-filming) .stage { border: 1px solid var(--rule); }
+.film .doc { margin-top: 0; }
+.film .credits + * { margin-top: var(--L); }  /* The kit leaves no blank rule after a .meta line; the button wants one. */
+.nojs { margin: 0; color: var(--ink-2); }
+
+/* On a narrow film the draft stamp steps down a size, so that it stays in its corner clear of the
+   page's top line. */
+@container (width < 720px) {
+  .stage .pf-draft { font-size: 10px; }
+}
+
+/* On a phone the film takes the page's whole width, as a photo would, so that the fwiends stay as
+   large as they can. main's padding there is the margin line plus 12px on the left, and 12px on the
+   right; the text under the film keeps it. */
+@media (max-width: 720px) {
+  .film { margin-inline: calc(-12px - var(--margin-x)) -12px; }
+  .stage { margin-inline: auto; }
+  .film .doc { padding: 0 12px 0 calc(12px + var(--margin-x)); }
+}

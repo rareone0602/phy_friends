@@ -505,6 +505,25 @@
     return p;
   }
 
+  // ------------------------------------------------------------ Travel
+
+  // A friend sits, so it gets about by hopping (FWIENDS.md): each hop is a crouch, a flight and a
+  // landing crouch. length is a hop's usual reach in head units, height its usual height, crouch the
+  // share of a hop spent crouching at each end, and lean the tilt in flight toward the way it goes.
+  const HOP = Object.freeze({ length: 80, seconds: 0.34, height: 26, crouch: 0.15, squash: 0.08, lean: 4 });
+
+  // How far through `hops` equal hops a friend is at u (0 to 1): along, the share of the distance
+  // covered; lift, the share of a hop's height it is off the ground; squash; and lean, in degrees
+  // toward the way it goes.
+  function hopping(u, hops) {
+    const i = Math.min(hops - 1, Math.floor(u * hops)), v = u * hops - i;
+    const c = HOP.crouch, air = clamp((v - c) / (1 - 2 * c), 0, 1);
+    const squash = v < c ? -HOP.squash * Math.sin(Math.PI * v / c)
+      : v > 1 - c ? -HOP.squash * Math.sin(Math.PI * (v - 1 + c) / c)
+        : HOP.squash * 0.5 * Math.sin(Math.PI * air);
+    return { along: (i + ease.smooth(air)) / hops, lift: Math.sin(Math.PI * air), squash, lean: HOP.lean * Math.sin(Math.PI * air) };
+  }
+
   // Maps a pointer position (client px) to {lookX, lookY, turnX, turnY} for a mounted
   // rig: the direction from between its eyes to the pointer, as if the pointer hovered
   // `depth` head units in front of the screen. The `turn` option is the share of that
@@ -518,7 +537,7 @@
 
   const api = {
     ease, clip, still, rest, track, layer, seq, loop, repeat, speed, delay, remap, pingpong, weight,
-    combine, mix, sample, frames, pulses, blinks, parse, play, lookAt, make, clips,
+    combine, mix, sample, frames, pulses, blinks, parse, play, lookAt, make, clips, HOP, hopping,
   };
   PF.anim = api;
   return api;

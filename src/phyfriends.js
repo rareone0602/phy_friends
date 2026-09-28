@@ -468,21 +468,26 @@
     margin: 0.5,             // The mask reaches this fraction of the view past each edge, for ears and tails.
     paper: '#fbf9f3',        // The paper of site/notebook.css, laid under a character drawn on a background of its own.
   };
+  // Noise seeds for the strokes, the tooth and the pressure: [seed of variant 0, step per variant].
+  const PENCIL_SEEDS = [[11, 17], [7, 13], [4, 5]];
   const pencilTextures = new Map();
 
   // The texture for a sheet (x, y, w, h), as an SVG image. Its filter mixes the three noises
   // (strokes 0.6, tooth 0.25, then pressure 0.35) and turns the mix into an alpha that keeps most of
   // the color, so that the paper shows only in specks and streaks. The rectangle is turned to the
   // stroke angle and reaches past the sheet's farthest corner. Views of one size share one image.
-  function pencilTexture(x, y, w, h) {
-    const key = [x, y, w, h].join(' ');
+  // Variant 0 is the texture every still uses; other variants reseed the noises, so that a film can
+  // redraw the texture every few frames, as hand-drawn animation does (src/scene.js, boil).
+  function pencilTexture(x, y, w, h, variant = 0) {
+    const box = [x, y, w, h].join(' '), key = `${box} ${variant}`;
     if (!pencilTextures.has(key)) {
       const reach = Math.hypot(Math.abs(x) + w, Math.abs(y) + h);
+      const [strokes, tooth, pressure] = PENCIL_SEEDS.map(([seed, step]) => seed + step * variant);
       const noise = (frequency, octaves, seed, result) =>
         `<feTurbulence type='fractalNoise' baseFrequency='${frequency}' numOctaves='${octaves}' seed='${seed}' result='${result}'/>`;
-      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${key}' width='${w}' height='${h}'>` +
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${box}' width='${w}' height='${h}'>` +
         `<filter id='p' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'>` +
-        noise(PENCIL.strokes, 2, 11, 'strokes') + noise(PENCIL.tooth, 1, 7, 'tooth') + noise(PENCIL.pressure, 2, 4, 'pressure') +
+        noise(PENCIL.strokes, 2, strokes, 'strokes') + noise(PENCIL.tooth, 1, tooth, 'tooth') + noise(PENCIL.pressure, 2, pressure, 'pressure') +
         `<feComposite in='strokes' in2='tooth' operator='arithmetic' k2='0.6' k3='0.25' result='grain'/>` +
         `<feComposite in='grain' in2='pressure' operator='arithmetic' k2='1' k3='0.35' result='mix'/>` +
         `<feColorMatrix in='mix' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.7' result='alpha'/>` +
@@ -571,6 +576,14 @@
     const w = num(view.w * (1 + 2 * PENCIL.margin)), h = num(view.h * (1 + 2 * PENCIL.margin));
     return `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x}" y="${y}" width="${w}" height="${h}">` +
       `<image data-pf-texture href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
+  }
+
+  // Draws any SVG content (in a viewBox of 0 0 w h) in the same pencil as the characters, for props
+  // that share a scene with them. Returns an SVG string.
+  function pencilSVG(inner, { w, h, uid = `pf${(++UID).toString(36)}`, flat = false } = {}) {
+    const open = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(w)} ${num(h)}" data-pf-uid="${uid}">`;
+    if (flat) return `${open}${inner}</svg>`;
+    return `${open}<defs>${pencilMask(`${uid}-pencil`, { w, h })}</defs><g mask="url(#${uid}-pencil)">${inner}</g></svg>`;
   }
 
   function resolveView(spec, v, size) {
@@ -841,6 +854,8 @@
     render, mount, poseState, resolveView,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
     rng, hash, SHADE, shadeOf,
+    // The pencil, for drawing props in the characters' texture and for redrawing it (src/scene.js).
+    pencil: { settings: PENCIL, texture: pencilTexture, svg: pencilSVG },
     // The palette a render uses: the spec's colors plus the house shades that the spec refers to.
     palette: specOrName => {
       const spec = resolve(specOrName), P = withShades(spec.palette || {}), used = JSON.stringify(spec);

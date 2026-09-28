@@ -1,8 +1,9 @@
 # phy's fwiends: the gallery and its characters
 
 This file adds what only this project needs to phy's style guide
-(`STYLE.md`): the gallery page, its stage, and the rules for drawing a friend
-with `src/phyfriends.js`. If the two disagree, `STYLE.md` wins, unless this
+(`STYLE.md`): the gallery page, its stage, the rules for drawing a friend
+with `src/phyfriends.js`, and the rules for putting friends together in
+films and games. If the two disagree, `STYLE.md` wins, unless this
 file says why. The site's `style.html` shows both files, one after the other;
 run `python3 tools/pf.py style` after editing either.
 
@@ -115,6 +116,31 @@ the corners (`STYLE.md` §3).
   second tap doesn't zoom the page. The labels stay selectable, so a handle
   can still be copied.
 
+**The opening.** The first time the page opens in a tab, the title writes
+itself and the fwiends come in by roll call. A reload, a step back through
+the history, reduced motion and the link preview show everything in place.
+- The title is written stroke by stroke, in the order a hand writes each
+  letter, in about two and a half seconds. The pen slows at each end of a
+  stroke and lifts between strokes, which gives it a hand's rhythm.
+  `src/pen.js` does the writing; `python3 design/title_pen.py` derives the
+  strokes (`site/title-pen.js`) from the title as the page sets it, and
+  must be run again if the title or its face changes. Should the face be
+  slow to arrive or not match the strokes, or colours be forced, the title
+  simply shows.
+- The fwiends begin to come in as the pen reaches "fwiends", and land one
+  after another, row by row. Each hops in along its row's rule from the
+  nearer edge of the screen, in hops a little lower than a scene's, so
+  that ears clear the labels above. The one farthest from its edge comes
+  first, so that nobody hops past anybody already standing. Its
+  neighbours watch it land while it smiles; the rest keep watching the
+  cursor.
+- The labels are there from the start, so the empty places above them read
+  as the names still to be called.
+- A row is called once it comes into view, so on a phone the lower rows come
+  in as they are scrolled to. A row scrolled past unseen is simply there.
+- A change in the window's width, or tabbing to a fwiend still to come,
+  brings everyone in at once.
+
 **The link preview and icons** come from `python3 design/site_assets.py`, run
 after any character changes:
 - the favicon is phy's head;
@@ -161,8 +187,7 @@ Follow them when turning someone's picture or design sheet into a friend.
     colour: Terry's ears behind the face, the back layer of a ruff, locks of
     hair behind the mop, a bandana's band behind its point.
   - A spec sets a shade by hand only where the derived one looks wrong, and
-    says so in a comment: mumuyou's gold hair, and Howdi's navy, whose
-    derived shade is nearly black.
+    says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
     shade: phy's crumb went a step darker, so the tail's cookie base stays
     apart from the shaded hip.
@@ -193,9 +218,9 @@ Follow them when turning someone's picture or design sheet into a friend.
 - **pill eyes** in the character's own eye colour: one flat colour per eye,
   with no whites, no highlight and no dark rim round the colour (a rim reads
   as an outline). The colour comes from the art (`eyes.color`); where the art
-  draws dark eyes, as Howdi's and Terry's does, they are near-black. A colour
-  that would be faint at gallery size goes one house step deeper, as phy's
-  green and mumuyou's gold do. Eyes of two colours take the other through
+  draws dark eyes, as Terry's does, they are near-black. A colour that would
+  be faint at gallery size goes one house step deeper, as phy's green,
+  mumuyou's gold and Howdi's blue do. Eyes of two colours take the other through
   `eyes.right`: mumuyou's, K3V1N's and Brian's. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,
@@ -228,6 +253,63 @@ spec's structure as well as in its look.
   with it, so everything picks up where it left off.
 - With `prefers-reduced-motion`: eyes only, no idle motion, and saying hi
   changes just the face.
+
+## scenes: films and games
+
+Beyond the gallery, the fwiends appear in scenes built with
+`src/scene.js`: short films, listed in `demo/index.html`, and in time
+games. A scene is a sheet of ruled paper measured in head units, a rule
+every 54, so a fwiend stands five rules tall, as in the gallery.
+Everything in it happens at a time on the scene's clock, so a film plays
+in a page and is filmed frame by frame (`pf.py film`) from the same
+script.
+
+**Who knows whom.** Every fwiend belongs to someone, and not every owner
+knows every other one. phy, the host, knows everyone; any other two are
+strangers until phy says their owners know each other
+(`characters/cast.js`). The scene checks these rules and refuses to break
+them.
+
+| | strangers | know each other |
+|---|---|---|
+| share a scene, take turns, look at each other, react to the same thing | yes | yes |
+| greet from a distance | yes | yes |
+| stand close, talk, hand something over, play on one side | no | yes |
+| touch, compete head to head, tease | no | only if both owners opt in |
+
+- Strangers keep a strip of paper between them, 40 head units between
+  outlines (ears apart); fwiends who know each other may stand side by
+  side. Choreograph so that nobody hops past anybody.
+- **Only phy speaks in words.** The others speak in marks (! ? !? … ♪ z),
+  since only their owners know how they talk. A mark is a drawing over a
+  fwiend's head, not punctuation, so the calm punctuation of `STYLE.md` §3
+  doesn't apply to it. Likewise, nobody is given a
+  personality, a birthday or any other fact its owner didn't give it.
+- Nobody is hurt, frightened for a laugh or beaten by another fwiend. Games
+  are won against the clock or the page; a miss ends with a fwiend sitting
+  down, not falling over or knocked out. Nobody is blamed for a miss, and
+  each fwiend keeps its own best score, never set against another's.
+- **Every frame credits** the owners of the fwiends in it, on the bottom
+  rule, and the page links each owner in its small print. A game that plays
+  only in the page may keep the credits to the small print.
+- **Consent is per medium.** An owner who agreed to the gallery has not
+  thereby agreed to films or games (`agreed` in `characters/cast.js`). Until
+  they do, work that shows their fwiend carries the word "draft" in a
+  corner, and `pf.py film` refuses to film it without `--draft`.
+
+**Motion in a scene:**
+- Fwiends get about by hopping, since they sit. They turn with `turnX`,
+  never with a mirror image, which would swap two-coloured eyes and reverse
+  K3V1N's mark.
+- Each fwiend is drawn on its own piece of paper, cut to its outline: its
+  pencil stays put while it breathes, turns or hops on the spot, and
+  travels with it when it moves about the page (`STYLE.md` §9).
+- Films "boil": the pencil texture is redrawn 8 times a second, as in
+  hand-drawn animation (`demo/film.js`). The gallery keeps its texture
+  still, and so does a film under reduced motion.
+- Under `prefers-reduced-motion` a scene plays no idle motion, travel
+  becomes a glide and a greeting changes only the face; a film shows its
+  last frame and waits to be played.
 
 ---
 

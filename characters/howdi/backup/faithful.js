@@ -1,3 +1,6 @@
+// An alternative to characters/howdi/howdi.js, for phy to compare: the pale muzzle stays below the eyes, as all
+// three newer pictures draw it, and the eyes sit on the sky blue in the darker blue of the iris ring. Kept per
+// STYLE.md, principle 1.
 // Character spec for Howdi, a sky-blue wolf with a navy mop of hair, two navy bands on each ear, blue eyes
 // and a pale-tipped tail.
 // Pictures: examples/IMG_3308.png (a reference sheet), IMG_9372.png, 68c53a39-b337-489f-89a3-f325b83f11d9.png
@@ -13,7 +16,7 @@ PhyFriends.define('howdi', {
     hair: '#223678',       // The navy of the color bar: the mop and the bands on the ears.
     earInner: '#eceff3',   // The white of the color bar, deepened to mumuyou's depth to stay visible on paper.
     eye: '#1d2038',        // A navy near-black, like the pupils, used for the mouth.
-    eyeBlue: '#1f84e5',    // The bright blue of the irises in IMG_3308.png and IMG_9372.png (#539eff), one house step deeper so that it holds its weight.
+    eyeBlue: '#1440a8',    // The royal blue of the iris ring in IMG_3308.png, dark enough to hold against the sky blue.
     belly: '#a7deff',      // The mid blue of the color bar: the belly in all three newer pictures.
     blush: '#ffc6c8',      // The pink of the color bar, lightened by hand. The pictures mark the blush only with hatching.
     tongue: '#ff9da3',     // The pink of the color bar.
@@ -23,15 +26,13 @@ PhyFriends.define('howdi', {
     cx: 0, cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
-  // The pale muzzle and cheeks. In the pictures the pale starts at the lower lids, so the eyes sit on sky blue;
-  // here it rises to their tops, as for Brian and K3V1N, because the blue eyes are too faint on sky blue
-  // (about 2:1) at gallery size. The cheeks end in spiky pale tufts that point outward and down. Setting
-  // len < 0 flattens the top, under the fringe.
+  // The pale muzzle and cheeks start at the foot of the eyes, as the pictures draw them, so that the eyes sit on
+  // the sky blue. The cheeks end in spiky pale tufts that point outward and down. Setting len < 0 flattens the top.
   face: {
-    cx: 0, cy: 14, rx: 80, ry: 38,
+    cx: 0, cy: 34, rx: 80, ry: 19,
     fluff: [
-      { from: -24, to: 40, n: 3, len: 12, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
-      { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
+      { from: -40, to: 40, n: 3, len: 12, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
+      { from: 235, to: 305, n: 1, len: -2, b1: 0, b2: 0, jit: 0 },
     ],
   },
   // The wolf ears are large and pointed, and stand fairly upright. Two navy bands cross the upper half of
@@ -64,12 +65,12 @@ PhyFriends.define('howdi', {
     ],
   },
   // The eyes are plain tall pills in Howdi's own blue, which every newer picture draws (ref.jpg draws them
-  // black), without the pictures' darker ring, pupil, mint crescent, highlight or heavy lids. They are set
-  // wide and low. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
+  // black), without the pictures' brighter outer blue, pupil, mint crescent, highlight or heavy lids. They
+  // are set wide and low. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
   eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1, color: 'eyeBlue' },
-  // The blush sits on the pale under the outer corner of each eye, tipped up to follow the cheek. It sits low
-  // enough that an eye looking down and outward does not land on it.
-  blush: { x: 54, y: 26, rx: 11, ry: 6.5, tilt: 10 },
+  // The blush sits on the top edge of the pale under the outer corner of each eye, tipped up to follow the
+  // cheek. It sits low enough that an eye looking down and outward does not land on it.
+  blush: { x: 54, y: 29, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default, and the pictures' nose is left out. The greeting's 'w' mouth stands for the
   // small mouth the pictures draw.
   mouth: { y: 21, size: 3.8 },

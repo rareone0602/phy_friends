@@ -11,10 +11,16 @@
   python3 tools/pf.py anim howdi --clip "layer(idle, curious)" --size 512 --sheet -o out/scratch/x.mp4
   python3 tools/pf.py render howdi --with out/scratch/mine.js   # A working copy that may redefine howdi.
   python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
+  python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
+  python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
+  python3 tools/pf.py test                              # Runs test/index.html headless; exits non-zero on a failure.
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
 view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
+
+`film` films any page that follows the film contract (see film() below) frame
+by frame, so a scene exports frame-exactly whatever the machine's speed.
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
 out/design/ for page mockups, and out/scratch/ for experiments.
@@ -34,15 +40,17 @@ import subprocess
 import sys
 import tempfile
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from string import Template
 
 from PIL import Image
 
+from cdp import CHROME, ChromeError, HeadlessChrome, PageError
+
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/ and out/scratch/.
 CHARACTERS = ROOT / 'characters'  # Holds characters/<name>/<name>.js and characters/<name>/examples/.
-CHROME = os.environ.get('CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
 IMAGE_TYPES = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
 EXTRA = []  # Scripts from --with, loaded after the characters (e.g. a working copy that redefines one).
 
@@ -272,23 +280,28 @@ def encode(frame_paths, out, fps=30):
     return out
 
 
-def contact_sheet(frame_paths, out_png, count=16, cols=8, fps=None):
+def contact_sheet(frame_paths, out_png, count=16, cols=8, fps=None, start=0):
     """Tile `count` evenly spaced frames, always including the first and the last.
 
     Each tile is labeled with its frame index, and with its time when fps is given.
+    start: the index of the first frame, for frames taken from partway through a film.
     """
     from PIL import ImageDraw, ImageFont
     n = len(frame_paths)
-    idx = sorted({round(i * (n - 1) / max(1, count - 1)) for i in range(min(count, n))})
+    count = min(count, n)
+    idx = sorted({round(i * (n - 1) / max(1, count - 1)) for i in range(count)})
     tiles = [Image.open(frame_paths[i]).convert('RGBA') for i in idx]
     w, h = tiles[0].size
     cols = min(cols, len(tiles))
     sheet = Image.new('RGBA', (cols * w, math.ceil(len(tiles) / cols) * h), '#555')
-    draw, font = ImageDraw.Draw(sheet), ImageFont.load_default(size=max(12, w // 16))
+    label_size = max(12, w // 16)
+    draw, font = ImageDraw.Draw(sheet), ImageFont.load_default(size=label_size)
     for k, (i, tile) in enumerate(zip(idx, tiles)):
-        x, y = (k % cols) * w, (k // cols) * h
+        x, y, frame = (k % cols) * w, (k // cols) * h, start + i
         sheet.alpha_composite(tile, (x, y))
-        draw.text((x + 6, y + 4), f'#{i}' + (f' {i / fps:.2f}s' if fps else ''), fill='#fff', font=font)
+        # The dark outline keeps a label legible on a light frame, such as a film on paper.
+        draw.text((x + 6, y + 4), f'#{frame}' + (f' {frame / fps:.2f}s' if fps else ''), fill='#fff', font=font,
+                  stroke_width=max(1, label_size // 8), stroke_fill='#333')
     Path(out_png).parent.mkdir(parents=True, exist_ok=True)
     sheet.save(out_png)
     return out_png
@@ -638,6 +651,233 @@ def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.
     return out
 
 
+# ---- Films: a page that defines window.film, filmed frame by frame ----------------
+
+FILM_VIEWPORT = (1280, 720)  # The viewport a page first opens at, before its film's own size is known.
+FILM_FPS = 30  # The frame rate when neither --fps nor the film sets one.
+SETTLE_ATTEMPTS = 10  # Screenshots taken at most while waiting for the first frame to stop changing.
+PROGRESS_REPORTS = 4  # Progress lines printed while filming.
+URL = re.compile(r'[a-zA-Z][a-zA-Z0-9+.-]*://')
+
+# Resolves after two animation frames, by which time the DOM changes made before it have been painted.
+NEXT_PAINT_JS = 'new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))'
+READ_FILM_JS = """(async () => {
+  const film = window.film;
+  if (!film || typeof film.seek !== 'function') {
+    throw new Error('the page defines no window.film with a seek(t) method (see the film contract in tools/pf.py)');
+  }
+  await film.ready;
+  await document.fonts.ready;
+  return { width: film.width, height: film.height, fps: film.fps, duration: film.duration,
+           unagreed: Array.from(film.unagreed || []) };
+})()"""
+
+
+def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, draft=False, sheet=None):
+    """Film a page frame by frame to a video, or save one still, and return the output path.
+
+    The page must follow the film contract. Opened with ?film (plus &draft for a draft),
+    it lays its scene out to fill the viewport, hides its chrome, does not play on its
+    own, and defines:
+
+      window.film = {
+        width, height,  // Preferred frame size in CSS px (used when size is not given).
+        fps,            // Optional preferred frame rate (default 30).
+        duration,       // Seconds.
+        unagreed,       // Names of friends on screen whose owners have not agreed to video.
+        ready,          // Promise: resolves when fonts, images and textures are loaded.
+        seek(t),        // Draws the frame at t seconds; may return a promise.
+      };
+
+    Frame i shows t = i / fps, for start * fps <= i < end * fps; each is screenshotted
+    after seek(t) and two animation frames. A film with unagreed friends is refused
+    unless draft is set (STYLE.md, principle 8).
+    page: an HTML file, relative to the current directory and optionally with a query
+    of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
+    still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio.
+    sheet: a path for a contact sheet, or True for <out>-sheet.png.
+    """
+    page, out = absolute_page(page), Path(out)
+    if at is not None:
+        if out.suffix.lower() != '.png' or sheet:
+            raise SystemExit('--at saves one still: give a .png output, and no --sheet')
+        return film_still(page, out, at, size, scale, draft)
+    pick_encoder(out.suffix.lower())  # Fail before the slow part if no encoder is available.
+    if sheet is True:
+        sheet = out.with_name(out.stem + '-sheet.png')
+    work = Path(tempfile.mkdtemp(prefix='pf-film-'))
+    try:
+        paths, fps, first = film_frames(page, work, size, scale, fps, start, end, draft)
+        if sheet:
+            contact_sheet(paths, sheet, fps=fps, start=first)
+        encode(paths, out, fps)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return out
+
+
+def absolute_page(page):
+    """Return a page with its path made absolute from the current directory; a URL is returned as it is."""
+    page = str(page)
+    if URL.match(page):
+        return page
+    path, mark, query = page.partition('?')
+    path = Path(path).resolve()
+    if not path.is_file():
+        raise SystemExit(f'no page at {path}')
+    return str(path) + mark + query
+
+
+def film_still(page, out, at, size=None, scale=1, draft=False):
+    """Save the frame at `at` seconds as a PNG and return its path."""
+    with open_film(page, size, scale, draft) as (chrome, spec):
+        if not 0 <= at <= spec['duration']:
+            raise SystemExit(f"--at must lie within the film's {spec['duration']:g} s")
+        png = settle(chrome, at)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(png)
+    return out
+
+
+def film_frames(page, frame_dir, size=None, scale=1, fps=None, start=0, end=None, draft=False):
+    """Screenshot the film's frames from start to end seconds into frame_dir/f0000.png, ...
+
+    Returns (frame paths, fps, the index of the first frame within the whole film).
+    """
+    frame_dir = Path(frame_dir)
+    frame_dir.mkdir(parents=True, exist_ok=True)
+    with open_film(page, size, scale, draft) as (chrome, spec):
+        fps = fps or spec['fps'] or FILM_FPS
+        total = round(spec['duration'] * fps)
+        first, last = round(start * fps), total if end is None else round(end * fps)
+        if not 0 <= first < last <= total:
+            raise SystemExit(f"--from and --to must lie within the film's {spec['duration']:g} s, --from first")
+        settle(chrome, first / fps)
+        count = last - first
+        report_every = math.ceil(count / PROGRESS_REPORTS)
+        began, paths = time.monotonic(), []
+        for i in range(first, last):
+            paths.append(frame_dir / f'f{i - first:04d}.png')
+            paths[-1].write_bytes(shoot_frame(chrome, i / fps))
+            if len(paths) % report_every == 0 and len(paths) < count:
+                print(f'{len(paths)}/{count} frames', file=sys.stderr)
+        seconds = time.monotonic() - began
+        print(f'{count}/{count} frames in {seconds:.1f} s ({seconds / count:.3f} s a frame, '
+              f'{chrome.width}x{chrome.height} at scale {chrome.scale:g})', file=sys.stderr)
+    return paths, fps, first
+
+
+@contextmanager
+def open_film(page, size=None, scale=1, draft=False):
+    """Open a page in film mode at its film's size, check consent, and yield (chrome, the film's properties)."""
+    width, height = size or FILM_VIEWPORT
+    with HeadlessChrome(width, height, scale) as chrome:
+        chrome.open(page, 'film&draft' if draft else 'film')
+        spec = read_film(chrome)
+        refuse_unagreed(spec['unagreed'], draft)
+        if not size:
+            if not (spec['width'] and spec['height']):
+                raise SystemExit('the film gives no width and height: pass --size')
+            if (spec['width'], spec['height']) != (width, height):
+                # The page laid its scene out for the first viewport, so it is loaded again at its own size.
+                chrome.set_viewport(spec['width'], spec['height'], scale)
+                chrome.reload()
+                spec = read_film(chrome)
+        yield chrome, spec
+
+
+def read_film(chrome):
+    """Wait until the page's film is ready and return its properties, checked."""
+    spec = chrome.evaluate(READ_FILM_JS)
+    if chrome.errors:
+        raise PageError('the page reported errors while loading', chrome.errors)
+    if not (isinstance(spec['duration'], (int, float)) and spec['duration'] > 0):
+        raise SystemExit(f"film.duration must be a number of seconds above 0, not {spec['duration']!r}")
+    if spec['fps'] is not None and not (isinstance(spec['fps'], (int, float)) and spec['fps'] > 0):
+        raise SystemExit(f"film.fps must be a frame rate above 0, not {spec['fps']!r}")
+    for key in ('width', 'height'):
+        value = spec[key]
+        spec[key] = round(value) if isinstance(value, (int, float)) and value >= 1 else None
+    return spec
+
+
+def refuse_unagreed(names, draft):
+    """Stop unless every owner of a friend on screen has agreed to video, or the film is a draft."""
+    if not names:
+        return
+    several = len(names) > 1
+    owners = f'the owner{"s" if several else ""} of {join_names(names)} {"have" if several else "has"}'
+    if not draft:
+        raise SystemExit(f'not filming: {owners} not agreed to video. Record the agreement in characters/cast.js, '
+                         'or pass --draft to film a draft.')
+    print(f'note: filming a draft; {owners} not agreed to video', file=sys.stderr)
+
+
+def join_names(names):
+    """Join names as prose: "Terry", "Terry and mumuyou", "Yuda, Terry and mumuyou"."""
+    return names[0] if len(names) == 1 else ', '.join(names[:-1]) + ' and ' + names[-1]
+
+
+def settle(chrome, t):
+    """Draw the frame at t seconds, wait until two screenshots in a row agree, and return the last one.
+
+    The first paint after loading can come before a data-URI image, such as the pencil
+    texture, has decoded, which would leave the first frame without its characters.
+    """
+    previous = shoot_frame(chrome, t)
+    for _ in range(SETTLE_ATTEMPTS):
+        chrome.evaluate(NEXT_PAINT_JS)
+        current = chrome.screenshot()
+        if current == previous:
+            return current
+        previous = current
+    print(f'note: the frame at {t:g} s kept changing; the page may be animating on its own', file=sys.stderr)
+    return previous
+
+
+def shoot_frame(chrome, t):
+    """Return a PNG of the frame at t seconds, taken once seek(t) has finished and its result has been painted."""
+    chrome.evaluate(f'(async () => {{ await window.film.seek({t!r}); await {NEXT_PAINT_JS}; }})()')
+    if chrome.errors:
+        raise PageError(f'the page reported errors at {t:g} s', chrome.errors)
+    return chrome.screenshot()
+
+
+# ---- Tests: test/index.html, run headless -------------------------------------------
+
+TEST_PAGE = ROOT / 'test' / 'index.html'
+TEST_TIMEOUT = 120  # Seconds for the whole run; the harness also stops any single test that hangs.
+TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testResults) : null'
+
+
+def run_tests(page=TEST_PAGE):
+    """Run the in-browser tests, print each failure and a summary, and return the number of problems."""
+    with HeadlessChrome(1024, 768) as chrome:
+        chrome.open(page)
+        results = chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
+        errors = list(chrome.errors)
+    if results is None:
+        errors.append(f'{page} did not load test/harness.js: window.testsDone is missing')
+        results = {'passed': [], 'failed': []}
+    for failure in results['failed']:
+        print(f'failed: {failure["name"]}: {failure["message"]}')
+    for error in errors:
+        print(f'page error: {error}')
+    summary = f'{len(results["passed"])} passed, {len(results["failed"])} failed'
+    if errors:
+        summary += f', {len(errors)} page error{"" if len(errors) == 1 else "s"}'
+    print(summary)
+    return len(results['failed']) + len(errors)
+
+
+def frame_size(text):
+    """Parse a frame size given as WxH, e.g. 1280x720."""
+    match = re.fullmatch(r'([1-9]\d*)x([1-9]\d*)', text)
+    if not match:
+        raise argparse.ArgumentTypeError(f'{text!r} is not a size such as 1280x720')
+    return int(match[1]), int(match[2])
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest='cmd', required=True)
@@ -677,6 +917,21 @@ def main(argv=None):
 
     sub.add_parser('style', help='write STYLE.md and FWIENDS.md out as style.html')
 
+    f = sub.add_parser('film', help='film a page that defines window.film to .mp4 / .webm / .gif / .apng, or a still')
+    f.add_argument('page', help='an HTML file, optionally with a query (e.g. "scene.html?take=2"), or a URL')
+    f.add_argument('-o', '--out', required=True)
+    f.add_argument('--size', type=frame_size, help="WxH in CSS pixels; default: the film's own size")
+    f.add_argument('--scale', type=float, default=1, help='device pixel ratio (2 films twice the pixels each way)')
+    f.add_argument('--fps', type=int, help="default: the film's own rate, or 30")
+    f.add_argument('--from', dest='start', type=float, default=0, metavar='SECONDS')
+    f.add_argument('--to', dest='end', type=float, metavar='SECONDS', help="default: the film's end")
+    f.add_argument('--at', type=float, metavar='SECONDS', help='with a .png output, save one still at this time')
+    f.add_argument('--draft', action='store_true',
+                   help="film even without every owner's agreement; the page marks it as a draft")
+    f.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
+
+    sub.add_parser('test', help='run the in-browser tests in test/index.html')
+
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])
     if a.cmd == 'list':
@@ -696,7 +951,15 @@ def main(argv=None):
                    bg=not a.no_bg, sheet=a.sheet, zoom=a.zoom))
     elif a.cmd == 'style':
         print(style_page())
+    elif a.cmd == 'film':
+        print(film(a.page, a.out, size=a.size, scale=a.scale, fps=a.fps, start=a.start, end=a.end, at=a.at,
+                   draft=a.draft, sheet=a.sheet))
+    elif a.cmd == 'test':
+        raise SystemExit(1 if run_tests() else 0)
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except ChromeError as error:  # The message names what failed in Chrome or the page; a traceback adds nothing.
+        raise SystemExit(f'error: {error}')

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>a card · phy's fwiends</title>
+<meta name="description" content="phy brings a friend a cake, for no particular reason, and the card writes itself.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="../site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="../site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="stylesheet" href="../site/notebook.css">
+<link rel="stylesheet" href="../site/pencil.css">
+<link rel="stylesheet" href="film.css">
+<style>
+  :root { --informal: 100; }  /* A hobby project sits at the top of the dial (STYLE.md §5). */
+  /* Who the card is for: a row of names like the page's nav (site/pencil.css), at the body's size,
+     the current one ringed. The list's items wrap along with the label. */
+  .recipients { display: flex; flex-wrap: wrap; column-gap: 1.4em; }
+  .recipients ul { display: contents; }
+  .recipients li { list-style: none; }
+  .recipients a { text-decoration: none; }
+  .recipients a:hover { text-decoration: underline; }
+  .recipients .label { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Graphite grain and a slight displacement wobble for the title and the pencil lines. -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <h1>a card</h1>
+    <p class="intro">phy brings a friend a cake, for no particular reason, and the card writes itself. pick the friend under the film.</p>
+    <nav aria-label="pages">
+      <ul>
+        <li><a href="../index.html">fwiends</a></li>
+        <li><a href="index.html">demos</a></li>
+        <li><a href="../style.html">style guide</a></li>
+        <li><a href="../specimen.html">specimen</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="film" aria-label="the film">
+    <div class="stage" role="img"></div>
+    <div class="doc">
+      <noscript><p class="nojs">the film is drawn live, so it needs JavaScript to play.</p></noscript>
+      <ul class="meta credits" aria-label="the fwiends' owners"></ul>
+      <p class="actions"><button class="btn quiet replay" type="button">play</button></p>
+      <nav class="recipients" aria-label="who the card is for"><span class="label">for</span><ul></ul></nav>
+    </div>
+  </section>
+
+  <footer>
+    <ul>
+      <li>characters belong to the people named under them</li>
+      <li><a href="../style.html">style guide</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+    </ul>
+  </footer>
+</main>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../characters/yuda/yuda.js"></script>
+<script src="../characters/terry/terry.js"></script>
+<script src="../characters/mumuyou/mumuyou.js"></script>
+<script src="../characters/kevin/kevin.js"></script>
+<script src="../characters/brian/brian.js"></script>
+<script src="../src/anim.js"></script>
+<script src="../src/cast.js"></script>
+<script src="../characters/cast.js"></script>
+<script src="../src/scene.js"></script>
+<script src="film.js"></script>
+<script>
+  // The film (src/scene.js): a card. A friend sits on a ruled page; phy, the host, hops in with a
+  // cake and hands it over, for no particular reason. The friend answers in marks, surprise and then
+  // a song, with a happy hop, while the card writes itself across the top. ?for=<name> picks the
+  // friend: any friend but phy, and Yuda when the name is not one.
+  const PF = PhyFriends, RULE = PF.scene.RULE, HOP = PF.scene.HOP;
+  const WORLD = { width: 1440, height: 810 };  // 16:9 and 15 rules: the pair, their marks and the card's two lines.
+  const GROUND = RULE * 13;
+  const PAGE_RULE_PX = 32;                       // The page's rule (site/notebook.css), for sizes taken from the page.
+  const DEFAULT_RECIPIENT = 'yuda';
+  const CLOSE = 24;                              // Paper between phy's outline and the friend's; friends who know each other need 4 (src/cast.js).
+  const LETTERS_PER_SECOND = 14;                 // How fast the hand writes.
+  // The card's two lines, a rule in from the edge, spaced as a page's title and intro are: the first
+  // at a title's size on the third rule, the second at a name's size in the lighter ink, a rule
+  // below the next, clear of the first line's tails.
+  const CARD = {
+    x: RULE,
+    heading: { size: RULE * 64 / PAGE_RULE_PX, y: RULE * 3 },
+    aside: { text: 'for no particular reason', size: RULE * 31 / PAGE_RULE_PX, y: RULE * 5 },
+  };
+  const ENTRY = { at: 0.5, stride: 140, height: 30, clearance: 24, noticed: 0.4 };  // The friend looks up once phy is in the frame.
+  // phy's words, centered above phy (film.css) on the sixth rule above the floor, clear of phy's ears.
+  const SPEECH = { size: 40, rulesAboveFloor: 6 };
+  // The beats after phy lands, in seconds.
+  const BEAT = { say: 0.3, words: 2.2, give: 1.4, handing: 0.8, surprise: 2.3, write: 2.5, song: 3.4, smile: [3.5, 4.7], end: 0.8 };
+  const GREETING = PF.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 });  // The gallery's happy hop.
+  const OBJECT_PRONOUN = { he: 'him', she: 'her', they: 'them', it: 'it' };  // As the owners give them (characters/cast.js).
+  const CAKE = cakeDrawing();
+
+  const recipientName = chooseRecipient(filmPage.params.get('for'));
+  const scene = PF.scene.create(document.querySelector('.stage'), { ...WORLD, ground: GROUND, boil: filmPage.boilRate() });
+  const friend = scene.add(recipientName, { look: 'around' });
+  const phy = scene.add(PF.cast.host, { at: Infinity });
+  const { friendX, phyX } = placePair(phy.extent(), friend.extent());
+  friend.moveTo(friendX, { at: 0, duration: 0 });  // Measured where it was added, then set in its place before the film begins.
+  const entrance = phyEntrance(phyX);
+  const cake = scene.prop(CAKE, { x: entrance.from, y: GROUND, at: ENTRY.at });
+  carryAlong(cake, entrance);
+  const duration = playBeats(entrance.land);
+  describe();
+  filmPage.listCredits(document.querySelector('.credits'), [recipientName, PF.cast.host]);
+  listRecipients();
+  filmPage.present(scene, { duration, button: document.querySelector('.replay') });
+
+  // The code name of the friend the card is for, from ?for= (a code name, or a name as its owner writes it).
+  function chooseRecipient(requested) {
+    const wanted = (requested || '').toLowerCase();
+    const match = PF.cast.names().find(name => name === wanted || PF.cast.friend(name).name.toLowerCase() === wanted);
+    return match && match !== PF.cast.host ? match : DEFAULT_RECIPIENT;
+  }
+
+  // phy stands CLOSE to the left of the friend, and the pair is centered in the frame.
+  function placePair(phyOutline, friendOutline) {
+    const apart = phyOutline.right + CLOSE + friendOutline.left;
+    const width = phyOutline.left + apart + friendOutline.right;
+    const phyAt = (WORLD.width - width) / 2 + phyOutline.left;
+    return { phyX: phyAt, friendX: phyAt + apart };
+  }
+
+  // phy hops in from just past the left edge, watching the friend.
+  function phyEntrance(to) {
+    const from = -(phy.extent().right + ENTRY.clearance);
+    const hops = Math.max(1, Math.round((to - from) / ENTRY.stride)), travel = hops * HOP.seconds;
+    phy.enter({ from, to, at: ENTRY.at, hops, duration: travel, height: ENTRY.height }).look(friend, { at: ENTRY.at });
+    return { from, to, hops, travel, land: ENTRY.at + travel };
+  }
+
+  // The cake keeps to phy's hops, resting on the floor in front of phy's paws: still while phy
+  // crouches, and along the same arc in the air. Where phy glides (reduced motion, on the page
+  // only), so does the cake.
+  function carryAlong(item, { from, to, hops, travel }) {
+    if (scene.reduced && !filmPage.filming) {
+      item.moveTo({ x: to }, { at: ENTRY.at, duration: travel, ease: 'smooth' });
+      return;
+    }
+    const hopSeconds = travel / hops, flight = hopSeconds * (1 - 2 * HOP.crouch);
+    for (let k = 0; k < hops; k++) {
+      const x = from + (to - from) * (k + 1) / hops;
+      item.moveTo({ x }, { at: ENTRY.at + k * hopSeconds + HOP.crouch * hopSeconds, duration: flight, ease: 'smooth', arc: ENTRY.height });
+    }
+  }
+
+  // Everything after phy lands. Returns the film's length in seconds.
+  function playBeats(land) {
+    const name = friend.displayName, heading = `a cake for ${name}`;
+    const rise = SPEECH.rulesAboveFloor * RULE - phy.spec.rig.ground + PF.scene.WORDS.y;  // From WORDS.y above the eyes to its rule.
+    friend.look(phy, { at: ENTRY.at + ENTRY.noticed });
+    phy.say(`for you, ${name}.`, { to: friend, side: 0, size: SPEECH.size, rise, at: land + BEAT.say, seconds: BEAT.words });
+    phy.give(cake, friend, { at: land + BEAT.give, duration: BEAT.handing, height: 0 });  // Handed over along the floor's arc, paw to paw.
+    friend.look(cake, { at: land + BEAT.give + BEAT.handing / 2 });
+    friend.emote('!', { at: land + BEAT.surprise }).play('surprised', { at: land + BEAT.surprise });
+    friend.look(phy, { at: land + BEAT.song });
+    friend.emote('♪', { at: land + BEAT.song }).play(GREETING, { at: land + BEAT.song, until: land + BEAT.song + GREETING.duration });
+    phy.pose({ eyes: 'happy', mouth: 'w' }, { at: land + BEAT.smile[0], until: land + BEAT.smile[1] });
+    const asideAt = writeLine(heading, CARD.heading, land + BEAT.write, { graphite: true });
+    const done = writeLine(CARD.aside.text, CARD.aside, asideAt, { tone: 'ink-2' });
+    return done + BEAT.end;
+  }
+
+  // Writes one line of the card and returns when it is finished.
+  function writeLine(text, { size, y }, at, style) {
+    const seconds = text.length / LETTERS_PER_SECOND;
+    scene.write(text, { x: CARD.x, y, size, at, seconds, ...style });
+    return at + seconds;
+  }
+
+  // A small round cake with one candle, in quiet colors so that it does not outshine the friends. It
+  // needs no shade: no two neighbors share a color.
+  function cakeDrawing() {
+    const w = 130, h = 90, floor = h, top = floor - 44, mid = w / 2;
+    const color = { sponge: '#e5cda4', cream: '#ece0ca', jam: '#cf9d95', berry: '#c4847e', candle: '#a9bcd4', flame: '#e4ad62' };
+    const drips = Array.from({ length: 10 }, (_, i) => `L${15 + 10 * i} ${top + 2 + (i % 2) * 3}q5 ${7 + (i % 3)} 10 0`).join('');
+    const svg =
+      `<path d="M15 ${top}V${floor - 6}q0 6 6 6h88q6 0 6-6V${top}z" fill="${color.sponge}"/>` +
+      `<rect x="15" y="${floor - 24}" width="100" height="6" fill="${color.jam}"/>` +
+      `<path d="M15 ${top}${drips}L115 ${top}z" fill="${color.cream}"/>` +
+      `<ellipse cx="${mid}" cy="${top}" rx="50" ry="10" fill="${color.cream}"/>` +
+      [36, 94].map(x => `<circle cx="${x}" cy="${top - 1}" r="4.5" fill="${color.berry}"/>`).join('') +
+      `<rect x="${mid - 3}" y="${top - 26}" width="6" height="24" rx="2" fill="${color.candle}"/>` +
+      `<path d="M${mid} ${top - 44}c4 6 5 10 0 14c-5-4-4-8 0-14z" fill="${color.flame}"/>`;
+    return { w, h, svg };
+  }
+
+  function describe() {
+    const name = friend.displayName, them = OBJECT_PRONOUN[PF.cast.friend(recipientName).pronoun] || name;
+    scene.el.setAttribute('aria-label', `a short film on a ruled page. ${name} sits on the page. phy hops in with a small cake with one ` +
+      `candle, says: for you, ${name}, and hands ${them} the cake. ${name} is surprised, then hops with a song, and the card writes ` +
+      `itself across the top: a cake for ${name}, ${CARD.aside.text}.`);
+  }
+
+  // A link for every friend but the host; the one the card is for is ringed, as the page's nav rings the page.
+  function listRecipients() {
+    const list = document.querySelector('.recipients ul');
+    for (const name of PF.cast.names().filter(n => n !== PF.cast.host)) {
+      const item = document.createElement('li'), display = PF.cast.friend(name).name;
+      item.innerHTML = name === recipientName ? `<span aria-current="true">${display}</span>` : `<a href="?for=${name}">${display}</a>`;
+      list.appendChild(item);
+    }
+  }
+</script>
+</body>
+</html>
