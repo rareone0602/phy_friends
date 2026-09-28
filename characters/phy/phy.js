@@ -9,7 +9,8 @@ PhyFriends.define('phy', {
     face: '#fcf5ef',       // The cat's white.
     earInner: '#f9bcaa',   // The lighter almond in the ear. Its house shade (earInnerShade) fills the rim around it.
     marble: '#d8bab0',     // The cookies-and-cream marbling and the pale bands on the crest.
-    eye: '#2e2020',
+    eye: '#2e2020',        // A warm near-black, for the open mouth.
+    eyeGreen: '#9cac47',   // The yellow-green of the eyes in front.png and card.png, one house step deeper so that it holds its weight.
     blush: '#fdcabc',
     chest: '#fcf5ef',      // The ruff, in the cream of the Oreo.
     crumb: '#5f4d50',      // The cookie, a step darker than the fur's shade so that the tail's base stays apart from the hip.
@@ -40,9 +41,9 @@ PhyFriends.define('phy', {
   // The crest is one large lock rising to a point left of center, with a dome for its right side;
   // the second tip is hidden inside the head. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: { cx: -5, cy: -62, rx: 30, ry: 15, color: 'fur', tips: [[-31.1, -97.4, -20.6, -37.4, [19, -69.3]], [0, -45, 0, 0, [-35.3, -60.9]]] },
-  // The eyes are plain tall pills, their tops leaning in slightly. Setting arc: 1 draws the happy,
-  // closed and squint strokes at the full eye width.
-  eyes: { x: 31, y: 0.6, w: 13, h: 33, tilt: 2, stroke: 4.5, arc: 1 },
+  // The eyes are plain tall pills in phy's own green, their tops leaning in slightly. Setting arc: 1
+  // draws the happy, closed and squint strokes at the full eye width.
+  eyes: { x: 31, y: 0.6, w: 13, h: 33, tilt: 2, stroke: 4.5, arc: 1, color: 'eyeGreen' },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 48.1, y: 21.3, rx: 9.6, ry: 5.5, tilt: 20 },
   // There is no mouth by default; when open (as in the icon), it shows one fang.

@@ -37,14 +37,16 @@ For an agent's brief, when there is no room for the rest:
 - **Don't make it too artificial.** No gradients, glows, glass, heavy
   shadows, emoji, stock icons, hype or template layouts.
 - **Graphite on paper, never black.** Colour goes only to the subject, a
-  character or the data. It is flat, with at most one shade step.
+  character or the data. A character is coloured in with coloured pencil and
+  has no outline; data colour is flat. Either has at most one shade step.
 - **One hand on one dial.** Everything is in Shantell Sans, set by one
   number: `0` for a paper's diagram, `50` for a site, `100` for a hobby
   project. Titles, notes and names are never neater than `50`.
 - **Keep a set aligned**: within one set, in look, size and structure.
 - **Tell things apart first**, but never simplify away what makes a thing
   itself.
-- **Make it cute:** characters are chibi, soft and round.
+- **Make it cute:** characters are soft and round, a big head on a small
+  body.
 - **The owner decides** names, colours and credit. Names keep their owner's
   case, so phy is always lower case.
 - **British English, as The Economist writes it:** opinionated, analytical
@@ -78,7 +80,7 @@ For an agent's brief, when there is no room for the rest:
   tufts, two pill eyes and a blush. So phy's characters are made by a small
   program, not stored as pixels.
 - **The avatar is phy**, phy's fursona: an Eevee in the colours of phy's
-  tuxedo cat, with Oreo crumbs on the ruff and tail, drawn as a chibi (§9).
+  tuxedo cat, with Oreo crumbs on the ruff and tail, in coloured pencil (§9).
 
 ## 2. principles
 
@@ -111,10 +113,12 @@ For an agent's brief, when there is no room for the rest:
 4. **Graphite on paper; colour for the subject.** Everything is in paper and
    ink tones except what the work is about. On a page of characters, the
    characters are the only saturated things. In a figure, the data is.
-5. **One layer.** Colour is flat. Each colour may have at most one shade, a
+5. **One layer.** Colour goes on in one layer: flat in a chart, in coloured
+   pencil on a character (§9). Each colour may have at most one shade, a
    single step darker. The shade is used only to tell apart two neighbours
    of the same colour. There are no lighting effects, highlights or second
-   steps, and nothing is copied from a reference's light and shade.
+   steps, and nothing is copied from a reference's light and shade. The
+   pencil's texture is the same everywhere, so it is paper, not shading.
 6. **Keep the set aligned.** Within a set (a family of characters, a figure
    series, a deck), anything new matches what is already there in look, size
    and structure. Where the set is made of code, as a family of character
@@ -130,9 +134,9 @@ For an agent's brief, when there is no room for the rest:
    - a credit linking to the owner.
    An owner's wish beats a house rule. A character appears only with its
    owner's say-so.
-9. **Make it cute.** Characters are chibi, soft and round. Cute comes before
-   literal, but never at the cost of what makes a character itself
-   (principle 7).
+9. **Make it cute.** Characters are soft and round, with a big head on a
+   small body. Cute comes before literal, but never at the cost of what
+   makes a character itself (principle 7).
 10. **Not the mode.** The most likely choice is the most boring one: the
     template layout, the stock phrase, the default chart, the formal tone put
     on for show. There is more than one way to put an idea, so look for the
@@ -557,15 +561,23 @@ type. `figures/phy-diagram.sty` carries it for TikZ, and
 
 ## 9. the avatar and characters
 
-- **phy's mark is phy**, the chibi fursona: the head alone for a favicon or
+- **phy's mark is phy**, the fursona: the head alone for a favicon or
   avatar, the whole character where there is room. It is drawn by
   `src/phyfriends.js` from `characters/phy/phy.js`, never redrawn by hand, so
   every copy matches.
-- Characters are **flat chibi vectors**: soft round shapes, solid near-black
-  pill eyes, soft blush, no outlines, no nose and no mouth by default. Each
-  has exactly one shade layer (principle 5), and the body, which sits under
-  the head, always wears it.
-- The template came from the
+- Characters are **drawn in coloured pencil**: soft round shapes coloured
+  in without an outline, pill eyes in each character's own eye colour, soft
+  blush, and no nose and no mouth by default. Each has exactly one shade layer (principle 5), and
+  the body, which sits under the head, always wears it.
+- **The pencil is one texture over the whole character**, which the factory
+  lays on: strokes rising to the right, the paper's tooth, and patches where
+  the hand pressed more lightly. The paper, rules and all, shows through.
+  The texture belongs to the paper, so it stays put while a character moves.
+  On a background of its own, such as a dark close-up, a character is drawn
+  on a sheet of paper cut to its outline, so the pencil shows paper, never
+  the background. An icon too small to hold it, such as a favicon, is drawn
+  flat.
+- The shapes came from the template of the
   [Grokbot Icon](https://grokbot-icon-studio.serio-ai.chatgpt.site/) prompt:
   a close-up with the head tipped, pill eyes and blush on a dark ground.
   Reviewers of a character should know its examples.

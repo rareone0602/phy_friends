@@ -23,8 +23,8 @@ The page has five parts, in this order:
 1. The title, `phy's fwiends`, in the hand. That is the project's name
    wherever people read it; `phy_friends` is only the repository and code
    name.
-2. One line of intro: "a few chibi fwiends, each one drawn from a hundred-odd
-   lines of code."
+2. One line of intro: "a few fwiends in coloured pencil, each one drawn from a
+   hundred-odd lines of code."
 3. The nav, as on the other two pages: fwiends, style guide, specimen.
 4. **The stage**, a group photo: the fwiends stand together on pencilled
    ground and all watch the cursor.
@@ -34,26 +34,36 @@ The page has five parts, in this order:
 **The stage:**
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
+  The stage is also the one wide thing: beside the margin line it runs to the
+  paper's edge, and the page stops at 1720px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
-  bottom edge is the friend's `rig.ground`. The box is 7 rules tall, then 6
-  below 1000px, 5 below 880px and 4 below 360px (5 on phones held sideways),
-  so two fwiends still stand side by side on the smallest phones.
+  bottom edge is the friend's `rig.ground`. The box is a whole number of
+  rules, so the ground stays on a rule: 5 rules, and 6 once a row of seven
+  has room, from about 1670px. The smallest phones, below 360px, take 4, so
+  two fwiends still stand side by side.
 - Ears and tails may reach outside the box, as in a photo. A body or tail
   that sticks out at ground level widens that friend's slot
-  (`--reach-left` and `--reach-right`, measured on load), so neighbours stand close but never tread on a
-  tail.
-- The fwiends stand in one row while they fit (from 1720px the page widens
-  so all five do), then wrap onto more rows, each grounded on a rule; phones
-  show two to a row.
+  (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
+  close but never tread on a tail. Below 420px there is no room, and a tail
+  reaches into the gap beside the pair.
+- All seven stand in one row from about 1410px. The seven reaches add up to
+  410 head units and neighbours overlap by 0.06 of a box, so the row is 8.1
+  boxes wide. Narrower, a row holds at most four, so the seven split four and
+  three, at 5 rules so that both rows fit a laptop's first screen; below
+  about 830px they stand three to a row, and on phones two.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
 - The ring circles the host's name, phy's: "this one" is the one whose
   page it is. The nav's ring marks the page, as it does everywhere.
-- A pencilled note says what to do. From 1200px it sits in the margin to
-  the right, tilted `−2°`, with an arrow: "psst: they watch your cursor. click
-  one to say hi". Below that it is one centred line under the stage, and
-  touch screens read "tap" for "click".
+- A pencilled note says what to do: "psst: they watch your cursor. click one
+  to say hi". It sits on the rule under the nav, over the right end of the
+  row with one blank rule below, so it is read before the fwiends and is on
+  the first screen of every device. Being one long line, it takes the
+  title's tilt, `−1°`, rather than a margin note's `−2°`, at which its far end
+  would climb half a rule; and sitting so close, it needs no arrow. Where
+  fewer than seven stand in a row it is only "click one to say hi", and touch
+  screens, which have no cursor, read "tap one to say hi".
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
 
@@ -83,7 +93,7 @@ start of a line.
 |---|---|
 | that's me | Meet phy, the creator behind it all! |
 | click one to say hi | Click a character to interact! |
-| a few chibi fwiends, each one drawn from a hundred-odd lines of code. | Welcome to a magical world of adorable characters |
+| a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code. | Welcome to a magical world of adorable characters |
 | characters belong to the people named under them | All rights reserved. |
 
 The "psst" and the footer's disclaimer are the page's two winks, both in
@@ -91,15 +101,27 @@ the corners (`STYLE.md` §3).
 
 **Saying hi:**
 - Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a
-  touch wider.
+  touch wider. It stays perked while either lasts, click or no click.
 - A click, a tap, Enter or Space plays the library's happy hop: happy eyes,
   a small mouth, two bounces. The other fwiends glance at the one being
   greeted.
+- A friend in mid-air ignores another hi until it lands, and a key held down
+  says hi once. Starting the hop again would drop it to the ground in one
+  frame.
+- A hidden status line tells a screen reader what happened, in one flat
+  sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion.
+  Names keep their owner's case: "phy hops twice."
+- A double-click or a long press on a friend selects nothing, and a quick
+  second tap doesn't zoom the page. The labels stay selectable, so a handle
+  can still be copied.
 
 **The link preview and icons** come from `python3 design/site_assets.py`, run
 after any character changes:
 - the favicon is phy's head;
-- the preview (1200×630) is a snapshot of the page with the whole set.
+- the preview (1200×630) is a snapshot of the page with the whole set. The
+  page is photographed at 1440×756, the same shape, and scaled down, because
+  1440px is the narrowest common window where all seven stand in one row;
+  at 1200px the second row would fall out of the picture.
 
 ## drawing a friend
 
@@ -116,13 +138,18 @@ Follow them when turning someone's picture or design sheet into a friend.
 - Keep private references (photos of a real pet, say) in a git-ignored
   `private/` folder. They are never published.
 
-**Flat vector:**
-- No outlines, no gradients, no textures.
+**Coloured pencil:**
+- No outlines and no gradients. The one texture is the factory's pencil
+  (`STYLE.md` §9), which `render` and `mount` lay over the whole friend. A
+  spec never draws a texture of its own.
+- `pencil: false` draws the flat shapes alone. It is only for an icon too
+  small to hold the texture, and for matching a flat reference picture, as
+  `pf.py compare` does.
 - Every colour is one the character really has: fur, hair, markings,
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
 - A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current five use 6–11 each, plus
+  `earInner`, `eye`, `blush`, `chest`, … The current seven use 6–12 each, plus
   `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
@@ -141,10 +168,11 @@ Follow them when turning someone's picture or design sheet into a friend.
     apart from the shaded hip.
 - Nothing is copied from a reference's lighting: no pale rim along an ear, no
   darker far side, no highlights.
-- A pale colour that would vanish on paper takes one slightly deeper flat
-  tint wherever it appears (mumuyou's white, `#efeef3`).
+- A pale colour that would vanish on paper takes one slightly deeper tint
+  wherever it appears (mumuyou's white, `#efeef3`). The pencil lets the paper
+  through, so judge it on the page, not on a flat render.
 
-**Chibi proportions, in head space:**
+**Proportions, in head space:** a big head on a small, seated body.
 - The origin sits between the eyes. The head is widest around eye level,
   about 140–190 units across the cheeks.
 - Ear tips reach about −155 (floppy ears less), and the paws reach
@@ -162,11 +190,14 @@ Follow them when turning someone's picture or design sheet into a friend.
   face;
 - **rounded-triangle ears**, with an inner ear and stripe bands only where the
   character really has them;
-- **pill eyes**: solid near-black, no whites, no highlight. Both eyes match,
-  even when the art shows coloured eyes, unless the owner asks otherwise.
-  mumuyou's owner did, so his eyes are flat pills in his own colours (blue on
-  his right, gold on his left) through `eyes.right`, with no dark rim round
-  the colour;
+- **pill eyes** in the character's own eye colour: one flat colour per eye,
+  with no whites, no highlight and no dark rim round the colour (a rim reads
+  as an outline). The colour comes from the art (`eyes.color`); where the art
+  draws dark eyes, as Howdi's and Terry's does, they are near-black. A colour
+  that would be faint at gallery size goes one house step deeper, as phy's
+  green and mumuyou's gold do. Eyes of two colours take the other through
+  `eyes.right`: mumuyou's, K3V1N's and Brian's. The palette keeps `eye`, a
+  near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,
   `#a9dbf3`);
 - no nose, and no mouth by default.
@@ -189,8 +220,12 @@ spec's structure as well as in its look.
 - Idle underneath: breathing, blinks at irregular intervals, a slow tail
   sway, an occasional ear flick.
 - When the pointer leaves the window, or sits still for a while, the fwiends
-  drift back to centre or glance around. On touch screens they follow the
-  finger while it touches; there is no gyroscope.
+  drift back to centre or glance around. A pen is followed like a mouse. On
+  touch screens they follow the finger while it touches; there is no
+  gyroscope.
+- The stage stops drawing while none of it is in view, or the page is
+  hidden, to spare a phone's battery. It keeps its own clock, which stops
+  with it, so everything picks up where it left off.
 - With `prefers-reduced-motion`: eyes only, no idle motion, and saying hi
   changes just the face.
 

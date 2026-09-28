@@ -9,7 +9,7 @@ PhyFriends.define('howdi', {
     hairShade: '#1d3068',  // The hair's one shade, set by hand because the derived shade of this navy is nearly black.
     earInner: '#e4f5fd',
     stripe: '#29417d',
-    eye: '#1c1d22',
+    eye: '#1c1d22',        // Near-black, as ref.jpg draws the eyes.
     blush: '#e9d3e0',
     chest: '#e3f4fe',      // The ruff. Its house shade (chestShade) fills the back layer behind its clumps.
     tailTip: '#29417d',

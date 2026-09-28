@@ -4,6 +4,7 @@
   python3 tools/pf.py list
   python3 tools/pf.py render howdi                      # Writes out/howdi/portrait.png.
   python3 tools/pf.py render howdi --view ref --pose '{"lookX": 1}' -o out/scratch/x.png
+  python3 tools/pf.py render howdi --flat               # The flat shapes, without the pencil texture.
   python3 tools/pf.py compare howdi                     # Every example -> out/howdi/compare/<example>.png.
   python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example; metrics and a zoom for a box.
   python3 tools/pf.py anim howdi --clip idle            # Writes out/howdi/anim/idle.gif.
@@ -119,9 +120,9 @@ def shoot(html, w, h, out_png, timeout=60):
         shutil.rmtree(work, ignore_errors=True)
 
 
-def render(name, out_png, view='portrait', pose=None, size=None, bg=True):
-    """Render one still and return the PIL image."""
-    opts = {'view': view, 'pose': pose or {}}
+def render(name, out_png, view='portrait', pose=None, size=None, bg=True, pencil=True):
+    """Render one still and return the PIL image. pencil=False draws the flat shapes without the pencil texture."""
+    opts = {'view': view, 'pose': pose or {}, 'pencil': pencil}
     if size:
         opts['size'] = size
     if bg is False:
@@ -407,7 +408,7 @@ def compare_one(name, ref_path, out_png, render_png, view, pose=None, region=Non
     ref = Image.open(ref_path).convert('RGB')
     out_png = Path(out_png)
     out_png.parent.mkdir(parents=True, exist_ok=True)
-    got = render(name, render_png, view=view, pose=pose).convert('RGB').resize(ref.size)
+    got = render(name, render_png, view=view, pose=pose, pencil=False).convert('RGB').resize(ref.size)
     blend = Image.blend(ref, got, 0.5)
     k = 600 / ref.width
     tiles = [im.resize((600, round(ref.height * k)), Image.LANCZOS) for im in (ref, got, blend)]
@@ -652,6 +653,7 @@ def main(argv=None):
     r.add_argument('--pose', default='{}', help='JSON pose, e.g. {"lookX": 1, "eyes": "happy"}')
     r.add_argument('--size', type=int)
     r.add_argument('--no-bg', action='store_true', help='transparent background')
+    r.add_argument('--flat', action='store_true', help='without the pencil texture')
     r.add_argument('-o', '--out')
 
     c = sub.add_parser('compare', help='render next to its example pictures', parents=[common])
@@ -683,7 +685,7 @@ def main(argv=None):
             print(f'{n:16s} ' + (f'examples: {", ".join(ex)}' if ex else 'no examples'))
     elif a.cmd == 'render':
         out = a.out or OUT / a.name / f'{a.view}.png'
-        render(a.name, out, view=a.view, pose=json.loads(a.pose), size=a.size, bg=not a.no_bg)
+        render(a.name, out, view=a.view, pose=json.loads(a.pose), size=a.size, bg=not a.no_bg, pencil=not a.flat)
         print(out)
     elif a.cmd == 'compare':
         region = tuple(int(v) for v in a.region.split(',')) if a.region else None

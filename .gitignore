@@ -6,6 +6,10 @@ __pycache__/
 # Per-character material that informs a design but is not published, such as photos of a real pet.
 characters/*/private/
 
+# Reference pictures stay on the machine that drew the character: they belong to their artists. The
+# examples committed before this rule are still tracked.
+characters/*/examples/
+
 # LaTeX build output from figures/diagram.tex and similar sources.
 figures/*.aux
 figures/*.log

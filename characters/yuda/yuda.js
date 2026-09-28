@@ -7,7 +7,8 @@ PhyFriends.define('yuda', {
     fur: '#6c7ba7',        // The slate blue of the icon. Its house shade (furShade) fills the body, which sits under the head.
     face: '#f9f7f6',       // The muzzle, cheeks, eyebrow spots, chest and forepaws.
     earInner: '#88d5dd',   // Cyan, also used for the inside of the open mouth.
-    eye: '#23263d',        // A deep slate navy.
+    eye: '#23263d',        // A deep slate navy, for the open mouth.
+    eyeBlue: '#4e7ec0',    // The blue of the eyes in waving.png and card.png.
     blush: '#a9dbf3',      // A soft sky blue, as his owner set it (the pictures draw it peach or pink).
     scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band and the knot.
     tailMid: '#94a1d9',    // The periwinkle band on the tail, drawn in both waving.png and teacup.png.
@@ -50,9 +51,9 @@ PhyFriends.define('yuda', {
       [-76, -30, 0, 0, [-50, -80]],
     ],
   },
-  // The eyes are plain tall pills, set wide and low. Setting arc: 1 draws the happy, closed and
-  // squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1 },
+  // The eyes are plain tall pills in Yuda's own blue, set wide and low. Setting arc: 1 draws the happy,
+  // closed and squint strokes at the full eye width.
+  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1, color: 'eyeBlue' },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek. It
   // sits low enough that an eye looking down and outward does not land on it.
   blush: { x: 53, y: 24.5, rx: 11, ry: 6.5, tilt: 10 },

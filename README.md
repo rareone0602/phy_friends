@@ -1,6 +1,6 @@
 # phy's fwiends
 
-A tiny factory for flat-vector chibi characters. The repository and the code
+A tiny factory for characters in coloured pencil. The repository and the code
 are named `phy_friends`.
 
 Images like `characters/howdi/examples/ref.jpg` have very low Kolmogorov complexity: a few
@@ -54,9 +54,11 @@ example that has a view and skips the rest, so a picture can wait in the folder
 until its view is written. For a sheet with several figures, crop each one into
 its own file (`sheet-front.png`, `sheet-back.png`), each with its own view.
 
-Material that informs a design but should not be published, such as photos of
-the real pet behind a fursona, goes in `characters/<name>/private/`, which git
-ignores.
+Git ignores `examples/`: the pictures belong to their artists, so they stay on
+the machine that drew the character (the few committed before that rule are
+still in the repository). Material that should never leave that machine, such
+as photos of the real pet behind a fursona, goes in `characters/<name>/private/`,
+which git ignores too.
 
 ## Head space
 
@@ -142,6 +144,20 @@ Shape primitives (`PhyFriends.shapes`):
   corners and `bend` (default -6) bows the edges out. On the tail, each polygon
   rides the curve on its own.
 
+## The pencil
+
+`render` and `mount` colour every character in with coloured pencil (STYLE.md
+§9): one mask over the whole drawing lets the paper show through in diagonal
+strokes, fine tooth and patches of lighter pressure. There are no outlines.
+The mask is measured in the picture's own units rather than head units,
+since a pencil is the same size however large the drawing; it stays put while
+the character moves, and, being an image, costs a browser one draw rather
+than one per frame. A render with a background of its own lays a sheet of
+paper, cut to the character's outline, under the drawing, so the pencil shows
+paper rather than the background. `{ pencil: false }` draws the flat shapes
+alone, for an icon too small to hold the texture or for matching a flat
+reference picture.
+
 ## Pose
 
 Every field is optional:
@@ -170,6 +186,7 @@ rig.setPose({ lookX: 0.8, turnX: 0.5, eyes: 'happy' });
 python3 tools/pf.py list                                    # Characters and their examples
 python3 tools/pf.py render howdi --size 512                 # out/howdi/portrait.png
 python3 tools/pf.py render howdi --pose '{"eyes":"happy","mouth":"w"}' -o out/howdi/happy.png
+python3 tools/pf.py render howdi --flat                     # The flat shapes, without the pencil
 python3 tools/pf.py compare howdi                           # Every example: out/howdi/compare/ref.png + ref-diff.png
 python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example, metrics and a zoomed crop for a box
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif

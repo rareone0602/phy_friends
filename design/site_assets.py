@@ -7,15 +7,18 @@ Run this after a character changes:
 
 Outputs:
 
-  site/icon.svg              The favicon: phy's head, with the tail tucked away.
+  site/icon.svg              The favicon: phy's head, with the tail tucked away. The icons are drawn
+                             flat, because they are too small to hold the pencil texture.
   site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
   site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
-  site/preview.png           1200x630 link preview image (the gallery at 1720 px, scaled down).
+  site/preview.png           1200x630 link preview image: the gallery, photographed at 1440x756 and scaled down.
 """
 import json
 import subprocess
 import sys
 from pathlib import Path
+
+from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -24,26 +27,30 @@ import pf  # noqa: E402
 POSE = {'tail': -75}
 ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 47, 'scale': 0.31}
 TOUCH = {'w': 180, 'h': 180, 'x': 90, 'y': 132, 'scale': 0.75}
+PREVIEW = (1200, 630)        # The link preview's size.
+PREVIEW_SHOT = (1440, 756)   # The window it is photographed in: the same shape, wide enough for one row.
 
 
 def still(view, out, bg=False):
     js = (f"document.getElementById('root').innerHTML = PhyFriends.render('phy', "
-          f"{{ view: {json.dumps(view)}, pose: {json.dumps(POSE)}, bg: {json.dumps(bg)} }});")
+          f"{{ view: {json.dumps(view)}, pose: {json.dumps(POSE)}, bg: {json.dumps(bg)}, pencil: false }});")
     pf.shoot(pf.page(js), view['w'], view['h'], out)
     print(out)
 
 
 def main():
-    svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, uid: 'i' }})")
+    svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: 'i' }})")
     (ROOT / 'site/icon.svg').write_text(svg)
     print(ROOT / 'site/icon.svg')
     still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
     still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-    # The link preview is the gallery itself, with the simulated pointer near the middle so the
-    # friends look out at the viewer. It is laid out for a wide monitor (1720 px, where all the
-    # friends fit in one row) and scaled down to 1200x630.
-    subprocess.run([sys.executable, str(ROOT / 'design/shoot.py'), str(ROOT / 'index.html'), str(ROOT / 'site/preview.png'),
-                    '--size', '1720x903', '--scale', str(1200 / 1720), '--query', 'px=860&py=520'], check=True)
+    # The link preview is the gallery itself (STYLE.md §7), photographed at 1440x756 and scaled to
+    # 1200x630: 1440px is the narrowest common window where all seven friends stand in one row
+    # (FWIENDS.md). The simulated pointer sits below the middle so that they look out at the viewer.
+    preview = ROOT / 'site/preview.png'
+    subprocess.run([sys.executable, str(ROOT / 'design/shoot.py'), str(ROOT / 'index.html'), str(preview),
+                    '--size', f'{PREVIEW_SHOT[0]}x{PREVIEW_SHOT[1]}', '--query', 'px=720&py=564'], check=True)
+    Image.open(preview).convert('RGB').resize(PREVIEW, Image.LANCZOS).save(preview)
 
 
 if __name__ == '__main__':

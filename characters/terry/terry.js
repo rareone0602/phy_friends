@@ -8,7 +8,7 @@ PhyFriends.define('terry', {
     bg: '#1c1d21',
     fur: '#fce08e',        // Butter yellow, used throughout. Its house shade (furShade) fills the ears.
     earInner: '#a47a4c',   // The dark inside of each ear under the flap (in every front view of the turnaround), warm so that it does not read as an eye.
-    eye: '#29231c',        // Near-black, faintly warm.
+    eye: '#29231c',        // Near-black, faintly warm, as every picture draws the eyes.
     blush: '#f8b9a2',      // The art has no blush; this soft peach pink is chosen to read on the yellow.
     cream: '#fef0c8',      // The bib and the tail (white in front.png), as one pale cream that stays visible on paper.
     pad: '#6f573f',        // The dark felt soles of the hind feet.

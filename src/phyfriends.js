@@ -1,5 +1,5 @@
 /*!
- * phy_friends: a small factory for flat-vector chibi characters.
+ * phy_friends: a small factory for characters drawn in colored pencil.
  *
  * A character is a small data "spec": a palette plus a handful of shape
  * parameters (head, face, ears, hair, eyes, and so on). Calling
@@ -453,6 +453,62 @@
   const DEFAULT_VIEW = { w: 512, h: 512, x: 256, y: 266, scale: 1.6, rotate: 0 };
   let UID = 0;
 
+  // The pencil (FWIENDS.md): every character is colored in with colored pencil and has no outline.
+  // A mask over the whole drawing lets the paper show through in three ways: diagonal strokes, the
+  // paper's fine tooth, and patches where the hand pressed more lightly. The mask is measured in the
+  // picture's own units, not head units, because the pencil is the same size however large the
+  // drawing is; the gallery draws at about one unit to the pixel. It sits outside the camera, so the
+  // strokes keep their angle when a view tips the head, and it stays put while the character moves,
+  // as the paper would. It is an image, so a browser draws its noise once rather than on every frame.
+  const PENCIL = {
+    angle: -40,              // The strokes rise to the right, as a right hand shades.
+    strokes: '0.035 0.9',    // Streaky noise: long along a stroke and fine across it.
+    tooth: 1.2,              // The paper's grain.
+    pressure: 0.02,          // The size of the lighter patches.
+    margin: 0.5,             // The mask reaches this fraction of the view past each edge, for ears and tails.
+    paper: '#fbf9f3',        // The paper of site/notebook.css, laid under a character drawn on a background of its own.
+  };
+  const pencilTextures = new Map();
+
+  // The texture for a sheet (x, y, w, h), as an SVG image. Its filter mixes the three noises
+  // (strokes 0.6, tooth 0.25, then pressure 0.35) and turns the mix into an alpha that keeps most of
+  // the color, so that the paper shows only in specks and streaks. The rectangle is turned to the
+  // stroke angle and reaches past the sheet's farthest corner. Views of one size share one image.
+  function pencilTexture(x, y, w, h) {
+    const key = [x, y, w, h].join(' ');
+    if (!pencilTextures.has(key)) {
+      const reach = Math.hypot(Math.abs(x) + w, Math.abs(y) + h);
+      const noise = (frequency, octaves, seed, result) =>
+        `<feTurbulence type='fractalNoise' baseFrequency='${frequency}' numOctaves='${octaves}' seed='${seed}' result='${result}'/>`;
+      const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${key}' width='${w}' height='${h}'>` +
+        `<filter id='p' x='0' y='0' width='1' height='1' color-interpolation-filters='sRGB'>` +
+        noise(PENCIL.strokes, 2, 11, 'strokes') + noise(PENCIL.tooth, 1, 7, 'tooth') + noise(PENCIL.pressure, 2, 4, 'pressure') +
+        `<feComposite in='strokes' in2='tooth' operator='arithmetic' k2='0.6' k3='0.25' result='grain'/>` +
+        `<feComposite in='grain' in2='pressure' operator='arithmetic' k2='1' k3='0.35' result='mix'/>` +
+        `<feColorMatrix in='mix' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3 2.7' result='alpha'/>` +
+        `<feComposite in='SourceGraphic' in2='alpha' operator='in'/></filter>` +
+        `<rect x='${-reach}' y='${-reach}' width='${2 * reach}' height='${2 * reach}' fill='#fff' filter='url(#p)' transform='rotate(${PENCIL.angle})'/></svg>`;
+      // Encoded, so that the render stays well-formed XML when it is saved or shown as a standalone SVG.
+      pencilTextures.set(key, `data:image/svg+xml,${encodeURIComponent(svg)}`);
+    }
+    return pencilTextures.get(key);
+  }
+
+  // A sheet of paper cut to the character's outline, for a render with a background of its own: the
+  // pencil lets paper through, never the background (STYLE.md §4, on a dark host).
+  function paperSheet(id) {
+    return `<filter id="${id}" x="-10%" y="-10%" width="120%" height="120%">` +
+      `<feFlood flood-color="${PENCIL.paper}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
+  }
+
+  // The mask that holds the texture over a view: white keeps the color and transparent lets the paper through.
+  function pencilMask(id, view) {
+    const x = num(-view.w * PENCIL.margin), y = num(-view.h * PENCIL.margin);
+    const w = num(view.w * (1 + 2 * PENCIL.margin)), h = num(view.h * (1 + 2 * PENCIL.margin));
+    return `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x}" y="${y}" width="${w}" height="${h}">` +
+      `<image href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
+  }
+
   function resolveView(spec, v, size) {
     const views = spec.views || {};
     const base = { ...DEFAULT_VIEW, ...(views.portrait || {}) };
@@ -667,10 +723,18 @@
     const bg = opts.bg === false ? null : opts.bg || view.bg || P.bg;
     const size = opts.fluid ? '' : ` width="${num(view.w)}" height="${num(view.h)}"`;
     const cam = `translate(${num(view.x)} ${num(view.y)}) rotate(${view.rotate || 0}) scale(${num(view.scale * 1000) / 1000})`;
+    // opts.pencil: false draws the flat shapes alone, for an icon too small to hold the texture or
+    // for matching a flat reference picture.
+    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', tail + body + head)}</g>`;
+    if (opts.pencil !== false) {
+      defs.push(pencilMask(`${uid}-pencil`, view));
+      const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
+      if (bg) defs.push(paperSheet(`${uid}-paper`));
+      drawing = `${sheet}<g mask="url(#${uid}-pencil)">${drawing}</g>`;
+    }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(view.w)} ${num(view.h)}"${size} data-pf-uid="${uid}">` +
       `<defs>${defs.join('')}</defs>` +
-      (bg ? `<rect width="100%" height="100%" fill="${bg}"/>` : '') +
-      `<g transform="${cam}">${g('root', tail + body + head)}</g></svg>`;
+      (bg ? `<rect width="100%" height="100%" fill="${bg}"/>` : '') + drawing + '</svg>';
   }
 
   // ------------------------------------------------------------------ Mount

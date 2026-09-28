@@ -55,11 +55,11 @@
 <li><strong>Few rules (low Kolmogorov complexity).</strong> Derive values rather than pick them. Measure against one named reference. A special case gets a comment saying why.</li>
 <li><strong>Not the mode.</strong> The most likely choice (a template, a stock phrase, a default chart, a formal tone) is the boring one. Across works, phy stays consistent through the rules, not through sameness.</li>
 <li><strong>Don't make it too artificial.</strong> No gradients, glows, glass, heavy shadows, emoji, stock icons, hype or template layouts.</li>
-<li><strong>Graphite on paper, never black.</strong> Colour goes only to the subject, a character or the data. It is flat, with at most one shade step.</li>
+<li><strong>Graphite on paper, never black.</strong> Colour goes only to the subject, a character or the data. A character is coloured in with coloured pencil and has no outline; data colour is flat. Either has at most one shade step.</li>
 <li><strong>One hand on one dial.</strong> Everything is in Shantell Sans, set by one number: <code>0</code> for a paper's diagram, <code>50</code> for a site, <code>100</code> for a hobby project. Titles, notes and names are never neater than <code>50</code>.</li>
 <li><strong>Keep a set aligned</strong>: within one set, in look, size and structure.</li>
 <li><strong>Tell things apart first</strong>, but never simplify away what makes a thing itself.</li>
-<li><strong>Make it cute:</strong> characters are chibi, soft and round.</li>
+<li><strong>Make it cute:</strong> characters are soft and round, a big head on a small body.</li>
 <li><strong>The owner decides</strong> names, colours and credit. Names keep their owner's case, so phy is always lower case.</li>
 <li><strong>British English, as The Economist writes it:</strong> opinionated, analytical and dry; British in idiom and grammar, not merely in spelling; the exact word in a short sentence, and numbers rather than adjectives. No ceremony and no exclamation marks. The humour is dark, with puns and irony, and stays out of formal work.</li>
 <li><strong>Code is American English</strong>, formal and clean, after Robert C. Martin's <em>Clean Code</em>. The dial, the lower case and the jokes stop at its edge.</li>
@@ -74,7 +74,7 @@
 <li><strong>Work over ceremony.</strong> phy skips formality put on for show, lets the work speak, and looks for more than one way to put an idea. The single most likely answer (the mode, or the MAP estimate) is the most boring one.</li>
 <li><strong>A fan of dark humour, dark comedy and British humour</strong>: dark and dry, understated, and said with a straight face. It stays out of formal work, and may go on a poster or into a talk.</li>
 <li><strong>Draws with code.</strong> phy noticed that <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a>'s character icons have a low Kolmogorov complexity: a few ellipses, some tufts, two pill eyes and a blush. So phy's characters are made by a small program, not stored as pixels.</li>
-<li><strong>The avatar is phy</strong>, phy's fursona: an Eevee in the colours of phy's tuxedo cat, with Oreo crumbs on the ruff and tail, drawn as a chibi (§9).</li>
+<li><strong>The avatar is phy</strong>, phy's fursona: an Eevee in the colours of phy's tuxedo cat, with Oreo crumbs on the ruff and tail, in coloured pencil (§9).</li>
 </ul>
 <h2 id="2-principles">2. principles</h2>
 <ol>
@@ -97,7 +97,7 @@
 <li>Never use gradients, glassmorphism, glows, heavy drop shadows, emoji bullets, stock icons, marketing hero copy, calls to action, generic card grids, or a layout snapped to a grid.</li>
 </ul></li>
 <li><strong>Graphite on paper; colour for the subject.</strong> Everything is in paper and ink tones except what the work is about. On a page of characters, the characters are the only saturated things. In a figure, the data is.</li>
-<li><strong>One layer.</strong> Colour is flat. Each colour may have at most one shade, a single step darker. The shade is used only to tell apart two neighbours of the same colour. There are no lighting effects, highlights or second steps, and nothing is copied from a reference's light and shade.</li>
+<li><strong>One layer.</strong> Colour goes on in one layer: flat in a chart, in coloured pencil on a character (§9). Each colour may have at most one shade, a single step darker. The shade is used only to tell apart two neighbours of the same colour. There are no lighting effects, highlights or second steps, and nothing is copied from a reference's light and shade. The pencil's texture is the same everywhere, so it is paper, not shading.</li>
 <li><strong>Keep the set aligned.</strong> Within a set (a family of characters, a figure series, a deck), anything new matches what is already there in look, size and structure. Where the set is made of code, as a family of character specs is, the code matches too. When a rule changes, it changes everywhere at once.</li>
 <li><strong>Tell things apart first.</strong> If two parts can't be told apart, fix that before matching a reference any closer. Simplify only down to what makes a thing itself, never past it.</li>
 <li><strong>The owner decides.</strong> People and their characters appear as their owners give them:
@@ -106,7 +106,7 @@
 <li>a credit linking to the owner.</li>
 </ul>
 An owner's wish beats a house rule. A character appears only with its owner's say-so.</li>
-<li><strong>Make it cute.</strong> Characters are chibi, soft and round. Cute comes before literal, but never at the cost of what makes a character itself (principle 7).</li>
+<li><strong>Make it cute.</strong> Characters are soft and round, with a big head on a small body. Cute comes before literal, but never at the cost of what makes a character itself (principle 7).</li>
 <li><strong>Not the mode.</strong> The most likely choice is the most boring one: the template layout, the stock phrase, the default chart, the formal tone put on for show. There is more than one way to put an idea, so look for the one that fits this idea.
 <ul>
 <li>Across works, phy stays consistent through the rules (one hand, one dial, one palette), not by every piece looking the same. Within a set, principle 6 still holds.</li>
@@ -380,9 +380,10 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 </ul>
 <h2 id="9-the-avatar-and-characters">9. the avatar and characters</h2>
 <ul>
-<li><strong>phy's mark is phy</strong>, the chibi fursona: the head alone for a favicon or avatar, the whole character where there is room. It is drawn by <code>src/phyfriends.js</code> from <code>characters/phy/phy.js</code>, never redrawn by hand, so every copy matches.</li>
-<li>Characters are <strong>flat chibi vectors</strong>: soft round shapes, solid near-black pill eyes, soft blush, no outlines, no nose and no mouth by default. Each has exactly one shade layer (principle 5), and the body, which sits under the head, always wears it.</li>
-<li>The template came from the <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a> prompt: a close-up with the head tipped, pill eyes and blush on a dark ground. Reviewers of a character should know its examples.</li>
+<li><strong>phy's mark is phy</strong>, the fursona: the head alone for a favicon or avatar, the whole character where there is room. It is drawn by <code>src/phyfriends.js</code> from <code>characters/phy/phy.js</code>, never redrawn by hand, so every copy matches.</li>
+<li>Characters are <strong>drawn in coloured pencil</strong>: soft round shapes coloured in without an outline, pill eyes in each character's own eye colour, soft blush, and no nose and no mouth by default. Each has exactly one shade layer (principle 5), and the body, which sits under the head, always wears it.</li>
+<li><strong>The pencil is one texture over the whole character</strong>, which the factory lays on: strokes rising to the right, the paper's tooth, and patches where the hand pressed more lightly. The paper, rules and all, shows through. The texture belongs to the paper, so it stays put while a character moves. On a background of its own, such as a dark close-up, a character is drawn on a sheet of paper cut to its outline, so the pencil shows paper, never the background. An icon too small to hold it, such as a favicon, is drawn flat.</li>
+<li>The shapes came from the template of the <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a> prompt: a close-up with the head tipped, pill eyes and blush on a dark ground. Reviewers of a character should know its examples.</li>
 <li>Every character is a small spec (about 100 lines) that a factory draws. The rules for drawing one are in <code>FWIENDS.md</code>, next to the factory.</li>
 <li><strong>Motion</strong> is calm and alive. The eyes follow the pointer, smoothed so they never jitter, with breathing, irregular blinks and a slow sway underneath. Nothing bounces all the time. Under <code>prefers-reduced-motion</code>, only the eyes move.</li>
 </ul>
@@ -437,20 +438,20 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <p class="lead">The page has five parts, in this order:</p>
 <ol>
 <li>The title, <code>phy's fwiends</code>, in the hand. That is the project's name wherever people read it; <code>phy_friends</code> is only the repository and code name.</li>
-<li>One line of intro: "a few chibi fwiends, each one drawn from a hundred-odd lines of code."</li>
+<li>One line of intro: "a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code."</li>
 <li>The nav, as on the other two pages: fwiends, style guide, specimen.</li>
 <li><strong>The stage</strong>, a group photo: the fwiends stand together on pencilled ground and all watch the cursor.</li>
 <li>The footer: "characters belong to the people named under them", the style guide and the source, with a mock disclaimer on the last rule.</li>
 </ol>
 <p class="lead"><strong>The stage:</strong></p>
 <ul>
-<li>The stage is the one centred thing on the page, as the subject of a group photo stands in the middle of the frame. The rest keeps to the margin line.</li>
-<li>Every friend is drawn at the same scale, in a box 270 head units tall whose bottom edge is the friend's <code>rig.ground</code>. The box is 7 rules tall, then 6 below 1000px, 5 below 880px and 4 below 360px (5 on phones held sideways), so two fwiends still stand side by side on the smallest phones.</li>
-<li>Ears and tails may reach outside the box, as in a photo. A body or tail that sticks out at ground level widens that friend's slot (<code>--reach-left</code> and <code>--reach-right</code>, measured on load), so neighbours stand close but never tread on a tail.</li>
-<li>The fwiends stand in one row while they fit (from 1720px the page widens so all five do), then wrap onto more rows, each grounded on a rule; phones show two to a row.</li>
+<li>The stage is the one centred thing on the page, as the subject of a group photo stands in the middle of the frame. The rest keeps to the margin line. The stage is also the one wide thing: beside the margin line it runs to the paper's edge, and the page stops at 1720px.</li>
+<li>Every friend is drawn at the same scale, in a box 270 head units tall whose bottom edge is the friend's <code>rig.ground</code>. The box is a whole number of rules, so the ground stays on a rule: 5 rules, and 6 once a row of seven has room, from about 1670px. The smallest phones, below 360px, take 4, so two fwiends still stand side by side.</li>
+<li>Ears and tails may reach outside the box, as in a photo. A body or tail that sticks out at ground level widens that friend's slot (<code>--reach-left</code> and <code>--reach-right</code>, measured on load), so neighbours stand close but never tread on a tail. Below 420px there is no room, and a tail reaches into the gap beside the pair.</li>
+<li>All seven stand in one row from about 1410px. The seven reaches add up to 410 head units and neighbours overlap by 0.06 of a box, so the row is 8.1 boxes wide. Narrower, a row holds at most four, so the seven split four and three, at 5 rules so that both rows fit a laptop's first screen; below about 830px they stand three to a row, and on phones two.</li>
 <li>Each friend's ground is its own patch of rule, gone over in pencil: a seeded wobble (<code>PhyFriends.rng(5)</code>), ink at 70%, 1.4px, through the graphite filter.</li>
 <li>The ring circles the host's name, phy's: "this one" is the one whose page it is. The nav's ring marks the page, as it does everywhere.</li>
-<li>A pencilled note says what to do. From 1200px it sits in the margin to the right, tilted <code>−2°</code>, with an arrow: "psst: they watch your cursor. click one to say hi". Below that it is one centred line under the stage, and touch screens read "tap" for "click".</li>
+<li>A pencilled note says what to do: "psst: they watch your cursor. click one to say hi". It sits on the rule under the nav, over the right end of the row with one blank rule below, so it is read before the fwiends and is on the first screen of every device. Being one long line, it takes the title's tilt, <code>−1°</code>, rather than a margin note's <code>−2°</code>, at which its far end would climb half a rule; and sitting so close, it needs no arrow. Where fewer than seven stand in a row it is only "click one to say hi", and touch screens, which have no cursor, read "tap one to say hi".</li>
 <li>Without JavaScript: "the fwiends are drawn live, so they need JavaScript to appear."</li>
 </ul>
 <p class="lead"><strong>Labels.</strong> Each friend has a small label, three rules tall:</p>
@@ -468,20 +469,23 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <tbody>
 <tr><td>that's me</td><td>Meet phy, the creator behind it all!</td></tr>
 <tr><td>click one to say hi</td><td>Click a character to interact!</td></tr>
-<tr><td>a few chibi fwiends, each one drawn from a hundred-odd lines of code.</td><td>Welcome to a magical world of adorable characters</td></tr>
+<tr><td>a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code.</td><td>Welcome to a magical world of adorable characters</td></tr>
 <tr><td>characters belong to the people named under them</td><td>All rights reserved.</td></tr>
 </tbody>
 </table>
 <p>The "psst" and the footer's disclaimer are the page's two winks, both in the corners (<code>STYLE.md</code> §3).</p>
 <p class="lead"><strong>Saying hi:</strong></p>
 <ul>
-<li>Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a touch wider.</li>
+<li>Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a touch wider. It stays perked while either lasts, click or no click.</li>
 <li>A click, a tap, Enter or Space plays the library's happy hop: happy eyes, a small mouth, two bounces. The other fwiends glance at the one being greeted.</li>
+<li>A friend in mid-air ignores another hi until it lands, and a key held down says hi once. Starting the hop again would drop it to the ground in one frame.</li>
+<li>A hidden status line tells a screen reader what happened, in one flat sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion. Names keep their owner's case: "phy hops twice."</li>
+<li>A double-click or a long press on a friend selects nothing, and a quick second tap doesn't zoom the page. The labels stay selectable, so a handle can still be copied.</li>
 </ul>
 <p class="lead"><strong>The link preview and icons</strong> come from <code>python3 design/site_assets.py</code>, run after any character changes:</p>
 <ul>
 <li>the favicon is phy's head;</li>
-<li>the preview (1200×630) is a snapshot of the page with the whole set.</li>
+<li>the preview (1200×630) is a snapshot of the page with the whole set. The page is photographed at 1440×756, the same shape, and scaled down, because 1440px is the narrowest common window where all seven stand in one row; at 1200px the second row would fall out of the picture.</li>
 </ul>
 <h2 id="drawing-a-friend">drawing a friend</h2>
 <p>These are the rules the factory (<code>src/phyfriends.js</code>) encodes. A friend is a spec of about 100 lines, a palette plus shape parameters, not a traced path. Follow them when turning someone's picture or design sheet into a friend.</p>
@@ -492,11 +496,12 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>A friend appears only with its owner's consent, and its credit line names them.</li>
 <li>Keep private references (photos of a real pet, say) in a git-ignored <code>private/</code> folder. They are never published.</li>
 </ul>
-<p class="lead"><strong>Flat vector:</strong></p>
+<p class="lead"><strong>Coloured pencil:</strong></p>
 <ul>
-<li>No outlines, no gradients, no textures.</li>
+<li>No outlines and no gradients. The one texture is the factory's pencil (<code>STYLE.md</code> §9), which <code>render</code> and <code>mount</code> lay over the whole friend. A spec never draws a texture of its own.</li>
+<li><code>pencil: false</code> draws the flat shapes alone. It is only for an icon too small to hold the texture, and for matching a flat reference picture, as <code>pf.py compare</code> does.</li>
 <li>Every colour is one the character really has: fur, hair, markings, accessories. A band the owner counts as a marking (phy's crest) is a colour, not shading.</li>
-<li>A few colours, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, … The current five use 6–11 each, plus <code>bg</code> (<code>#1c1d21</code>, the same for all).</li>
+<li>A few colours, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, … The current seven use 6–12 each, plus <code>bg</code> (<code>#1c1d21</code>, the same for all).</li>
 <li><strong>Exactly one shade layer</strong> (<code>STYLE.md</code>, principle 5). <code>&lt;name&gt;Shade</code> is derived by the library from <code>&lt;name&gt;</code> with <code>PhyFriends.shadeOf</code>: CIELAB L* <code>−10</code>, chroma <code>×1.2</code>, the same hue, and near-whites lean to lavender. The shades therefore match across fwiends.
 <ul>
 <li>Every friend has the layer, and none has a second. The body sits under the head, so every body is in its fur's shade.</li>
@@ -505,9 +510,9 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>Where a shade lands on a neighbouring colour, the neighbour moves, not the shade: phy's crumb went a step darker, so the tail's cookie base stays apart from the shaded hip.</li>
 </ul></li>
 <li>Nothing is copied from a reference's lighting: no pale rim along an ear, no darker far side, no highlights.</li>
-<li>A pale colour that would vanish on paper takes one slightly deeper flat tint wherever it appears (mumuyou's white, <code>#efeef3</code>).</li>
+<li>A pale colour that would vanish on paper takes one slightly deeper tint wherever it appears (mumuyou's white, <code>#efeef3</code>). The pencil lets the paper through, so judge it on the page, not on a flat render.</li>
 </ul>
-<p class="lead"><strong>Chibi proportions, in head space:</strong></p>
+<p class="lead"><strong>Proportions, in head space:</strong> a big head on a small, seated body.</p>
 <ul>
 <li>The origin sits between the eyes. The head is widest around eye level, about 140–190 units across the cheeks.</li>
 <li>Ear tips reach about −155 (floppy ears less), and the paws reach <code>rig.ground</code>, about +131. A tail may curl out to one side.</li>
@@ -519,7 +524,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li><strong>fluffy ellipses</strong> for the head, face mask and chest, whose outlines grow small curved tufts;</li>
 <li><strong>a star hair mop</strong> of broad, curved, flame-like locks, some hanging over the face;</li>
 <li><strong>rounded-triangle ears</strong>, with an inner ear and stripe bands only where the character really has them;</li>
-<li><strong>pill eyes</strong>: solid near-black, no whites, no highlight. Both eyes match, even when the art shows coloured eyes, unless the owner asks otherwise. mumuyou's owner did, so his eyes are flat pills in his own colours (blue on his right, gold on his left) through <code>eyes.right</code>, with no dark rim round the colour;</li>
+<li><strong>pill eyes</strong> in the character's own eye colour: one flat colour per eye, with no whites, no highlight and no dark rim round the colour (a rim reads as an outline). The colour comes from the art (<code>eyes.color</code>); where the art draws dark eyes, as Howdi's and Terry's does, they are near-black. A colour that would be faint at gallery size goes one house step deeper, as phy's green and mumuyou's gold do. Eyes of two colours take the other through <code>eyes.right</code>: mumuyou's, K3V1N's and Brian's. The palette keeps <code>eye</code>, a near-black, for the open mouth;</li>
 <li>soft <strong>blush</strong> ovals, in the owner's colour if they have one (Yuda's is blue, <code>#a9dbf3</code>);</li>
 <li>no nose, and no mouth by default.</li>
 </ul>
@@ -530,7 +535,8 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li>Each friend works out the direction from its own head to the pointer, so the group converges on it. The eyes take the full offset (<code>lookX/lookY</code>); the head turns about half as much (<code>turnX/turnY</code>, drawn as layer parallax).</li>
 <li>Idle underneath: breathing, blinks at irregular intervals, a slow tail sway, an occasional ear flick.</li>
-<li>When the pointer leaves the window, or sits still for a while, the fwiends drift back to centre or glance around. On touch screens they follow the finger while it touches; there is no gyroscope.</li>
+<li>When the pointer leaves the window, or sits still for a while, the fwiends drift back to centre or glance around. A pen is followed like a mouse. On touch screens they follow the finger while it touches; there is no gyroscope.</li>
+<li>The stage stops drawing while none of it is in view, or the page is hidden, to spare a phone's battery. It keeps its own clock, which stops with it, so everything picks up where it left off.</li>
 <li>With <code>prefers-reduced-motion</code>: eyes only, no idle motion, and saying hi changes just the face.</li>
 </ul>
 <hr>
