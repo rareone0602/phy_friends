@@ -1,0 +1,23 @@
+% diagram.tex: an example of a paper's main diagram in the house style (STYLE.md §8).
+% Build it here with `lualatex diagram.tex`; the paper includes diagram.pdf.
+\documentclass[tikz, border=4pt]{standalone}
+\usepackage{newtxtext, newtxmath}   % The paper's typeface: Times, as in most venues.
+                                    % The text package supplies the digits for math.
+\usepackage{phy-diagram}
+\begin{document}
+\begin{tikzpicture}[phy]
+  \node[box] (enc) {Encoder};
+  \node[box, series=1, right=of enc] (mem) {Slow memory};
+  \node[box, right=of mem] (dec) {Decoder};
+  \node[left=5mm of enc] (x) {$x_t$};
+  \node[right=5mm of dec] (y) {$\hat{y}_t$};
+  \draw[arrow] (x) -- (enc);
+  \draw[arrow] (enc) -- node[above] {$z_t$} (mem);
+  \draw[arrow] (mem) -- node[above] {$m_t$} (dec);
+  \draw[arrow] (dec) -- (y);
+  \draw[arrow] (mem.south east) .. controls +(0.4,-0.7) and +(-0.4,-0.7)
+    .. node[below] {Kept for $k = 64$ steps} (mem.south west);
+  \node[note, above=6mm of mem, xshift=14mm] (n) {The new part};
+  \draw[note arrow] (n.west) to[bend right=25] (mem.north);
+\end{tikzpicture}
+\end{document}

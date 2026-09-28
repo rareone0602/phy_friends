@@ -3,5 +3,10 @@ out/
 .claude/settings.local.json
 __pycache__/
 
-# per-character material that informs a design but is not published (e.g. photos of a real pet)
+# Per-character material that informs a design but is not published, such as photos of a real pet.
 characters/*/private/
+
+# LaTeX build output from figures/diagram.tex and similar sources.
+figures/*.aux
+figures/*.log
+figures/*.pdf

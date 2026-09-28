@@ -1,16 +1,17 @@
 /*!
- * phy_friends — a tiny factory for flat-vector chibi characters.
+ * phy_friends: a small factory for flat-vector chibi characters.
  *
  * A character is a small data "spec": a palette plus a handful of shape
- * parameters (head, face, ears, hair, eyes, ...). render(spec, {pose, view})
- * turns it into an SVG string; mount(el, spec) gives a live rig whose
- * setPose() only rewrites a few transforms, so it is cheap to animate or to
- * drive from the mouse.
+ * parameters (head, face, ears, hair, eyes, and so on). Calling
+ * render(spec, {pose, view}) returns it as an SVG string. Calling
+ * mount(el, spec) returns a live rig whose setPose() rewrites only a few
+ * transforms, so the rig is cheap to animate or to drive from the mouse.
  *
- * Head space: origin between the eyes, +x right, +y down, the head is about
- * 200 units wide. Angles are degrees; 0 = right, 90 = down (screen space).
+ * Head space: the origin is between the eyes, +x points right, +y points down,
+ * and the head is about 200 units wide. Angles are in degrees: 0 is right and
+ * 90 is down (screen space).
  *
- * Works as a classic <script> (window.PhyFriends) or as a CommonJS module.
+ * Loads as a classic <script> (window.PhyFriends) or as a CommonJS module.
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -26,9 +27,9 @@
     return [x * c - y * s, x * s + y * c];
   };
 
-  // ---------------------------------------------------------------- random
+  // ---------------------------------------------------------------- Random
 
-  function rng(seed) { // mulberry32
+  function rng(seed) { // Mulberry32 PRNG
     let a = (seed >>> 0) || 0x9e3779b9;
     return () => {
       a = (a + 0x6D2B79F5) | 0;
@@ -38,11 +39,11 @@
     };
   }
 
-  // The house shade (STYLE.md §6): the one shade layer every friend shares. A palette role
-  // `<name>Shade` that the spec leaves out is <name> one fixed step darker in CIELAB lightness,
-  // its own hue a little richer (chroma x1.2, kept inside sRGB); near-whites, which have no hue
-  // of their own, lean to lavender instead, as the artists' own shading does. Every friend's
-  // shades are the same step.
+  // The house shade (STYLE.md principle 5; FWIENDS.md) is the single shade layer that every
+  // friend shares. When a spec omits a palette role `<name>Shade`, it is derived from <name>:
+  // one fixed step darker in CIELAB lightness, with its own hue at a higher chroma (x1.2, kept
+  // inside the sRGB gamut). Near-whites have no hue of their own, so they shift toward lavender
+  // instead, matching the artists' own shading. Every friend's shades use the same step.
   const SHADE = { dL: -10, chroma: 1.2, lavender: [2, -6], neutral: 10 };
   function shadeOf(hex, by = SHADE) {
     let h = hex.replace('#', ''); if (h.length === 3) h = h.replace(/./g, '$&$&');
@@ -66,7 +67,7 @@
     return '#' + rgb.map(c => Math.max(0, Math.min(255, Math.round(c * 255))).toString(16).padStart(2, '0')).join('');
   }
   function withShades(palette) {
-    const P = {}; // each derived shade right after its colour
+    const P = {}; // Insert each derived shade directly after its base color.
     for (const [k, v] of Object.entries(palette)) {
       P[k] = v;
       if (typeof v === 'string' && /^#[0-9a-f]{3,6}$/i.test(v) && !(`${k}Shade` in palette)) P[`${k}Shade`] = shadeOf(v);
@@ -80,11 +81,12 @@
     return h >>> 0;
   }
 
-  // ----------------------------------------------------------- path builder
+  // ----------------------------------------------------------- Path builder
 
-  // Closed outline through nodes {x, y, c, b}.
-  //   c: corner node (sharp); otherwise the curve passes smoothly (Catmull-Rom).
-  //   b: bend of the edge leaving a corner node, in degrees. For outlines that
+  // Builds a closed outline through nodes {x, y, c, b}.
+  //   c: True for a corner node (sharp); otherwise the curve passes through smoothly
+  //      (Catmull-Rom).
+  //   b: The bend of the edge leaving a corner node, in degrees. For outlines that
   //      run clockwise on screen (increasing angle), b > 0 bows the edge
   //      inward (concave) and b < 0 bows it outward (convex).
   function pathD(nodes, closed = true, tension = 1 / 6) {
@@ -108,7 +110,7 @@
     return closed ? d + 'Z' : d;
   }
 
-  // --------------------------------------------------------------- ellipses
+  // --------------------------------------------------------------- Ellipses
 
   function ellipse(s) {
     const rx = s.rx ?? 50;
@@ -127,17 +129,17 @@
     return (Math.atan2(v / e.ry, u / e.rx) / DEG + 360) % 360;
   }
 
-  // ---------------------------------------------------------------- shapes
+  // ---------------------------------------------------------------- Shapes
 
-  // Fluffy blob: an ellipse whose outline grows tufts of fur over angle ranges.
+  // Fluffy blob: an ellipse whose outline carries tufts of fur over given angle ranges.
   //   {cx, cy, rx, ry, rot, step, fluff: [{from, to, n, len, lean, jit, depth, b1, b2, sym, seed}]}
-  //   n tufts between angles from..to; len = tuft length; lean shifts tips
-  //   toward +angle (deg); jit = randomness 0..1; depth = notch depth (0..1 of
-  //   radius); b1/b2 bend the rising/falling side of each tuft; sym mirrors the
-  //   range across the vertical axis. Ranges must not overlap.
-  //   Sawtooth shingles: len ~0, depth ~0.1, a lean that puts each tip near
+  //   Each range places n tufts between angles from..to. Per range: len = tuft length;
+  //   lean shifts the tips toward +angle (degrees); jit = randomness (0..1); depth =
+  //   notch depth (0..1 of the radius); b1/b2 bend the rising/falling side of each tuft;
+  //   sym mirrors the range across the vertical axis. Ranges must not overlap.
+  //   For sawtooth shingles, use len ~0, depth ~0.1, a lean that puts each tip near
   //   one of its valleys, and a convex long side (b ~ -15) with a straight
-  //   notch (b ~ 0). len < 0 pulls the tip inward (n: 1 flattens an arc).
+  //   notch (b ~ 0). A negative len pulls the tip inward (with n: 1, it flattens an arc).
   function fluffy(s, seed = 1) {
     const e = ellipse(s), step = s.step || 24, ranges = [];
     (s.fluff || []).forEach((fl, i) => {
@@ -196,11 +198,11 @@
     return nodes;
   }
 
-  // Spiky tuft (hair): tips are absolute points; a valley sits on the base
+  // Spiky tuft (hair). Tips are absolute points; a valley sits on the base
   // ellipse (scaled by `valley`) halfway between consecutive tips.
   //   {cx, cy, rx, ry, rot, valley, b1, b2, tips: [[x, y, b1, b2, v], ...]}
-  //   per-tip b1/b2 bend the edge rising to / falling from that tip; v overrides
-  //   the following valley (a scale factor, or an absolute [x, y]).
+  //   A tip's own b1/b2 bend the edges rising to and falling from that tip; its v
+  //   overrides the following valley (a scale factor, or an absolute [x, y]).
   function star(s) {
     const e = ellipse(s);
     const tips = s.tips
@@ -220,8 +222,9 @@
     return nodes;
   }
 
-  // Any shape spec -> nodes. Raw nodes: [[x, y, corner, bend], ...]; round (0-0.5)
-  // softens every corner into an arc, cut at that fraction of its shorter edge.
+  // Converts any shape spec to nodes. Raw nodes are given as [[x, y, corner, bend], ...];
+  // the optional round (0 to 0.5) softens every corner into an arc, cut at that fraction
+  // of its shorter edge.
   function shapeNodes(s, seed) {
     if (s.nodes) {
       const ns = s.nodes.map(n => (Array.isArray(n) ? { x: n[0], y: n[1], c: !!n[2], b: n[3] || 0 } : n));
@@ -231,9 +234,9 @@
     return fluffy(s, seed);
   }
 
-  // Each corner becomes two corners joined by an arc: bent by minus half the turn
-  // there, so the arc leaves along the incoming edge and arrives along the outgoing
-  // one. The corner's own bend moves to the outgoing edge.
+  // Replaces each corner with two corners joined by an arc. The arc is bent by minus half
+  // the turn at that corner, so it leaves along the incoming edge and arrives along the
+  // outgoing one. The corner's own bend moves to the outgoing edge.
   function roundCorners(ns, r) {
     const n = ns.length;
     return ns.flatMap((v, i) => {
@@ -246,10 +249,11 @@
         { x: v.x + (bx / lb) * d, y: v.y + (by / lb) * d, c: true, b: v.b }];
     });
   }
-  // Rounded polygons, several to a shape (crumbs, spots): polys: [[x, y, r, sides,
-  // rot, aspect], ...], r out to the corners, rot in degrees, and aspect < 1 squashing
-  // each one across its first corner (a diamond from a square). The shape's round
-  // (default 0.2) softens the corners and its bend (default -6) bows the edges out.
+  // Rounded polygons, several per shape (for crumbs or spots), given as
+  // polys: [[x, y, r, sides, rot, aspect], ...]. The radius r reaches the corners, rot is
+  // in degrees, and aspect < 1 squashes each polygon across its first corner (turning a
+  // square into a diamond). The shape's round (default 0.2) softens the corners, and its
+  // bend (default -6) bows the edges outward.
   function polyNodes(p, s) {
     const [x, y, r, n = 6, a = 0, k = 1] = p, b = s.bend ?? -6;
     return roundCorners(Array.from({ length: n }, (_, i) => {
@@ -259,17 +263,17 @@
   }
   const shapeD = (s, seed) => s.d || (s.polys ? s.polys.map(p => pathD(polyNodes(p, s))).join('') : pathD(shapeNodes(s, seed)));
 
-  // Ear in local space: base centred on the origin, pointing up (-y).
+  // Ear in local space: the base is centered on the origin, and the ear points up (-y).
   //   {width, length, lean, tip, b1, b2, inner: {scale, dx, dy}, stripes: [{t, w, a, b, span}]}
-  //   local +x is the side facing the top of the head; lean moves the tip
-  //   along +x; tip > 0 rounds the tip; stripes are bands at fraction t of the
-  //   length, w thick, tilted a degrees, bowed by b; span [x0, x1] limits a
-  //   band to that local x range (default: the full ear; the end is square).
-  //   inner is the outline scaled by `scale` and shifted by dx/dy; it may also
-  //   override width/length/lean/tip/b1/b2 to get its own (e.g. slimmer) shape.
-  //   inner.front: true draws the inner ear in front of the head (layers
-  //   earLfront / earRfront, right after 'base'), so it can run down over the
-  //   head fur while the rest of the ear stays behind it.
+  //   Local +x is the side facing the top of the head. The lean moves the tip along
+  //   +x, and tip > 0 rounds the tip. Stripes are bands at fraction t of the length,
+  //   w thick, tilted a degrees, and bowed by b; span [x0, x1] limits a band to that
+  //   local x range (the default is the full ear; the band's end is square).
+  //   The inner ear is the outline scaled by `scale` and shifted by dx/dy; it may also
+  //   override width/length/lean/tip/b1/b2 to get its own (e.g., slimmer) shape.
+  //   Setting inner.front: true draws the inner ear in front of the head (layers
+  //   earLfront / earRfront, directly after 'base'), so it can extend down over the
+  //   head fur while the rest of the ear stays behind the head.
   function earNodes(ear) {
     const w = ear.width / 2, L = ear.length, lean = ear.lean || 0, r = ear.tip || 0;
     const B1 = [-w, 0], T = [lean, -L], B2 = [w, 0];
@@ -284,22 +288,23 @@
   }
   function norm(x, y) { const l = Math.hypot(x, y) || 1; return [x / l, y / l]; }
 
-  // Tail in local space: base on the origin, pointing up (-y). It is a fluffy
-  // ellipse (`fluff` angles as for any fluffy: 270 = tip, 90 = base) bent into
+  // Tail in local space: the base is on the origin, and the tail points up (-y). It is a
+  // fluffy ellipse (`fluff` angles as for any fluffy: 270 = tip, 90 = base) bent into
   // a plume.
   //   {length, width, curl, bend, taper, root, fluff}
-  //   local +x faces away from the body; curl moves the tip that way (the spine
-  //   bends as u², u = 0 at the base .. 1 at the tip); taper and root (0..1)
-  //   pinch the tip end and the base end, so the plume is bushiest past midway.
-  //   bend (degrees) turns the spine itself, by bend·u² at the tip (+ outward,
-  //   - inward), and lays the width off along the spine's normal, so the plume
-  //   keeps its thickness as it curls over (curl only slides it sideways).
-  //   `blob` swaps in another ellipse spec (e.g. a tip marking) bent the same way.
-  // tailBend(tail) is that mapping: (x, y) in the straight plume -> [x, y] bent.
+  //   Local +x faces away from the body, and curl moves the tip that way (the spine
+  //   bends as u², where u runs from 0 at the base to 1 at the tip). The taper and
+  //   root values (0..1) pinch the tip end and the base end, so the plume is widest
+  //   past its midpoint. The bend value (degrees) turns the spine itself, by bend·u²
+  //   at the tip (+ outward, - inward), and lays the width off along the spine's
+  //   normal, so the plume keeps its thickness as it curls over (curl only slides it
+  //   sideways). The `blob` argument of tailNodes swaps in another ellipse spec
+  //   (e.g., a tip marking) bent the same way.
+  // Calling tailBend(tail) returns that mapping: (x, y) in the straight plume -> [x, y] bent.
   function tailBend(tail) {
     const L = tail.length, taper = tail.taper ?? 0.3, root = tail.root ?? 0.8, curl = tail.curl || 0;
     const bend = (tail.bend || 0) * DEG, N = 60, S = [[0, 0]];
-    // the bent spine, walked in N steps per length (out to u = 1.2, as far as tufts reach)
+    // Sample the bent spine in N steps per tail length, out to u = 1.2 (as far as tufts reach).
     if (bend) for (let i = 1; i <= N * 1.2; i++) {
       const a = bend * ((i - 0.5) / N) ** 2, [x, y] = S[i - 1];
       S.push([x + Math.sin(a) * L / N, y - Math.cos(a) * L / N]);
@@ -321,9 +326,9 @@
       return { ...n, x, y };
     });
   }
-  // Where a rigid mark centred at (cx, cy) in the straight plume rides once the
-  // tail is bent: `translate(..) rotate(..) translate(..)` moving the centre onto
-  // the bent tail and turning the mark with the spine there.
+  // Returns where a rigid mark centered at (cx, cy) in the straight plume rides once the
+  // tail is bent: a `translate(..) rotate(..) translate(..)` that moves the center onto
+  // the bent tail and turns the mark with the spine at that point.
   function tailRide(tail, cx, cy) {
     const L = tail.length, bent = tailBend(tail);
     const u = Math.min(1.2, Math.max(0, -cy / L)), u0 = Math.max(0, Math.min(1.19, u - 0.005));
@@ -332,7 +337,7 @@
     return `translate(${num(X)} ${num(Y)}) rotate(${num(turn)}) translate(${num(-cx)} ${num(-cy)})`;
   }
 
-  // ------------------------------------------------------------------ specs
+  // ------------------------------------------------------------------ Specs
 
   const registry = new Map();
   const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
@@ -357,32 +362,32 @@
     return r;
   }
 
-  // ------------------------------------------------------------------- rig
+  // ------------------------------------------------------------------- Rig
 
-  // Every pose field is optional; numbers are blended additively by anim.js.
+  // Every pose field is optional; anim.js blends the numeric fields additively.
   const POSE = {
-    x: 0, y: 0,         // whole-body offset (head units)
-    squash: 0,          // + stretches up, - squashes down (about the ground)
-    tilt: 0,            // head roll, degrees
-    headX: 0, headY: 0, // head offset from the body (head units): nods, bobs
-    turnX: 0, turnY: 0, // head yaw / pitch, -1..1 (drawn as layer parallax)
-    lookX: 0, lookY: 0, // gaze, -1..1
-    blink: 0,           // 0 open .. 1 shut (only the open eye shape squashes)
-    widen: 0,           // eye size: + wide open (0.3 = 30% bigger), - squint
-    earL: 0, earR: 0,   // extra outward ear rotation, degrees
-    hair: 0,            // hair sway, degrees
-    tail: 0,            // tail wag, degrees: + swings the tip outward, - tucks it in behind
-    blush: 1,           // blush opacity
-    eyes: 'open',       // 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override)
-    mouth: null,        // null = spec default; 'none' | 'w' | 'smile' | 'o' | 'v' | 'open'
+    x: 0, y: 0,         // Whole-body offset (head units)
+    squash: 0,          // Positive stretches up, negative squashes down (about the ground)
+    tilt: 0,            // Head roll in degrees
+    headX: 0, headY: 0, // Head offset from the body (head units), for nods and bobs
+    turnX: 0, turnY: 0, // Head yaw and pitch, -1..1 (rendered as layer parallax)
+    lookX: 0, lookY: 0, // Gaze direction, -1..1
+    blink: 0,           // Eyelid closure, 0 open to 1 shut (only the open eye shape squashes)
+    widen: 0,           // Eye size: positive widens (0.3 = 30% larger), negative squints
+    earL: 0, earR: 0,   // Extra outward ear rotation in degrees
+    hair: 0,            // Hair sway in degrees
+    tail: 0,            // Tail wag in degrees: positive swings the tip outward, negative tucks it in behind
+    blush: 1,           // Blush opacity
+    eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override it)
+    mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'o' | 'v' | 'open'
   };
 
-  // Parallax depth per layer: how far it slides when the head turns.
+  // Parallax depth per layer: how far each layer slides when the head turns.
   const DEPTH = { tail: -0.4, body: -0.15, earL: -0.5, earR: -0.5, face: 0.35, blush: 0.55, eyes: 0.6, mouth: 0.55, hair: 0.45 };
 
   const EAR_DEFAULT = { base: [-70, -70], angle: 35, width: 60, length: 70 };
   const EYE_DEFAULT = { x: 35, y: 0, w: 14, h: 28, shape: 'pill', range: 6 };
-  // A bushy plume curling up behind the body's left side (see tailNodes).
+  // Default tail: a bushy plume that curls up behind the left side of the body (see tailNodes).
   const TAIL_DEFAULT = {
     base: [-56, 102], angle: 55, length: 108, width: 58, curl: -50,
     fluff: [{ from: 150, to: 205, n: 2, len: 8, lean: 8, sym: true },
@@ -401,8 +406,8 @@
       : `translate(${num(-bx)} ${num(by)}) rotate(${num(a)}) scale(-1 1)`;
   }
   // The tail pivots at its base and leans `angle` degrees away from the body's
-  // centre line (mirrored when the base is on the left, so +x stays outward).
-  // A tail that sets `bend` does its curling that way, so it drops the default curl.
+  // center line (mirrored when the base is on the left, so +x stays outward).
+  // A tail that sets `bend` curls through the bend instead, so it drops the default curl.
   const tailFor = spec => ({ ...TAIL_DEFAULT, ...(spec.tail && spec.tail.bend ? { curl: 0 } : {}), ...spec.tail });
   function tailPlace(tail, wag) {
     const [bx, by] = tail.base, out = bx < 0 ? -1 : 1;
@@ -441,10 +446,10 @@
     };
   }
 
-  // ---------------------------------------------------------------- render
+  // ---------------------------------------------------------------- Render
 
-  // Portrait: the whole character (ear tips ~ -145 .. paws ~ +132, tail to ~ -150
-  // at full wag) in a square, with a margin for hops and stretches.
+  // Portrait view: fits the whole character (ear tips ~ -145 .. paws ~ +132, tail to
+  // ~ -150 at full wag) in a square, with a margin for hops and stretches.
   const DEFAULT_VIEW = { w: 512, h: 512, x: 256, y: 266, scale: 1.6, rotate: 0 };
   let UID = 0;
 
@@ -459,8 +464,8 @@
     return out;
   }
 
-  // Eye strokes: w, h of the eye, a = half-span as a fraction of w (eyes.arc),
-  // d = 1 for the left eye and -1 for the right ('squint' points inwards: > <).
+  // Eye strokes take the eye's w and h, a = the half-span as a fraction of w (eyes.arc),
+  // and d = 1 for the left eye or -1 for the right ('squint' points inward: > <).
   const EYE_STROKES = {
     happy: (w, h, a) => `M${num(-w * a)} ${num(h * 0.12)}Q0 ${num(-h * 0.42)} ${num(w * a)} ${num(h * 0.12)}`,
     closed: (w, h, a) => `M${num(-w * a)} ${num(-h * 0.08)}Q0 ${num(h * 0.3)} ${num(w * a)} ${num(-h * 0.08)}`,
@@ -477,7 +482,7 @@
     const spec = resolve(specOrName);
     const uid = opts.uid || `pf${(++UID).toString(36)}`;
     const view = resolveView(spec, opts.view, opts.size);
-    // a view may carry the pose its reference was drawn in; opts.pose overrides it
+    // A view may carry the pose its reference was drawn in; opts.pose overrides that pose.
     const st = poseState(spec, view.pose ? { ...view.pose, ...opts.pose } : opts.pose);
     const P = withShades(spec.palette || {});
     const col = c => (c && P[c]) || c || '#000';
@@ -510,7 +515,7 @@
     const extras = (part, clip, under) => {
       const out = [];
       (spec.extras || []).forEach((x, i) => {
-        // on: 'ears' puts one extra on both ears (ear-local space is mirrored for the right)
+        // An extra with on: 'ears' is drawn on both ears (ear-local space is mirrored for the right ear).
         const on = x.on === 'ears' && (part === 'earL' || part === 'earR') ? part : x.on;
         if (on !== part || !!x.under !== under) return;
         const s = extraShape(x, i, part);
@@ -518,7 +523,7 @@
       });
       return out.join('');
     };
-    // A part = optional main shape + its extras (clipped extras stay inside it).
+    // A part is an optional main shape plus its extras; clipped extras stay inside the main shape.
     const part = (name, shape, color) => {
       if (!shape) return extras(name, null, true) + extras(name, null, false);
       const d = shapeD(shape, seed(name));
@@ -526,7 +531,7 @@
       return extras(name, clip, true) + fill(d, shape.color || color) + extras(name, clip, false);
     };
 
-    // Ears (the inner ear goes in its own layer when it sits in front of the head)
+    // Ears. The inner ear goes in its own layer when it sits in front of the head.
     const innerEar = e => {
       const k = e.inner.scale ?? 0.6, dx = e.inner.dx || 0, dy = e.inner.dy || 0;
       return fill(pathD(earNodes({ ...e, ...e.inner }).map(n => ({ ...n, x: n.x * k + dx, y: n.y * k + dy }))), e.inner.color || 'earInner');
@@ -553,8 +558,8 @@
     };
 
     // Eyes. `shine` is one highlight or a list of marks drawn in order and
-    // clipped to the eye, each a circle (r) or an ellipse (rx, ry): e.g. an
-    // iris, a lighter crescent peeking in at the bottom, then a white glint.
+    // clipped to the eye, each a circle (r) or an ellipse (rx, ry): e.g., an
+    // iris, then a lighter crescent visible at the bottom, then a white highlight.
     const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
     let eyeClip = '';
     if (eye.shine || (eye.right && eye.right.shine)) {
@@ -564,7 +569,7 @@
         : `M${num(-w / 2)} ${num(-h / 2 + r)}A${num(r)} ${num(r)} 0 0 1 ${num(w / 2)} ${num(-h / 2 + r)}V${num(h / 2 - r)}` +
           `A${num(r)} ${num(r)} 0 0 1 ${num(-w / 2)} ${num(h / 2 - r)}Z`);
     }
-    // eyes.right overrides the right eye's colour and shine (for odd-coloured eyes)
+    // The eyes.right entry overrides the right eye's color and shine (for eyes of two colors).
     const eyeShape = side => {
       const e = side === 'R' && eye.right ? { ...eye, ...eye.right } : eye;
       const { w, h } = eye, c = col(e.color || 'eye'), tilt = (eye.tilt || 0) * (side === 'L' ? 1 : -1);
@@ -580,7 +585,8 @@
         open += `<g clip-path="${eyeClip}">${marks}</g>`;
       }
       if (tilt) open = `<g transform="rotate(${tilt})">${open}</g>`;
-      // happy / closed / squint strokes: eyes.stroke sets the line width, eyes.arc the half-span (x w)
+      // Strokes for 'happy', 'closed', and 'squint': eyes.stroke sets the line width, and
+      // eyes.arc sets the half-span (as a multiple of w).
       const stroke = k => `<path d="${EYE_STROKES[k](w, h, eye.arc ?? 0.9, side === 'L' ? 1 : -1)}" fill="none" stroke="${c}"` +
         ` stroke-width="${num(eye.stroke ?? w * 0.42)}" stroke-linecap="round" stroke-linejoin="round"/>`;
       const key = `eye${side}`;
@@ -594,8 +600,8 @@
       const s = m.size || 5;
       return when('mouth', k, `<path transform="translate(${m.x || 0} ${m.y ?? 22})" d="${MOUTHS[k](s)}" fill="${k === 'o' ? col(m.color || 'eye') : 'none'}" stroke="${col(m.color || 'eye')}" stroke-width="${num(s * 0.35)}" stroke-linecap="round" stroke-linejoin="round"/>`);
     }).join('') + when('mouth', 'open', (() => {
-      // open 'D' mouth: a flat-topped opening with a tongue (m.tongue, else palette
-      // tongue or earInner) and, with m.fang, one small fang on the right
+      // Open 'D' mouth: a flat-topped opening with a tongue (m.tongue, else the palette's
+      // tongue or earInner) and, when m.fang is set, one small fang on the right.
       const s = (m.size || 5) * 1.8, D = `M${num(-s)} ${num(-0.35 * s)}Q0 ${num(-0.1 * s)} ${num(s)} ${num(-0.35 * s)}` +
         `C${num(s)} ${num(0.6 * s)} ${num(0.5 * s)} ${num(1.2 * s)} 0 ${num(1.2 * s)}C${num(-0.5 * s)} ${num(1.2 * s)} ${num(-s)} ${num(0.6 * s)} ${num(-s)} ${num(-0.35 * s)}Z`;
       const fang = m.fang ? `<path d="M${num(0.28 * s)} ${num(-0.26 * s)}L${num(0.64 * s)} ${num(-0.29 * s)}L${num(0.47 * s)} ${num(0.14 * s)}Z" fill="#fff"/>` : '';
@@ -603,7 +609,7 @@
         `<ellipse cx="0" cy="${num(0.9 * s)}" rx="${num(0.62 * s)}" ry="${num(0.42 * s)}" fill="${col(m.tongue || (P.tongue ? 'tongue' : 'earInner'))}"/></g>${fang}</g>`;
     })());
 
-    // Blush; tilt > 0 raises the outer ends (mirrored, like eyes.tilt)
+    // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt).
     const bl = spec.blush;
     const blushSvg = bl ? [-1, 1].map(sx =>
       `<ellipse cx="${num(sx * bl.x)}" cy="${num(bl.y)}" rx="${bl.rx}" ry="${bl.ry}"` +
@@ -626,8 +632,8 @@
     const head = g('head', order.map(k => layers[k]()).join(''));
     const body = g('body', part('body', spec.body, 'chest'));
 
-    // Tail (optional, behind the body): the plume, then a tip marking whose
-    // edge is a row of tufts pointing back at the base, bent with it and clipped.
+    // Tail (optional, drawn behind the body): the plume, then a tip marking whose edge
+    // is a row of tufts pointing back toward the base, bent with the plume and clipped to it.
     let tail = '';
     if (spec.tail) {
       const tl = tailFor(spec), d = pathD(tailNodes(tl, seed('tail'))), clip = clipUrl('tail', d);
@@ -639,10 +645,10 @@
           fluff: k.fluff || [{ from: 90 - s, to: 90 + s, n: k.n ?? 2, len: k.len ?? 10, depth: 0.02 }],
         })), k.color || 'tailTip');
       }
-      // extras on 'tail' are drawn in its straight local space. Fluffies bend with
-      // it; the rest (raw nodes, stars, paths, ellipses) stay rigid and ride along:
-      // each is moved to where the bent tail puts its centre (cx, cy, or the mean
-      // of its nodes; each of its polys on its own) and turned with the spine there.
+      // Extras on 'tail' are drawn in the tail's straight local space. Fluffy extras bend
+      // with the tail; the rest (raw nodes, stars, paths, ellipses) stay rigid and ride
+      // along: each is moved to where the bent tail puts its center (cx, cy, or the mean
+      // of its nodes; each of its polys separately) and turned with the spine at that point.
       const tx = under => (spec.extras || []).map((x, i) => {
         if (x.on !== 'tail' || !!x.under !== under) return '';
         let s;
@@ -667,7 +673,7 @@
       `<g transform="${cam}">${g('root', tail + body + head)}</g></svg>`;
   }
 
-  // ------------------------------------------------------------------ mount
+  // ------------------------------------------------------------------ Mount
 
   function mount(el, specOrName, opts = {}) {
     const spec = resolve(specOrName);
@@ -704,7 +710,7 @@
     render, mount, poseState, resolveView,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
     rng, hash, SHADE, shadeOf,
-    // the palette a render uses: the spec's colours plus the house shades it refers to
+    // The palette a render uses: the spec's colors plus the house shades that the spec refers to.
     palette: specOrName => {
       const spec = resolve(specOrName), P = withShades(spec.palette || {}), used = JSON.stringify(spec);
       return Object.fromEntries(Object.entries(P).filter(([k]) => (spec.palette || {})[k] !== undefined || used.includes(`"${k}"`)));

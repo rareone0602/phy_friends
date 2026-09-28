@@ -75,7 +75,7 @@
     try { return A.parse(src); } catch (e) { say(String(e.message || e), true); return null; }
   }
 
-  function sync(p = player) { // also the player's onFrame, which can fire before play() returns
+  function sync(p = player) { // Also the player's onFrame, which can fire before `player` is assigned; hence p.
     const d = p.duration;
     $('play').textContent = p.playing ? 'Pause' : 'Play';
     $('scrub').disabled = !(d > 0);

@@ -1,0 +1,83 @@
+% phy-diagram.sty: the house style for a paper's main diagram, such as the teaser or
+% the method overview (STYLE.md §8). The paper's own text keeps the venue's typeface.
+%
+% Build the diagram separately, in this folder, and include the resulting PDF:
+%   lualatex diagram.tex
+%   \includegraphics[width=\linewidth]{diagram.pdf}   in the paper
+% This way the paper builds as usual, including on arXiv, without the font.
+%
+% Load the paper's text and math packages first (newtxtext and newtxmath for a Times
+% venue) so that symbols and digits in the diagram match the text. The font is in
+% fonts/ next to this file, together with its license.
+%
+% One typeface, Shantell Sans, on one dial: informal is 0 for a paper, 50 for a site
+% and 100 for a hobby project (STYLE.md §5 and §8).
+%   \usepackage[informal=50]{phy-diagram}   a diagram for a site or slides
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{phy-diagram}[2026/09/28 phy's pencil for diagrams]
+
+% Only LuaLaTeX can set the font's axes; XeLaTeX would silently use the default instance.
+\ifdefined\directlua\else
+  \PackageError{phy-diagram}{Build this with lualatex: only LuaLaTeX sets
+    the font's axes}{XeLaTeX would load Shantell Sans at its default, so every
+    word would come out formal.}
+  \expandafter\@@end
+\fi
+
+\def\phy@informal{0}
+\DeclareKeys{informal.store = \phy@informal}
+\ProcessKeyOptions
+
+\RequirePackage[no-math]{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{arrows.meta, decorations.pathmorphing, positioning, calc}
+
+% Locate fonts/ next to this file, wherever TeX finds the package.
+\edef\phy@fonts{\directlua{local f = kpse.find_file('phy-diagram.sty', 'tex') or ''
+  tex.sprint((f:match('^(.*/)') or './') .. 'fonts/')}}
+
+% Map the dial to the font's axes, as site/notebook.css does (STYLE.md §5). Running
+% text uses the dial value as its informality (INFM). Hand-lettered text (hand = 50)
+% never drops below INFM 50 and bounces in the top half of the dial, reaching BNCE 50
+% at 100. The weight is always Light (300).
+\def\phy@max#1#2{\ifnum\numexpr#1\relax>\numexpr#2\relax
+  \the\numexpr#1\relax\else\the\numexpr#2\relax\fi}
+\def\phy@axes#1#2{wght=300, INFM=\phy@max{#1}{#2}, BNCE=\phy@max{#1+#2-100}{0}}
+% The axes require HarfBuzz (node mode ignores them). The rlig feature substitutes
+% alternates so that a repeated letter is drawn differently each time.
+\def\phy@pencil#1#2#3{\edef\phy@tmp{\noexpand\newfontfamily\noexpand#1%
+  {ShantellSans-Variable}[Path=\phy@fonts, Extension=.ttf, Renderer=HarfBuzz,
+  RawFeature=+rlig, RawAxis={\phy@axes{#2}{#3}}]}\phy@tmp}
+% Running text, at the dial value.
+\phy@pencil\phyprint{\phy@informal}{0}
+% Hand-lettered text, for the diagram's single note.
+\phy@pencil\phyhand{\phy@informal}{50}
+
+% The inks (site/notebook.css) and the data colors with their shades (STYLE.md §8).
+\definecolor{phyink}{HTML}{3D3C39}
+\definecolor{phyink2}{HTML}{6D6A63}
+\definecolor{phyink3}{HTML}{97938A}
+\definecolor{phy1}{HTML}{179AD0} \definecolor{phy1shade}{HTML}{087FAD}
+\definecolor{phy2}{HTML}{A74126} \definecolor{phy2shade}{HTML}{931800}
+\definecolor{phy3}{HTML}{4D6295} \definecolor{phy3shade}{HTML}{284A85}
+\definecolor{phy4}{HTML}{A98F12} \definecolor{phy4shade}{HTML}{8C7609}
+\definecolor{phy5}{HTML}{D56B75} \definecolor{phy5shade}{HTML}{C34758}
+
+% A fixed seed, so that a rebuild draws the same wobble.
+\pgfmathsetseed{7}
+
+\tikzset{
+  % Apply this style to the tikzpicture.
+  phy/.style={line width=0.7pt, draw=phyink, text=phyink, line cap=round,
+    line join=round, font=\phyprint\footnotesize, node distance=8mm},
+  pencil/.style={decorate, decoration={random steps, segment length=6pt,
+    amplitude=0.3pt}},
+  box/.style={draw, pencil, inner sep=5pt, minimum height=7mm},
+  arrow/.style={pencil, -{Straight Barb[round, length=3pt, width=5pt]}},
+  % Color for the new part, or for the few elements the reader must follow.
+  series/.style={draw=phy#1, fill=phy#1!16},
+  % The single note, hand-lettered and tilted as on the page.
+  note/.style={font=\phyhand\small, text=phyink2, inner sep=1pt, rotate=2},
+  note arrow/.style={draw=phyink2, line width=0.6pt,
+    -{Straight Barb[round, length=2.5pt, width=4pt]}},
+}

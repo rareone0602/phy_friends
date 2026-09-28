@@ -1,0 +1,101 @@
+# Base Matplotlib style (phy.mplstyle) for figures in phy's house style.
+# Graphite ink on paper; the data series are the only saturated elements, drawn in the characters' colors.
+# Sized for one column of a paper (3.3 in). Stack an overlay on top for the target medium:
+#   plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Paper: white background, the paper's text face.
+#   plt.style.use(['phy.mplstyle', 'phy-slides.mplstyle'])  # Slides and web: paper background, larger type.
+# Values come from site/notebook.css and STYLE.md §8 rather than being chosen here; the colors come from figures/palette.py.
+# Text is set in Shantell Sans (figures/fonts/). Matplotlib finds it only after registration; otherwise it silently falls back to Helvetica Neue:
+#   from matplotlib import font_manager; font_manager.fontManager.addfont('figures/fonts/ShantellSans-Variable.ttf')
+
+## Page: paper (#fbf9f3); the print overlay replaces it with white
+figure.facecolor:   fbf9f3
+figure.edgecolor:   fbf9f3
+axes.facecolor:     fbf9f3
+savefig.facecolor:  auto
+figure.figsize:     3.3, 2.1
+figure.dpi:         150
+savefig.dpi:        300
+savefig.bbox:       tight
+savefig.pad_inches: 0.03
+figure.constrained_layout.use: True
+
+## Data: the five characters in stage order (Howdi, phy, Yuda, Terry, mumuyou).
+## Each is the character's own color, darkened in house steps (L* -10) until it has 3:1 contrast on paper;
+## phy and Yuda take one more step to stay distinct from mumuyou and Howdi (see figures/palette.py).
+axes.prop_cycle: cycler('color', ['179ad0', 'a74126', '4d6295', 'a98f12', 'd56b75'])
+
+## Ink: graphite, never black. --ink for text, --ink-2 for spines, ticks and numbers.
+text.color:        3d3c39
+axes.labelcolor:   3d3c39
+axes.titlecolor:   3d3c39
+axes.edgecolor:    6d6a63
+xtick.color:       6d6a63
+ytick.color:       6d6a63
+xtick.labelcolor:  6d6a63
+ytick.labelcolor:  6d6a63
+
+## Type: small and plain, with one size step between numbers (7 pt) and text (8 pt).
+## Shantell Sans at its formal end: Matplotlib cannot set variable-font axes, and the file's default instance is exactly wght 300, INFM 0.
+## That is the only weight available here, so text requested in bold renders light.
+font.family:      sans-serif
+font.sans-serif:  Shantell Sans, Helvetica Neue, Helvetica, Arial, DejaVu Sans
+font.size:        8
+axes.titlesize:   8
+axes.titlelocation: left
+axes.titleweight: normal
+axes.titlepad:    6
+axes.labelsize:   8
+axes.labelpad:    3
+xtick.labelsize:  7
+ytick.labelsize:  7
+legend.fontsize:  7
+mathtext.fontset: dejavusans
+pdf.fonttype:     42
+ps.fonttype:      42
+svg.fonttype:     none
+
+## Frame: thin graphite lines; two spines, short ticks, no box
+axes.linewidth:      0.6
+axes.spines.top:     False
+axes.spines.right:   False
+xtick.major.size:    2.5
+ytick.major.size:    2.5
+xtick.major.width:   0.6
+ytick.major.width:   0.6
+xtick.minor.visible: False
+ytick.minor.visible: False
+xtick.major.pad:     2
+ytick.major.pad:     2
+axes.xmargin:        0.02
+axes.ymargin:        0.04
+axes.autolimit_mode: data
+
+## Grid: off by default; when on, pale-blue horizontal rules like notebook paper (y only), below the data
+axes.grid:       False
+axes.grid.axis:  y
+axes.axisbelow:  True
+grid.color:      cfdbe8
+grid.linewidth:  0.6
+grid.linestyle:  -
+
+## Marks: one line weight for lines; flat fills with no edge
+lines.linewidth:       1.2
+lines.solid_capstyle:  round
+lines.solid_joinstyle: round
+lines.dash_capstyle:   round
+lines.markersize:      3.5
+lines.markeredgewidth: 0
+patch.linewidth:       0
+patch.edgecolor:       fbf9f3
+patch.force_edgecolor: False
+errorbar.capsize:      0
+scatter.edgecolors:    face
+hatch.linewidth:       0.6
+
+## Legends: only when direct labels would collide; no frame
+legend.frameon:        False
+legend.handlelength:   1.2
+legend.handletextpad:  0.4
+legend.borderaxespad:  0.2
+legend.labelspacing:   0.3
+legend.columnspacing:  1.0

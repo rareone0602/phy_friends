@@ -3,50 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>phy's fwiends style guide</title>
-<meta name="description" content="how phy's fwiends are drawn, and how their page behaves.">
+<meta name="color-scheme" content="light">
+<title>phy's style guide</title>
+<meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
 <meta name="theme-color" content="#fbf9f3">
 <link rel="icon" href="site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">
-<!-- Generated from STYLE.md by `python3 tools/pf.py style`: edit STYLE.md, not this file. -->
+<!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=The+Girl+Next+Door&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
 <link rel="stylesheet" href="site/notebook.css">
-<style>
-  .doc { --lift: calc(var(--L) / 2 - 7px); position: relative; top: var(--lift); max-width: 42em; margin-top: calc(var(--L) * 2); overflow-wrap: break-word; text-wrap: pretty; }
-  .doc * { margin: 0; }
-  .doc > * + *, .doc blockquote > * + * { margin-top: var(--L); }   /* a blank rule between blocks */
-  .doc :is(h2, hr, .lead) + * { margin-top: 0; }                   /* but none under a heading, squiggle or lead-in */
-  .doc h2 { font: 400 44px/calc(var(--L) * 2) var(--hand); position: relative; top: 11px; }
-  .doc ul, .doc ol { padding-left: 1.4em; }
-  .doc ul { list-style-type: '\2013  '; }
-  .doc li::marker { color: var(--ink-3); }
-  .doc ol { list-style: none; }  /* numbered by hand; out of flow, so the number can't stretch a line */
-  .doc ol > li::before { content: counter(list-item) '.'; position: absolute; margin-left: -.9em; font: 25px/var(--L) var(--hand); color: var(--ink-2); }
-  .doc blockquote { padding-left: 1.6em; color: var(--ink-2); position: relative; }
-  .doc blockquote::before {  /* a thin pencil line down the side */
-    content: ''; position: absolute; left: .45em; top: 2px; bottom: 6px; width: 4px;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 100' preserveAspectRatio='none'><path d='M2 0C2.9 22 1.3 41 2.2 63S1.5 88 2 100' fill='none' stroke='%2397938a' stroke-width='1.1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>") 0 0 / 100% 100% no-repeat;
-  }
-  .doc code { font: 15px/1 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--ink-2); }
-  .doc hr {  /* a short squiggle on the rule */
-    border: 0; height: var(--L);
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2397938a' stroke-width='1.3' stroke-linecap='round'/></svg>") 0 calc(100% - var(--lift) - 2px) / 90px 10px no-repeat;
-  }
-  @media (max-width: 720px) {
-    .doc { margin-top: var(--L); }
-    .doc h2 { font-size: 38px; top: 12px; }
-    .doc ul, .doc ol { padding-left: 1.2em; }
-    .doc blockquote { padding-left: 1.3em; }
-    .doc blockquote::before { left: .3em; }
-  }
-</style>
+<link rel="stylesheet" href="site/pencil.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- graphite grain + a hair of wobble, for the title -->
+  <!-- Graphite grain and a slight displacement wobble for the title. -->
   <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
     <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
     <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
@@ -59,138 +32,510 @@
 <main>
   <header>
     <h1>style guide</h1>
-    <p class="intro">how <a href="index.html">phy's fwiends</a> are drawn, and how their page behaves.</p>
+    <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
+    <nav aria-label="pages">
+      <ul>
+        <li><a href="index.html">fwiends</a></li>
+        <li><span aria-current="page">style guide</span></li>
+        <li><a href="specimen.html">specimen</a></li>
+      </ul>
+    </nav>
   </header>
 
   <article class="doc">
-<p>The one rule behind everything below: <strong>a page from a sketchbook.</strong> The characters are the only saturated things on it; everything else is graphite on paper. It should feel drawn, not designed.</p>
-<p>Read this before building a page or adding a character. The site's <code>style.html</code> is made from this file with <code>python3 tools/pf.py style</code>; run it again after editing.</p>
+<p>This is phy's house style: one voice and one look for everything phy makes, from pages, slides and posters to READMEs, hobby projects and code. Hand it to anyone, or any agent, making something for phy.</p>
+<p>A paper's text is the exception. It has its own guide, which keeps the English simple for the reviewers' sake. From a paper, this guide covers only the main diagram (§8).</p>
+<p>The idea behind all of it is to <strong>work in pencil.</strong> A page from a sketchbook is graphite on paper, drawn rather than designed. A pencil mark is light and can be erased cleanly and drawn again, so every piece of work stays easy to rework. Colour belongs only to what the work is about.</p>
+<p><strong>This guide is the standard.</strong> Where anything else disagrees with it, the guide wins; where the guide is wrong, it is corrected here. The source is <code>STYLE.md</code> in <a href="https://github.com/rareone0602/phy_friends">rareone0602/phy_friends</a>, also at <a href="https://raw.githubusercontent.com/rareone0602/phy_friends/main/STYLE.md">its raw address</a> for an agent to read. Other projects copy the kit (§7) and point to the source, so every copy stays the same.</p>
 <hr>
-<h2 id="1-principles">1. Principles</h2>
+<h2 id="in-short">in short</h2>
+<p class="lead">For an agent's brief, when there is no room for the rest:</p>
 <ul>
-<li><strong>Handmade, honest, quiet.</strong> Small, plain words and hand-drawn marks. Whitespace is part of the drawing.</li>
-<li><strong>Characters first.</strong> If an element does not help you meet the characters, leave it out.</li>
-<li><strong>Slightly imperfect on purpose.</strong> Tilt things ±1–2°, leave spacing a little uneven, and let lines wobble. Mechanical perfection is what makes a page look generated.</li>
+<li><strong>Work in pencil.</strong> Keep everything easy to erase cleanly and redo: make it from a small source with a script, and when something goes, remove all of it.</li>
+<li><strong>Few rules (low Kolmogorov complexity).</strong> Derive values rather than pick them. Measure against one named reference. A special case gets a comment saying why.</li>
+<li><strong>Not the mode.</strong> The most likely choice (a template, a stock phrase, a default chart, a formal tone) is the boring one. Across works, phy stays consistent through the rules, not through sameness.</li>
+<li><strong>Don't make it too artificial.</strong> No gradients, glows, glass, heavy shadows, emoji, stock icons, hype or template layouts.</li>
+<li><strong>Graphite on paper, never black.</strong> Colour goes only to the subject, a character or the data. It is flat, with at most one shade step.</li>
+<li><strong>One hand on one dial.</strong> Everything is in Shantell Sans, set by one number: <code>0</code> for a paper's diagram, <code>50</code> for a site, <code>100</code> for a hobby project. Titles, notes and names are never neater than <code>50</code>.</li>
+<li><strong>Keep a set aligned</strong>: within one set, in look, size and structure.</li>
+<li><strong>Tell things apart first</strong>, but never simplify away what makes a thing itself.</li>
+<li><strong>Make it cute:</strong> characters are chibi, soft and round.</li>
+<li><strong>The owner decides</strong> names, colours and credit. Names keep their owner's case, so phy is always lower case.</li>
+<li><strong>British English, as The Economist writes it:</strong> opinionated, analytical and dry; British in idiom and grammar, not merely in spelling; the exact word in a short sentence, and numbers rather than adjectives. No ceremony and no exclamation marks. The humour is dark, with puns and irony, and stays out of formal work.</li>
+<li><strong>Code is American English</strong>, formal and clean, after Robert C. Martin's <em>Clean Code</em>. The dial, the lower case and the jokes stop at its edge.</li>
+<li><strong>A paper's main diagram</strong>, the picture people remember it by, is drawn in the face at <code>0</code> with <code>figures/phy-diagram.sty</code>.</li>
+<li><strong>Show, then ship.</strong> Discuss before building anything big, ask which part is meant when a request is unclear, put the options side by side, and let phy review before anything is published.</li>
+<li><strong>Private stays private.</strong></li>
 </ul>
-<p class="lead"><strong>Do:</strong></p>
+<h2 id="1-who-phy-is">1. who phy is</h2>
 <ul>
-<li>paper as the background</li>
-<li>pencil handwriting for the title and labels</li>
-<li>hand-drawn ground lines, arrows and underlines</li>
-<li>lots of space</li>
+<li><strong>phy</strong>, always lower case, even at the start of a sentence. The handle is <code>rareone0602</code> on GitHub and X.</li>
+<li><strong>A pencil user</strong>, who likes work that can be erased cleanly and reworked.</li>
+<li><strong>Work over ceremony.</strong> phy skips formality put on for show, lets the work speak, and looks for more than one way to put an idea. The single most likely answer (the mode, or the MAP estimate) is the most boring one.</li>
+<li><strong>A fan of dark humour, dark comedy and British humour</strong>: dark and dry, understated, and said with a straight face. It stays out of formal work, and may go on a poster or into a talk.</li>
+<li><strong>Draws with code.</strong> phy noticed that <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a>'s character icons have a low Kolmogorov complexity: a few ellipses, some tufts, two pill eyes and a blush. So phy's characters are made by a small program, not stored as pixels.</li>
+<li><strong>The avatar is phy</strong>, phy's fursona: an Eevee in the colours of phy's tuxedo cat, with Oreo crumbs on the ruff and tail, drawn as a chibi (§9).</li>
 </ul>
-<p class="lead"><strong>Don't:</strong></p>
-<ul>
-<li>gradients, glassmorphism, glows, or heavy drop shadows</li>
-<li>emoji bullets or stock icons</li>
-<li>marketing hero copy or calls to action</li>
-<li>generic card grids</li>
-<li>perfectly aligned everything</li>
-</ul>
-<h2 id="2-page">2. Page</h2>
-<p class="lead">The page is a sheet of <strong>lined notebook paper</strong> (design C, chosen from the mockups in <code>design/</code>; A and B are kept as backups in <code>design/backup/</code>). It has pale blue rules, a red margin line on the left and a little paper tooth, and <strong>everything is written on the rules</strong>:</p>
-<ul>
-<li>every vertical measure is a whole number of rules, and text sits on them;</li>
-<li>the fwiends' ground line is a rule, gone over in pencil;</li>
-<li>the rule spacing is 32px, or 30px on phones.</li>
-</ul>
-<p>The files are <code>index.html</code> (the gallery), <code>style.html</code> (this guide) and <code>site/notebook.css</code>, which the two share.</p>
-<p class="lead">Each page has four parts, in this order:</p>
+<h2 id="2-principles">2. principles</h2>
 <ol>
-<li>A handwritten title: <code>phy's fwiends</code>. That is the project's name wherever people see it (titles, headings, labels, copy); <code>phy_friends</code> is only the repository and code name.</li>
-<li>One short, honest line of intro.</li>
-<li><strong>The stage.</strong> It's a group photo: the fwiends stand together on one pencilled ground line and all watch the cursor.
+<li><strong>Work in pencil.</strong> Everything should be as easy to erase and redraw as a pencil line.
 <ul>
-<li>Every friend is drawn at the same scale, with its own ground (<code>rig.ground</code>) on the line. The stage box is 7 rules tall, stepping down to 6, 5 and then 4 on narrow screens, so two fwiends still fit side by side on the smallest phones.</li>
-<li>Ears and tails may reach outside a friend's box, as they would in a photo. A tail that sticks out at ground level gets room beside it.</li>
-<li>The fwiends stand in a row while they fit (on wide monitors the page widens so all of them do), then wrap onto more rows, each grounded on a rule (on phones, two to a row).</li>
-<li>A loose pencil ring circles one name: the host's, phy.</li>
-<li>Every friend can be greeted (see §5). A pencilled note says so: in the margin beside the stage with an arrow, or one line under it on narrow screens ("click one to say hi", or "tap" on touch screens).</li>
+<li>Keep sources, not results. A spec, a script or a Markdown file is the source, and pictures, pages and figures are generated from it. Never hand-edit a generated file.</li>
+<li>Erase cleanly. When something goes, all of it goes: no leftover references, no half-renamed words, no commented-out code. Git remembers the old version.</li>
+<li>Keep the candidates that lose in a <code>backup/</code> folder until phy says otherwise. Set them aside; don't rub them out.</li>
+<li>A first version is a sketch. Expect to redraw it once phy has looked.</li>
 </ul></li>
-<li>A small footer: who the characters belong to, a link to the style guide and a link to the repo.</li>
+<li><strong>Few rules (low Kolmogorov complexity).</strong>
+<ul>
+<li>Derive values rather than pick them: shades from colours, and every vertical measure from the rule spacing.</li>
+<li>Measure against one standard. Pick one reference, say which it is, and lower the diff against it rather than eyeballing.</li>
+<li>A special case gets a comment saying why. If special cases pile up, the rule is wrong.</li>
+</ul></li>
+<li><strong>Don't make it too artificial.</strong> It should feel drawn, not designed: honest and quiet.
+<ul>
+<li>Tilt a hand-drawn thing by up to <code>2°</code>, anticlockwise. Let lines wobble, and leave horizontal spacing a little uneven. Vertical measures still sit on the rules.</li>
+<li>Never use gradients, glassmorphism, glows, heavy drop shadows, emoji bullets, stock icons, marketing hero copy, calls to action, generic card grids, or a layout snapped to a grid.</li>
+</ul></li>
+<li><strong>Graphite on paper; colour for the subject.</strong> Everything is in paper and ink tones except what the work is about. On a page of characters, the characters are the only saturated things. In a figure, the data is.</li>
+<li><strong>One layer.</strong> Colour is flat. Each colour may have at most one shade, a single step darker. The shade is used only to tell apart two neighbours of the same colour. There are no lighting effects, highlights or second steps, and nothing is copied from a reference's light and shade.</li>
+<li><strong>Keep the set aligned.</strong> Within a set (a family of characters, a figure series, a deck), anything new matches what is already there in look, size and structure. Where the set is made of code, as a family of character specs is, the code matches too. When a rule changes, it changes everywhere at once.</li>
+<li><strong>Tell things apart first.</strong> If two parts can't be told apart, fix that before matching a reference any closer. Simplify only down to what makes a thing itself, never past it.</li>
+<li><strong>The owner decides.</strong> People and their characters appear as their owners give them:
+<ul>
+<li>names in the owner's capitalisation, with their species, colours and pronouns;</li>
+<li>a credit linking to the owner.</li>
+</ul>
+An owner's wish beats a house rule. A character appears only with its owner's say-so.</li>
+<li><strong>Make it cute.</strong> Characters are chibi, soft and round. Cute comes before literal, but never at the cost of what makes a character itself (principle 7).</li>
+<li><strong>Not the mode.</strong> The most likely choice is the most boring one: the template layout, the stock phrase, the default chart, the formal tone put on for show. There is more than one way to put an idea, so look for the one that fits this idea.
+<ul>
+<li>Across works, phy stays consistent through the rules (one hand, one dial, one palette), not by every piece looking the same. Within a set, principle 6 still holds.</li>
+<li>Inside the rules, each piece is a fresh draw, like the face's letters.</li>
+</ul></li>
 </ol>
-<p class="lead">Each character gets a small handwritten label:</p>
+<h2 id="3-words">3. words</h2>
+<p class="lead">The model is <em>The Economist</em>: opinionated, analytical and dry, with wit, puns and irony. Words are few, exact and honest, like a note in the margin.</p>
 <ul>
-<li>name</li>
-<li>species (optional)</li>
-<li>a credit line: the owner's handle, linking to their page (and the artist's, if someone else drew it). phy's reads "that's me". Other people's fursonas appear only with their owner's consent.</li>
+<li><strong>British English, all the way down.</strong> The spelling is British (colour, centre, grey, programme, -ise), and so are the vocabulary, grammar, collocations and phrasal verbs: "at the weekend", "in hospital", "a fortnight", "take a decision", "have got", "I've just finished", "sort it out", "muddle through". American prose in British spelling, a <em>New York Times</em> piece run through a spell-checker, is not British English.</li>
+<li><strong>Take a view, and show the working.</strong> Say which is better and why, with the evidence or the mechanism behind it. Hedging everything is ceremony of another kind.</li>
+<li><strong>The exact word, in a short sentence.</strong> A long or academic word is welcome when it is the precise one ("orthogonal", "idiosyncratic", "a trade-off"), never to sound clever. The structure stays plain: one idea to a sentence, one line per job. Say how a thing is made ("each one drawn from a hundred-odd lines of code") rather than how good it is, with numbers and names rather than adjectives.</li>
+<li><strong>English only.</strong> Another script appears only inside someone's own name or a quote of theirs.</li>
+<li><strong>No hype.</strong> No "magical", "seamless", "powerful", "novel", "revolutionary", "leverage" or "unlock". No "welcome" and no calls to action.</li>
+<li><strong>No ceremony.</strong> Lead with the work. No throat-clearing, no "I hope this finds you well", no titles or credentials before the point, no sign-off. A formal piece is the same voice with the jokes taken out.</li>
+<li><strong>Calm punctuation:</strong> full stops and colons, no exclamation marks and no emoji.</li>
+<li><strong>Case follows the dial</strong> (§5).
+<ul>
+<li>From <code>50</code> up (a site, notes, slides, a poster, a hobby project), the chrome is lower case: titles, headings, intros, nav, labels, notes, captions, buttons and footers. Running prose is in sentence case.</li>
+<li>At <code>0</code> (a paper's diagram), and in plain text the face can't reach (READMEs, email), write in sentence case throughout.</li>
+<li>A chart takes the case of the work it sits in, though its face is always at <code>0</code>.</li>
+<li>Names always keep their owner's case.</li>
+</ul></li>
+<li><strong>Person.</strong> A page talks about the work. Where phy speaks for themself, as in a credit line, it may say "me". The reader is "you", told the one thing they can do.</li>
+<li><strong>Humour is dark and dry</strong>, and phy's own: dark comedy and British humour. Understatement, irony, puns and self-deprecation; the absurd or grim thing said in the flattest, most official voice, like a mock disclaimer or a solemn footnote. Never explain the joke. It follows the dial: none at <code>0</code>, welcome from <code>50</code> up (a poster, a talk, a site), at home at <code>100</code>.
+<ul>
+<li>Keep it to a line or two per page, in the corners (a note, a caption, the footer), never in what the reader came for.</li>
+<li>Dark about the world, the work and the machine; never at the expense of a real person, their character or the reader. Never baby talk.</li>
+</ul></li>
+<li><strong>Credit</strong>: the owner, linked. Name an artist only when you know who drew the picture.</li>
+<li><strong>Dates</strong>: in full in prose (28 September 2026), short in a date line (28 sep 2026).</li>
 </ul>
-<p>Names keep their owner's capitalisation: <strong>Howdi</strong>, <strong>Yuda</strong> and <strong>Terry</strong> are capitalised, but <strong>phy</strong> and <strong>mumuyou</strong> are always lower case, even at the start of a line. Everything else on the page is written in lower case.</p>
-<h2 id="3-type">3. Type</h2>
-<p class="lead">Two pencil hands, both from Google Fonts, and very little text:</p>
+<table>
+<thead><tr><th>do</th><th>don't</th></tr></thead>
+<tbody>
+<tr><td>that's me</td><td>Meet phy, the creator behind it all!</td></tr>
+<tr><td>nothing saved yet.</td><td>Oops! Looks like there's nothing here yet!</td></tr>
+<tr><td>the second method is better: it halves the build time.</td><td>Both approaches have their merits.</td></tr>
+<tr><td>one script redraws every figure in about 40 seconds</td><td>Blazing-fast, seamless figure generation</td></tr>
+</tbody>
+</table>
+<h2 id="4-paper-and-ink">4. paper and ink</h2>
+<p>The page is a sheet of <strong>lined notebook paper</strong>: pale blue rules, a faded red margin line on the left, and a little paper tooth. <strong>Everything is written on the rules.</strong> Every vertical measure is a whole number of rules, and text sits on them.</p>
+<p>The tokens, from <code>site/notebook.css</code>:</p>
+<pre><code>:root {
+  --L: 32px;            /* Rule spacing; 30px on phones. */
+  --band: 4;            /* Blank rules above the first. */
+  --paper: #fbf9f3;
+  --rule: #cfdbe8;      /* Pale blue. */
+  --margin: #e6aaa3;    /* Faded red. */
+  --margin-x: 88px;     /* 22px on phones. */
+  --ink: #3d3c39;       /* Graphite. */
+  --ink-2: #6d6a63;
+  --ink-3: #97938a;
+  --red: #a64a3f;       /* For errors only. */
+  --face: 'Shantell Sans', ui-rounded, system-ui, sans-serif;
+  --informal: 50;       /* The dial (§5): 0 a paper's diagram, 50 a site, 100 a hobby project. */
+  --sit: calc(var(--L) / 2 - 1px - .35em);  /* Moves a line onto its rule (§5). */
+}</code></pre>
+<p>The inks, measured on the paper:</p>
+<table>
+<thead><tr><th>ink</th><th>contrast</th><th>use it for</th></tr></thead>
+<tbody>
+<tr><td><code>--ink</code></td><td><code>10.5:1</code></td><td>anything: titles, names, body text</td></tr>
+<tr><td><code>--ink-2</code></td><td><code>5.1:1</code></td><td>quieter words (intros, small print, notes, captions), the lines of controls, focus</td></tr>
+<tr><td><code>--ink-3</code></td><td><code>2.9:1</code></td><td>marks only: dashes, squiggles, the quote line, disabled controls. Never words someone needs to read</td></tr>
+<tr><td><code>--red</code></td><td><code>5.4:1</code></td><td>errors, and nothing else: the margin's red, pressed harder</td></tr>
+</tbody>
+</table>
 <ul>
-<li><strong>Reenie Beanie</strong> for the handwriting:
-<ul>
-<li>the title, 92px (66px on phones), three rules tall (two on phones), tilted by −1° and gone over with the graphite filter;</li>
-<li>the fwiends' names, 36px (31px on phones);</li>
-<li>headings on the style guide.</li>
-</ul></li>
-<li><strong>The Girl Next Door</strong> for everything else:
-<ul>
-<li>the intro, 21px (17px on phones);</li>
-<li>species, credits and the footer, 14–17px, in the lighter inks;</li>
-<li>body text on the style guide, 18px.</li>
-</ul></li>
+<li>Ink is graphite, never black.</li>
+<li>The rules and the margin line are decoration. Nothing that carries meaning is drawn in them.</li>
+<li>The paper tooth is a fine fractal noise at <code>40%</code>, multiplied over everything.</li>
+<li>There is no dark theme: the page is paper. Tell the browser with <code>&lt;meta name="color-scheme" content="light"&gt;</code>. On a dark host, a slide say, lay a sheet of paper on it rather than inverting the inks.</li>
 </ul>
-<p>The line height is always the rule spacing, and each block is nudged down a few pixels so its baseline lands on a rule.</p>
-<p>These fonts don't cover Chinese or Japanese; pick a companion font if CJK text is ever needed.</p>
-<h2 id="4-colour">4. Colour</h2>
-<p class="lead">Page chrome uses only paper and ink tones; saturated colour belongs to the characters.</p>
+<h2 id="5-type">5. type</h2>
+<p><strong>One hand on one dial.</strong> Everything this guide covers is written in one face, <strong>Shantell Sans</strong>: a hand drawn with one even line, like a fine pen held lightly. The pencil is in the rest: the graphite ink, the paper, the marks and the filter over the title. The face has an informality axis, so the same hand can be neat in a diagram and loose in a toy. Formality is a setting of the one voice, never a different voice. Above the neat end, a letter that repeats is drawn a little differently each time (the face swaps in alternates by itself), so no two words come out the same.</p>
+<p class="lead"><strong>The dial.</strong> Each piece of work has one number, <code>--informal</code>, from <code>0</code> to <code>100</code>:</p>
 <ul>
-<li>paper <code>#fbf9f3</code>, with a fine noise overlay for tooth</li>
-<li>rules <code>#cfdbe8</code>, pale blue</li>
-<li>the margin line <code>#e6aaa3</code>, faded red</li>
-<li>ink <code>#3d3c39</code> (graphite) for the title and names, <code>#6d6a63</code> for the intro and species, and <code>#97938a</code> for credits and the footer</li>
+<li><code>0</code> for a paper's diagram, and for charts (matplotlib can't turn it);</li>
+<li><code>50</code> for a site, notes, slides and posters;</li>
+<li><code>100</code> for a hobby project: the face as informal as it goes.</li>
 </ul>
-<p>There is no dark theme: the page is paper. Backup B (<code>design/backup/b.html</code>) shows a dark version, should that change.</p>
-<h2 id="5-motion">5. Motion</h2>
+<p>A piece may sit anywhere in between; these are the usual stops.</p>
+<p class="lead"><strong>The print and the hand.</strong> Running words, the print, sit at the work's number, which is the face's informality (<code>INFM</code>). A few words written rather than set, the hand (titles, headings, notes, captions, table heads and names), are never neater than <code>50</code>, and in the top half of the dial they bounce as well (<code>BNCE</code>, rising to <code>50</code> at the top).</p>
 <ul>
-<li><strong>Eye-follow:</strong>
-<ul>
-<li>Each character works out the direction from its own head to the pointer, so the whole group converges on it.</li>
-<li>The eyes take the full offset (<code>lookX/lookY</code>) and the head turns about half as much (<code>turnX/turnY</code>, drawn as layer parallax).</li>
-<li>Motion is smoothed with a spring or lerp; it never jitters.</li>
-</ul></li>
-<li><strong>Idle underneath:</strong> breathing, blinks at irregular intervals, a slow tail sway and an occasional ear flick. Nothing bounces all the time.</li>
-<li><strong>Pointer leaves the window</strong> (or sits still for a while): they drift back to centre or glance around.</li>
-<li><strong>Touch:</strong> follow the finger while touching, otherwise glance around. No gyroscope.</li>
-<li><strong>Saying hi:</strong> each friend is a button. Hovering over it (or tabbing to it) perks it up: ears in, eyes a touch wider. A click, a tap, Enter or Space plays the library's happy hop (happy eyes, a small mouth, two bounces), and the other fwiends glance at the one being greeted.</li>
-<li><strong><code>prefers-reduced-motion</code>:</strong> eyes only, with no idle motion; saying hi changes just the face.</li>
+<li>Past <code>50</code> a lower-case s grows towards a capital. A site stops there, so "saved" still reads as "saved"; a hobby project goes all the way, big s and all.</li>
+<li>Bounce stops at <code>50</code>: any more lifts a p or an s to capital height, and "phy" reads "Phy". The print never bounces.</li>
 </ul>
-<h2 id="6-characters-what-makes-one-of-phy-s-fwiends">6. Characters: what makes one of phy's fwiends</h2>
-<p>These are the rules the factory (<code>src/phyfriends.js</code>) encodes. Follow them when reproducing a new image or design sheet.</p>
+<table>
+<thead><tr><th></th><th>the print</th><th>the hand</th></tr></thead>
+<tbody>
+<tr><td>a paper's diagram, <code>0</code></td><td>neat</td><td>loose</td></tr>
+<tr><td>a site, <code>50</code></td><td>loose</td><td>loose</td></tr>
+<tr><td>a hobby project, <code>100</code></td><td>loosest</td><td>loosest, bouncing</td></tr>
+</tbody>
+</table>
+<p><strong>Weight is pressure.</strong> Everything is Light (<code>300</code>). Bold is <code>600</code>, the pencil pressed harder. There are no other weights and no italics.</p>
+<p><strong>Sizes</strong> step by <code>1.2</code> from the <code>18px</code> print. On a phone the hand and the intro step down one; the rest of the print keeps its size.</p>
+<table>
+<thead><tr><th>in the hand</th><th>size</th><th>rules</th></tr></thead>
+<tbody>
+<tr><td>title</td><td><code>64px</code> (<code>54px</code>)</td><td>3 (2)</td></tr>
+<tr><td>part title</td><td><code>54px</code> (<code>45px</code>)</td><td>3 (2)</td></tr>
+<tr><td>h2</td><td><code>37px</code> (<code>31px</code>)</td><td>2</td></tr>
+<tr><td>h3, a result</td><td><code>26px</code> (<code>22px</code>)</td><td>1</td></tr>
+<tr><td>note, caption, table head</td><td><code>22px</code> (<code>18px</code>)</td><td>1</td></tr>
+</tbody>
+</table>
+<table>
+<thead><tr><th>in the print</th><th>size</th><th>rules</th></tr></thead>
+<tbody>
+<tr><td>intro</td><td><code>22px</code> (<code>18px</code>)</td><td>1 (2)</td></tr>
+<tr><td>body</td><td><code>18px</code></td><td>1</td></tr>
+<tr><td>small print, code</td><td><code>15px</code></td><td>1</td></tr>
+</tbody>
+</table>
 <ul>
-<li><strong>Flat vector:</strong>
+<li>Words are in <code>--ink</code>. The intro, small print, notes, captions and table heads are in <code>--ink-2</code>. Code is in the system monospace (<code>ui-monospace</code>, SF Mono, Menlo), in <code>--ink-2</code>.</li>
+<li>The line height is always a whole number of rules. A line moves down by <code>--sit</code> so its baseline lands on its rule: half a rule, less the rule's 1px, less <code>0.35em</code> (half the face's ascent, <code>1.02em</code>, minus its descent, <code>0.32em</code>). No nudge is picked by eye.</li>
+<li><strong>The hand is for a few words.</strong> Anything longer than a line goes in the print.</li>
+<li>A title is a few words: about 12 letters fit on one line on a phone. It sits on the first rule, and the rule under it stays blank for its tails.</li>
+<li><strong>Loading it:</strong> <code>https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&amp;display=swap</code>, about 170 KB for Latin. <code>site/notebook.css</code> sets the dial; a page changes only <code>--informal</code>, and marks its own hand text with <code>.hand</code>. A file for LaTeX, matplotlib or a design tool is in <code>figures/fonts/</code>.</li>
+<li><strong>CJK text:</strong> add <code>'LXGW WenKai TC'</code> (Google Fonts, a pencil-like hand) after the face. Load it only on pages with CJK text, and mark that text with <code>lang</code>.</li>
+<li><strong>Licence.</strong> Shantell Sans is under the SIL Open Font License: free for any use, papers included, and it may be embedded in a PDF. Keep the licence file next to any copy of the font file.</li>
+</ul>
+<h2 id="6-hand-drawn-marks">6. hand-drawn marks</h2>
+<p class="lead">Every mark is a single pencil stroke: an SVG path with round caps, <code>1.1–1.5px</code> wide, in an ink, never filled. There are nine:</p>
 <ul>
-<li>no outlines, no gradients, no textures</li>
-<li>8–12 colours per character, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>stripe</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, …</li>
-<li><strong>one shade layer, the same for every friend:</strong> every colour is one the character really has (its fur, hair, markings, accessories), plus at most one shade of it. <code>&lt;name&gt;Shade</code> in the palette is derived by the library from <code>&lt;name&gt;</code> (one fixed step darker, CIELAB L* −10, its own hue a little richer; near-whites lean to lavender), so the shades match across fwiends. A spec sets one by hand only where the derived one looks wrong (mumuyou's gold hair, Howdi's navy, whose derived shade is nearly black), and says so in a comment. It goes only on a part that sits behind a neighbour of the same colour, to tell them apart: Terry's ears behind the face, a body under the head, the back layer of a ruff, locks of hair behind the mop, a bandana's band behind its point.</li>
-<li>no other shading: no second step, no highlights, and nothing copied from a reference's lighting (a pale rim of light along an ear, a darker far side).</li>
-<li>a pale colour that would vanish on the paper takes one slightly deeper flat tint, used wherever that colour appears (mumuyou's white, #efeef3).</li>
-</ul></li>
-<li><strong>Chibi proportions, in head space:</strong>
+<li>a <strong>ground line</strong> along a rule, for a character to stand on;</li>
+<li>a <strong>ring</strong>, one loose loop that doesn't quite close, round "this one": the current page, or the one thing that matters;</li>
+<li>an <strong>arrow</strong> from a note to what it's about;</li>
+<li>a <strong>squiggle</strong> for a break;</li>
+<li>a <strong>side line</strong> down a quote;</li>
+<li>a <strong>box</strong> round the one primary button;</li>
+<li>a <strong>tick</strong>;</li>
+<li>a <strong>cross</strong>, in red, for errors;</li>
+<li>a <strong>caret</strong> on a select.</li>
+</ul>
+<p>If something needs a tenth mark, write a word instead.</p>
 <ul>
-<li>the origin sits between the eyes, and the head is about 200 units wide</li>
-<li>ear tips reach about −140, the paws about +130 (<code>rig.ground</code>), and a tail may curl out to one side</li>
-<li>every friend shares one scale, so they stand together as a set: pill eyes about 12 × 32 units, centred about 31–35 either side of the origin, and a reference in the house template (a 1254px close-up, head tipped 20°) is matched at <code>scale: 5.5</code></li>
-<li>the head is widest around eye level</li>
-</ul></li>
-<li><strong>Shape vocabulary:</strong>
+<li><strong>Focus</strong> is a dashed pencil outline, <code>1.5px</code> in <code>--ink-2</code>, <code>3–4px</code> clear of the thing.</li>
+<li><strong>Tilts</strong> are anticlockwise and never more than <code>2°</code>: the title <code>−1°</code>, a margin note <code>−2°</code>, the button's box <code>−0.8°</code>.</li>
+<li><strong>The graphite filter</strong> goes over the title, the ground line and the arrow, never over small text or a figure. Paste it once into each page:</li>
+</ul>
+<pre><code>&lt;svg width="0" height="0" style="position:absolute" aria-hidden="true"&gt;
+  &lt;filter id="graphite" x="-2%" y="-20%" width="104%" height="140%"&gt;
+    &lt;feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/&gt;
+    &lt;feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/&gt;
+    &lt;feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/&gt;
+    &lt;feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/&gt;
+    &lt;feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/&gt;
+  &lt;/filter&gt;
+&lt;/svg&gt;</code></pre>
+<h2 id="7-parts-of-a-page">7. parts of a page</h2>
+<p class="lead"><strong>The kit.</strong> Copy these from rareone0602/phy_friends:</p>
 <ul>
-<li><em>fluffy ellipses</em>: the head, face mask and chest, whose outlines grow small curved fur tufts</li>
-<li><em>a star hair mop</em>: broad, curved, flame-like locks, with some hanging over the face</li>
-<li><em>rounded-triangle ears</em>, with an inner ear and stripe bands only where the character really has them</li>
-<li><em>pill eyes</em>: solid, no whites, no highlight by default</li>
-<li>soft <em>blush</em> ovals</li>
-<li>no mouth by default</li>
-</ul></li>
-<li><strong>Layering:</strong> ears, head, face mask, blush, eyes, mouth, then hair on top. Bangs may cross the face.</li>
-<li><strong>Expressions come from the pose, not new drawings:</strong> <code>eyes: 'happy' | 'closed'</code>, <code>mouth</code>, <code>blink</code>, ear angles.</li>
-<li><strong>Keep the spec small.</strong> A character is about 100 lines of parameters, not a traced path. Prefer tuning <code>fluffy</code> / <code>star</code> / ear parameters over raw <code>nodes</code>.</li>
+<li><code>site/notebook.css</code>, the paper;</li>
+<li><code>site/pencil.css</code>, everything drawn on it. Its opening comment lists the classes;</li>
+<li><code>site/icon.svg</code>, the favicon;</li>
+<li><code>figures/</code>, for charts and diagrams (§8);</li>
+<li>the graphite filter (§6).</li>
+</ul>
+<p><code>specimen.html</code> shows every part below, working, on the rules.</p>
+<p class="lead"><strong>Layout.</strong></p>
+<ul>
+<li>One column, <code>42em</code> at most, left-aligned against the margin line.</li>
+<li>Nothing scrolls sideways. Long words break.</li>
+<li>A page has a title in the hand, one line of intro, the content, and a small footer. Nothing else is required.</li>
+</ul>
+<p class="lead"><strong>Small print.</strong> The nav, a date line and the footer are small print in <code>--ink-2</code>.</p>
+<ul>
+<li>The nav sits on the rule under the intro, its items spaced apart. The current page wears the ring. There are no menus and no hamburgers, and a page in one part needs no nav at all.</li>
+<li>A date line and the footer split their items with middle dots: "28 sep 2026 · pencils · paper". Tags are plain words: no pills and no #.</li>
+</ul>
+<p><strong>Links</strong> are the text itself, underlined like a pencil line (<code>1px</code>, <code>3px</code> below). Hovering darkens them to <code>--ink</code>.</p>
+<p><strong>Lists and quotes.</strong> A list item starts with a dash in <code>--ink-3</code>, and a numbered item with its number in the hand. A quote is indented, in <code>--ink-2</code>, with the side line.</p>
+<p><strong>Code</strong> is one line to a rule. A block is indented like a list, with no box, and wraps rather than scrolls.</p>
+<p class="lead"><strong>Pictures:</strong></p>
+<ul>
+<li>A picture is a whole number of rules tall, with its top and bottom on rules. It has no frame, no rounded corners and no shadow.</li>
+<li>A photo stays a photo. A scan or a line drawing on white is laid in with <code>multiply</code>, so its white becomes the paper. A character or a chart is drawn on paper or on nothing.</li>
+<li>A picture is scaled to fit, never cut: a chart loses nothing on a phone.</li>
+<li>The caption is a note on the next rule. Never put words over a photo.</li>
+<li>A picture that is the point of the page may be in colour, like a character.</li>
+</ul>
+<p class="lead"><strong>Tables.</strong> The rules are the rows: no borders, stripes or vertical lines.</p>
+<ul>
+<li>The head is in the hand in <code>--ink-2</code>, and the rule under it is gone over in pencil.</li>
+<li>Numbers are right-aligned.</li>
+<li>A cell that wraps takes whole rules.</li>
+<li>A phone fits three columns. Fold the rest into a label, or split the table.</li>
+</ul>
+<p class="lead"><strong>Controls:</strong></p>
+<ul>
+<li><strong>One primary button per view:</strong> the word in the pencil box. Hovering goes over the box again, and pressing moves it down <code>1px</code>.</li>
+<li><strong>Every other button is quiet:</strong> the word alone, underlined like a link.</li>
+<li><strong>A text field</strong> has its label on its own rule, in <code>--ink-2</code>, and the field on the next. The field has no box; the rule under it is gone over in <code>--ink-2</code>. There are no placeholders: put an example in the label.</li>
+<li><strong>A select</strong> is the same, with the caret. Its open list is the system's; leave it alone.</li>
+<li><strong>A checkbox</strong> is a pencil box with a tick that overshoots it. There are no switches: an on/off setting is a checkbox.</li>
+<li><strong>Disabled</strong> things are in <code>--ink-3</code>.</li>
+</ul>
+<p class="lead"><strong>States:</strong></p>
+<ul>
+<li><strong>An error</strong> turns the field's line into a red wave. A note in red on the next rule says what to do: "that needs to be a number, like 250".</li>
+<li><strong>A result</strong> is written in the hand with the arrow pointing at it, numbers and all.</li>
+<li><strong>Loading</strong> shows the squiggle drawing itself, with one plain word: "counting…". Under reduced motion it stays still.</li>
+<li><strong>An empty state</strong> is one note, "nothing saved yet.", then a few blank rules. No picture, no "oops".</li>
+</ul>
+<p><strong>A portrait.</strong> An about page may have one character standing beside the title, a rule taller than it. It stands on the title's rule, reaches up into the blank band, and may watch the cursor.</p>
+<p class="lead"><strong>Other places:</strong></p>
+<ul>
+<li><strong>Favicon:</strong> phy's head on everything phy makes, unless the work is about another character.</li>
+<li><strong>Link preview:</strong> the page itself, photographed at <code>1200×630</code>. It is not a designed card: no extra text and no logo.</li>
+<li><strong>README:</strong> GitHub strips CSS, so the style lives in the words. Write it in sentence case, as plain text (§3): a title, one honest line, the preview picture, and short plain sections. No badges, no emoji and no feature lists.</li>
+<li><strong>Print:</strong> plain paper. The rules, margin line, tooth, nav and portrait drop out; the ink stays.</li>
+</ul>
+<h2 id="8-charts-slides-and-a-paper-s-diagram">8. charts, slides and a paper's diagram</h2>
+<p>Charts and diagrams wear the same pencil. The data plays the part of the characters, the only saturated thing on the page. The matplotlib styles in <code>figures/</code> carry these rules; stack an overlay for the medium:</p>
+<pre><code>plt.style.use(['phy.mplstyle', 'phy-slides.mplstyle'])  # Slides and the web.
+plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the host document's typeface.</code></pre>
+<p><strong>Data colours</strong> come from phy's characters. Each is a character's colour taken down in the one-shade step (CIELAB L* <code>−10</code>, chroma <code>×1.2</code>, same hue) until it holds <code>3:1</code> on the paper; where two still sat too close, one took another step. <code>python3 figures/palette.py</code> derives them again and prints the tests.</p>
+<table>
+<thead><tr><th>series</th><th>colour</th><th>shade</th></tr></thead>
+<tbody>
+<tr><td>1, blue</td><td><code>#179ad0</code></td><td><code>#087fad</code></td></tr>
+<tr><td>2, red</td><td><code>#a74126</code></td><td><code>#931800</code></td></tr>
+<tr><td>3, slate</td><td><code>#4d6295</code></td><td><code>#284a85</code></td></tr>
+<tr><td>4, ochre</td><td><code>#a98f12</code></td><td><code>#8c7609</code></td></tr>
+<tr><td>5, pink</td><td><code>#d56b75</code></td><td><code>#c34758</code></td></tr>
+</tbody>
+</table>
+<ul>
+<li>Every pair stays apart under protanopia, deuteranopia and tritanopia: CIEDE2000 <code>13.9</code> at the closest.</li>
+<li><strong>Five at most.</strong> Fold the rest into "other" in <code>--ink-3</code>, or split the figure into small panels.</li>
+<li>Take the colours in order. A series keeps its colour from figure to figure, never its rank.</li>
+<li><strong>Data on a scale</strong> takes the blue in the same steps: <code>#e3f3ff</code> <code>#a7dbfe</code> <code>#7cc1eb</code> <code>#49a7d9</code> <code>#158dbf</code> <code>#0f729b</code> <code>#01597a</code>. The lightest two are for fills only.</li>
+<li><strong>Data either side of a middle</strong> takes the blue and the red, with the paper in the middle.</li>
+<li>The five fall into only two tiers of grey. A figure that may be printed in grey needs direct labels or marker shapes as well.</li>
+</ul>
+<p class="lead"><strong>Charts:</strong></p>
+<ul>
+<li>Words are in <code>--ink</code>; axes, ticks and numbers in <code>--ink-2</code>.</li>
+<li>Draw two spines, short ticks, no box and no grid. Where a grid helps, draw pale rules (<code>#cfdbe8</code>, <code>0.6pt</code>) across y only, under the data.</li>
+<li>Lines are <code>1.2pt</code> with round caps. Fills are flat, and a band of spread is the series colour at <code>16%</code>.</li>
+<li>Label lines at their ends. Use a legend only where labels would collide, and give it no frame.</li>
+<li>Bars start at zero.</li>
+<li>Words and numbers are in the face at the neat end of the dial, <code>0</code>. matplotlib can't turn the dial, and the font file's default is exactly that. Register it before plotting, or matplotlib falls back to Helvetica Neue without a word: <code>font_manager.fontManager.addfont('figures/fonts/ShantellSans-Variable.ttf')</code>. A chart inside a document with its own typeface takes that typeface instead (the print overlay).</li>
+<li>No wobble and no graphite filter: on a chart they look bent, not drawn.</li>
+<li>A caption says what is shown, then what it shows: "build time for four versions: the last one halves it". Never just "results".</li>
+<li>A chart is made by a script and redrawn by running it again, never touched up by hand.</li>
+<li>Check that everything reads at the size it will be seen.</li>
+</ul>
+<p class="lead"><strong>Slides.</strong> A slide is the notebook page with everything <code>×1.5</code>: at <code>1280×720</code> the rules are <code>48px</code> apart, 15 to a slide, and the title is <code>96px</code>.</p>
+<ul>
+<li>One idea per slide, and the title states the point, not the topic.</li>
+<li>A chart gets blank paper with no rules behind it, since they would read as gridlines. The slides overlay's paper-toned figure covers them.</li>
+<li>One note with an arrow may point at the one thing to see.</li>
+<li>The bottom line, in small print, gives the source and what is missing: "one run each; no error bars".</li>
+</ul>
+<p class="lead"><strong>A paper's main diagram.</strong> Every paper needs one diagram that people remember it by, the teaser or the method overview, and redraw in their own talks. That is where the pencil shows; the paper's text keeps the venue's type. <code>figures/phy-diagram.sty</code> carries it for TikZ, and <code>figures/diagram.tex</code> is an example.</p>
+<ul>
+<li>Build it as its own file with <code>lualatex diagram.tex</code> and include the PDF, so the paper builds as usual, arXiv included, without the font. Only LuaLaTeX can turn the dial; XeLaTeX stops with a message. In any other tool, install the font from <code>figures/fonts/</code>.</li>
+<li>It sits on white, not the paper tone, and has no title: the caption carries it.</li>
+<li>Words are in the face at <code>0</code>, the neat end of the dial, in sentence case. A box holds a noun or two; the caption does the explaining. A diagram for a site or slides takes that work's number: <code>\usepackage[informal=50]{phy-diagram}</code>.</li>
+<li>Symbols and values are maths in the paper's own type, so the <code>z_t</code> in the diagram is the <code>z_t</code> in the text. Load the paper's text and maths packages (<code>newtxtext</code> and <code>newtxmath</code> for Times) before <code>phy-diagram</code>.</li>
+<li>One note in the hand, at <code>50</code>, with an arrow, may point at the new part.</li>
+<li>Draw it at the size it prints, <code>6.75in</code> across both columns or <code>3.3in</code> in one, so words come out at <code>8pt</code> and none is smaller than <code>7pt</code>.</li>
+<li>Lines are graphite, <code>0.7pt</code>, with round caps and open arrowheads. They wobble a little, from a fixed seed, so a rebuild draws the same lines.</li>
+<li>Boxes are outlined, not filled. Colour goes only to the new part, or to the few things the reader must follow: a data colour on the line and at <code>16%</code> inside. Each keeps its colour in every figure of the paper.</li>
+</ul>
+<h2 id="9-the-avatar-and-characters">9. the avatar and characters</h2>
+<ul>
+<li><strong>phy's mark is phy</strong>, the chibi fursona: the head alone for a favicon or avatar, the whole character where there is room. It is drawn by <code>src/phyfriends.js</code> from <code>characters/phy/phy.js</code>, never redrawn by hand, so every copy matches.</li>
+<li>Characters are <strong>flat chibi vectors</strong>: soft round shapes, solid near-black pill eyes, soft blush, no outlines, no nose and no mouth by default. Each has exactly one shade layer (principle 5), and the body, which sits under the head, always wears it.</li>
+<li>The template came from the <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a> prompt: a close-up with the head tipped, pill eyes and blush on a dark ground. Reviewers of a character should know its examples.</li>
+<li>Every character is a small spec (about 100 lines) that a factory draws. The rules for drawing one are in <code>FWIENDS.md</code>, next to the factory.</li>
+<li><strong>Motion</strong> is calm and alive. The eyes follow the pointer, smoothed so they never jitter, with breathing, irregular blinks and a slow sway underneath. Nothing bounces all the time. Under <code>prefers-reduced-motion</code>, only the eyes move.</li>
+</ul>
+<h2 id="10-code">10. code</h2>
+<p class="lead">Code is a language of its own, with its own conventions: American English, formal, and clean in the sense of Robert C. Martin's <em>Clean Code</em>. The dial, the lower-case chrome and the humour stop at its edge.</p>
+<ul>
+<li><strong>American English</strong> in identifiers, comments, docstrings and commit messages: <code>color</code>, <code>center</code>, <code>gray</code>, <code>normalize</code>, <code>behavior</code>, <code>license</code>, <code>labeled</code>, <code>toward</code>. Words the code puts in front of people (a page's text, a label, an error message) are copy, and follow §3.</li>
+<li><strong>Formal.</strong> Comments and docstrings are full sentences in sentence case, plain and precise: no jokes, no asides and no metaphors.</li>
+<li><strong>Names reveal intent.</strong> A name says what a thing is or does, and can be said aloud and searched for. Use one word per concept across a codebase; no cute names, no puns, and no abbreviations beyond the field's own (<code>rgb</code>, <code>L*</code>). A number that means something gets a name (principle 2).</li>
+<li><strong>Functions are small and do one thing</strong>, at one level of abstraction, with few arguments and no hidden side effects. A file reads from the top down, each caller above what it calls.</li>
+<li><strong>Comments say why</strong>: intent, a constraint, a warning, a reference ("STYLE.md §5"). If a comment has to explain what the code does, rename or extract instead. No commented-out code, no changelogs and no bylines; git keeps those.</li>
+<li><strong>Errors</strong> are raised with a message that says what went wrong and what to do, not returned as codes.</li>
+<li><strong>Tests</strong> are as clean as the code: one concept each, fast, independent and repeatable.</li>
+<li><strong>Formatting</strong> follows the language's convention (PEP 8 for Python) and the project's formatter, so a codebase reads as if one person wrote it.</li>
+<li><strong>Commit messages</strong> have a subject line in the imperative and in sentence case, of about 50 characters ("Add the formality dial"), and the why in the body.</li>
+</ul>
+<h2 id="11-working-with-phy">11. working with phy</h2>
+<p class="lead">For anyone, or any agent, making something for phy:</p>
+<ul>
+<li><strong>Discuss before building</strong> anything big. Say what you'll make and wait for a yes.</li>
+<li><strong>Show, don't describe.</strong> Render the options and put them side by side. Rules about looks are settled by looking; once one is settled, write it down at the source.</li>
+<li><strong>Ask which part</strong> when a request names a region or a word that could mean two things, before changing anything. A marked-up crop helps.</li>
+<li><strong>Let phy review before anything is published.</strong> Pushing, posting and sharing are phy's call, each time.</li>
+<li><strong>Keep folders tidy:</strong> one folder per thing, with its examples beside it, and generated output in a git-ignored <code>out/</code>.</li>
+<li><strong>Fanning out is welcome:</strong> phy is happy for a big job to go to several agents in parallel. Visual work then goes to an adversarial reviewer who knows the references.</li>
+<li><strong>Private stays private.</strong> Personal references (photos of a real pet, say) live in a git-ignored folder and never reach a public page. Quote phy's own words only where a piece needs them.</li>
+</ul>
+<h2 id="12-is-it-phy-s">12. is it phy's?</h2>
+<p class="lead">Before calling something done:</p>
+<ul>
+<li>Could it be erased and redrawn from its source in one command?</li>
+<li>Could its rules fit on an index card?</li>
+<li>Is anything saturated that isn't the subject?</li>
+<li>Is there a gradient, a glow, a shadow, an emoji or a hype word?</li>
+<li>Is there more than one shade of any colour, or shading that isn't parting two neighbours?</li>
+<li>Does it match the rest of the set in size, look and structure?</li>
+<li>Can every part be told apart at the size people will see it?</li>
+<li>Is everyone credited as they wish, with every name written as its owner writes it?</li>
+<li>Is it in the one face, at the work's place on the dial?</li>
+<li>Is it British English as The Economist would write it, with no ceremony?</li>
+<li>Is the code American English, formal and clean?</li>
+<li>Is any part of it the first template that came to mind?</li>
+<li>Has phy seen it?</li>
 </ul>
 <hr>
-<h2 id="appendix-original-brief">Appendix: original brief</h2>
-<p>This is the brief the design direction came from, kept verbatim-in-spirit so later changes can be checked against it.</p>
+<h1 id="phy-s-fwiends-the-gallery-and-its-characters">phy's fwiends: the gallery and its characters</h1>
+<p>This file adds what only this project needs to phy's style guide (<code>STYLE.md</code>): the gallery page, its stage, and the rules for drawing a friend with <code>src/phyfriends.js</code>. If the two disagree, <code>STYLE.md</code> wins, unless this file says why. The site's <code>style.html</code> shows both files, one after the other; run <code>python3 tools/pf.py style</code> after editing either.</p>
+<hr>
+<h2 id="the-gallery-page">the gallery page</h2>
+<p>The files are <code>index.html</code> (the gallery), <code>style.html</code> (the guides) and <code>specimen.html</code> (the kit at work). All three wear the kit, <code>site/notebook.css</code> (the paper) and <code>site/pencil.css</code> (the pencil). The paper is design C from the mockups in <code>design/</code>; A and B are kept in <code>design/backup/</code>.</p>
+<p>The gallery is a hobby project, so it sits at <code>100</code>, the top of the dial (<code>STYLE.md</code> §5): every letter is as informal as the face goes, big s and all, and the hand bounces.</p>
+<p class="lead">The page has five parts, in this order:</p>
+<ol>
+<li>The title, <code>phy's fwiends</code>, in the hand. That is the project's name wherever people read it; <code>phy_friends</code> is only the repository and code name.</li>
+<li>One line of intro: "a few chibi fwiends, each one drawn from a hundred-odd lines of code."</li>
+<li>The nav, as on the other two pages: fwiends, style guide, specimen.</li>
+<li><strong>The stage</strong>, a group photo: the fwiends stand together on pencilled ground and all watch the cursor.</li>
+<li>The footer: "characters belong to the people named under them", the style guide and the source, with a mock disclaimer on the last rule.</li>
+</ol>
+<p class="lead"><strong>The stage:</strong></p>
+<ul>
+<li>The stage is the one centred thing on the page, as the subject of a group photo stands in the middle of the frame. The rest keeps to the margin line.</li>
+<li>Every friend is drawn at the same scale, in a box 270 head units tall whose bottom edge is the friend's <code>rig.ground</code>. The box is 7 rules tall, then 6 below 1000px, 5 below 880px and 4 below 360px (5 on phones held sideways), so two fwiends still stand side by side on the smallest phones.</li>
+<li>Ears and tails may reach outside the box, as in a photo. A body or tail that sticks out at ground level widens that friend's slot (<code>--reach-left</code> and <code>--reach-right</code>, measured on load), so neighbours stand close but never tread on a tail.</li>
+<li>The fwiends stand in one row while they fit (from 1720px the page widens so all five do), then wrap onto more rows, each grounded on a rule; phones show two to a row.</li>
+<li>Each friend's ground is its own patch of rule, gone over in pencil: a seeded wobble (<code>PhyFriends.rng(5)</code>), ink at 70%, 1.4px, through the graphite filter.</li>
+<li>The ring circles the host's name, phy's: "this one" is the one whose page it is. The nav's ring marks the page, as it does everywhere.</li>
+<li>A pencilled note says what to do. From 1200px it sits in the margin to the right, tilted <code>−2°</code>, with an arrow: "psst: they watch your cursor. click one to say hi". Below that it is one centred line under the stage, and touch screens read "tap" for "click".</li>
+<li>Without JavaScript: "the fwiends are drawn live, so they need JavaScript to appear."</li>
+</ul>
+<p class="lead"><strong>Labels.</strong> Each friend has a small label, three rules tall:</p>
+<ul>
+<li>the name in the hand, <code>31px</code> (<code>26px</code> on phones, <code>22px</code> on the smallest): a step up the scale from an h3, because it is read under a picture from further away;</li>
+<li>the species in small print, two or three lower-case words ("tuxedo eevee", "yellow plush toy");</li>
+<li>a credit line in small print: the owner's handle, linking to their page. phy's reads "that's me · @rareone0602", on two lines on a phone.</li>
+</ul>
+<p>Both small-print lines are in <code>--ink-2</code>; the credit is told apart by being a link.</p>
+<p>Each friend is a button, and its <code>aria-label</code> says who it is in one line: "say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles".</p>
+<p>Names keep their owner's capitalisation: <strong>Howdi</strong>, <strong>Yuda</strong> and <strong>Terry</strong> are capitalised; <strong>phy</strong> and <strong>mumuyou</strong> are always lower case, even at the start of a line.</p>
+<p><strong>The copy</strong>, against what it isn't:</p>
+<table>
+<thead><tr><th>do</th><th>don't</th></tr></thead>
+<tbody>
+<tr><td>that's me</td><td>Meet phy, the creator behind it all!</td></tr>
+<tr><td>click one to say hi</td><td>Click a character to interact!</td></tr>
+<tr><td>a few chibi fwiends, each one drawn from a hundred-odd lines of code.</td><td>Welcome to a magical world of adorable characters</td></tr>
+<tr><td>characters belong to the people named under them</td><td>All rights reserved.</td></tr>
+</tbody>
+</table>
+<p>The "psst" and the footer's disclaimer are the page's two winks, both in the corners (<code>STYLE.md</code> §3).</p>
+<p class="lead"><strong>Saying hi:</strong></p>
+<ul>
+<li>Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a touch wider.</li>
+<li>A click, a tap, Enter or Space plays the library's happy hop: happy eyes, a small mouth, two bounces. The other fwiends glance at the one being greeted.</li>
+</ul>
+<p class="lead"><strong>The link preview and icons</strong> come from <code>python3 design/site_assets.py</code>, run after any character changes:</p>
+<ul>
+<li>the favicon is phy's head;</li>
+<li>the preview (1200×630) is a snapshot of the page with the whole set.</li>
+</ul>
+<h2 id="drawing-a-friend">drawing a friend</h2>
+<p>These are the rules the factory (<code>src/phyfriends.js</code>) encodes. A friend is a spec of about 100 lines, a palette plus shape parameters, not a traced path. Follow them when turning someone's picture or design sheet into a friend.</p>
+<p class="lead"><strong>Before starting:</strong></p>
+<ul>
+<li>Ask the owner how their character is written: its name's capitalisation, its species, and its pronoun (they, until told).</li>
+<li>Take one picture as the colour standard, and say which one.</li>
+<li>A friend appears only with its owner's consent, and its credit line names them.</li>
+<li>Keep private references (photos of a real pet, say) in a git-ignored <code>private/</code> folder. They are never published.</li>
+</ul>
+<p class="lead"><strong>Flat vector:</strong></p>
+<ul>
+<li>No outlines, no gradients, no textures.</li>
+<li>Every colour is one the character really has: fur, hair, markings, accessories. A band the owner counts as a marking (phy's crest) is a colour, not shading.</li>
+<li>A few colours, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, … The current five use 6–11 each, plus <code>bg</code> (<code>#1c1d21</code>, the same for all).</li>
+<li><strong>Exactly one shade layer</strong> (<code>STYLE.md</code>, principle 5). <code>&lt;name&gt;Shade</code> is derived by the library from <code>&lt;name&gt;</code> with <code>PhyFriends.shadeOf</code>: CIELAB L* <code>−10</code>, chroma <code>×1.2</code>, the same hue, and near-whites lean to lavender. The shades therefore match across fwiends.
+<ul>
+<li>Every friend has the layer, and none has a second. The body sits under the head, so every body is in its fur's shade.</li>
+<li>Elsewhere the shade goes only on a part behind a neighbour of the same colour: Terry's ears behind the face, the back layer of a ruff, locks of hair behind the mop, a bandana's band behind its point.</li>
+<li>A spec sets a shade by hand only where the derived one looks wrong, and says so in a comment: mumuyou's gold hair, and Howdi's navy, whose derived shade is nearly black.</li>
+<li>Where a shade lands on a neighbouring colour, the neighbour moves, not the shade: phy's crumb went a step darker, so the tail's cookie base stays apart from the shaded hip.</li>
+</ul></li>
+<li>Nothing is copied from a reference's lighting: no pale rim along an ear, no darker far side, no highlights.</li>
+<li>A pale colour that would vanish on paper takes one slightly deeper flat tint wherever it appears (mumuyou's white, <code>#efeef3</code>).</li>
+</ul>
+<p class="lead"><strong>Chibi proportions, in head space:</strong></p>
+<ul>
+<li>The origin sits between the eyes. The head is widest around eye level, about 140–190 units across the cheeks.</li>
+<li>Ear tips reach about −155 (floppy ears less), and the paws reach <code>rig.ground</code>, about +131. A tail may curl out to one side.</li>
+<li>The eyes are about 13 × 32 units, centred 31–35 either side of the origin.</li>
+<li>A reference in the house template (a 1254px close-up, head tipped 20°, as in the Grokbot Icon prompt's examples; reviewers should know them) is matched at <code>scale: 5.5</code> with the view <code>{w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20}</code>.</li>
+</ul>
+<p class="lead"><strong>Shape vocabulary:</strong></p>
+<ul>
+<li><strong>fluffy ellipses</strong> for the head, face mask and chest, whose outlines grow small curved tufts;</li>
+<li><strong>a star hair mop</strong> of broad, curved, flame-like locks, some hanging over the face;</li>
+<li><strong>rounded-triangle ears</strong>, with an inner ear and stripe bands only where the character really has them;</li>
+<li><strong>pill eyes</strong>: solid near-black, no whites, no highlight. Both eyes match, even when the art shows coloured eyes, unless the owner asks otherwise. mumuyou's owner did, so his eyes are flat pills in his own colours (blue on his right, gold on his left) through <code>eyes.right</code>, with no dark rim round the colour;</li>
+<li>soft <strong>blush</strong> ovals, in the owner's colour if they have one (Yuda's is blue, <code>#a9dbf3</code>);</li>
+<li>no nose, and no mouth by default.</li>
+</ul>
+<p><strong>Layering:</strong> ears, head, face mask, blush, eyes, mouth, then hair on top. Bangs may cross the face.</p>
+<p><strong>Expressions come from the pose, not from new drawings:</strong> <code>eyes: 'happy' | 'closed'</code>, <code>mouth</code>, <code>blink</code>, and ear angles. <code>eyes.arc</code> and <code>eyes.stroke</code> set how wide and thick the happy and closed strokes are.</p>
+<p><strong>Keep the spec small.</strong> Tune the <code>fluffy</code>, <code>star</code> and ear parameters rather than writing raw <code>nodes</code>. A new friend matches the set in size and in the spec's structure as well as in its look.</p>
+<p class="lead"><strong>Motion on the page:</strong></p>
+<ul>
+<li>Each friend works out the direction from its own head to the pointer, so the group converges on it. The eyes take the full offset (<code>lookX/lookY</code>); the head turns about half as much (<code>turnX/turnY</code>, drawn as layer parallax).</li>
+<li>Idle underneath: breathing, blinks at irregular intervals, a slow tail sway, an occasional ear flick.</li>
+<li>When the pointer leaves the window, or sits still for a while, the fwiends drift back to centre or glance around. On touch screens they follow the finger while it touches; there is no gyroscope.</li>
+<li>With <code>prefers-reduced-motion</code>: eyes only, no idle motion, and saying hi changes just the face.</li>
+</ul>
+<hr>
+<h2 id="appendix-the-gallery-s-original-brief">appendix: the gallery's original brief</h2>
+<p>Claude wrote this brief for the design agents from phy's first request: a pencil font, and a design that isn't too artificial. It is kept so later changes can be checked against it:</p>
 <blockquote>
 <p>A pencil font. Don't make the design too artificial: no glossy, over-designed, template-y "AI landing page" look (no gradients, glassmorphism, glows, heavy drop shadows, emoji bullets, marketing hero copy, generic SaaS card grids). Aim for handmade, honest and quiet, like a page of someone's sketchbook where the characters are the only saturated things on it. The fwiends stand together on one shared stage and all watch the cursor (falling back to a grid or rows on narrow screens), each with a small handwritten label: name, maybe species, and a credit/owner line.</p>
 </blockquote>
@@ -198,7 +543,6 @@
 
   <footer>
     <ul>
-      <li>characters belong to the people named under them</li>
       <li><a href="index.html">back to the fwiends</a></li>
       <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
     </ul>

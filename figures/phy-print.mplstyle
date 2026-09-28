@@ -1,0 +1,10 @@
+# Print overlay (phy-print.mplstyle): stack it on phy.mplstyle for a paper.
+# White page, since print has no paper tone to match; the venue's template takes precedence on everything else.
+figure.facecolor: white
+figure.edgecolor: white
+axes.facecolor:   white
+patch.edgecolor:  white
+# The paper's own text face (Times for most LaTeX venues); substitute the venue's face if it differs.
+font.family:      serif
+font.serif:       STIX Two Text, Times New Roman, Times, DejaVu Serif
+mathtext.fontset: stix

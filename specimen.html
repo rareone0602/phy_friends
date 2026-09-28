@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>specimen</title>
+<meta name="description" content="every part of phy's house style, working, on the rules.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="site/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="stylesheet" href="site/notebook.css">
+<link rel="stylesheet" href="site/pencil.css">
+<style>
+  /* Page-specific styles: a stroke of each ink, and the list of marks. */
+  .swatch { display: inline-block; width: 30px; height: 10px; vertical-align: 1px; margin-right: .5em; }
+  .inks td:first-child { white-space: nowrap; }
+  .marks { font-size: 15px; color: var(--ink-2); }
+  .marks span:not(.mark) { white-space: nowrap; margin-right: .9em; }  /* A mark never wraps away from its label. */
+  .marks .mark { margin-right: .3em; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Graphite grain and a slight displacement wobble for the title and the pencil lines. -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <div class="titleline">
+      <h1>specimen</h1>
+      <div class="portrait" role="img" aria-label="phy, a tuxedo eevee"></div>
+    </div>
+    <p class="intro">every part of the house style, working, on the rules.</p>
+    <nav aria-label="pages">
+      <ul>
+        <li><a href="index.html">fwiends</a></li>
+        <li><a href="style.html">style guide</a></li>
+        <li><span aria-current="page">specimen</span></li>
+      </ul>
+    </nav>
+  </header>
+
+  <article class="doc">
+    <h2 id="notes">a page of notes</h2>
+    <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
+    <p>A notes page is the style guide with the numbers taken off. Links are <a href="style.html">underlined in pencil</a>, and <strong>bold</strong> is the only emphasis that shows from across the room. Long words and <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a> break rather than push the page sideways.</p>
+    <h3>a smaller heading</h3>
+    <ul>
+      <li>one idea to a line</li>
+      <li>a dash for a bullet, in the lightest ink</li>
+      <li>no gap under a heading</li>
+    </ul>
+    <blockquote><p>measure twice, cut once.<br>a carpenter's rule</p></blockquote>
+    <p class="lead">Set the rule with <code>--L</code>; every height is a whole number of them:</p>
+    <pre><code>:root {
+  --L: 32px;       /* one rule */
+  --ink: #3d3c39;  /* graphite */
+}</code></pre>
+    <figure style="--rules: 5">
+      <img id="photo" alt="phy's close-up, head tipped, on a near-black background, drawn by the library">
+      <img id="drawing" alt="phy asleep, drawn by the library straight onto the paper">
+      <figcaption>a photo stays a photo; a character is drawn straight onto the paper</figcaption>
+    </figure>
+    <table class="inks">
+      <thead><tr><th>ink</th><th class="n">contrast</th><th>use it for</th></tr></thead>
+      <tbody>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#3d3c39" stroke-width="2.2" stroke-linecap="round"/></svg>ink</td><td class="n">10.5 : 1</td><td>anything</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#6d6a63" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;2</td><td class="n">5.1 : 1</td><td>quieter words, the lines of controls</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#97938a" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;3</td><td class="n">2.9 : 1</td><td>marks only, never words</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#a64a3f" stroke-width="2.2" stroke-linecap="round"/></svg>red</td><td class="n">5.4 : 1</td><td>errors only</td></tr>
+      </tbody>
+    </table>
+    <hr>
+    <h2>a small tool</h2>
+    <p>How many rules does a drawing need?</p>
+    <div class="row">
+      <label for="h">height, in pixels</label>
+      <input class="field" id="h" value="two hundred" aria-invalid="true" aria-describedby="h-err">
+      <p class="error" id="h-err">that needs to be a number, like 250</p>
+    </div>
+    <div class="row">
+      <label for="s">rule spacing</label>
+      <select class="field" id="s"><option>32px, on a screen</option><option>30px, on a phone</option></select>
+    </div>
+    <label class="check"><input type="checkbox" checked> round up to a whole rule</label>
+    <div class="actions"><button class="btn" type="button">count</button><button class="btn quiet" type="button">start again</button></div>
+    <p class="result" aria-live="polite">eight rules</p>
+    <p class="note">7.4 rules, rounded up</p>
+    <p class="loading" role="status">counting…</p>
+    <h3>saved</h3>
+    <p class="empty">nothing saved yet.</p>
+    <p class="marks"><span><span class="mark arrow"></span>arrow</span> <span><span class="mark tick"></span>tick</span> <span><span class="mark cross"></span>cross</span> <span><span class="mark caret"></span>caret</span> <span><span class="mark ring"></span>ring</span> <span><span class="mark squiggle"></span>squiggle</span></p>
+  </article>
+
+  <footer>
+    <ul>
+      <li><a href="style.html">style guide</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+    </ul>
+  </footer>
+</main>
+
+<script src="src/phyfriends.js"></script>
+<script src="characters/phy/phy.js"></script>
+<script>
+  // The portrait: a still drawing of phy, grounded on the bottom edge of a box a whole number of rules tall.
+  const spec = PhyFriends.get('phy'), ground = (spec.rig && spec.rig.ground) ?? 120;
+  document.querySelector('.portrait').innerHTML = PhyFriends.render('phy', {
+    view: { w: 270, h: 270, x: 135, y: 270 - ground, scale: 1, rotate: 0 }, bg: false, fluid: true, pose: { lookX: -0.5, lookY: 0.2 } });
+  // The pictures: the house close-up on its own dark background (a photo), and phy on a transparent background (a character).
+  const img = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  document.getElementById('photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));
+  document.getElementById('drawing').src = img(PhyFriends.render('phy', {
+    view: { w: 300, h: 300, x: 150, y: 300 - ground - 12, scale: 1.02, rotate: 0 }, bg: false, pose: { eyes: 'closed', tail: -40 } }));
+</script>
+</body>
+</html>

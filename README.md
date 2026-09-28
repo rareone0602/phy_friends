@@ -28,7 +28,10 @@ GitHub Pages.
 | `src/anim.js` | animation clips, composition, and a browser player |
 | `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`) and `examples/` |
 | `tools/pf.py` | CLI: render stills, compare with a reference, and export animations (headless Chrome + ffmpeg) |
-| `index.html`, `style.html`, `site/` | the site (GitHub Pages): the gallery, and the style guide made from `STYLE.md` by `pf.py style` |
+| `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
+| `FWIENDS.md` | what only this project adds to it: the gallery page and the rules for drawing a friend |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site (GitHub Pages): the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper and `site/pencil.css` everything drawn on it |
+| `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `demo/` | local dev pages |
 | `design/` | design scratch: `index.html` lists the mockups (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`), `shoot.py` takes page screenshots, and `site_assets.py` rebuilds the site's icons and link preview after a character changes |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/scratch/` for experiments |
@@ -69,21 +72,21 @@ outwards); a render's own pose overrides it field by field.
 
 ```js
 PhyFriends.define('name', {
-  palette: { bg, fur, face, hair, earInner, stripe, eye, blush, chest, tailTip },  // furShade etc. are derived
-  head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // fluffy ellipse
-  face:  { ... same as head ... },                                     // pale mask
+  palette: { bg, fur, face, hair, earInner, stripe, eye, blush, chest, tailTip },  // Shades such as furShade are derived
+  head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // Fluffy ellipse
+  face:  { ... same as head ... },                                     // Pale mask
   ears:  { base, angle, width, length, lean, tip, inner, stripes, right: {...overrides} },
-  hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // spiky star
-  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { color, shine } },  // shine: a glint, or a list of marks (iris, glint); right: the right eye's own colour
+  hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // Spiky star
+  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { color, shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own color
   blush: { x, y, rx, ry, tilt },                                      // tilt > 0 raises the outer ends
   mouth: { x, y, size, shape, fang, tongue },                         // shape: the default mouth
   body:  { ...fluffy ellipse... },
-  tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // optional
-  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // markings, the shade layer; on: 'ears' = both ears
+  tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
+  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // Markings and the shade layer; on: 'ears' means both ears
   order: ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   views: { ref: { w, h, x, y, scale, rotate, pose } },
-  extends: 'other-character',                                          // variants
+  extends: 'other-character',                                          // Variants
 });
 ```
 
@@ -95,7 +98,7 @@ Every character file is laid out the same way, so two specs read side by side:
 
 Fwiends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
 
-Shades are derived (STYLE.md §6): any `<name>Shade` a spec uses and leaves out of
+Shades are derived (the one-layer rule: STYLE.md, principle 5, and FWIENDS.md): any `<name>Shade` a spec uses and leaves out of
 its palette is `<name>` one fixed step darker (`PhyFriends.shadeOf`: CIELAB L* −10,
 its hue a little richer, near-whites leaning to lavender), so every friend's one
 shade layer matches. Set one by hand only where the derived one looks wrong.
@@ -164,13 +167,13 @@ rig.setPose({ lookX: 0.8, turnX: 0.5, eyes: 'happy' });
 ## CLI
 
 ```sh
-python3 tools/pf.py list                                    # characters and their examples
+python3 tools/pf.py list                                    # Characters and their examples
 python3 tools/pf.py render howdi --size 512                 # out/howdi/portrait.png
 python3 tools/pf.py render howdi --pose '{"eyes":"happy","mouth":"w"}' -o out/howdi/happy.png
-python3 tools/pf.py compare howdi                           # every example: out/howdi/compare/ref.png + ref-diff.png
-python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # one example, metrics and a zoomed crop for a box
+python3 tools/pf.py compare howdi                           # Every example: out/howdi/compare/ref.png + ref-diff.png
+python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example, metrics and a zoomed crop for a box
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
-python3 tools/pf.py render howdi --with out/scratch/mine.js # mine.js redefines howdi: try a working copy
+python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
 ```
 
 `compare` snaps every pixel of the reference and the render to the nearest

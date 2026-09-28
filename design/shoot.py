@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Screenshot a design mockup with headless Chrome (throwaway profile).
+"""Screenshot a design mockup with headless Chrome, using a throwaway profile.
 
   python3 design/shoot.py design/backup/a.html out/design/a-desktop.png --size 1280x800 --query 'px=900&py=260'
   python3 design/shoot.py design/fonts.html out/design/fonts.png --size 1280x2400
 
-Modelled on shoot() in tools/pf.py, but loads a real file:// URL (so relative
-../src and ../characters paths resolve) and gives Google Fonts time to load.
-The mockups honour ?px=..&py=.. (CSS px) as a fake pointer so a still shows
-the eye-follow.
+Modeled on shoot() in tools/pf.py, but loads a real file:// URL (so that
+relative ../src and ../characters paths resolve) and gives Google Fonts time to
+load. The mockups honor ?px=..&py=.. (CSS pixels) as a simulated pointer
+position, so a still shows the eyes following it.
 """
 import argparse
 import os
@@ -32,8 +32,8 @@ def shoot(page, out_png, w, h, query='', scale=1, budget=12000, timeout=90):
         shot = work / 'shot.png'
         win_w = w
         if w < 500:
-            # headless Chrome won't make a window narrower than ~500px, so a phone
-            # layout is rendered in an iframe of the exact size and cropped.
+            # Headless Chrome will not make a window narrower than about 500 px, so a
+            # phone layout is rendered in an iframe of the exact size and then cropped.
             wrap = work / 'wrap.html'
             wrap.write_text('<!doctype html><style>html,body{margin:0;background:#fff}iframe{border:0;display:block}</style>'
                             f'<iframe src="{url}" width="{w}" height="{h}"></iframe>')

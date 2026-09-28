@@ -1,0 +1,16 @@
+# Slides overlay (phy-slides.mplstyle): stack it on phy.mplstyle for slides and the web.
+# Sized for a figure 6.4 in wide shown at 960 px (a 1280 x 720 slide): 10 pt is about 21 px.
+# Numbers use the same face as text: at its formal end, Shantell Sans has a clearly visible period, so 2.0 never reads as 20.
+figure.figsize:   6.4, 3.4
+font.size:        12
+axes.titlesize:   13
+axes.labelsize:   12
+xtick.labelsize:  10
+ytick.labelsize:  10
+legend.fontsize:  12
+lines.linewidth:  2.2
+axes.linewidth:   0.9
+xtick.major.width: 0.9
+ytick.major.width: 0.9
+xtick.major.size:  4
+ytick.major.size:  4

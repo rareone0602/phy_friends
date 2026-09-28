@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""Rebuild the site's images from the specs, after a character changes:
+"""Rebuild the site's images from the character specs.
+
+Run this after a character changes:
 
   python3 design/site_assets.py
 
-  site/icon.svg              the favicon: phy's head, the tail tucked away
-  site/icon-32.png           the same as a PNG, for browsers without SVG favicons
-  site/apple-touch-icon.png  180px, on paper (iOS wants an opaque square)
-  site/preview.png           1200x630, the picture shown where the link is shared (the gallery at 1720 px, scaled)
+Outputs:
+
+  site/icon.svg              The favicon: phy's head, with the tail tucked away.
+  site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
+  site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
+  site/preview.png           1200x630 link preview image (the gallery at 1720 px, scaled down).
 """
 import json
 import subprocess
@@ -35,8 +39,9 @@ def main():
     print(ROOT / 'site/icon.svg')
     still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
     still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-    # the gallery itself, the friends looking out at whoever opens the link: laid out for a wide
-    # monitor (1720 px, where all the friends stand in one row) and scaled down to 1200x630
+    # The link preview is the gallery itself, with the simulated pointer near the middle so the
+    # friends look out at the viewer. It is laid out for a wide monitor (1720 px, where all the
+    # friends fit in one row) and scaled down to 1200x630.
     subprocess.run([sys.executable, str(ROOT / 'design/shoot.py'), str(ROOT / 'index.html'), str(ROOT / 'site/preview.png'),
                     '--size', '1720x903', '--scale', str(1200 / 1720), '--query', 'px=860&py=520'], check=True)
 

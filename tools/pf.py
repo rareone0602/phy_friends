@@ -1,24 +1,25 @@
 #!/usr/bin/env python3
-"""phy's fwiends command line — render characters with headless Chrome.
+"""Command-line tool for phy's fwiends that renders characters with headless Chrome.
 
   python3 tools/pf.py list
-  python3 tools/pf.py render howdi                      # -> out/howdi/portrait.png
+  python3 tools/pf.py render howdi                      # Writes out/howdi/portrait.png.
   python3 tools/pf.py render howdi --view ref --pose '{"lookX": 1}' -o out/scratch/x.png
-  python3 tools/pf.py compare howdi                     # every example -> out/howdi/compare/<example>.png
-  python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # one example, metrics + zoom for a box
-  python3 tools/pf.py anim howdi --clip idle            # -> out/howdi/anim/idle.gif
+  python3 tools/pf.py compare howdi                     # Every example -> out/howdi/compare/<example>.png.
+  python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example; metrics and a zoom for a box.
+  python3 tools/pf.py anim howdi --clip idle            # Writes out/howdi/anim/idle.gif.
   python3 tools/pf.py anim howdi --clip "layer(idle, curious)" --size 512 --sheet -o out/scratch/x.mp4
-  python3 tools/pf.py render howdi --with out/scratch/mine.js   # mine.js may redefine howdi (a working copy)
-  python3 tools/pf.py style                             # STYLE.md -> style.html (the site's style-guide page)
+  python3 tools/pf.py render howdi --with out/scratch/mine.js   # A working copy that may redefine howdi.
+  python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
 
-Characters live in characters/<name>/: the spec <name>.js, and examples/ with
-reference pictures. An example is compared through the view of the same name,
-so examples/ref.jpg pairs with the spec's views.ref.
+Each character lives in characters/<name>/, which holds the spec <name>.js and
+an examples/ folder of reference pictures. An example is compared through the
+view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
 
-Output layout: out/<name>/ for each character (stills, compare/, anim/),
-out/design/ for page mockups, out/scratch/ for experiments.
+Output goes to out/<name>/ for each character (stills, compare/, anim/),
+out/design/ for page mockups, and out/scratch/ for experiments.
 
-Needs Google Chrome (override with $CHROME) and Pillow; ffmpeg for video.
+Requires Google Chrome (override the path with $CHROME) and Pillow; video
+output also requires ffmpeg.
 """
 import argparse
 import html
@@ -38,20 +39,20 @@ from string import Template
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'out'  # out/<name>/..., out/design/, out/scratch/
-CHARACTERS = ROOT / 'characters'  # characters/<name>/<name>.js and characters/<name>/examples/
+OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/ and out/scratch/.
+CHARACTERS = ROOT / 'characters'  # Holds characters/<name>/<name>.js and characters/<name>/examples/.
 CHROME = os.environ.get('CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
 IMAGE_TYPES = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
-EXTRA = []  # --with: scripts loaded after the characters, e.g. a working copy that redefines one
+EXTRA = []  # Scripts from --with, loaded after the characters (e.g. a working copy that redefines one).
 
 
 def characters():
-    """Character names: every characters/<name>/ that holds a <name>.js."""
+    """Return the character names: every characters/<name>/ that holds a <name>.js."""
     return sorted(d.name for d in CHARACTERS.iterdir() if (d / f'{d.name}.js').is_file())
 
 
 def examples(name):
-    """{example name: path} for the pictures in characters/<name>/examples/."""
+    """Return {example name: path} for the pictures in characters/<name>/examples/."""
     folder = CHARACTERS / name / 'examples'
     if not folder.is_dir():
         return {}
@@ -59,7 +60,7 @@ def examples(name):
 
 
 def scripts():
-    """Library files first, then every character definition."""
+    """Return the scripts a page loads: library files, then character definitions, then --with scripts."""
     libs = [ROOT / 'src' / 'phyfriends.js'] + sorted(p for p in (ROOT / 'src').glob('*.js') if p.name != 'phyfriends.js')
     return libs + [CHARACTERS / n / f'{n}.js' for n in characters()] + [Path(x).resolve() for x in EXTRA]
 
@@ -78,7 +79,7 @@ try {{ {body_js} }} catch (e) {{ document.getElementById('err').textContent = St
 
 
 def shoot(html, w, h, out_png, timeout=60):
-    """Screenshot an HTML string at w x h CSS px into out_png."""
+    """Screenshot an HTML string at w x h CSS pixels into out_png and return the image."""
     work = Path(tempfile.mkdtemp(prefix='pf-'))
     try:
         src = work / 'page.html'
@@ -119,7 +120,7 @@ def shoot(html, w, h, out_png, timeout=60):
 
 
 def render(name, out_png, view='portrait', pose=None, size=None, bg=True):
-    """Render one still. Returns the PIL image."""
+    """Render one still and return the PIL image."""
     opts = {'view': view, 'pose': pose or {}}
     if size:
         opts['size'] = size
@@ -137,7 +138,7 @@ document.title = v.w + 'x' + v.h;"""
 
 
 def evaluate(js_expr, timeout=60):
-    """Evaluate a JS expression in a page that has the library loaded; returns its JSON value."""
+    """Evaluate a JS expression in a page that has the library loaded and return its JSON value."""
     work = Path(tempfile.mkdtemp(prefix='pf-'))
     try:
         src = work / 'page.html'
@@ -178,11 +179,12 @@ def view_size(name, view='portrait', size=None):
 
 
 def frames(name, poses_js, out_dir, view='portrait', size=256, bg=True, max_side=4096):
-    """Render many poses as sprite sheets (one Chrome launch per sheet), then split.
+    """Render many poses to frame PNGs, batched into sprite sheets that are then split.
 
-    poses_js: JS expression evaluating to an array of pose objects; it can use
-    PhyFriends (and PhyFriends.anim when present). Returns the frame paths
-    (out_dir/f0000.png ...).
+    Batching costs one Chrome launch per sheet instead of one per frame.
+    poses_js: a JS expression that evaluates to an array of pose objects; it can
+    use PhyFriends (and PhyFriends.anim when present). Returns the frame paths
+    (out_dir/f0000.png, ...).
     """
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -227,7 +229,7 @@ _have = None
 
 
 def pick_encoder(ext):
-    """(encoder, args) for an output extension, falling back when ffmpeg lacks the best one."""
+    """Return (encoder, args) for an output extension, falling back when ffmpeg lacks the best one."""
     global _have
     if ext not in ENCODERS:
         raise SystemExit(f'unknown output type {ext} (use .gif, .mp4, .webm or .apng)')
@@ -247,7 +249,7 @@ def pick_encoder(ext):
 
 
 def encode(frame_paths, out, fps=30):
-    """Encode frames (f0000.png ...) into .gif / .mp4 / .webm / .apng with ffmpeg."""
+    """Encode frames (f0000.png, ...) into .gif, .mp4, .webm or .apng with ffmpeg."""
     frame_dir = Path(frame_paths[0]).parent
     pattern = str(frame_dir / 'f%04d.png')
     out = Path(out)
@@ -258,7 +260,7 @@ def encode(frame_paths, out, fps=30):
     if ext == '.gif':
         vf = 'split[a][b];[a]palettegen=reserve_transparent=1:stats_mode=full[p];[b][p]paletteuse=dither=none'
         cmd = base + ['-vf', vf, '-loop', '0', str(out)]
-    elif ext == '.mp4':  # no alpha; yuv420p wants even sizes
+    elif ext == '.mp4':  # MP4 has no alpha channel, and yuv420p requires even dimensions.
         cmd = base + ['-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2', '-c:v', codec, *args, '-pix_fmt', 'yuv420p',
                       '-movflags', '+faststart', str(out)]
     elif ext == '.webm':
@@ -270,7 +272,10 @@ def encode(frame_paths, out, fps=30):
 
 
 def contact_sheet(frame_paths, out_png, count=16, cols=8, fps=None):
-    """Tile `count` evenly spaced frames (always the first and the last), labelled."""
+    """Tile `count` evenly spaced frames, always including the first and the last.
+
+    Each tile is labeled with its frame index, and with its time when fps is given.
+    """
     from PIL import ImageDraw, ImageFont
     n = len(frame_paths)
     idx = sorted({round(i * (n - 1) / max(1, count - 1)) for i in range(min(count, n))})
@@ -289,23 +294,24 @@ def contact_sheet(frame_paths, out_png, count=16, cols=8, fps=None):
 
 
 def zoom_view(name, view='portrait', k=1.0):
-    """The view zoomed by k about its bottom centre (k < 1 leaves headroom for hops)."""
+    """Return the view zoomed by k about its bottom center (k < 1 leaves headroom for hops)."""
     v = evaluate(f'PhyFriends.resolveView(PhyFriends.get({json.dumps(name)}), {json.dumps(view)})')
     return {**v, 'x': v['w'] / 2 + (v['x'] - v['w'] / 2) * k, 'y': v['h'] + (v['y'] - v['h']) * k, 'scale': v['scale'] * k}
 
 
 def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', size=384, bg=True, sheet=None, zoom=1.0):
-    """Render a PhyFriends.anim clip (a name or an expression like "layer(idle, curious)").
+    """Render a PhyFriends.anim clip (a name or an expression such as "layer(idle, curious)").
 
     sheet: a path for a contact sheet of sampled frames, or True for <out>-sheet.png.
-    zoom: < 1 zooms out about the bottom edge, for clips that travel upwards (hop).
+    zoom: a value below 1 zooms out about the bottom edge, for clips that travel upward (hop).
+    Returns the output path.
     """
     import re
     out = Path(out or OUT / name / 'anim' / f'{re.sub(r"[^A-Za-z0-9]+", "-", clip).strip("-")[:40]}.gif')
     if sheet is True:
         sheet = out.with_name(out.stem + '-sheet.png')
     ext = out.suffix.lower()
-    pick_encoder(ext)  # fail before rendering
+    pick_encoder(ext)  # Fail before the slow render if no encoder is available.
     clip_js = f'PhyFriends.anim.parse({json.dumps(clip)})'
     if seconds is None:
         seconds = evaluate(f'{clip_js}.duration ?? null')
@@ -327,9 +333,12 @@ def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', siz
 
 
 def palette_classes(name, merge=24):
-    """The spec's palette, with the house shades it uses, as colour classes; near-identical colours share a class."""
+    """Return the spec's palette, with the house shades it uses, as color classes.
+
+    Colors closer than `merge` (Euclidean distance in 0-255 RGB) share a class.
+    """
     pal = evaluate(f'PhyFriends.palette({json.dumps(name)})')
-    classes = []  # [(label, (r, g, b))]
+    classes = []  # List of (label, (r, g, b)).
     for key, col in pal.items():
         if not (isinstance(col, str) and col.startswith('#') and len(col) in (4, 7)):
             continue
@@ -354,9 +363,10 @@ def classify(img, classes):
 def compare(name, out_png=None, view=None, pose=None, region=None):
     """Compare the character with its examples, each through the view of the same name.
 
-    view: one example (and view) name; by default every example that has a view.
+    view: one example (and view) name; by default, every example that has a view.
     Writes out/<name>/compare/<example>.png and -diff.png (see compare_one), and
-    the plain render to out/<name>/<example>.png. out_png and region need a single example.
+    the plain render to out/<name>/<example>.png. out_png and region require a single
+    example. Returns the names of the compared examples.
     """
     found = examples(name)
     if not found:
@@ -384,13 +394,14 @@ def compare(name, out_png=None, view=None, pose=None, region=None):
 
 
 def compare_one(name, ref_path, out_png, render_png, view, pose=None, region=None):
-    """Reference | render | blend, plus a palette-class diff map and metrics.
+    """Write a reference | render | blend sheet, a palette-class diff map, and metrics.
 
-    Every pixel of both images is snapped to the nearest palette colour; the diff
+    Every pixel of both images is snapped to the nearest palette color; the diff
     map (<out>-diff.png) paints red where the classes disagree, over a dimmed
-    reference. "solid" mismatch ignores a 2px band along the reference's colour
-    edges (anti-aliasing and JPEG noise). region = (x0, y0, x1, y1) in reference
-    pixels also prints metrics for that box and writes a zoomed <out>-region.png.
+    reference. The "solid" mismatch ignores a 2 px band along the reference's
+    color edges, where anti-aliasing and JPEG noise dominate. region = (x0, y0,
+    x1, y1) in reference pixels also prints metrics for that box and writes a
+    zoomed <out>-region.png.
     """
     import numpy as np
     ref = Image.open(ref_path).convert('RGB')
@@ -458,14 +469,14 @@ def compare_one(name, ref_path, out_png, render_png, view, pose=None, region=Non
     return out_png
 
 
-# ---- style.html: STYLE.md written out on the notebook page ------------------------
+# ---- Style guide page: STYLE.md and FWIENDS.md rendered to style.html -------------
 
 LIST_ITEM = re.compile(r'( *)([-*]|\d+\.) +(.*)')
 
 
 def md_inline(text):
-    """**bold**, *italic*, `code` and [text](url); everything else HTML-escaped."""
-    codes = []  # code spans wait outside as \0n\0, so emphasis can wrap them but not reach in
+    """Convert inline Markdown (**bold**, *italic*, `code`, [text](url)) to HTML; escape the rest."""
+    codes = []  # Code spans are held out as \0n\0 so emphasis can wrap them but not match inside.
 
     def stash(m):
         codes.append(f'<code>{html.escape(m[1], quote=False)}</code>')
@@ -478,15 +489,36 @@ def md_inline(text):
 
 
 def md_blocks(lines, tight=False):
-    """The Markdown STYLE.md uses: # headings, ---, paragraphs, - and 1. lists nested
-    by indentation, and > quotes. tight: paragraphs as bare text (inside a list item).
-    A paragraph that runs straight into a list (no blank line) is marked class="lead"."""
+    """Convert the block-level Markdown that STYLE.md uses to HTML.
+
+    Supported: # headings, ---, paragraphs, - and 1. lists nested by indentation,
+    > quotes, | tables and ``` code blocks. tight: emit paragraphs as bare text
+    (inside a list item). A paragraph that runs straight into a list (no blank
+    line) is marked class="lead".
+    """
     out, i, n = [], 0, len(lines)
     while i < n:
         line = lines[i]
         m = LIST_ITEM.match(line)
         if not line.strip():
             i += 1
+        elif line.lstrip().startswith('```'):
+            j = i + 1
+            while j < n and not lines[j].lstrip().startswith('```'):
+                j += 1
+            code = '\n'.join(lines[i + 1:j])
+            out.append(f'<pre><code>{html.escape(code, quote=False)}</code></pre>')
+            i = j + 1
+        elif line.startswith('|'):
+            j = i
+            while j < n and lines[j].startswith('|'):
+                j += 1
+            rows = [[c.strip() for c in x.strip().strip('|').split('|')] for x in lines[i:j]]
+            head, body = (rows[0], rows[2:]) if len(rows) > 1 and set(''.join(rows[1])) <= set('-: ') else (None, rows)
+            cells = lambda tag, row: ''.join(f'<{tag}>{md_inline(c)}</{tag}>' for c in row)
+            out.append('<table>\n' + (f'<thead><tr>{cells("th", head)}</tr></thead>\n' if head else '')
+                       + '<tbody>\n' + '\n'.join(f'<tr>{cells("td", r)}</tr>' for r in body) + '\n</tbody>\n</table>')
+            i = j
         elif line.strip() == '---':
             out.append('<hr>')
             i += 1
@@ -504,7 +536,7 @@ def md_blocks(lines, tight=False):
         elif m:
             indent, ordered, items = len(m[1]), m[2].endswith('.'), []
             while i < n and (m := LIST_ITEM.match(lines[i])) and len(m[1]) == indent and m[2].endswith('.') == ordered:
-                w, body = len(m[0]) - len(m[3]), [m[3]]  # w: indent + marker + space
+                w, body = len(m[0]) - len(m[3]), [m[3]]  # The item text starts at column w (indent + marker + space).
                 i += 1
                 while i < n and lines[i].strip() and len(lines[i]) - len(lines[i].lstrip()) > indent:
                     body.append(lines[i][min(w, len(lines[i]) - len(lines[i].lstrip())):])
@@ -514,7 +546,7 @@ def md_blocks(lines, tight=False):
             out.append(f'<{tag}>\n' + '\n'.join(items) + f'\n</{tag}>')
         else:
             j = i + 1
-            while j < n and lines[j].strip() and not (LIST_ITEM.match(lines[j]) or re.match(r'#{1,6} |>|---\s*$', lines[j])):
+            while j < n and lines[j].strip() and not (LIST_ITEM.match(lines[j]) or re.match(r'#{1,6} |>|---\s*$|\s*```|\|', lines[j])):
                 j += 1
             text = md_inline(' '.join(x.strip() for x in lines[i:j]))
             lead = j < n and LIST_ITEM.match(lines[j])
@@ -523,58 +555,31 @@ def md_blocks(lines, tight=False):
     return '\n'.join(out)
 
 
-# Page CSS on top of site/notebook.css. Every block is a whole number of rules (--L)
-# tall, so nothing drifts off the rules further down; .doc is lifted as one piece
-# (--lift) so 18px body text sits on them, and h2 is nudged for its own font.
+# The page is styled only by site/notebook.css (the paper) and site/pencil.css (the .doc
+# column and everything drawn on it). It deliberately has no CSS of its own, so the style
+# guide is rendered with the same stylesheets it documents.
 STYLE_PAGE = Template("""<!doctype html>
 <html lang="en-GB">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <title>$title</title>
-<meta name="description" content="how phy's fwiends are drawn, and how their page behaves.">
+<meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
 <meta name="theme-color" content="#fbf9f3">
 <link rel="icon" href="site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">
-<!-- Generated from STYLE.md by `python3 tools/pf.py style`: edit STYLE.md, not this file. -->
+<!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reenie+Beanie&family=The+Girl+Next+Door&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
 <link rel="stylesheet" href="site/notebook.css">
-<style>
-  .doc { --lift: calc(var(--L) / 2 - 7px); position: relative; top: var(--lift); max-width: 42em; margin-top: calc(var(--L) * 2); overflow-wrap: break-word; text-wrap: pretty; }
-  .doc * { margin: 0; }
-  .doc > * + *, .doc blockquote > * + * { margin-top: var(--L); }   /* a blank rule between blocks */
-  .doc :is(h2, hr, .lead) + * { margin-top: 0; }                   /* but none under a heading, squiggle or lead-in */
-  .doc h2 { font: 400 44px/calc(var(--L) * 2) var(--hand); position: relative; top: 11px; }
-  .doc ul, .doc ol { padding-left: 1.4em; }
-  .doc ul { list-style-type: '\\2013  '; }
-  .doc li::marker { color: var(--ink-3); }
-  .doc ol { list-style: none; }  /* numbered by hand; out of flow, so the number can't stretch a line */
-  .doc ol > li::before { content: counter(list-item) '.'; position: absolute; margin-left: -.9em; font: 25px/var(--L) var(--hand); color: var(--ink-2); }
-  .doc blockquote { padding-left: 1.6em; color: var(--ink-2); position: relative; }
-  .doc blockquote::before {  /* a thin pencil line down the side */
-    content: ''; position: absolute; left: .45em; top: 2px; bottom: 6px; width: 4px;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 100' preserveAspectRatio='none'><path d='M2 0C2.9 22 1.3 41 2.2 63S1.5 88 2 100' fill='none' stroke='%2397938a' stroke-width='1.1' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>") 0 0 / 100% 100% no-repeat;
-  }
-  .doc code { font: 15px/1 ui-monospace, 'SF Mono', Menlo, Consolas, monospace; color: var(--ink-2); }
-  .doc hr {  /* a short squiggle on the rule */
-    border: 0; height: var(--L);
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2397938a' stroke-width='1.3' stroke-linecap='round'/></svg>") 0 calc(100% - var(--lift) - 2px) / 90px 10px no-repeat;
-  }
-  @media (max-width: 720px) {
-    .doc { margin-top: var(--L); }
-    .doc h2 { font-size: 38px; top: 12px; }
-    .doc ul, .doc ol { padding-left: 1.2em; }
-    .doc blockquote { padding-left: 1.3em; }
-    .doc blockquote::before { left: .3em; }
-  }
-</style>
+<link rel="stylesheet" href="site/pencil.css">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- graphite grain + a hair of wobble, for the title -->
+  <!-- Graphite grain and a slight displacement wobble for the title. -->
   <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
     <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
     <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
@@ -587,7 +592,14 @@ STYLE_PAGE = Template("""<!doctype html>
 <main>
   <header>
     <h1>style guide</h1>
-    <p class="intro">how <a href="index.html">phy's fwiends</a> are drawn, and how their page behaves.</p>
+    <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
+    <nav aria-label="pages">
+      <ul>
+        <li><a href="index.html">fwiends</a></li>
+        <li><span aria-current="page">style guide</span></li>
+        <li><a href="specimen.html">specimen</a></li>
+      </ul>
+    </nav>
   </header>
 
   <article class="doc">
@@ -596,7 +608,6 @@ $body
 
   <footer>
     <ul>
-      <li>characters belong to the people named under them</li>
       <li><a href="index.html">back to the fwiends</a></li>
       <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
     </ul>
@@ -607,12 +618,22 @@ $body
 """)
 
 
-def style_page(src=ROOT / 'STYLE.md', out=ROOT / 'style.html'):
-    """Write STYLE.md out as style.html. Its # title becomes the <title>; the page's
-    own handwritten h1 and intro come from STYLE_PAGE."""
-    lines = Path(src).read_text(encoding='utf-8').splitlines()
-    title = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else "phy's fwiends style guide"
-    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(title, quote=False), body=md_blocks(lines)), encoding='utf-8')
+def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.html'):
+    """Render STYLE.md, then FWIENDS.md, to style.html.
+
+    The first file's # title becomes the <title>; each later file's # title heads
+    its own part of the page. The page's own h1 and intro are written in STYLE_PAGE.
+    """
+    title, parts = "phy's style guide", []
+    for k, src in enumerate(srcs):
+        lines = Path(src).read_text(encoding='utf-8').splitlines()
+        head = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else None
+        if k == 0:
+            title = head or title
+        elif head:
+            lines = ['---', '', '# ' + head, ''] + lines
+        parts.append(md_blocks(lines))
+    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(title, quote=False), body='\n'.join(parts)), encoding='utf-8')
     return out
 
 
@@ -652,7 +673,7 @@ def main(argv=None):
     n.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
     n.add_argument('-o', '--out')
 
-    sub.add_parser('style', help='write STYLE.md out as style.html')
+    sub.add_parser('style', help='write STYLE.md and FWIENDS.md out as style.html')
 
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])

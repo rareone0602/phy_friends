@@ -1,22 +1,25 @@
 /*!
- * phy_friends/anim — clips, composition and a tiny player for PhyFriends rigs.
+ * phy_friends/anim: clips, composition, and a small player for PhyFriends rigs.
  *
- * A clip is a deterministic function of time: clip(t seconds) -> partial pose,
- * tagged with .duration (seconds, may be undefined = endless) and .loop (true =
- * periodic: clip(t) repeats every duration, so exports loop seamlessly; false =
- * it holds its end pose after duration). Randomness is seeded (PhyFriends.rng).
+ * A clip is a deterministic function of time, clip(t seconds) -> partial pose,
+ * tagged with .duration (in seconds; undefined means endless) and .loop. A
+ * looping clip is periodic: clip(t) repeats every duration, so exports loop
+ * seamlessly. A non-looping clip holds its end pose after duration. Randomness
+ * is seeded (PhyFriends.rng).
  *
  * Partial poses stack like layers: numbers add onto the neutral POSE (blush
- * multiplies), strings (eyes, eyeL, eyeR, mouth) are last-wins, undefined means
- * "no opinion" and null means "spec default". sample() then clamps blink to
- * 0..1 and look/turn to -1..1.
+ * multiplies), strings (eyes, eyeL, eyeR, mouth) are last-wins, undefined
+ * leaves the field to lower layers, and null selects the spec default.
+ * Afterward, sample() clamps blink to 0..1 and look/turn to -1..1.
+ *
+ * Example:
  *
  *   const A = PhyFriends.anim;
  *   const tip = A.track({ tilt: [[0, 0], [0.3, 8, 'back'], [1, 8], [1.4, 0]] });
  *   const player = A.play(PhyFriends.mount(el, 'howdi'), A.layer(A.clips.idle, tip));
  *   el.onpointermove = e => player.override(A.lookAt(player.rig, e.clientX, e.clientY));
  *
- * Classic script loaded after phyfriends.js (PhyFriends.anim), or require().
+ * Loads as a classic script after phyfriends.js (PhyFriends.anim), or through require().
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory(require('./phyfriends.js'));
@@ -25,21 +28,21 @@
   'use strict';
 
   const TAU = Math.PI * 2;
-  const _ = undefined; // "no opinion" in string tracks
+  const _ = undefined; // Marks "no value" in string tracks, so lower layers decide.
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, u) => a + (b - a) * u;
   const mod = (t, d) => ((t % d) + d) % d;
 
-  // --------------------------------------------------------------- easing
+  // --------------------------------------------------------------- Easing
 
   const ease = {
     linear: u => u,
-    smooth: u => (1 - Math.cos(Math.PI * u)) / 2, // sine in-out: the track default
+    smooth: u => (1 - Math.cos(Math.PI * u)) / 2, // Sine in-out; the default for tracks
     in: u => u * u * u,
     out: u => 1 - (1 - u) ** 3,
     inOut: u => (u < 0.5 ? 4 * u ** 3 : 1 - (2 - 2 * u) ** 3 / 2),
-    back: u => 1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2, // overshoots, settles
-    anticipate: u => 2.70158 * u ** 3 - 1.70158 * u * u,           // dips back, then goes
+    back: u => 1 + 2.70158 * (u - 1) ** 3 + 1.70158 * (u - 1) ** 2, // Overshoots, then settles
+    anticipate: u => 2.70158 * u ** 3 - 1.70158 * u * u,           // Dips back, then advances
     elastic: u => (u <= 0 || u >= 1 ? u : 2 ** (-10 * u) * Math.sin((u * 10 - 0.75) * TAU / 3) + 1),
     bounce: u => {
       const n = 7.5625, d = 2.75;
@@ -56,12 +59,12 @@
     return f;
   }
 
-  // ----------------------------------------------------------- pose maths
+  // ------------------------------------------------------------ Pose math
 
-  const MULT = { blush: 1 }; // fields that multiply instead of add
+  const MULT = { blush: 1 }; // Fields that multiply instead of add
   const RANGE = { blink: [0, 1], widen: [-0.8, 1], lookX: [-1, 1], lookY: [-1, 1], turnX: [-1, 1], turnY: [-1, 1], tail: [-45, 45] };
 
-  // Stack partial pose `p` onto `acc` (in place) with weight k (strings need k >= 0.5).
+  // Stacks partial pose `p` onto `acc` (in place) with weight k; strings apply only when k >= 0.5.
   function combine(acc, p, k = 1) {
     for (const f in p) {
       const v = p[f];
@@ -73,7 +76,7 @@
     return acc;
   }
 
-  // Stacked offsets -> full pose.
+  // Converts stacked offsets to a full pose.
   function settle(d) {
     const p = { ...PF.POSE };
     for (const f in d) {
@@ -89,7 +92,7 @@
     return p;
   }
 
-  // Blend two full poses (numbers lerp, strings switch halfway).
+  // Blends two full poses: numbers interpolate linearly, and strings switch halfway.
   function mix(a, b, u) {
     const p = { ...a };
     for (const f in b) {
@@ -98,11 +101,12 @@
     return p;
   }
 
-  // ---------------------------------------------------------------- clips
+  // ---------------------------------------------------------------- Clips
 
   const tag = (fn, duration, loop) => Object.assign(fn, { duration, loop: !!loop });
 
-  // fn only sees t in [0, duration): looping clips wrap, others clamp (hold the ends).
+  // The wrapped fn only sees t within the clip: looping clips wrap t into [0, duration),
+  // and other clips clamp it to [0, duration], holding the end poses.
   function clip(fn, duration, loop = false) {
     if (duration == null) return tag(t => fn(t) || {}, undefined, false);
     return tag(t => fn(loop && duration > 0 ? mod(t, duration) : clamp(t, 0, duration)) || {}, duration, loop);
@@ -118,10 +122,10 @@
     throw new Error(`phy_friends/anim: not a clip: ${c}`);
   }
 
-  // Keyframes: {field: [[t, value, ease], ...]}. `ease` shapes the segment
+  // Keyframes: {field: [[t, value, ease], ...]}. The `ease` shapes the segment
   // arriving at that key (default opts.ease || 'smooth'). Numbers interpolate;
-  // strings/null step and are undefined before their first key. With loop, the
-  // last key eases back into the first one a period later.
+  // strings and null step, and are undefined before their first key. When looping,
+  // the last key eases back into the first one a period later.
   function track(fields, { duration, loop = false, ease: e } = {}) {
     const tracks = Object.entries(fields).map(([f, ks]) =>
       [f, ks.map(k => (Array.isArray(k) ? k : [k.t, k.v, k.ease])).sort((a, b) => a[0] - b[0])]);
@@ -144,7 +148,8 @@
     }, end, loop);
   }
 
-  // Common period of looping durations (ms grid), or the longest if that gets silly.
+  // Returns the common period of looping durations (on a millisecond grid), or the longest
+  // duration when that period would exceed max(4 x longest, 16 s).
   function period(ds) {
     const gcd = (a, b) => (b ? gcd(b, a % b) : a);
     let L = 1;
@@ -153,7 +158,7 @@
     return L / 1000 <= Math.max(4 * max, 16) ? L / 1000 : max;
   }
 
-  // Stack clips bottom -> top. Loops if every timed clip loops.
+  // Stacks clips from bottom to top. The result loops if every timed clip loops.
   function layer(...cs) {
     cs = cs.map(toClip);
     const ds = cs.filter(c => c.duration != null).map(c => c.duration);
@@ -162,7 +167,7 @@
       ds.length ? (loop ? period(ds) : Math.max(...ds)) : undefined, loop);
   }
 
-  // One after another; a number is a rest of that many seconds.
+  // Plays clips one after another; a number stands for a rest of that many seconds.
   function seq(...items) {
     const cs = items.map(c => (typeof c === 'number' ? rest(c) : toClip(c))), at = [];
     let total = 0;
@@ -182,20 +187,21 @@
   const delay = (c, s) => (c = toClip(c), c.loop ? tag(t => c(t - s), c.duration, true)
     : tag(t => c(Math.max(0, t - s)), c.duration == null ? _ : c.duration + s, false));
   const pingpong = c => (c = toClip(c), clip(t => c(t < c.duration ? t : 2 * c.duration - t), 2 * c.duration, true));
-  // Scale a clip's offsets by k (a number or a function of t, e.g. a fade envelope).
+  // Scales a clip's offsets by k (a number or a function of t, e.g., a fade envelope).
   const weight = (c, k) => (c = toClip(c), tag(t => combine({}, c(t), typeof k === 'function' ? k(t) : k), c.duration, c.loop));
 
   function sample(c, t = 0) { return settle(combine({}, toClip(c)(t))); }
 
-  // Poses at t = i / fps for i < seconds * fps. A looping clip's frame n would
-  // equal frame 0, so the exported loop is seamless.
+  // Returns poses at t = i / fps for i < seconds * fps. For a looping clip, frame n
+  // would equal frame 0, so leaving it out makes the exported loop seamless.
   function frames(c, fps = 30, seconds) {
     c = toClip(c);
     const n = Math.max(1, Math.round((seconds ?? c.duration ?? 1) * fps));
     return Array.from({ length: n }, (_, i) => sample(c, i / fps));
   }
 
-  // Sum of bump-shaped events [[t0, width, amp], ...]; with `wrap` they wrap around a loop.
+  // Returns the sum of bump-shaped events [[t0, width, amp], ...]; with `wrap`, they wrap
+  // around a loop of that length.
   function pulses(events, wrap, shape = blinkShape) {
     const offs = wrap ? [-wrap, 0, wrap] : [0];
     return t => {
@@ -207,18 +213,18 @@
       return s;
     };
   }
-  // fast close, brief hold, slower open
+  // Blink profile: fast close, brief hold, slower open.
   const blinkShape = u => (u < 0.3 ? ease.smooth(u / 0.3) : u < 0.42 ? 1 : 1 - ease.smooth((u - 0.42) / 0.58));
-  // damped twitch: out, back past rest, settle
+  // Damped twitch: out, back past rest, then settle.
   const flickShape = u => Math.sin(u * TAU * 1.5) * (1 - u) ** 2;
-  // tail swish: two swings that swell and die away
+  // Tail swish: two swings that grow and then decay.
   const swishShape = u => Math.sin(u * TAU * 2) * Math.sin(Math.PI * u);
   const blinks = (times, duration, loop = true) =>
     (b => clip(t => ({ blink: b(t) }), duration, loop))(pulses(times.map(t => [t, 0.2]), loop && duration));
 
-  // -------------------------------------------------------------- library
-  // Factories take options; `clips` holds default instances. Loop lengths
-  // divide 8 s, so any of them layered over idle still loops in 8 s.
+  // -------------------------------------------------------------- Library
+  // Factories in `make` take options; `clips` holds their default instances. Loop
+  // lengths divide 8 s, so any of them layered over idle still loops in 8 s.
 
   const make = {};
 
@@ -226,30 +232,30 @@
     const R = PF.rng(seed), nb = Math.max(1, Math.round(duration / 2.7)), ev = [], ears = [[], []];
     for (let t = 0.4 + R() * 1.2; t < duration - 0.9; t += 1.4 + R() * 2.2) {
       ev.push([t, 0.2]);
-      if (R() < 0.3) ev.push([t + 0.3, 0.2]); // double blink
+      if (R() < 0.3) ev.push([t + 0.3, 0.2]); // Double blink
     }
     const nf = R() < 0.5 ? 1 : 2;
     for (let k = 0; k < nf; k++) ears[R() < 0.5 ? 0 : 1].push([(k + 0.15 + R() * 0.6) * duration / nf, 0.55, 14 + R() * 8]);
-    const gx = [[0, 0]], gy = [[0, 0]]; // two small glances
+    const gx = [[0, 0]], gy = [[0, 0]]; // Two small glances
     for (let k = 0; k < 2; k++) {
       const t0 = (k + 0.2 + R() * 0.35) * duration / 2, hold = 0.8 + R() * 0.6;
       const x = (R() < 0.5 ? -1 : 1) * (0.2 + R() * 0.2), y = (R() - 0.6) * 0.3;
       gx.push([t0, 0], [t0 + 0.12, x, 'out'], [t0 + hold, x], [t0 + hold + 0.15, 0, 'out']);
       gy.push([t0, 0], [t0 + 0.12, y, 'out'], [t0 + hold, y], [t0 + hold + 0.15, 0, 'out']);
     }
-    const swish = pulses([[(0.15 + R() * 0.6) * duration, 1.2, 6 + R() * 3]], duration, swishShape); // one tail swish
+    const swish = pulses([[(0.15 + R() * 0.6) * duration, 1.2, 6 + R() * 3]], duration, swishShape); // One tail swish
     const blink = pulses(ev, duration), flick = ears.map(e => pulses(e, duration, flickShape));
     return layer(weight(track({ lookX: gx, lookY: gy }, { duration, loop: true }), energy), clip(t => {
-      const a = (TAU * t) / duration, b = a * nb; // b: breathing phase
+      const a = (TAU * t) / duration, b = a * nb; // Phases: a is one cycle per clip, b is breathing
       return {
         squash: 0.014 * energy * Math.sin(b),
         headY: 0.6 * energy * Math.sin(b - 2.2),
         tilt: energy * (1.4 * Math.sin(a + 0.5) + 0.5 * Math.sin(2 * a)),
         turnX: 0.06 * energy * Math.sin(a + 2),
-        hair: 1.2 * energy * Math.sin(b - 1.2), // lags the breath
+        hair: 1.2 * energy * Math.sin(b - 1.2), // Lags the breath
         earL: 2 * energy * Math.sin(b - 0.6) + flick[0](t),
         earR: 2 * energy * Math.sin(b - 0.9) + flick[1](t),
-        tail: energy * (2.5 * Math.sin(a + 1) + Math.sin(b - 2)) + swish(t), // slow sway, lags the breath
+        tail: energy * (2.5 * Math.sin(a + 1) + Math.sin(b - 2)) + swish(t), // Slow sway that lags the breath
         blink: blink(t),
       };
     }, duration, true));
@@ -309,12 +315,12 @@
       turnY: -0.12 * air,
       headY: 2.5 * contact,
       earL: -7 + 12 * contact, earR: -7 + 12 * contact,
-      tail: -2 + 9 * Math.sin(wags * a + 0.6), // brisk wag, held a little high
+      tail: -2 + 9 * Math.sin(wags * a + 0.6), // Brisk wag, held slightly high
       eyes: 'happy', mouth: 'w',
     };
   }, duration, true);
 
-  // One-shot tail wag that swells and dies away, with a little answering head sway.
+  // One-shot tail wag that grows and then decays, with a small matching head sway.
   make.wag = ({ duration = 1.6, wags = 3, amp = 10 } = {}) => clip(t => {
     const u = t / duration, env = Math.sin(Math.PI * u), w = TAU * wags * u;
     return { tail: env * (amp * Math.sin(w) - 2), tilt: 1.5 * env * Math.sin(w - 1.2), hair: -env * Math.sin(w - 1.8) };
@@ -332,7 +338,7 @@
     earL: [[0, 8], [5.8, 16], [6.05, -8, 'out'], [6.6, 0], [8, 8]],
     earR: [[0, 9], [5.8, 17], [6.1, -6, 'out'], [6.7, 1], [8, 9]],
     hair: [[0, 0], [5.8, 2], [6.05, -3, 'out'], [6.5, 1], [7.2, 0]],
-    tail: [[0, -5], [5.8, -9], [6.05, 5, 'out'], [6.6, -1], [8, -5]], // curled in, flicks on waking
+    tail: [[0, -5], [5.8, -9], [6.05, 5, 'out'], [6.6, -1], [8, -5]], // Curled in; flicks on waking
   }, { duration: 8, loop: true }), clip(t => ({ squash: 0.02 * Math.sin((TAU * t * 3) / 8) }), 8, true));
 
   make.surprised = () => track({
@@ -345,7 +351,7 @@
     earL: [[0, 0], [0.1, -16, 'out'], [0.3, -8], [1.2, -10], [1.7, 0]],
     earR: [[0, 0], [0.1, -16, 'out'], [0.3, -8], [1.2, -10], [1.7, 0]],
     hair: [[0, 0], [0.1, 4, 'out'], [0.3, -2], [0.5, 1], [0.7, 0]],
-    tail: [[0, 0], [0.1, -12, 'out'], [0.3, -6], [1.2, -8], [1.7, 0]], // snaps up
+    tail: [[0, 0], [0.1, -12, 'out'], [0.3, -6], [1.2, -8], [1.7, 0]], // Snaps up
     mouth: [[0, _], [0.08, 'o'], [1.3, _]],
     blink: [[0, 0], [0.9, 0], [0.96, 1, 'in'], [1.05, 0, 'out'], [1.12, 1, 'in'], [1.22, 0, 'out']],
   }, { duration: 1.9 });
@@ -356,7 +362,7 @@
     earL: [[0, 0], [0.18, 6], [0.3, 16, 'out'], [0.5, 2], [0.7, -8], [0.8, 12, 'out'], [0.95, -3], [1.1, 0]],
     earR: [[0, 0], [0.18, 6], [0.32, 17, 'out'], [0.52, 2], [0.7, -7], [0.82, 11, 'out'], [0.97, -3], [1.1, 0]],
     hair: [[0, 0], [0.26, -2.5], [0.5, 2], [0.76, -2], [0.9, 1.5], [1.1, 0]],
-    tail: [[0, 0], [0.18, -3], [0.32, 7, 'out'], [0.52, -4], [0.72, 5], [0.84, -6, 'out'], [0.98, 2], [1.15, 0]], // lags the body
+    tail: [[0, 0], [0.18, -3], [0.32, 7, 'out'], [0.52, -4], [0.72, 5], [0.84, -6, 'out'], [0.98, 2], [1.15, 0]], // Lags the body
     turnY: [[0, 0], [0.18, 0.15], [0.5, -0.2], [0.75, 0.1], [1.0, 0]],
     headY: [[0, 0], [0.18, 2], [0.28, 3], [0.5, -1], [0.72, -1.5], [0.8, 4, 'out'], [0.95, -0.5], [1.1, 0]],
     blink: [[0, 0], [0.14, 0], [0.18, 0.5], [0.24, 0], [0.72, 0], [0.76, 0.6], [0.86, 0]],
@@ -390,7 +396,8 @@
   const clips = {};
   for (const k in make) clips[k] = make[k]();
 
-  // Clip name, JS expression over this API and the clips (e.g. "layer(idle, curious)"), or a clip.
+  // Accepts a clip name, a JS expression over this API and the clips (e.g., "layer(idle, curious)"),
+  // or a clip. Expressions are evaluated with Function(), so never pass untrusted input.
   function parse(expr) {
     if (typeof expr !== 'string') return toClip(expr);
     if (clips[expr]) return clips[expr];
@@ -398,7 +405,7 @@
     return toClip(Function(...Object.keys(scope), `'use strict'; return (${expr});`)(...Object.values(scope)));
   }
 
-  // --------------------------------------------------------------- player
+  // --------------------------------------------------------------- Player
 
   const players = new Set();
   let raf = 0, last = 0;
@@ -412,14 +419,14 @@
   }
   const wake = () => { if (!raf && typeof requestAnimationFrame === 'function') raf = requestAnimationFrame(frame); };
 
-  // Drive a mounted rig. opts: speed, loop (default true), autoplay (true),
-  // start (s), reducedMotion (true: honour prefers-reduced-motion by not
+  // Drives a mounted rig. Options: speed, loop (default true), autoplay (true),
+  // start (s), reducedMotion (true: honor prefers-reduced-motion by not
   // autoplaying), smooth (override easing, s), fade (clip crossfade, s),
-  // mode ('add' | 'set': how overrides combine with the clip), onFrame, onEnd.
+  // mode ('add' | 'set': how overrides combine with the clip), onFrame, and onEnd.
   function play(rig, c, opts = {}) {
     const o = { speed: 1, loop: true, autoplay: true, reducedMotion: true, smooth: 0.12, fade: 0.25, mode: 'add', ...opts };
     const mq = o.reducedMotion && typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
-    const live = {}; // override field -> {v, tv, w, tw, mode}
+    const live = {}; // Override field -> {v, tv, w, tw, mode}: value, target value, weight, target weight
     let cur = toClip(c), time = o.start || 0, playing = false, pose = null, from = null, fadeT = 0, fadeD = 0;
 
     const loops = () => cur.duration > 0 && (cur.loop || p.loop);
@@ -457,7 +464,7 @@
         from = fade > 0 && pose ? pose : null; fadeT = 0; fadeD = fade;
         cur = toClip(next); time = start; draw(); wake(); return p;
       },
-      // Live layer on top of the clip, eased by opts.smooth; null/undefined removes a field.
+      // Adds a live layer on top of the clip, eased by opts.smooth; null or undefined removes a field.
       override(partial, mode = o.mode) {
         for (const f in partial) {
           const v = partial[f], s = live[f];
@@ -498,9 +505,10 @@
     return p;
   }
 
-  // Pointer (client px) -> {lookX, lookY, turnX, turnY} for a mounted rig: the
-  // direction from between its eyes to the pointer, as if the pointer hovered
-  // `depth` head units in front of the screen. turn = share the head follows.
+  // Maps a pointer position (client px) to {lookX, lookY, turnX, turnY} for a mounted
+  // rig: the direction from between its eyes to the pointer, as if the pointer hovered
+  // `depth` head units in front of the screen. The `turn` option is the share of that
+  // direction the head follows.
   function lookAt(rig, clientX, clientY, { depth = 180, turn = 0.4 } = {}) {
     const cam = rig.parts.root && rig.parts.root.parentNode, m = cam && cam.getScreenCTM();
     if (!m) return {};
