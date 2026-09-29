@@ -36,22 +36,22 @@ The page has five parts, in this order:
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 1720px.
+  paper's edge, and the page stops at 1767px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
-  rules, so the ground stays on a rule: 5 rules, and 6 once a row of seven
-  has room, from about 1670px. The smallest phones, below 360px, take 4, so
-  two fwiends still stand side by side.
+  rules, so the ground stays on a rule: 5 rules. The smallest phones, below
+  360px, take 4, so two fwiends still stand side by side.
 - Ears and tails may reach outside the box, as in a photo. A body or tail
   that sticks out at ground level widens that friend's slot
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All seven stand in one row from about 1410px. The seven reaches add up to
-  410 head units and neighbours overlap by 0.06 of a box, so the row is 8.1
-  boxes wide. Narrower, a row holds at most four, so the seven split four and
-  three, at 5 rules so that both rows fit a laptop's first screen; below
-  about 830px they stand three to a row, and on phones two.
+- All nine stand in one row from a 1767px window, where the page stops
+  growing. The nine reaches add up to 508 head units and neighbours overlap
+  by 0.06 of a box, so the row is 10.3 boxes wide. Narrower, a row holds at
+  most five, so the nine split five and four, and both rows fit a laptop's
+  first screen. Below a 1025px window, where five no longer fit, they stand
+  three to a row, so that no row is left with one fwiend, and on phones two.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
@@ -63,7 +63,7 @@ The page has five parts, in this order:
   the first screen of every device. Being one long line, it takes the
   title's tilt, `−1°`, rather than a margin note's `−2°`, at which its far end
   would climb half a rule; and sitting so close, it needs no arrow. Where
-  fewer than seven stand in a row it is only "click one to say hi", and touch
+  fewer than nine stand in a row it is only "click one to say hi", and touch
   screens, which have no cursor, read "tap one to say hi".
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
@@ -84,9 +84,10 @@ Each friend is a button, and its `aria-label` says who it is in one line:
 "say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and
 dark felt soles".
 
-Names keep their owner's capitalisation: **Howdi**, **Yuda** and **Terry**
-are capitalised; **phy** and **mumuyou** are always lower case, even at the
-start of a line.
+Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
+**Brian** and **Teni** are capitalised; **phy**, **mumuyou** and **tanyuan**
+are always lower case, even at the start of a line; and **K3V1N** is spelt
+with a 3 and a 1.
 
 **The copy**, against what it isn't:
 
@@ -145,9 +146,9 @@ the history, reduced motion and the link preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 1440×756, the same shape, and scaled down, because
-  1440px is the narrowest common window where all seven stand in one row;
-  at 1200px the second row would fall out of the picture.
+  page is photographed at 1767×928, the same shape, and scaled down, because
+  1767px is the narrowest window where all nine stand in one row; narrower,
+  the second row would fall out of the picture.
 
 ## drawing a friend
 
@@ -175,17 +176,19 @@ Follow them when turning someone's picture or design sheet into a friend.
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
 - A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current seven use 6–12 each, plus
+  `earInner`, `eye`, `blush`, `chest`, … The current nine use 6–12 each, plus
   `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
   `−10`, chroma `×1.2`, the same hue, and near-whites lean to lavender. The
   shades therefore match across fwiends.
   - Every friend has the layer, and none has a second. The body sits under
-    the head, so every body is in its fur's shade.
+    the head, so every body is in its fur's shade, or in its clothes' shade
+    where it is dressed (tanyuan's hoodie).
   - Elsewhere the shade goes only on a part behind a neighbour of the same
     colour: Terry's ears behind the face, the back layer of a ruff, locks of
-    hair behind the mop, a bandana's band behind its point.
+    hair behind the mop, a bandana's band behind its point, the part of
+    tanyuan's folded ear under its flap.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
@@ -194,7 +197,8 @@ Follow them when turning someone's picture or design sheet into a friend.
 - Nothing is copied from a reference's lighting: no pale rim along an ear, no
   darker far side, no highlights.
 - A pale colour that would vanish on paper takes one slightly deeper tint
-  wherever it appears (mumuyou's white, `#efeef3`). The pencil lets the paper
+  wherever it appears (mumuyou's and tanyuan's white, `#efeef3`; Teni's pale
+  teal, `#ace1e0`). The pencil lets the paper
   through, so judge it on the page, not on a flat render.
 
 **Proportions, in head space:** a big head on a small, seated body.
@@ -220,7 +224,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   as an outline). The colour comes from the art (`eyes.color`); where the art
   draws dark eyes, as Terry's does, they are near-black. A colour that would
   be faint at gallery size goes one house step deeper, as phy's green,
-  mumuyou's gold and Howdi's blue do. Eyes of two colours take the other through
+  mumuyou's gold, Howdi's blue and tanyuan's red do. Eyes of two colours take the other through
   `eyes.right`: mumuyou's, K3V1N's and Brian's. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,

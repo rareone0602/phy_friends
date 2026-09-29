@@ -1,7 +1,8 @@
+// The spec before the alignment to the newer pictures (examples/67.png, by_yuda.png and gurumin1.png), drawn
+// from examples/sheet.png and mark.png alone. Kept per STYLE.md, principle 1.
 // Character spec for K3V1N, an ice-blue cat with large pointed ears, one blue eye and one orange eye, a
 // yellow mark on his forehead and a bushy white-ended tail.
-// Pictures: examples/sheet.png (the color standard), mark.png (the forehead mark as his owner draws it),
-// 67.png (a sticker) and two drawings by other artists, by_yuda.png and gurumin1.png.
+// Pictures: examples/sheet.png, mark.png.
 // Colors are taken from the color bar on examples/sheet.png; those it does not show are taken from the drawing.
 PhyFriends.define('kevin', {
   palette: {
@@ -30,16 +31,14 @@ PhyFriends.define('kevin', {
     ],
   },
   // The ears are large, upright cat ears with soft tips. The pink inner ear keeps a broad fur margin; the
-  // pale rim that his pictures draw along its outer edge is treated as lighting and left out (FWIENDS.md).
+  // pale rim that the sheet draws around it is lighting and is left out.
   ears: {
     base: [-54, -70], angle: 27, width: 90, length: 88, lean: 8, tip: 10, b1: -16, b2: -8,
     inner: { scale: 0.6, dx: 2, dy: -12 },
   },
   // The mop is in the fur color: a crown inside the head's outline, a shaggy tuft under each ear, one
-  // point between the eyes, where every picture brings the fur down, and a lock beside each eye. The
-  // narrow pale bridge that the sheet, 67.png and gurumin1.png draw up the middle of that fur is left
-  // out, because the two points of fur beside it would cover the eyes as they look inward. The valleys
-  // sit high enough to clear the eyes as they look around. Each tip is [x, y, bendIn, bendOut, following valley].
+  // point between the eyes, as on the sheet, and a lock beside each eye. The valleys sit high enough to
+  // clear the eyes as they look around. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
     cx: 0, cy: -58, rx: 74, ry: 44, color: 'fur',
     tips: [
@@ -89,19 +88,17 @@ PhyFriends.define('kevin', {
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head).
     // The round darker spot on each ear tip, which the sheet draws on the back of the ear; clipped to the ear, it caps the tip.
     { on: 'ears', clip: true, kind: 'ellipse', fill: 'band', cx: 8, cy: -88, rx: 30, ry: 26 },
-    // The white dot above the inner half of each eye: every picture sets the two dots closer together
-    // than the eyes.
-    { on: 'hair', kind: 'ellipse', fill: 'face', cx: -30, cy: -35, rx: 5.5, ry: 5 },
-    { on: 'hair', kind: 'ellipse', fill: 'face', cx: 30, cy: -35, rx: 5.5, ry: 5 },
+    // The white dot above each eye.
+    { on: 'hair', kind: 'ellipse', fill: 'face', cx: -33, cy: -35, rx: 5.5, ry: 5 },
+    { on: 'hair', kind: 'ellipse', fill: 'face', cx: 33, cy: -35, rx: 5.5, ry: 5 },
     // His forehead mark as his owner draws it (examples/mark.png): straight round-ended strokes, an
     // upright, a diagonal rising from its foot to the top of a second, lower upright, and a level bar
-    // across both, at one scale, with the strokes thickened to read at gallery size. It is centered
-    // between the white dots, as in the three frontal pictures (67.png, by_yuda.png and gurumin1.png),
-    // with its bar level with the dots, as in by_yuda.png and the sheet.
-    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-11.2, -56.7, 1], [-11.2, -28, 1], [-8.4, -28, 1], [-8.4, -56.7, 1]] },
-    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-9.8, -27.4, 1], [10.2, -47.1, 1], [8.3, -49.1, 1], [-11.8, -29.4, 1]] },
-    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[6.9, -48.5, 1], [6.9, -17.3, 1], [9.7, -17.3, 1], [9.7, -48.5, 1]] },
-    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-18.3, -35.6, 1], [18.3, -35.6, 1], [18.3, -38.4, 1], [-18.3, -38.4, 1]] },
+    // across both, at one scale, with the strokes thickened to read at gallery size. It sits above his
+    // right eye (the viewer's left), to the right of the white dot.
+    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-17.2, -56.7, 1], [-17.2, -28, 1], [-14.4, -28, 1], [-14.4, -56.7, 1]] },
+    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-15.8, -27.4, 1], [4.2, -47.1, 1], [2.3, -49.1, 1], [-17.8, -29.4, 1]] },
+    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[0.9, -48.5, 1], [0.9, -17.3, 1], [3.7, -17.3, 1], [3.7, -48.5, 1]] },
+    { on: 'hair', fill: 'mark', round: 0.5, nodes: [[-24.3, -35.6, 1], [12.3, -35.6, 1], [12.3, -38.4, 1], [-24.3, -38.4, 1]] },
     // The white chest and belly, an oval from under the chin whose tufts hang over the belly, above the
     // cuffs of the forepaws.
     { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 22, ry: 28,

@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="seven fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; and Brian, a cream fox in an orange newsboy cap">
+<meta property="og:image:alt" content="nine fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; and Teni, a Glaceon with a cyan bob">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,17 +60,18 @@
      page, as the subject of a group photo stands in the middle of the frame. */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 for the overlap. The seven reaches add up to 410 head units, so all seven take
-     8.0985 boxes, and the first four, Howdi to Terry, take 4.5007, rounded up to 4.501 so that
-     they always fit in one row. Until all seven fit in one row, the box is five rules, so that
-     two rows fit a laptop's first screen. */
+     less 0.06 for the overlap. The nine reaches add up to 508 head units, so all nine take
+     10.3415 boxes, the first five, Howdi to mumuyou, take 5.7, and the first three 3.5607; each is
+     rounded up so that those friends always fit in one row. The box is five rules, so that two
+     rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
-  .troupe { --abreast: 4.501; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room; the header and footer
-     keep to the margin line. */
-  main { max-width: 1720px; }
-  /* Friends stand in one row while all seven fit. Otherwise a row holds at most four, so the
-     seven split four and three, and each row is grounded on a rule. */
+  .troupe { --abreast: 3.561; --size: calc(var(--L) * 5); }
+  /* The page is wider than the kit's column so that the stage has room for a row of nine; the
+     header and footer keep to the margin line. */
+  main { max-width: 1767px; }
+  /* Friends stand in one row where all nine fit. Otherwise a row holds at most five, so the nine
+     split five and four, and where five do not fit, three, so that no row is left with one friend.
+     Each row is grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   .friend {
@@ -119,14 +120,13 @@
   /* Beside the margin line the stage spans the paper to the page's edge, keeping the 12px
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
   @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } }
-  /* All seven stand in one row once the stage is 8.099 boxes of five rules wide, which it is at
-     1408px. The box is then the most whole rules at which the row fits: five, and six from 1667px.
-     Whole rules keep the ground on a rule, and the lower bound only guards against rounding. */
-  @container (width >= 1296px) {
-    .troupe { --abreast: 8.099;
-      --size: clamp(calc(var(--L) * 5), round(down, 100cqw / var(--abreast), var(--L)), calc(var(--L) * 7)); }
+  /* Five stand in a row once the stage is 5.701 boxes wide, which it is from a 1025px window, and
+     all nine once it is 10.342 boxes wide, from a 1767px window, where the page stops growing. */
+  @container (width >= 913px) { .troupe { --abreast: 5.701; } }
+  @container (width >= 1655px) {
+    .troupe { --abreast: 10.342; }
     .friends { max-width: none; }
-    .note .long { display: inline; }  /* A row of seven leaves room for the whole note. */
+    .note .long { display: inline; }  /* A row of nine leaves room for the whole note. */
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
   @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
@@ -215,6 +215,14 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian, a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue"></div>
           <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/">fb/brian.ren.856964</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="tanyuan"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan, a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear"></div>
+          <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU">@tanyuan_UwU</a></span></figcaption>
+        </figure></li>
+        <li class="friend" data-friend="teni"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni, a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail"></div>
+          <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome">@foxx_manome</a></span></figcaption>
+        </figure></li>
       </ul>
     </div>
     <p class="announcer" role="status"></p>
@@ -238,6 +246,8 @@
 <script src="../../characters/mumuyou/mumuyou.js"></script>
 <script src="../../characters/kevin/kevin.js"></script>
 <script src="../../characters/brian/brian.js"></script>
+<script src="../../characters/tanyuan/tanyuan.js"></script>
+<script src="../../characters/teni/teni.js"></script>
 <script src="../../src/anim.js"></script>
 <script src="../../src/pen.js"></script>
 <script src="../../site/title-pen.js"></script>
