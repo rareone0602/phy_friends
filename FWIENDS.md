@@ -247,7 +247,9 @@ spec's structure as well as in its look.
   the group converges on it. The eyes take the full offset (`lookX/lookY`);
   the head turns about half as much (`turnX/turnY`, drawn as layer parallax).
 - Idle underneath: breathing, blinks at irregular intervals, a slow tail
-  sway, an occasional ear flick.
+  sway, an occasional ear flick. The pencil "boils": its texture is redrawn
+  8 times a second, cycling through three versions, as in hand-drawn
+  animation.
 - When the pointer leaves the window, or sits still for a while, the fwiends
   drift back to centre or glance around. A pen is followed like a mouse. On
   touch screens they follow the finger while it touches; there is no
@@ -255,8 +257,8 @@ spec's structure as well as in its look.
 - The stage stops drawing while none of it is in view, or the page is
   hidden, to spare a phone's battery. It keeps its own clock, which stops
   with it, so everything picks up where it left off.
-- With `prefers-reduced-motion`: eyes only, no idle motion, and saying hi
-  changes just the face.
+- With `prefers-reduced-motion`: eyes only, no idle motion, a still
+  pencil, and saying hi changes just the face.
 
 ## scenes: films and games
 
@@ -308,9 +310,8 @@ them.
 - Each fwiend is drawn on its own piece of paper, cut to its outline: its
   pencil stays put while it breathes, turns or hops on the spot, and
   travels with it when it moves about the page (`STYLE.md` §9).
-- Films "boil": the pencil texture is redrawn 8 times a second, as in
-  hand-drawn animation (`demo/film.js`). The gallery keeps its texture
-  still, and so does a film under reduced motion.
+- Films boil as the gallery does, 8 times a second (`demo/film.js`), and
+  keep still under reduced motion.
 - Under `prefers-reduced-motion` a scene plays no idle motion, travel
   becomes a glide and a greeting changes only the face; a film shows its
   last frame and waits to be played.

@@ -464,6 +464,7 @@
     angle: -40,              // The strokes rise to the right, as a right hand shades.
     margin: 0.5,             // The mask reaches this fraction of the view past each edge, for ears and tails.
     paper: '#fbf9f3',        // The paper of site/notebook.css, laid under a character drawn on a background of its own.
+    variants: 3,             // How many variants of the texture a boiling page cycles through.
   };
   // The texture's three noises, in the order in which they are mixed: the strokes, streaky noise long
   // along a stroke and fine across it; the paper's tooth; and the pressure, whose lighter patches are
@@ -482,8 +483,9 @@
   // strokes and the tooth, then the pressure) and turns the mix into an alpha that keeps most of the
   // color, so that the paper shows only in specks and streaks. The rectangle is turned to the stroke
   // angle and reaches past the sheet's farthest corner. Views of one size share one image.
-  // Variant 0 is the texture every still uses; other variants reseed the noises, so that a film can
-  // redraw the texture every few frames, as hand-drawn animation does (src/scene.js, boil).
+  // Variant 0 is the texture every still uses; other variants reseed the noises, so that a page can
+  // redraw the texture a few times a second, as hand-drawn animation does ("boil": rig.setTexture,
+  // src/scene.js).
   function pencilTexture(x, y, w, h, variant = 0) {
     const box = [x, y, w, h].join(' '), key = `${box} ${variant}`;
     if (!pencilTextures.has(key)) {
@@ -512,31 +514,39 @@
   // rounded up to a step) and again if the rig grows. The bitmap's noise is computed here rather than
   // drawn from the texture's filter, since Safari drew the filter into a canvas in one piece that held
   // the page up for seconds; it is computed a slice of rows at a time, no slice longer than `slice`
-  // milliseconds, so that the page stays responsive meanwhile. The bitmap is grey on black, which
-  // masks as the white texture does, so that it can be a JPEG, which is quick to encode. Rigs whose
-  // views are the same size share one bitmap per density. A browser that cannot make the bitmap
-  // keeps the texture.
+  // milliseconds, so that the page stays responsive meanwhile, and one bitmap at a time, in the order
+  // in which they are asked for, so that the one a rig shows first arrives first. The bitmap is grey
+  // on black, which masks as the white texture does, so that it can be a JPEG, which is quick to
+  // encode. Rigs whose views are the same size share one bitmap per density and variant. A browser
+  // that cannot make the bitmap keeps the texture.
   const BITMAP = { step: 0.5, maxDensity: 4, maxPixels: 4096, quality: 0.92, slice: 8 };
   const pencilBitmaps = new Map();
-  const bitmapDensities = new WeakMap();  // For each texture image swapped for a bitmap, the bitmap's density.
+  let bitmapQueue = Promise.resolve();
+  // For each texture image of a live rig: the variant it is to show, the density of its bitmap (0
+  // until it has one) and the density of the bitmap it shows.
+  const textureStates = new WeakMap();
 
-  // The bitmap of the texture for a sheet (x, y, w, h) at a density, as a promise of a blob URL.
-  function pencilBitmap(x, y, w, h, density) {
-    const key = [x, y, w, h, density].join(' ');
-    if (!pencilBitmaps.has(key)) pencilBitmaps.set(key, drawBitmap(x, y, w, h, density));
+  // The bitmap of a variant of the texture for a sheet (x, y, w, h) at a density, as a promise of a blob URL.
+  function pencilBitmap(x, y, w, h, density, variant = 0) {
+    const key = [x, y, w, h, density, variant].join(' ');
+    if (!pencilBitmaps.has(key)) {
+      const bitmap = bitmapQueue.then(() => drawBitmap(x, y, w, h, density, variant));
+      bitmapQueue = bitmap.catch(() => {});
+      pencilBitmaps.set(key, bitmap);
+    }
     return pencilBitmaps.get(key);
   }
 
-  // Computes variant 0 of the texture as a browser draws pencilTexture's filter: on a grid in the
+  // Computes a variant of the texture as a browser draws pencilTexture's filter: on a grid in the
   // turned rectangle's frame, a point every 1/density units, from which each pixel is then read
   // between its four nearest points. Reading the grid rather than the noise itself softens the
   // finest grain as much as the browser's drawing does.
-  async function drawBitmap(x, y, w, h, density) {
+  async function drawBitmap(x, y, w, h, density, variant) {
     const canvas = document.createElement('canvas');
     canvas.width = Math.ceil(w * density);
     canvas.height = Math.ceil(h * density);
     const context = canvas.getContext('2d'), pixels = context.createImageData(canvas.width, canvas.height);
-    const noises = PENCIL_NOISES.map(noise => ({ ...noise, ...turbulenceTables(noise.seed[0]) }));
+    const noises = PENCIL_NOISES.map(noise => ({ ...noise, ...turbulenceTables(noise.seed[0] + noise.seed[1] * variant) }));
     let sliceStart = performance.now();
     const yieldEverySlice = async () => {
       if (performance.now() - sliceStart < BITMAP.slice) return;
@@ -655,14 +665,43 @@
   function sharpenTexture(svg, width) {
     const image = svg.querySelector('image[data-pf-texture]'), units = svg.viewBox.baseVal.width;
     if (!image || !width || !units) return;
-    const [x, y, w, h] = ['x', 'y', 'width', 'height'].map(name => +image.getAttribute(name));
+    const [, , w, h] = sheetOf(image), state = textureStateOf(image);
     const wanted = Math.ceil(((width / units) * (self.devicePixelRatio || 1)) / BITMAP.step) * BITMAP.step;
     const density = Math.min(wanted, BITMAP.maxDensity, BITMAP.maxPixels / Math.max(w, h));
-    if (density <= (bitmapDensities.get(image) || 0)) return;
-    bitmapDensities.set(image, density);
-    pencilBitmap(x, y, w, h, density).then(
-      url => { if (bitmapDensities.get(image) === density) image.setAttribute('href', url); },
-      () => {});  // The texture stays as it was.
+    if (density <= state.density) return;
+    state.density = density;
+    showBitmap(image);
+  }
+
+  // Sets the variant of the texture that a live rig's image shows: as a bitmap where the rig has one
+  // (bitmap), and otherwise as the texture itself.
+  function setTextureVariant(image, variant, bitmap) {
+    const state = textureStateOf(image);
+    if (variant === state.variant) return;
+    state.variant = variant;
+    if (!bitmap) image.setAttribute('href', pencilTexture(...sheetOf(image), variant));
+    else if (state.density) showBitmap(image);
+  }
+
+  // Shows the image's variant at its density once that bitmap is ready. Until then the image keeps what
+  // it shows, unless it shows no bitmap at that density yet, in which case the first to arrive is shown.
+  function showBitmap(image) {
+    const state = textureStateOf(image), { variant, density } = state;
+    pencilBitmap(...sheetOf(image), density, variant).then(url => {
+      if (state.density !== density || (state.variant !== variant && state.shown === density)) return;
+      image.setAttribute('href', url);
+      state.shown = density;
+    }, () => {});  // The texture stays as it was.
+  }
+
+  function textureStateOf(image) {
+    if (!textureStates.has(image)) textureStates.set(image, { variant: 0, density: 0, shown: 0 });
+    return textureStates.get(image);
+  }
+
+  // The sheet (x, y, w, h) that a texture image covers.
+  function sheetOf(image) {
+    return ['x', 'y', 'width', 'height'].map(name => +image.getAttribute(name));
   }
 
   // Watches the size of every mounted drawing, and forgets a drawing once it leaves the page.
@@ -929,10 +968,11 @@
   function mount(el, specOrName, opts = {}) {
     const spec = resolve(specOrName);
     el.innerHTML = render(spec, { fluid: true, ...opts });
-    const svg = el.querySelector('svg');
+    const svg = el.querySelector('svg'), texture = svg.querySelector('image[data-pf-texture]');
     // opts.bitmap: false keeps the texture as it is drawn in a still, for a page that must come out the
     // same every time, such as a film.
-    if (textureWatch && opts.bitmap !== false) textureWatch.observe(svg);
+    const bitmap = !!textureWatch && opts.bitmap !== false;
+    if (bitmap) textureWatch.observe(svg);
     const parts = {};
     svg.querySelectorAll('[data-pf]').forEach(n => { parts[n.getAttribute('data-pf')] = n; });
     const toggles = [...svg.querySelectorAll('[data-pf-when]')].map(n => {
@@ -952,6 +992,12 @@
           if (st.state[t.key] === t.val) t.n.removeAttribute('display');
           else t.n.setAttribute('display', 'none');
         }
+        return rig;
+      },
+      // Shows a variant of the pencil texture (0 is a still's). A boiling page cycles through
+      // PENCIL.variants of them a few times a second, as hand-drawn animation does.
+      setTexture(variant) {
+        if (texture) setTextureVariant(texture, variant, bitmap);
         return rig;
       },
     };

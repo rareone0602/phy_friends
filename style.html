@@ -542,10 +542,10 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <p class="lead"><strong>Motion on the page:</strong></p>
 <ul>
 <li>Each friend works out the direction from its own head to the pointer, so the group converges on it. The eyes take the full offset (<code>lookX/lookY</code>); the head turns about half as much (<code>turnX/turnY</code>, drawn as layer parallax).</li>
-<li>Idle underneath: breathing, blinks at irregular intervals, a slow tail sway, an occasional ear flick.</li>
+<li>Idle underneath: breathing, blinks at irregular intervals, a slow tail sway, an occasional ear flick. The pencil "boils": its texture is redrawn 8 times a second, cycling through three versions, as in hand-drawn animation.</li>
 <li>When the pointer leaves the window, or sits still for a while, the fwiends drift back to centre or glance around. A pen is followed like a mouse. On touch screens they follow the finger while it touches; there is no gyroscope.</li>
 <li>The stage stops drawing while none of it is in view, or the page is hidden, to spare a phone's battery. It keeps its own clock, which stops with it, so everything picks up where it left off.</li>
-<li>With <code>prefers-reduced-motion</code>: eyes only, no idle motion, and saying hi changes just the face.</li>
+<li>With <code>prefers-reduced-motion</code>: eyes only, no idle motion, a still pencil, and saying hi changes just the face.</li>
 </ul>
 <h2 id="scenes-films-and-games">scenes: films and games</h2>
 <p>Beyond the gallery, the fwiends appear in scenes built with <code>src/scene.js</code>: short films, listed in <code>demo/index.html</code>, and in time games. A scene is a sheet of ruled paper measured in head units, a rule every 54, so a fwiend stands five rules tall, as in the gallery. Everything in it happens at a time on the scene's clock, so a film plays in a page and is filmed frame by frame (<code>pf.py film</code>) from the same script.</p>
@@ -570,7 +570,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li>Fwiends get about by hopping, since they sit. They turn with <code>turnX</code>, never with a mirror image, which would swap two-coloured eyes and reverse K3V1N's mark.</li>
 <li>Each fwiend is drawn on its own piece of paper, cut to its outline: its pencil stays put while it breathes, turns or hops on the spot, and travels with it when it moves about the page (<code>STYLE.md</code> §9).</li>
-<li>Films "boil": the pencil texture is redrawn 8 times a second, as in hand-drawn animation (<code>demo/film.js</code>). The gallery keeps its texture still, and so does a film under reduced motion.</li>
+<li>Films boil as the gallery does, 8 times a second (<code>demo/film.js</code>), and keep still under reduced motion.</li>
 <li>Under <code>prefers-reduced-motion</code> a scene plays no idle motion, travel becomes a glide and a greeting changes only the face; a film shows its last frame and waits to be played.</li>
 </ul>
 <hr>

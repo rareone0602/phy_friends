@@ -44,7 +44,7 @@
   const MARK = { size: 64, pop: 0.18, fade: 0.25, seconds: 1.4, x: 70, y: -200 };
   const WORDS = { size: 34, perSecond: 14, fade: 0.25, x: 115, y: -130 };
   const FADE = 0.15;          // Default fade in and out of a clip layer, in seconds.
-  const BOIL_VARIANTS = 3;    // Texture variants a boiling scene cycles through.
+  const BOIL_VARIANTS = PF.pencil.settings.variants;  // Texture variants a boiling scene cycles through.
   const IN_FRAME = -1;        // frameRequest while a live frame is being drawn.
   const PRUNE_AFTER = 2;      // A live scene forgets cues that ended this many seconds ago.
   const FILM_WIDTH = 1280;    // The default frame width, in CSS px, of a filmed scene.

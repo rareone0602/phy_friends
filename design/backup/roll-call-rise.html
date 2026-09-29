@@ -254,7 +254,8 @@
 <script>
   // The stage (FWIENDS.md). Each friend is mounted in its slot, stands on its own penciled ground
   // and follows the pointer. For screenshots, ?px=..&py=.. (CSS pixels) fixes a simulated pointer,
-  // and ?hi=<name> holds that friend in the middle of its hop.
+  // and ?hi=<name> holds that friend in the middle of its hop; ?boil=<redraws per second> sets how
+  // often the pencil texture is redrawn (0 keeps it still).
   const VIEW_SIZE = 270;                 // The camera is 270 head units square (FWIENDS.md).
   const DEFAULT_GROUND = 120;            // The ground line for a spec without rig.ground, in head units.
   const SLOT_CLEARANCE = 6;              // Head units kept clear beside a body or tail that extends past its box.
@@ -270,6 +271,7 @@
   const EAR_FLICK = { seconds: 0.35, degrees: 9, first: [4, 12], gap: [5, 14] };
   const BREATH = { depth: 0.012, rate: 1.7 };
   const TAIL_SWAY = { degrees: 3, rate: 0.8 };
+  const BOIL = 8;                        // Pencil texture redraws per second, as in a film (demo/film.js).
   const PERK = { earDegrees: 6, widen: 0.06 };
   const GREETING = PhyFriends.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 });
   const GREETING_FADE = { in: 0.08, out: 0.2 };
@@ -297,6 +299,7 @@
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const params = new URLSearchParams(location.search);
   const simulatedPointer = params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null;
+  const boilRate = params.has('boil') ? Number(params.get('boil')) : BOIL;  // Anything but a positive number keeps it still.
   const announcer = document.querySelector('.announcer');
 
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
@@ -497,7 +500,17 @@
       friend.rig.setPose(poseAt(friend, seconds, travel ?? NOT_TRAVELING));
       if (friend.arrival) showOnItsWay(friend, travel);
     }
+    boil(seconds);
     frameRequest = requestAnimationFrame(animate);
+  }
+
+  // The pencil texture "boils": every friend's is redrawn boilRate times a second, cycling through the
+  // library's variants in step, as in hand-drawn animation. Under reduced motion, or with a simulated
+  // pointer, it keeps still.
+  function boil(seconds) {
+    const still = reducedMotion.matches || simulatedPointer || !(Number.isFinite(boilRate) && boilRate > 0);
+    const variant = still ? 0 : Math.floor(seconds * boilRate) % PhyFriends.pencil.settings.variants;
+    for (const friend of friends) friend.rig.setTexture(variant);
   }
 
   // The friend greeted most recently, while its greeting lasts.
