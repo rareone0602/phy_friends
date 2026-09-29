@@ -41,6 +41,7 @@ GitHub Pages.
 | `demo/` | the demos (`index.html` lists them): short films built with `src/scene.js`; `animate.html` is a dev page for trying clips |
 | `design/` | design scratch: `index.html` lists the mockups (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken), `shoot.py` takes page screenshots, `site_assets.py` rebuilds the site's icons and link preview after a character changes, and `title_pen.py` derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/scratch/` for experiments |
+| `LICENSE` | the GNU Affero General Public License, version 3, which covers everything here but the fwiends and the font (see [Licence](#licence)) |
 
 ## Characters and examples
 
@@ -269,3 +270,23 @@ ffmpeg for video.
    the canonical one.
 3. **Animate**: pick or compose clips from `PhyFriends.anim` and export with
    `pf.py anim`, or play them live in a page.
+
+## Licence
+
+Copyright © 2026 phy.
+
+Everything here, bar the two exceptions below, is under the GNU Affero General
+Public License, version 3 only (`LICENSE`; SPDX `AGPL-3.0-only`), the strictest
+of the GNU licences. Anyone who passes on a copy, changed or not, must pass on
+its source under the same terms, and anyone who runs a changed copy that people
+use over a network (a website, say) must offer those people its source too.
+"Version 3 only" means that no later version of the licence applies.
+
+The exceptions:
+- **The fwiends.** Each character (its look, its name, everything in its folder
+  under `characters/` and every picture of it, such as the site's icons and link
+  preview) belongs to whoever is named under it in the gallery, and the licence
+  gives no rights to it. That goes for phy's own, and for Claude's, whose figure
+  is Claude Code's mascot and belongs to Anthropic.
+- **Shantell Sans** (`figures/fonts/`) is under the SIL Open Font License, whose
+  text sits next to it.
