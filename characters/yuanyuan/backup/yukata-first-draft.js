@@ -18,7 +18,7 @@ PhyFriends.define('yuanyuan', {
     tongue: '#ebb4ab',     // The icon's tongue.
     cord: '#ae4e48',       // The red of the twisted cord in EVE HP/2507.png.
     yukata: '#5c5c74',     // The navy of the yukata in EVE HP/2508.png, which holds on paper as it is. The yukata is the body, which sits under the head, so its house shade (yukataShade) fills it; only the top panel of the robe, which lies over the other, takes this color.
-    pattern: '#c4d4f4',    // The pale blue of the round dots on the yukata in EVE HP/2508.png, also used for the sash, so that the sash adds no color of its own and stays clear of the red cord and the red seal beside him.
+    pattern: '#c4d4f4',    // The pale blue of the round dots on the yukata in EVE HP/2508.png, also used for the sash, so that the sash adds no color of its own and stays clear of the red cord.
   },
   // The head is a broad dome in the hair's lavender; the mop covers all of it but the face.
   head: { cx: 0, cy: -20, rx: 84, ry: 60, color: 'hair' },

@@ -21,7 +21,7 @@ PhyFriends.cast.define({
     },
     phy: {
       name: 'phy', pronoun: 'they', species: 'tuxedo eevee',
-      credit: { handle: '@rareone0602', href: 'https://x.com/rareone0602' }, agreed: ['gallery', 'video', 'games'], voice: true,
+      credit: { handle: 'linkedin', href: 'https://www.linkedin.com/in/po-hung-yeh-6a8134116' }, agreed: ['gallery', 'video', 'games'], voice: true,
     },
     yuda: {
       name: 'Yuda', pronoun: 'he', species: 'slate-blue wolf',
@@ -58,6 +58,10 @@ PhyFriends.cast.define({
     alfie: {
       name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
       credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
+    },
+    claude: {
+      name: 'Claude', pronoun: 'it', species: 'language model',
+      credit: { handle: '@AnthropicAI', href: 'https://x.com/AnthropicAI' }, agreed: ['gallery'],
     },
   },
   know: [],

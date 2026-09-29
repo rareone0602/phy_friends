@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="eleven fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; YuanYuan, a white cat with a lavender mop, in a navy yukata, his red seal at his feet; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; and Alfie, a coral tabby cat in round glasses">
+<meta property="og:image:alt" content="twelve fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; YuanYuan, a white cat with a lavender mop, in a navy yukata; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,18 +60,18 @@
      page, as the subject of a group photo stands in the middle of the frame. */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 for the overlap. The eleven reaches add up to 556 head units, so all eleven take
-     12.3993 boxes. In the smaller splits the widest rows are the first six, Howdi to K3V1N, at
-     6.9141 boxes, mumuyou to YuanYuan at 4.597, and the first three at 3.5607. Each is rounded up
-     so that those friends always fit in one row. The box is five rules, so that two rows fit a
-     laptop's first screen. */
+     less 0.06 for the overlap. The twelve reaches add up to 556 head units (Claude's is nil), so
+     all twelve take 13.3393 boxes. In the smaller splits the widest rows are the first six, Howdi
+     to K3V1N, at 6.9141 boxes, mumuyou to YuanYuan at 4.597, and the first three at 3.5607. Each
+     is rounded up so that those friends always fit in one row. The box is five rules, so that two
+     rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 3.561; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of eleven; the
+  /* The page is wider than the kit's column so that the stage has room for a row of twelve; the
      header and footer keep to the margin line. */
-  main { max-width: 2096px; }
-  /* Friends stand in one row where all eleven fit. Otherwise they split six and five; where six do
-     not fit, four, four and three; and where four do not fit, three to a row, so that no row is left
+  main { max-width: 2248px; }
+  /* Friends stand in one row where all twelve fit. Otherwise they split six and six; where six do
+     not fit, four, four and four; and where four do not fit, three to a row, so that no row is left
      with one friend. Each row is grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
@@ -101,17 +101,6 @@
   .ground { position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; pointer-events: none; z-index: 5;
     color: var(--ink); filter: url(#graphite); }
 
-  /* YuanYuan's owner is an artist, and the owner's seal (characters/yuanyuan/seal.svg) is stamped at
-     YuanYuan's feet: upright on the ground, on the side away from the tail, as the owner stamps it low
-     beside the figure in his own pictures. It is flat ink, and decorative, since the name and the credit
-     say whose it is. It shows only with the drawing: not before the friend is mounted, and not while the
-     friend waits for the roll call or is on its way. It is stamped as the friend lands. */
-  .seal { position: absolute; z-index: 4; top: calc(var(--size) * .8); left: calc(var(--size) * (var(--reach-left, 0) / 270 - .05));
-    height: calc(var(--size) * .2); width: auto; pointer-events: none; -webkit-user-select: none; user-select: none;
-    transform-origin: 50% 100%; transition: opacity .18s ease-out, scale .18s ease-out; }
-  .rig:empty ~ .seal, .friend:is(.waiting, .on-its-way) .seal { opacity: 0; scale: 1.15; transition: none; }
-  @media (prefers-reduced-motion: reduce) { .seal { transition: none; } }
-
   figcaption { text-align: center; }
   .name { display: block; height: var(--L); font: 300 31px/var(--L) var(--face); position: relative; top: var(--sit); }
   /* The species and the credit are small print in ink-2; the credit is told apart by being a link. */
@@ -133,15 +122,15 @@
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
   @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } }
   /* Four stand in a row once the stage is 4.598 boxes wide, which it is from an 848px window, six
-     once it is 6.915 boxes wide, from a 1219px window, and all eleven once it is 12.4 boxes wide,
-     from a 2096px window, where the page stops growing. */
+     once it is 6.915 boxes wide, from a 1219px window, and all twelve once it is 13.34 boxes wide,
+     from a 2248px window, where the page stops growing. */
   @container (width >= 736px) { .troupe { --abreast: 4.598; } }
   @container (width >= 1107px) {
     .troupe { --abreast: 6.915; }
     .note .long { display: inline; }  /* A row of six leaves room for the whole note. */
   }
-  @container (width >= 1984px) {
-    .troupe { --abreast: 12.4; }
+  @container (width >= 2135px) {
+    .troupe { --abreast: 13.34; }
     .friends { max-width: none; }
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
@@ -154,7 +143,6 @@
   @media (max-width: 419px) {
     .friend { width: var(--size); }
     .rig, figcaption { margin-left: 0; }
-    .seal { left: calc(var(--size) * -.05); }
     .credit { height: auto; } .credit .me { display: block; } .credit .dot { display: none; }
   }
   /* On the smallest phones everything steps down once more, so that two friends still fit side by side. */
@@ -168,8 +156,18 @@
   }
   /* Phones held sideways have little height, so the note gives up its blank rule. */
   @media (max-height: 500px) and (orientation: landscape) { .note { margin-bottom: 0; } }
-  /* The mock disclaimer sits on the footer's last rule. */
-  .disclaimer { margin: 0; text-wrap: balance; }
+  /* The mock disclaimer is about the last fwiend, Claude, the machine that made the page. It sits in small
+     print on the rules under the last row, a blank rule below the labels, and its first line ends under
+     Claude with the kit's arrow turned to point up at it, as the ring marks the host. --to-claude, set on
+     load and whenever the stage changes width, is how far Claude's middle stands in from the troupe's
+     right edge. The disclaimer takes no part in the troupe's width, so it cannot move what it measures. */
+  .disclaimer { contain: inline-size; margin: var(--L) 0 0; padding-right: max(0px, calc(var(--to-claude, 0px) - 1.1em));
+    font-size: 15px; color: var(--ink-2); text-align: right; text-wrap: balance; position: relative; top: var(--sit); }
+  /* Each sentence is a line of its own, balanced where it wraps, and the arrow stays with its words. The
+     arrow is the kit's, drawn a size up so that it holds its own against the labels above it. */
+  .disclaimer .line { display: block; text-wrap: balance; }
+  .disclaimer .machine { white-space: nowrap; }
+  .disclaimer .mark.arrow { width: 2.2em; height: 1.4em; margin-left: .1em; vertical-align: -.35em; transform: rotate(-90deg); }
   .nojs { margin: 0; height: var(--L); color: var(--ink-2); position: relative; top: var(--sit); text-align: center; }
   /* The live region that says what a greeting did is for screen readers only, so it is hidden from view. */
   .announcer { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -211,7 +209,7 @@
         </figure></li>
         <li class="friend" data-friend="phy" data-host><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours with cookie crumbs on their ruff and tail"></div>
-          <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me<span class="dot"> · </span></span><a href="https://x.com/rareone0602" rel="me">@rareone0602</a></span></figcaption>
+          <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me<span class="dot"> · </span></span><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116" rel="me">linkedin</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="yuda"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana"></div>
@@ -235,7 +233,6 @@
         </figure></li>
         <li class="friend" data-friend="yuanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan, a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle"></div>
-          <img class="seal" src="../../characters/yuanyuan/seal.svg" alt="" width="42" height="32">
           <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan">@Milk_YuanYuan</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="tanyuan"><figure>
@@ -250,7 +247,13 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie, a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail"></div>
           <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="claude"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Claude, the machine that drew this page, as it appears in Claude Code: a small terracotta block with two tall eyes, a stub of an arm on each side and four short legs"></div>
+          <figcaption><span class="name hand">Claude</span><span class="species">language model</span><span class="credit"><a href="https://x.com/AnthropicAI">@AnthropicAI</a></span></figcaption>
+        </figure></li>
       </ul>
+      <p class="disclaimer"><span class="line">this work was generated entirely by <span class="machine">this machine<span class="mark arrow" aria-hidden="true"></span></span></span>
+        <span class="line">no human intelligence, emotion or caffeine was utilised in its creation.</span></p>
     </div>
     <p class="announcer" role="status"></p>
   </section>
@@ -261,7 +264,6 @@
       <li><a href="../../style.html">style guide</a></li>
       <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
     </ul>
-    <p class="disclaimer">this work was generated entirely by a machine. no human intelligence, emotion or caffeine was utilised in its creation.</p>
   </footer>
 </main>
 
@@ -277,6 +279,7 @@
 <script src="../../characters/tanyuan/tanyuan.js"></script>
 <script src="../../characters/teni/teni.js"></script>
 <script src="../../characters/alfie/alfie.js"></script>
+<script src="../../characters/claude/claude.js"></script>
 <script src="../../src/anim.js"></script>
 <script src="../../src/pen.js"></script>
 <script src="../../site/title-pen.js"></script>
@@ -333,6 +336,7 @@
 
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
   widenSlots(friends);
+  pointAtTheMachine(friends.find(friend => friend.name === 'claude'));
   const heldMidHop = friends.find(friend => friend.name === params.get('hi'));
   let pointer = simulatedPointer, pointerMovedAt = performance.now();
   // The stage keeps its own clock, which stands still while the stage is out of sight, so that the idle
@@ -362,6 +366,20 @@
   function cameraFor(spec) {
     const ground = (spec.rig && spec.rig.ground) ?? DEFAULT_GROUND;
     return { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 };
+  }
+
+  // Keeps the disclaimer's arrow under the machine it is about, whichever row Claude stands in. Claude is
+  // measured by its labels, which stay put while it hops in.
+  function pointAtTheMachine(machine) {
+    const disclaimer = document.querySelector('.disclaimer');
+    if (!machine || !disclaimer) return;
+    const troupe = disclaimer.parentElement, caption = machine.element.querySelector('figcaption');
+    const place = () => {
+      const labels = caption.getBoundingClientRect();
+      disclaimer.style.setProperty('--to-claude', `${troupe.getBoundingClientRect().right - (labels.left + labels.width / 2)}px`);
+    };
+    place();
+    new ResizeObserver(place).observe(troupe);
   }
 
   // Sets each slot's --reach-left and --reach-right. Every slot is measured before any is widened, so

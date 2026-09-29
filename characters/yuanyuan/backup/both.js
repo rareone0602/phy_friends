@@ -1,3 +1,6 @@
+// A candidate that lost to the reviewed design of characters/yuanyuan/yuanyuan.js: the designer's recommendation,
+// the same yukata but for a sash that stands only 2 to 6 units proud of the body, a step of 1 to 4 px at gallery
+// size, in pale blue on cream paper. Kept per STYLE.md, principle 1.
 // Character spec for YuanYuan, a white cat with a lavender mop of pointed locks and a thick curl on the crown,
 // lavender ears with white tufts, red-brown eyes, two lavender dots on his forehead, pink paw pads and a
 // red-and-white cord around one ankle. He wears a navy yukata with pale blue dots, a pale blue collar and a pale
@@ -135,13 +138,12 @@ PhyFriends.define('yuanyuan', {
       [-50, 62, 3.4, 12], [6, 93, 3.4, 12], [34, 95, 3.4, 12], [58, 88, 3.4, 12], [20, 104, 3.4, 12],
       [0, 106, 3.4, 12]] },
     // The sash round the waist, in the pale blue of the dots, bowed down a little in the middle as it follows the
-    // round body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands
-    // 6 to 10 units proud of the body where it turns out of sight, which shows its thickness. Its ends are upright
-    // and bow outward, as a band's do round a waist; ends that stand less proud, or follow the body's curve, leave
-    // the outline a ball at gallery size. The robe in EVE HP/2508.png is tied at the front instead; without a sash,
-    // a crossed robe reads as a dressing gown.
+    // round body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands a
+    // few units proud of the body where it turns out of sight, which shows its thickness, and its ends bow outward.
+    // The robe in EVE HP/2508.png is tied at the front instead; without a sash, a crossed robe reads as a dressing
+    // gown.
     { on: 'body', fill: 'pattern', round: 0.3,
-      nodes: [[-70, 68, 1, 4], [70, 68, 1, -8], [70, 83, 1, -4], [-70, 83, 1, -8]] },
+      nodes: [[-66, 68, 1, 4], [66, 68, 1, -8], [66, 83, 1, -4], [-66, 83, 1, -8]] },
     // The sash is tied in a bow at his back, a little to his right, so that the bow peeks out beside the body on the
     // viewer's left, where the tail does not reach. Its two loops splay, one up and one down, so that it reads as a
     // bow rather than a paw or an arm. It is drawn under the body and lies behind the sash, so it takes the pale

@@ -1,16 +1,17 @@
 // A candidate, the runner-up to characters/yuanyuan/yuanyuan.js: the rose-red yukata of EVE HP/2506.png, with its
 // white pattern and a white sash, instead of the navy one of EVE HP/2508.png. Its red sits close to the red of his
-// cord and of the seal beside him. Kept per STYLE.md, principle 1.
+// cord. Kept per STYLE.md, principle 1.
 // Character spec for YuanYuan, a white cat with a lavender mop of pointed locks and a thick curl on the crown,
 // lavender ears with white tufts, red-brown eyes, two lavender dots on his forehead, pink paw pads and a
-// red-and-white cord around one ankle. He wears a rose-red yukata with white dots, a white collar and a white sash.
+// red-and-white cord around one ankle. He wears a rose-red yukata with white dots, a white collar and a white sash tied
+// in a bow at his back.
 // Pictures: examples/icon.png (his head, drawn by his owner) and sixteen of his owner's works in examples/EVE HP/.
 // Colors and shapes are taken from examples/icon.png; colors it does not show are taken from EVE HP/2507.png, and
 // the yukata's from EVE HP/2506.png. The works serve for colors, markings and fur shapes only.
 PhyFriends.define('yuanyuan', {
   palette: {
     bg: '#1c1d21',
-    fur: '#efeef3',        // The white, deepened to mumuyou's depth to stay visible on paper; the icon's warm white (#fff6f4) merges with the paper's cream. It fills the face, the ear tufts, the paws, the tail and the white of the cord, of the yukata's pattern, of its collar bands and of the sash. Its house shade (furShade) fills the chest in the collar of the yukata, under the white chin.
+    fur: '#efeef3',        // The white, deepened to mumuyou's depth to stay visible on paper; the icon's warm white (#fff6f4) merges with the paper's cream. It fills the face, the ear tufts, the paws, the tail and the white of the cord, of the yukata's pattern, of its collar bands and of the sash. Its house shade (furShade) fills the chest in the collar of the yukata, under the white chin, and the bow, behind the white sash.
     hair: '#a3a4cb',       // The icon's lavender (#a6a4c2) at the chroma of the hair in EVE HP/2507.png (C* 22 for 17), so that on paper it keeps the icon's own color rather than turning gray: the mop, the curl, the head, the ears and the forehead dots.
     earInner: '#fcd6d0',   // The pink of the icon's inner ears.
     eye: '#2e2024',        // A warm near-black, used for the open mouth.
@@ -110,28 +111,47 @@ PhyFriends.define('yuanyuan', {
     // other, so its edge runs from under his chin on the viewer's right down across the sash to the viewer's left,
     // like the long stroke of a y. Crossed the other way, right over left, a kimono is how the dead are dressed. The
     // top panel is in the yukata's own color, and the panel under it keeps the body's house shade.
-    // Each panel's edge carries a collar band in the white of the pattern. The band of the panel underneath is
-    // drawn first and runs on beneath the top panel. The two panels differ by only one house step, which the pencil
-    // blurs at gallery size; the bands draw the crossed collar that tells a yukata from a round dark sweater.
-    { on: 'body', clip: true, fill: 'fur', nodes: [[-36.3, 22, 1], [-1, 63, 1], [5.5, 70.6, 1], [0.2, 75.2, 1],
-      [-41.6, 26.6, 1]] },
-    { on: 'body', clip: true, fill: 'yukata', nodes: [[34, 28, 1], [110, 28, 1], [110, 140, 1], [-14, 140, 1], [-10, 81, 1],
-      [-8, 70, 1]] },
+    // Each panel's edge carries a collar band in the white of the pattern. The two panels differ by only one house
+    // step, which the pencil blurs at gallery size, so the bands draw the crossed collar that tells a yukata from a
+    // round dark sweater. They are about as broad as the sash, so that each reads as a band of cloth folded over the
+    // edge rather than a line drawn on the body. The band of the panel underneath is drawn first and runs on beneath
+    // the top panel's band. It stays white, since in the white's house shade it would merge with the chest in the V
+    // beside it, so the two bands merge where they cross below the chin.
+    { on: 'body', clip: true, fill: 'fur', nodes: [[-36.3, 22, 1], [12, 78, 1], [-2.5, 78, 1], [-46.2, 30.5, 1]] },
+    { on: 'body', clip: true, fill: 'yukata', nodes: [[34, 28, 1], [110, 28, 1], [110, 140, 1], [-41, 140, 1],
+      [-41, 131, 1], [-20, 86, 1], [-9, 71, 1]] },
     // The white chest in the V of the collar, where the two panels part below the chin. It lies under the white chin,
     // so it takes the fur's house shade, which parts the two.
     { on: 'body', clip: true, fill: 'furShade', nodes: [[-26, 34, 1], [28, 34, 1], [-1, 63, 1]] },
-    // The top panel's collar band, along its edge from under the chin to the sash.
-    { on: 'body', clip: true, fill: 'fur',
-      nodes: [[40, 22, 1], [-8, 70, 1], [-9.3, 77, 1], [-5.1, 77, 1], [49.9, 22, 1]] },
-    // Eight of the white marks of the yukata's pattern, scattered over both panels and kept clear of the collar, so that
-    // they read as a print on the cloth. Four dots, two of them beside the collar, read as a jacket's buttons.
+    // The top panel's collar band, along its edge from under the chin down to the hem. A yukata's collar runs on past
+    // the sash down the front edge, so below the sash the band carries on over the lap to the ground between the hind
+    // foot and the forepaw on the viewer's left, a little more steeply than above, as the robe hangs from the sash.
+    // Whole, it draws the long stroke of the y, and shows the top panel as cloth wrapped over the other rather than
+    // a print on the body. Much steeper, it crosses the sash square and reads as the ribbon on a parcel.
+    { on: 'body', clip: true, fill: 'fur', nodes: [[40, 22, 1], [-9, 71, 1], [-20, 86, 1], [-41, 131, 1],
+      [-25, 131, 1], [-4, 86, 1], [9.4, 71, 1], [58.4, 22, 1]] },
+    // Eight of the white marks of the yukata's pattern, scattered over both panels and kept clear of the collar, the
+    // sash and the cord, so that they read as a print on the cloth. Four dots, two of them beside the collar, read as
+    // a jacket's buttons.
     { on: 'body', clip: true, fill: 'fur', round: 0.5, polys: [[-40, 52, 3.4, 12], [38, 56, 3.4, 12],
-      [-54, 92, 3.4, 12], [-24, 96, 3.4, 12], [6, 90, 3.4, 12], [34, 95, 3.4, 12], [58, 88, 3.4, 12],
+      [-50, 62, 3.4, 12], [6, 93, 3.4, 12], [34, 95, 3.4, 12], [58, 88, 3.4, 12], [20, 104, 3.4, 12],
       [0, 106, 3.4, 12]] },
-    // The sash round the waist, in the white of the pattern, bowed down in the middle as it follows the round body.
-    // The robe in EVE HP/2508.png is tied at the front instead; without a sash, a crossed robe reads as a dressing
-    // gown.
-    { on: 'body', clip: true, fill: 'fur', nodes: [[-100, 70, 1, 6], [100, 70, 1], [100, 81, 1, -6], [-100, 81, 1]] },
+    // The sash round the waist, in the white of the pattern, bowed down a little in the middle as it follows the
+    // round body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands
+    // 6 to 10 units proud of the body where it turns out of sight, which shows its thickness. Its ends are upright
+    // and bow outward, as a band's do round a waist; ends that stand less proud, or follow the body's curve, leave
+    // the outline a ball at gallery size. The robe in EVE HP/2508.png is tied at the front instead; without a sash,
+    // a crossed robe reads as a dressing gown.
+    { on: 'body', fill: 'fur', round: 0.3,
+      nodes: [[-70, 68, 1, 4], [70, 68, 1, -8], [70, 83, 1, -4], [-70, 83, 1, -8]] },
+    // The sash is tied in a bow at his back, a little to his right, so that the bow peeks out beside the body on the
+    // viewer's left, where the tail does not reach. Its two loops splay, one up and one down, so that it reads as a
+    // bow rather than a paw or an arm. It is drawn under the body and lies behind the sash, so it takes the
+    // white's house shade, which parts it from the sash's end.
+    { on: 'body', under: true, fill: 'furShade', nodes: [[-58, 71, 1], [-72, 60], [-84, 54], [-91, 60], [-86, 70],
+      [-60, 78, 1]] },
+    { on: 'body', under: true, fill: 'furShade', nodes: [[-60, 76, 1], [-76, 82], [-86, 92], [-82, 100], [-72, 94],
+      [-58, 82, 1]] },
     // The forepaws on the ground between the hind feet.
     { on: 'body', kind: 'ellipse', fill: 'fur', cx: -15, cy: 121, rx: 12.5, ry: 10 },
     { on: 'body', kind: 'ellipse', fill: 'fur', cx: 15, cy: 121, rx: 12.5, ry: 10 },

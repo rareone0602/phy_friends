@@ -11,7 +11,7 @@ Outputs:
                              flat, because they are too small to hold the pencil texture.
   site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
   site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
-  site/preview.png           1200x630 link preview image: the gallery, photographed at 2096x1100 and scaled down.
+  site/preview.png           1200x630 link preview image: the gallery, photographed at 2248x1180 and scaled down.
 """
 import json
 import subprocess
@@ -28,7 +28,7 @@ POSE = {'tail': -75}
 ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 47, 'scale': 0.31}
 TOUCH = {'w': 180, 'h': 180, 'x': 90, 'y': 132, 'scale': 0.75}
 PREVIEW = (1200, 630)        # The link preview's size.
-PREVIEW_SHOT = (2096, 1100)  # The window it is photographed in: the same shape, wide enough for one row.
+PREVIEW_SHOT = (2248, 1180)  # The window it is photographed in: the same shape, wide enough for one row.
 
 
 def still(view, out, bg=False):
@@ -44,12 +44,12 @@ def main():
     print(ROOT / 'site/icon.svg')
     still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
     still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-    # The link preview is the gallery itself (STYLE.md §7), photographed at 2096x1100 and scaled to
-    # 1200x630: 2096px is the narrowest window where all eleven friends stand in one row (FWIENDS.md).
+    # The link preview is the gallery itself (STYLE.md §7), photographed at 2248x1180 and scaled to
+    # 1200x630: 2248px is the narrowest window where all twelve friends stand in one row (FWIENDS.md).
     # The simulated pointer sits below the middle so that they look out at the viewer.
     preview = ROOT / 'site/preview.png'
     subprocess.run([sys.executable, str(ROOT / 'design/shoot.py'), str(ROOT / 'index.html'), str(preview),
-                    '--size', f'{PREVIEW_SHOT[0]}x{PREVIEW_SHOT[1]}', '--query', 'px=1048&py=820'], check=True)
+                    '--size', f'{PREVIEW_SHOT[0]}x{PREVIEW_SHOT[1]}', '--query', 'px=1124&py=880'], check=True)
     Image.open(preview).convert('RGB').resize(PREVIEW, Image.LANCZOS).save(preview)
 
 

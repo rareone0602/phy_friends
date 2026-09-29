@@ -28,15 +28,16 @@ The page has five parts, in this order:
    hundred-odd lines of code."
 3. The nav, as on the other two pages: fwiends, style guide, specimen.
 4. **The stage**, a group photo: the fwiends stand together on pencilled
-   ground and all watch the cursor.
+   ground and all watch the cursor. A mock disclaimer stands under the last
+   of them.
 5. The footer: "characters belong to the people named under them", the style
-   guide and the source, with a mock disclaimer on the last rule.
+   guide and the source.
 
 **The stage:**
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 2096px.
+  paper's edge, and the page stops at 2248px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
   rules, so the ground stays on a rule: 5 rules. The smallest phones, below
@@ -46,24 +47,26 @@ The page has five parts, in this order:
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All eleven stand in one row from a 2096px window, where the page stops
-  growing. The eleven reaches add up to 556 head units and neighbours
-  overlap by 0.06 of a box, so the row is 12.4 boxes wide. Narrower, they
-  split six and five, from a 1219px window, and both rows fit a laptop's
-  first screen. Below that they stand four, four and three, and below an
-  848px window three to a row, so that no row is left with one fwiend; on
-  phones they stand in pairs.
+- All twelve stand in one row from a 2248px window, where the page stops
+  growing. The twelve reaches add up to 556 head units and neighbours
+  overlap by 0.06 of a box, so the row is 13.34 boxes wide. Narrower, they
+  split six and six, from a 1219px window, and both rows fit a laptop's
+  first screen. Below that they stand four to a row, and below an 848px
+  window three to a row; on phones they stand in pairs.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
 - The ring circles the host's name, phy's: "this one" is the one whose
   page it is. The nav's ring marks the page, as it does everywhere.
-- YuanYuan's owner is an artist, and his seal
-  (`characters/yuanyuan/seal.svg`, redrawn from the one he stamps on his
-  pictures) stands upright on the ground at YuanYuan's feet, on the side
-  away from the tail, a fifth of a box tall. It is flat red ink, without the
-  graphite filter, and is hidden from screen readers, since the name and the
-  credit already say whose it is.
+- The mock disclaimer is about the last fwiend, Claude, the machine that
+  made the page: "this work was generated entirely by this machine", then
+  "no human intelligence, emotion or caffeine was utilised in its creation."
+  It sits in small print on the rules under the last row, a blank rule below
+  the labels, and its first line ends in the kit's arrow, turned to point up
+  at Claude from under its middle (measured on load, as the reaches are), as
+  the ring marks the host. Each sentence is a line of its own, balanced
+  where it wraps. A fwiend added later goes before Claude, so that the
+  disclaimer stays under the machine.
 - A pencilled note says what to do: "psst: they watch your cursor. click one
   to say hi". It sits on the rule under the nav, over the right end of the
   row with one blank rule below, so it is read before the fwiends and is on
@@ -82,7 +85,7 @@ The page has five parts, in this order:
 - the species in small print, two or three lower-case words ("tuxedo
   eevee", "yellow plush toy");
 - a credit line in small print: the owner's handle, linking to their page.
-  phy's reads "that's me · @rareone0602", on two lines on a phone.
+  phy's reads "that's me · linkedin", on two lines on a phone.
 
 On the smallest phones a long species or handle wraps onto a second rule
 rather than running into its neighbour's.
@@ -108,8 +111,9 @@ the start of a line; and **K3V1N** is spelt with a 3 and a 1.
 | a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code. | Welcome to a magical world of adorable characters |
 | characters belong to the people named under them | All rights reserved. |
 
-The "psst" and the footer's disclaimer are the page's two winks, both in
-the corners (`STYLE.md` §3).
+The "psst" and the disclaimer are the page's two winks, both in corners of
+the stage (`STYLE.md` §3): one over the right end of the row, the other
+under its last fwiend.
 
 **Saying hi:**
 - Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a
@@ -146,7 +150,7 @@ the history, reduced motion and the link preview show everything in place.
   neighbours watch it land while it smiles; the rest keep watching the
   cursor.
 - The labels are there from the start, so the empty places above them read
-  as the names still to be called. YuanYuan's seal is stamped as he lands.
+  as the names still to be called.
 - A row is called once it comes into view, so on a phone the lower rows come
   in as they are scrolled to. A row scrolled past unseen is simply there.
 - A change in the window's width, or tabbing to a fwiend still to come,
@@ -156,8 +160,8 @@ the history, reduced motion and the link preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 2096×1100, the same shape, and scaled down, because
-  2096px is the narrowest window where all eleven stand in one row; narrower,
+  page is photographed at 2248×1180, the same shape, and scaled down, because
+  2248px is the narrowest window where all twelve stand in one row; narrower,
   the second row would fall out of the picture.
 
 ## drawing a friend
@@ -179,6 +183,11 @@ Follow them when turning someone's picture or design sheet into a friend.
 - No outlines and no gradients. The one texture is the factory's pencil
   (`STYLE.md` §9), which `render` and `mount` lay over the whole friend. A
   spec never draws a texture of its own.
+- Clothes take their thickness from how they are made, never from a
+  texture: a band that stands a few units proud of the body (YuanYuan's
+  sash, the roll of tanyuan's hood), and cloth that lies over cloth (a
+  crossed collar, a front over its hem). Painted on to the body's ellipse,
+  clothes read as a print on a ball.
 - `pencil: false` draws the flat shapes alone. It is only for an icon too
   small to hold the texture, and for matching a flat reference picture, as
   `pf.py compare` does.
@@ -186,7 +195,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
 - A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current eleven use 6–12 each, plus
+  `earInner`, `eye`, `blush`, `chest`, … The current twelve use 3–12 each, plus
   `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
@@ -194,11 +203,15 @@ Follow them when turning someone's picture or design sheet into a friend.
   shades therefore match across fwiends.
   - Every friend has the layer, and none has a second. The body sits under
     the head, so every body is in its fur's shade, or in its clothes' shade
-    where it is dressed (tanyuan's hoodie, YuanYuan's yukata).
+    where it is dressed (tanyuan's hoodie, YuanYuan's yukata). A layer of
+    the clothes that lies over it takes the clothes' own colour: YuanYuan's
+    top panel, the front of tanyuan's hoodie.
   - Elsewhere the shade goes only on a part behind a neighbour of the same
     colour: Terry's ears behind the face, the back layer of a ruff, locks of
     hair behind the mop, a bandana's band behind its point, the part of
-    tanyuan's folded ear under its flap.
+    tanyuan's folded ear under its flap, the inside of his hood past its
+    rim, the hem under his hoodie's front, the under band of YuanYuan's
+    collar and the bow behind his sash.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
@@ -253,6 +266,26 @@ set how wide and thick the happy and closed strokes are.
 **Keep the spec small.** Tune the `fluffy`, `star` and ear parameters rather
 than writing raw `nodes`. A new friend matches the set in size and in the
 spec's structure as well as in its look.
+
+**Claude, the exception.** The twelfth fwiend, standing last, is Claude, the
+model that drew the others, as Claude Code draws it on its welcome screen:
+three lines of block characters. It keeps every rule above but the shape.
+Its figure comes from the glyphs. A terminal cell is about twice as tall as
+it is wide, so a quadrant pixel is one unit wide and two tall, drawn 16 head
+units to the unit, which makes the eyes as tall as the house's: a terracotta
+block whose body is its head, pill eyes where the glyphs cut their notches,
+a stub of an arm on each side and four short legs. Being made of blocks, it
+is drawn in raw `nodes`, rounded as a pencil rounds them: its top corners
+are soft and its bottom ones nearly square, so that its sides run straight
+into its outer legs. Its arms take the place of ears and are in its own
+colour, as the glyphs draw them; each turns about a shoulder inside the
+block, so that the arms rise when it is pleased or startled. Its legs are
+its body, in its one house shade. Its eyes look a whole unit aside (16 head
+units, where the house's move 6), as the glyphs move the notches, and its
+blush is a soft rose, since a pale pink on terracotta reads as a highlight.
+It is short, so its legs meet the ground at 112 rather than about 131. Its
+species is "language model", its pronoun is "it", and its credit is
+Anthropic's.
 
 **Motion on the page:**
 - Each friend works out the direction from its own head to the pointer, so

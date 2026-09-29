@@ -124,7 +124,7 @@
       scene.add('phy', { x: 400, at: 1 });
       const credits = () => [...el.querySelectorAll('.pf-credits span')].map(span => span.textContent.replace('\u00a0', ' '));
       scene.seek(2);
-      assertEqual(credits(), ['Terry @FreshSnails_x_6', 'phy @rareone0602']);
+      assertEqual(credits(), ['Terry @FreshSnails_x_6', 'phy linkedin']);
       scene.seek(0.5);
       assertEqual(credits(), ['Terry @FreshSnails_x_6']);
     });
