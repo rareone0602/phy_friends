@@ -1,0 +1,132 @@
+// An alternative to characters/alfie/alfie.js: Alfie without the round glasses of envelope.png and glasses.png, as
+// on the sheet, with a red mark on each cheek under the outer corner of the eye. Kept per STYLE.md, principle 1.
+// Character spec for Alfie, a coral tabby cat with a red mark on the forehead and on each cheek, white eyebrow
+// spots, amber eyes, striped hips and a bushy coral tail.
+// Pictures: examples/sheet.jpg (the color standard), envelope.png and glasses.png.
+// Colors are taken from the color bar on examples/sheet.jpg; those it does not show are taken from the drawing.
+PhyFriends.define('alfie', {
+  palette: {
+    bg: '#1c1d21',
+    fur: '#fe8568',        // The coral of the color bar. Its house shade (furShade) fills the body, which sits under the head.
+    face: '#efeef3',       // The white of the color bar, deepened to mumuyou's depth to stay visible on paper: muzzle, cheeks, eyebrow spots, inner ears, chest and paws.
+    stripe: '#b23f27',     // The darker red-orange of the color bar (#d75639), one house step (L* -10) deeper so that it parts from furShade, with its chroma kept at the pictures' (C* ~60) rather than raised: the forehead and cheek marks, inner ears, hip stripes and ankles.
+    eye: '#2a2a2a',        // The black of the color bar (the claws), used for the open mouth.
+    eyeAmber: '#bb7500',   // The amber of the irises on the sheet (#d69033), one house step deeper so that it holds its weight on the white.
+    blush: '#ffbebf',      // The pink of the color bar, which the sheet gives the paw pads: the blush, the pads and the tongue.
+  },
+  // The head is a round dome with two spiky tufts down each side, under the ears.
+  head: {
+    cx: 0, cy: -22, rx: 90, ry: 68,
+    fluff: [{ from: -30, to: -2, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
+  },
+  // The white muzzle and cheeks. On the sheet the coral comes down beside each eye; here the white rises to the
+  // eyes' tops, so that each pill eye sits on one color. Its sides are cut into spiky tufts. Setting len < 0
+  // flattens the top.
+  face: {
+    cx: 0, cy: 16, rx: 80, ry: 38,
+    fluff: [
+      { from: -24, to: 30, n: 3, len: 9, lean: 3, depth: 0.1, b1: -28, b2: 8, jit: 0, sym: true },
+      { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
+    ],
+  },
+  // The ears are large, upright cat ears with soft tips. The white inner ear keeps a broad coral margin; the red of
+  // its inner half is an extra.
+  ears: {
+    base: [-54, -70], angle: 27, width: 90, length: 92, lean: 8, tip: 10, b1: -16, b2: -8,
+    inner: { scale: 0.62, dx: 2, dy: -12, color: 'face' },
+  },
+  // The mop is in the fur color: a crown of spikes inside the head's outline and a shaggy tuft under each ear. It
+  // stops above the eyebrow spots, so that the white between the eyes stays clear of it.
+  // Each tip is [x, y, bendIn, bendOut, following valley].
+  hair: {
+    cx: 0, cy: -62, rx: 74, ry: 40, color: 'fur',
+    tips: [
+      [14, -114, -10, -6, [40, -86]],
+      [88, -40, -6, -4, [70, -40]],
+      [60, -46, 0, 0, [0, -52]],
+      [-60, -46, 0, 0, [-70, -40]],
+      [-88, -40, -4, -6, [-40, -86]],
+      [-12, -104, -6, -10, [0, -92]],
+    ],
+  },
+  // The eyes are plain tall pills in Alfie's own amber. Setting arc: 1 draws the happy, closed and squint strokes at
+  // the full eye width.
+  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 4.8, arc: 1, color: 'eyeAmber' },
+  // The blush sits on the white under each eye, inside the cheek mark, tipped up to follow the cheek. It sits low
+  // enough that an eye looking down does not land on it.
+  blush: { x: 41, y: 34, rx: 10, ry: 6, tilt: 10 },
+  // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows the pink tongue
+  // of the sheet's head study, without a fang.
+  mouth: { y: 22, size: 3.8, tongue: 'blush' },
+  // The body is small, round and seated, in the house shade. Shoulder tufts sit under the cheeks, and small hip
+  // tufts below them.
+  body: {
+    cx: 0, cy: 87, rx: 64, ry: 45, color: 'furShade',
+    fluff: [{ from: -65, to: -25, n: 2, len: 8, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
+      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+  },
+  // The tail is a large bushy plume rising behind Alfie's left hip (the viewer's right) and curling in low. It is all
+  // coral, as the sheet's tip is: a white end vanishes into the paper and meets the white cheek as the tail sways in,
+  // and the white that the sheet runs along the underside would sit on the silhouette's edge, where it vanishes too.
+  tail: {
+    base: [52, 110], angle: 58, length: 120, width: 96, bend: -84, taper: 0.72, root: 0.5, color: 'fur',
+    fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
+      { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
+      { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  extras: [
+    // The spiky cheek tufts: a fur ruff under the head whose points reach past the white cheeks, as on the sheet. An
+    // n: 1 range with len < 0 tucks the bottom in under the chin.
+    { on: 'base', under: true, fill: 'fur', cx: 0, cy: 10, rx: 92, ry: 48,
+      fluff: [{ from: -42, to: 12, n: 3, len: 14, lean: -2, depth: 0.1, b1: -40, b2: 14, jit: 0, sym: true },
+        { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
+    // The white rises into a point between the eyes, up between the eyebrow spots, as in every picture.
+    { on: 'face', fill: 'face', nodes: [[0, -44, 1, -10], [16, -14, 1, 0], [-16, -14, 1, -10]] },
+    // The red mark on each cheek, as the sheet draws it: a stroke from beside the outer corner of the eye that
+    // tapers down and in.
+    { on: 'face', fill: 'stripe', round: 0.3, nodes: [[-77, 14, 1, 0], [-68, 9, 1, -10], [-54, 31, 1, 0]] },
+    { on: 'face', fill: 'stripe', round: 0.3, nodes: [[77, 14, 1, 0], [54, 31, 1, 10], [68, 9, 1, 0]] },
+    // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head); on: 'ears' puts
+    // them on both. The red half of the inner ear along its side toward the crown, from the base to the tip, as
+    // envelope.png and glasses.png draw it: a marking, the same on both ears.
+    { on: 'ears', clip: true, fill: 'stripe', nodes: [[2, 0, 1, 0], [40, 0, 1, -16], [13, -76, 1, 0], [3, -40]] },
+    // The forehead mark as the sheet's breakdown draws it: an upright oval over a round dot, between two moon
+    // crescents whose round backs face the middle and whose horns point outward. It sits between the eyebrow spots
+    // and the crown.
+    { on: 'hair', kind: 'ellipse', fill: 'stripe', cx: 0, cy: -74, rx: 5.5, ry: 11 },
+    { on: 'hair', kind: 'ellipse', fill: 'stripe', cx: 0, cy: -55, rx: 4.5, ry: 4.5 },
+    { on: 'hair', fill: 'stripe', nodes: [[-32, -84, 1], [-19, -79], [-12, -67], [-15, -56], [-27, -50, 1], [-20, -58], [-21, -67], [-24, -77]] },
+    { on: 'hair', fill: 'stripe', nodes: [[32, -84, 1], [24, -77], [21, -67], [20, -58], [27, -50, 1], [15, -56], [12, -67], [19, -79]] },
+    // The eyebrow spots: a white oval above each eye, as in every picture.
+    { on: 'hair', kind: 'ellipse', fill: 'face', cx: -32, cy: -38, rx: 8.5, ry: 5.5, rot: -8 },
+    { on: 'hair', kind: 'ellipse', fill: 'face', cx: 32, cy: -38, rx: 8.5, ry: 5.5, rot: 8 },
+    // The white chest and belly, an oval from under the chin whose tufts hang over the belly. The gray of the color
+    // bar, which the sheet draws down the chest and where the white meets the coral at the wrists and ankles, is
+    // left out: at gallery size it would read as a shadow.
+    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 28, ry: 30,
+      fluff: [{ from: 40, to: 140, n: 3, len: 5, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
+    // The tabby stripes on the outer side of each hip: two narrow bands running in from the body's edge and tapering
+    // to a round end, as the sheet's thigh stripes do, clipped to the body so that they start at its edge.
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[74, 65, 1, -8], [36, 75, 1, 0], [74, 78, 1, 0]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[74, 85, 1, -8], [40, 94, 1, 0], [74, 97, 1, 0]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-74, 65, 1, 0], [-74, 78, 1, 0], [-36, 75, 1, 8]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-74, 85, 1, 0], [-74, 97, 1, 0], [-40, 94, 1, 8]] },
+    // The hind feet, turned out slightly: white, under the red of the lower legs, each with its big pink pad
+    // turned to the front.
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -50, cy: 112, rx: 17, ry: 11, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 50, cy: 112, rx: 17, ry: 11, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'face', cx: -50, cy: 120, rx: 19, ry: 11, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'face', cx: 50, cy: 120, rx: 19, ry: 11, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'blush', cx: -51, cy: 121, rx: 8, ry: 6, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'blush', cx: 51, cy: 121, rx: 8, ry: 6, rot: 8 },
+    // The white forepaws on the ground between them.
+    { on: 'body', kind: 'ellipse', fill: 'face', cx: -16, cy: 121, rx: 12.5, ry: 10 },
+    { on: 'body', kind: 'ellipse', fill: 'face', cx: 16, cy: 121, rx: 12.5, ry: 10 },
+  ],
+  // The paws reach y ~131, so squash and stretch pivot about that height.
+  rig: { ground: 131 },
+  views: {
+    // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Alfie yet.
+    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
+  },
+});

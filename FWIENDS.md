@@ -36,7 +36,7 @@ The page has five parts, in this order:
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 1767px.
+  paper's edge, and the page stops at 2096px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
   rules, so the ground stays on a rule: 5 rules. The smallest phones, below
@@ -46,24 +46,31 @@ The page has five parts, in this order:
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All nine stand in one row from a 1767px window, where the page stops
-  growing. The nine reaches add up to 508 head units and neighbours overlap
-  by 0.06 of a box, so the row is 10.3 boxes wide. Narrower, a row holds at
-  most five, so the nine split five and four, and both rows fit a laptop's
-  first screen. Below a 1025px window, where five no longer fit, they stand
-  three to a row, so that no row is left with one fwiend, and on phones two.
+- All eleven stand in one row from a 2096px window, where the page stops
+  growing. The eleven reaches add up to 556 head units and neighbours
+  overlap by 0.06 of a box, so the row is 12.4 boxes wide. Narrower, they
+  split six and five, from a 1219px window, and both rows fit a laptop's
+  first screen. Below that they stand four, four and three, and below an
+  848px window three to a row, so that no row is left with one fwiend; on
+  phones they stand in pairs.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
 - The ring circles the host's name, phy's: "this one" is the one whose
   page it is. The nav's ring marks the page, as it does everywhere.
+- YuanYuan's owner is an artist, and his seal
+  (`characters/yuanyuan/seal.svg`, redrawn from the one he stamps on his
+  pictures) stands upright on the ground at YuanYuan's feet, on the side
+  away from the tail, a fifth of a box tall. It is flat red ink, without the
+  graphite filter, and is hidden from screen readers, since the name and the
+  credit already say whose it is.
 - A pencilled note says what to do: "psst: they watch your cursor. click one
   to say hi". It sits on the rule under the nav, over the right end of the
   row with one blank rule below, so it is read before the fwiends and is on
   the first screen of every device. Being one long line, it takes the
   title's tilt, `−1°`, rather than a margin note's `−2°`, at which its far end
   would climb half a rule; and sitting so close, it needs no arrow. Where
-  fewer than nine stand in a row it is only "click one to say hi", and touch
+  fewer than six stand in a row it is only "click one to say hi", and touch
   screens, which have no cursor, read "tap one to say hi".
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
@@ -77,6 +84,9 @@ The page has five parts, in this order:
 - a credit line in small print: the owner's handle, linking to their page.
   phy's reads "that's me · @rareone0602", on two lines on a phone.
 
+On the smallest phones a long species or handle wraps onto a second rule
+rather than running into its neighbour's.
+
 Both small-print lines are in `--ink-2`; the credit is told apart by being a
 link.
 
@@ -85,9 +95,9 @@ Each friend is a button, and its `aria-label` says who it is in one line:
 dark felt soles".
 
 Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
-**Brian** and **Teni** are capitalised; **phy**, **mumuyou** and **tanyuan**
-are always lower case, even at the start of a line; and **K3V1N** is spelt
-with a 3 and a 1.
+**Brian**, **Teni** and **Alfie** are capitalised; **YuanYuan** has two
+capitals; **phy**, **mumuyou** and **tanyuan** are always lower case, even at
+the start of a line; and **K3V1N** is spelt with a 3 and a 1.
 
 **The copy**, against what it isn't:
 
@@ -136,7 +146,7 @@ the history, reduced motion and the link preview show everything in place.
   neighbours watch it land while it smiles; the rest keep watching the
   cursor.
 - The labels are there from the start, so the empty places above them read
-  as the names still to be called.
+  as the names still to be called. YuanYuan's seal is stamped as he lands.
 - A row is called once it comes into view, so on a phone the lower rows come
   in as they are scrolled to. A row scrolled past unseen is simply there.
 - A change in the window's width, or tabbing to a fwiend still to come,
@@ -146,8 +156,8 @@ the history, reduced motion and the link preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 1767×928, the same shape, and scaled down, because
-  1767px is the narrowest window where all nine stand in one row; narrower,
+  page is photographed at 2096×1100, the same shape, and scaled down, because
+  2096px is the narrowest window where all eleven stand in one row; narrower,
   the second row would fall out of the picture.
 
 ## drawing a friend
@@ -176,7 +186,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
 - A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current nine use 6–12 each, plus
+  `earInner`, `eye`, `blush`, `chest`, … The current eleven use 6–12 each, plus
   `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
@@ -184,7 +194,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   shades therefore match across fwiends.
   - Every friend has the layer, and none has a second. The body sits under
     the head, so every body is in its fur's shade, or in its clothes' shade
-    where it is dressed (tanyuan's hoodie).
+    where it is dressed (tanyuan's hoodie, YuanYuan's yukata).
   - Elsewhere the shade goes only on a part behind a neighbour of the same
     colour: Terry's ears behind the face, the back layer of a ruff, locks of
     hair behind the mop, a bandana's band behind its point, the part of
@@ -197,8 +207,8 @@ Follow them when turning someone's picture or design sheet into a friend.
 - Nothing is copied from a reference's lighting: no pale rim along an ear, no
   darker far side, no highlights.
 - A pale colour that would vanish on paper takes one slightly deeper tint
-  wherever it appears (mumuyou's and tanyuan's white, `#efeef3`; Teni's pale
-  teal, `#ace1e0`). The pencil lets the paper
+  wherever it appears (the white of mumuyou, tanyuan, YuanYuan and Alfie,
+  `#efeef3`; Teni's pale teal, `#ace1e0`). The pencil lets the paper
   through, so judge it on the page, not on a flat render.
 
 **Proportions, in head space:** a big head on a small, seated body.
@@ -224,7 +234,9 @@ Follow them when turning someone's picture or design sheet into a friend.
   as an outline). The colour comes from the art (`eyes.color`); where the art
   draws dark eyes, as Terry's does, they are near-black. A colour that would
   be faint at gallery size goes one house step deeper, as phy's green,
-  mumuyou's gold, Howdi's blue and tanyuan's red do. Eyes of two colours take the other through
+  Howdi's blue, tanyuan's red and Alfie's amber do; mumuyou's pale sky and
+  lemon go further, to a blue and a gold that hold their own on his white
+  face. Eyes of two colours take the other through
   `eyes.right`: mumuyou's, K3V1N's and Brian's. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,

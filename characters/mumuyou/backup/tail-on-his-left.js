@@ -1,3 +1,6 @@
+// An alternative to characters/mumuyou/mumuyou.js, for phy to compare: the tail on his left (the viewer's
+// right), as badge.png, scarf.png, blond.png and uniform.png hold it, rather than on his right. Kept per
+// STYLE.md, principle 1.
 // Character spec for mumuyou, a white fox with a cream-blonde mop, sky-blue ears and socks, a blue
 // diamond on his forehead, a ringed mark on his left shoulder and a salmon-tipped tail.
 // Pictures: examples/sheet.png (the color standard), and five by other artists: badge.png, sitting.png,
@@ -74,11 +77,11 @@ PhyFriends.define('mumuyou', {
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
-  // The tail is a large bushy white brush rising behind his right hip (the viewer's left), its white
-  // set against the shaded body. The salmon tip is cut into flame-shaped tufts. The standing pictures
-  // hold the tail on his left, but seated it would rise through the ponytail, which hangs on that side.
+  // The tail is a large bushy white brush rising behind his left hip (the viewer's right), as the
+  // standing pictures hold it, its white set against the shaded body. The salmon tip is cut into
+  // flame-shaped tufts. Seated, it rises behind the ponytail, which hangs on the same side.
   tail: {
-    base: [-54, 106], angle: 54, length: 146, width: 104, bend: -76, taper: 0.7, root: 0.5, color: 'fur',
+    base: [54, 106], angle: 54, length: 146, width: 104, bend: -76, taper: 0.7, root: 0.5, color: 'fur',
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 195, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],

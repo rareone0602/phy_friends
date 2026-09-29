@@ -445,13 +445,14 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 </ol>
 <p class="lead"><strong>The stage:</strong></p>
 <ul>
-<li>The stage is the one centred thing on the page, as the subject of a group photo stands in the middle of the frame. The rest keeps to the margin line. The stage is also the one wide thing: beside the margin line it runs to the paper's edge, and the page stops at 1767px.</li>
+<li>The stage is the one centred thing on the page, as the subject of a group photo stands in the middle of the frame. The rest keeps to the margin line. The stage is also the one wide thing: beside the margin line it runs to the paper's edge, and the page stops at 2096px.</li>
 <li>Every friend is drawn at the same scale, in a box 270 head units tall whose bottom edge is the friend's <code>rig.ground</code>. The box is a whole number of rules, so the ground stays on a rule: 5 rules. The smallest phones, below 360px, take 4, so two fwiends still stand side by side.</li>
 <li>Ears and tails may reach outside the box, as in a photo. A body or tail that sticks out at ground level widens that friend's slot (<code>--reach-left</code> and <code>--reach-right</code>, measured on load), so neighbours stand close but never tread on a tail. Below 420px there is no room, and a tail reaches into the gap beside the pair.</li>
-<li>All nine stand in one row from a 1767px window, where the page stops growing. The nine reaches add up to 508 head units and neighbours overlap by 0.06 of a box, so the row is 10.3 boxes wide. Narrower, a row holds at most five, so the nine split five and four, and both rows fit a laptop's first screen. Below a 1025px window, where five no longer fit, they stand three to a row, so that no row is left with one fwiend, and on phones two.</li>
+<li>All eleven stand in one row from a 2096px window, where the page stops growing. The eleven reaches add up to 556 head units and neighbours overlap by 0.06 of a box, so the row is 12.4 boxes wide. Narrower, they split six and five, from a 1219px window, and both rows fit a laptop's first screen. Below that they stand four, four and three, and below an 848px window three to a row, so that no row is left with one fwiend; on phones they stand in pairs.</li>
 <li>Each friend's ground is its own patch of rule, gone over in pencil: a seeded wobble (<code>PhyFriends.rng(5)</code>), ink at 70%, 1.4px, through the graphite filter.</li>
 <li>The ring circles the host's name, phy's: "this one" is the one whose page it is. The nav's ring marks the page, as it does everywhere.</li>
-<li>A pencilled note says what to do: "psst: they watch your cursor. click one to say hi". It sits on the rule under the nav, over the right end of the row with one blank rule below, so it is read before the fwiends and is on the first screen of every device. Being one long line, it takes the title's tilt, <code>−1°</code>, rather than a margin note's <code>−2°</code>, at which its far end would climb half a rule; and sitting so close, it needs no arrow. Where fewer than nine stand in a row it is only "click one to say hi", and touch screens, which have no cursor, read "tap one to say hi".</li>
+<li>YuanYuan's owner is an artist, and his seal (<code>characters/yuanyuan/seal.svg</code>, redrawn from the one he stamps on his pictures) stands upright on the ground at YuanYuan's feet, on the side away from the tail, a fifth of a box tall. It is flat red ink, without the graphite filter, and is hidden from screen readers, since the name and the credit already say whose it is.</li>
+<li>A pencilled note says what to do: "psst: they watch your cursor. click one to say hi". It sits on the rule under the nav, over the right end of the row with one blank rule below, so it is read before the fwiends and is on the first screen of every device. Being one long line, it takes the title's tilt, <code>−1°</code>, rather than a margin note's <code>−2°</code>, at which its far end would climb half a rule; and sitting so close, it needs no arrow. Where fewer than six stand in a row it is only "click one to say hi", and touch screens, which have no cursor, read "tap one to say hi".</li>
 <li>Without JavaScript: "the fwiends are drawn live, so they need JavaScript to appear."</li>
 </ul>
 <p class="lead"><strong>Labels.</strong> Each friend has a small label, three rules tall:</p>
@@ -460,9 +461,10 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>the species in small print, two or three lower-case words ("tuxedo eevee", "yellow plush toy");</li>
 <li>a credit line in small print: the owner's handle, linking to their page. phy's reads "that's me · @rareone0602", on two lines on a phone.</li>
 </ul>
+<p>On the smallest phones a long species or handle wraps onto a second rule rather than running into its neighbour's.</p>
 <p>Both small-print lines are in <code>--ink-2</code>; the credit is told apart by being a link.</p>
 <p>Each friend is a button, and its <code>aria-label</code> says who it is in one line: "say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles".</p>
-<p>Names keep their owner's capitalisation: <strong>Howdi</strong>, <strong>Yuda</strong>, <strong>Terry</strong>, <strong>Brian</strong> and <strong>Teni</strong> are capitalised; <strong>phy</strong>, <strong>mumuyou</strong> and <strong>tanyuan</strong> are always lower case, even at the start of a line; and <strong>K3V1N</strong> is spelt with a 3 and a 1.</p>
+<p>Names keep their owner's capitalisation: <strong>Howdi</strong>, <strong>Yuda</strong>, <strong>Terry</strong>, <strong>Brian</strong>, <strong>Teni</strong> and <strong>Alfie</strong> are capitalised; <strong>YuanYuan</strong> has two capitals; <strong>phy</strong>, <strong>mumuyou</strong> and <strong>tanyuan</strong> are always lower case, even at the start of a line; and <strong>K3V1N</strong> is spelt with a 3 and a 1.</p>
 <p><strong>The copy</strong>, against what it isn't:</p>
 <table>
 <thead><tr><th>do</th><th>don't</th></tr></thead>
@@ -486,14 +488,14 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li>The title is written stroke by stroke, in the order a hand writes each letter, in about two and a half seconds. The pen slows at each end of a stroke and lifts between strokes, which gives it a hand's rhythm. <code>src/pen.js</code> does the writing; <code>python3 design/title_pen.py</code> derives the strokes (<code>site/title-pen.js</code>) from the title as the page sets it, and must be run again if the title or its face changes. Should the face be slow to arrive or not match the strokes, or colours be forced, the title simply shows.</li>
 <li>The fwiends begin to come in as the pen reaches "fwiends", and land one after another, row by row. Each hops in along its row's rule from the nearer edge of the screen, in hops a little lower than a scene's, so that ears clear the labels above. The one farthest from its edge comes first, so that nobody hops past anybody already standing. Its neighbours watch it land while it smiles; the rest keep watching the cursor.</li>
-<li>The labels are there from the start, so the empty places above them read as the names still to be called.</li>
+<li>The labels are there from the start, so the empty places above them read as the names still to be called. YuanYuan's seal is stamped as he lands.</li>
 <li>A row is called once it comes into view, so on a phone the lower rows come in as they are scrolled to. A row scrolled past unseen is simply there.</li>
 <li>A change in the window's width, or tabbing to a fwiend still to come, brings everyone in at once.</li>
 </ul>
 <p class="lead"><strong>The link preview and icons</strong> come from <code>python3 design/site_assets.py</code>, run after any character changes:</p>
 <ul>
 <li>the favicon is phy's head;</li>
-<li>the preview (1200×630) is a snapshot of the page with the whole set. The page is photographed at 1767×928, the same shape, and scaled down, because 1767px is the narrowest window where all nine stand in one row; narrower, the second row would fall out of the picture.</li>
+<li>the preview (1200×630) is a snapshot of the page with the whole set. The page is photographed at 2096×1100, the same shape, and scaled down, because 2096px is the narrowest window where all eleven stand in one row; narrower, the second row would fall out of the picture.</li>
 </ul>
 <h2 id="drawing-a-friend">drawing a friend</h2>
 <p>These are the rules the factory (<code>src/phyfriends.js</code>) encodes. A friend is a spec of about 100 lines, a palette plus shape parameters, not a traced path. Follow them when turning someone's picture or design sheet into a friend.</p>
@@ -509,16 +511,16 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>No outlines and no gradients. The one texture is the factory's pencil (<code>STYLE.md</code> §9), which <code>render</code> and <code>mount</code> lay over the whole friend. A spec never draws a texture of its own.</li>
 <li><code>pencil: false</code> draws the flat shapes alone. It is only for an icon too small to hold the texture, and for matching a flat reference picture, as <code>pf.py compare</code> does.</li>
 <li>Every colour is one the character really has: fur, hair, markings, accessories. A band the owner counts as a marking (phy's crest) is a colour, not shading.</li>
-<li>A few colours, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, … The current nine use 6–12 each, plus <code>bg</code> (<code>#1c1d21</code>, the same for all).</li>
+<li>A few colours, each with a named role in <code>palette</code>: <code>fur</code>, <code>face</code>, <code>hair</code>, <code>earInner</code>, <code>eye</code>, <code>blush</code>, <code>chest</code>, … The current eleven use 6–12 each, plus <code>bg</code> (<code>#1c1d21</code>, the same for all).</li>
 <li><strong>Exactly one shade layer</strong> (<code>STYLE.md</code>, principle 5). <code>&lt;name&gt;Shade</code> is derived by the library from <code>&lt;name&gt;</code> with <code>PhyFriends.shadeOf</code>: CIELAB L* <code>−10</code>, chroma <code>×1.2</code>, the same hue, and near-whites lean to lavender. The shades therefore match across fwiends.
 <ul>
-<li>Every friend has the layer, and none has a second. The body sits under the head, so every body is in its fur's shade, or in its clothes' shade where it is dressed (tanyuan's hoodie).</li>
+<li>Every friend has the layer, and none has a second. The body sits under the head, so every body is in its fur's shade, or in its clothes' shade where it is dressed (tanyuan's hoodie, YuanYuan's yukata).</li>
 <li>Elsewhere the shade goes only on a part behind a neighbour of the same colour: Terry's ears behind the face, the back layer of a ruff, locks of hair behind the mop, a bandana's band behind its point, the part of tanyuan's folded ear under its flap.</li>
 <li>A spec sets a shade by hand only where the derived one looks wrong, and says so in a comment: mumuyou's gold hair.</li>
 <li>Where a shade lands on a neighbouring colour, the neighbour moves, not the shade: phy's crumb went a step darker, so the tail's cookie base stays apart from the shaded hip.</li>
 </ul></li>
 <li>Nothing is copied from a reference's lighting: no pale rim along an ear, no darker far side, no highlights.</li>
-<li>A pale colour that would vanish on paper takes one slightly deeper tint wherever it appears (mumuyou's and tanyuan's white, <code>#efeef3</code>; Teni's pale teal, <code>#ace1e0</code>). The pencil lets the paper through, so judge it on the page, not on a flat render.</li>
+<li>A pale colour that would vanish on paper takes one slightly deeper tint wherever it appears (the white of mumuyou, tanyuan, YuanYuan and Alfie, <code>#efeef3</code>; Teni's pale teal, <code>#ace1e0</code>). The pencil lets the paper through, so judge it on the page, not on a flat render.</li>
 </ul>
 <p class="lead"><strong>Proportions, in head space:</strong> a big head on a small, seated body.</p>
 <ul>
@@ -532,7 +534,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li><strong>fluffy ellipses</strong> for the head, face mask and chest, whose outlines grow small curved tufts;</li>
 <li><strong>a star hair mop</strong> of broad, curved, flame-like locks, some hanging over the face;</li>
 <li><strong>rounded-triangle ears</strong>, with an inner ear and stripe bands only where the character really has them;</li>
-<li><strong>pill eyes</strong> in the character's own eye colour: one flat colour per eye, with no whites, no highlight and no dark rim round the colour (a rim reads as an outline). The colour comes from the art (<code>eyes.color</code>); where the art draws dark eyes, as Terry's does, they are near-black. A colour that would be faint at gallery size goes one house step deeper, as phy's green, mumuyou's gold, Howdi's blue and tanyuan's red do. Eyes of two colours take the other through <code>eyes.right</code>: mumuyou's, K3V1N's and Brian's. The palette keeps <code>eye</code>, a near-black, for the open mouth;</li>
+<li><strong>pill eyes</strong> in the character's own eye colour: one flat colour per eye, with no whites, no highlight and no dark rim round the colour (a rim reads as an outline). The colour comes from the art (<code>eyes.color</code>); where the art draws dark eyes, as Terry's does, they are near-black. A colour that would be faint at gallery size goes one house step deeper, as phy's green, Howdi's blue, tanyuan's red and Alfie's amber do; mumuyou's pale sky and lemon go further, to a blue and a gold that hold their own on his white face. Eyes of two colours take the other through <code>eyes.right</code>: mumuyou's, K3V1N's and Brian's. The palette keeps <code>eye</code>, a near-black, for the open mouth;</li>
 <li>soft <strong>blush</strong> ovals, in the owner's colour if they have one (Yuda's is blue, <code>#a9dbf3</code>);</li>
 <li>no nose, and no mouth by default.</li>
 </ul>

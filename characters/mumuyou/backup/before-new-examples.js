@@ -1,23 +1,24 @@
-// Character spec for mumuyou, a white fox with a cream-blonde mop, sky-blue ears and socks, a blue
-// diamond on his forehead, a ringed mark on his left shoulder and a salmon-tipped tail.
-// Pictures: examples/sheet.png (the color standard), and five by other artists: badge.png, sitting.png,
-// scarf.png, blond.png and uniform.png.
-// Colors are taken from the color bar on examples/sheet.png; the newer pictures fill their shapes with the
-// same colors. The house shade of the white marks the parts that lie under his white face.
+// The spec before the alignment to the newer pictures (examples/badge.png, sitting.png, scarf.png, blond.png and
+// uniform.png), drawn from examples/sheet.png alone. Kept per STYLE.md, principle 1.
+// Character spec for mumuyou, a white fox with a cream-blonde mop, sky-blue ears and socks,
+// and a salmon-tipped tail.
+// Pictures: examples/sheet.png.
+// Colors are taken from the color bar on examples/sheet.png. The house shade of the white marks
+// the parts that lie under his white face.
 PhyFriends.define('mumuyou', {
   palette: {
     bg: '#1c1d21',
     fur: '#efeef3',        // The white, deepened slightly to stay visible on paper. Its house shade (furShade) fills the cheek ruff and body, under his white face.
     hair: '#faefcf',       // The pale cream of the sheet.
     hairShade: '#efcf8a',  // The hair's one shade, set by hand: the warm gold of the back locks, the partings and the ponytail.
-    sky: '#98d4f8',        // The ears, the socks, the diamond on the forehead, the ring of the mark on the shoulder and the dot on the tail.
-    earInner: '#fcacb0',   // The pink of the ears, the left forepaw, the tongue and the end of the crescent on the tail.
+    sky: '#98d4f8',        // The ears, the socks and the mark on the forehead.
+    earInner: '#fcacb0',   // The pink of the ears, the left forepaw and the tongue.
     eye: '#221d22',        // A soft plum black, used for the open mouth.
     eyeBlue: '#4690e0',    // His right eye is blue.
     eyeGold: '#c98f12',    // His left eye is yellow, as on the sheet, deepened to match the weight of the blue.
     blush: '#fcc2c6',
-    tailTip: '#fc9494',    // Salmon, for the tip of the tail, the band of the ponytail and the speck beside the crescent.
-    yellow: '#fce874',     // The yellow of the crescent on the tail and of the arcs of the mark on the shoulder.
+    tailTip: '#fc9494',    // Salmon, for the tip of the tail and the band of the ponytail.
+    moon: '#fce874',       // The yellow crescent.
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
@@ -38,10 +39,8 @@ PhyFriends.define('mumuyou', {
     inner: { scale: 0.6, dx: 2, dy: -10 },
   },
   // The messy mop has a round crown, shaggy pointed locks over the forehead (the longest between
-  // the eyes) and a lock down each side of the face to eye level. The locks part above his right
-  // eye, where blond.png and uniform.png show the diamond on the forehead whole; the two edges of
-  // that parting bow out less than the others, so that it is wide enough for the diamond. Each tip
-  // is [x, y, bendIn, bendOut, following valley].
+  // the eyes) and a lock down each side of the face to eye level. Each tip is [x, y, bendIn,
+  // bendOut, following valley].
   hair: {
     cx: 0, cy: -58, rx: 74, ry: 46, color: 'hair',
     tips: [
@@ -51,17 +50,15 @@ PhyFriends.define('mumuyou', {
       [90, 2, 6, -10, [70, -26]],
       [58, -10, 12, -14, [38, -38]],
       [18, -12, 10, -16, [8, -40]],
-      [-6, 2, 12, -6, [-27, -47]],
-      [-50, -10, -6, 12, [-72, -26]],
+      [-6, 2, 12, -12, [-22, -38]],
+      [-50, -10, -14, 12, [-72, -26]],
       [-92, 2, -10, 6, [-86, -34]],
       [-98, -48, 6, -12, [-66, -96]],
     ],
   },
   // The eyes are plain tall pills, set wide and low, in his own colors: blue on his right (the
-  // viewer's left) and yellow on his left, as in every picture. The yellow ring that badge.png draws
-  // round the yellow eye is its outline, so it is left out, as are the pale dots that badge.png and
-  // blond.png alone set above the eyes. Setting arc: 1 draws the happy, closed and squint strokes at
-  // the full eye width.
+  // viewer's left) and yellow on his left. Setting arc: 1 draws the happy, closed and squint
+  // strokes at the full eye width.
   eyes: { x: 34, y: 5, w: 13, h: 32, tilt: -3, stroke: 5.2, arc: 1, color: 'eyeBlue', right: { color: 'eyeGold' } },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 53, y: 26, rx: 12, ry: 7, tilt: 12 },
@@ -74,9 +71,8 @@ PhyFriends.define('mumuyou', {
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
-  // The tail is a large bushy white brush rising behind his right hip (the viewer's left), its white
-  // set against the shaded body. The salmon tip is cut into flame-shaped tufts. The standing pictures
-  // hold the tail on his left, but seated it would rise through the ponytail, which hangs on that side.
+  // The tail is a large bushy white brush rising behind the left hip, its white set against the
+  // shaded body. The salmon tip is cut into flame-shaped tufts.
   tail: {
     base: [-54, 106], angle: 54, length: 146, width: 104, bend: -76, taper: 0.7, root: 0.5, color: 'fur',
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
@@ -93,10 +89,9 @@ PhyFriends.define('mumuyou', {
     { on: 'base', under: true, fill: 'hairShade', cx: 0, cy: -30, rx: 100, ry: 70,
       tips: [[0, -100, 0, 0, [98, -62]], [110, -20, -10, 6, [96, -14]], [104, 8, -6, 4, [88, -2]], [78, 10, 8, 0, [0, 0]],
         [-78, 10, 0, 8, [-88, -2]], [-104, 8, 4, -6, [-96, -14]], [-110, -20, 6, -10, [-98, -62]]] },
-    // The blue diamond on the forehead, above the right eye (the viewer's left) and a little inward,
-    // in the parting of the locks. As in the pictures, it is half as tall as the eye, a little
-    // narrower than tall, and leans toward the middle of the face.
-    { on: 'face', fill: 'sky', polys: [[-28, -30, 8, 4, 102, 0.82]] },
+    // The blue mark on the forehead, above the right eye (the viewer's left), between the locks.
+    // It is a small upright diamond, so that it reads as a mark rather than a speck.
+    { on: 'face', fill: 'sky', polys: [[-25, -25, 5.5, 4, 90, 0.62]] },
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head).
     // The white tufts rise from the base of the inner ear to just above the mop. The ear clips off
     // their round bottom, so that no stray shape shows when the ears flick.
@@ -113,15 +108,6 @@ PhyFriends.define('mumuyou', {
     // The white fluffy chest, below the shade under the chin, with its tufts hanging over the belly.
     { on: 'body', clip: true, fill: 'fur', cx: 0, cy: 84, rx: 50, ry: 27,
       fluff: [{ from: 20, to: 160, n: 4, len: 9, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
-    // The mark on his left shoulder, which every picture draws and the sheet shows on its own: a blue
-    // ring between two yellow arcs. Seated, it lies on the front of his left foreleg, above the pink
-    // forepaw, as in sitting.png.
-    { on: 'body', kind: 'ellipse', fill: 'sky', cx: 30, cy: 92, rx: 7.5, ry: 7.5 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 30, cy: 92, rx: 4.5, ry: 4.5 },
-    { on: 'body', fill: 'yellow', round: 0.5, nodes: [[19.8, 84.9, 1], [22.6, 82.1], [26.1, 80.2], [30, 79.6], [33.9, 80.2], [37.4, 82.1],
-      [40.2, 84.9, 1], [38.2, 86.3, 1], [36, 84], [33.1, 82.5], [30, 82], [26.9, 82.5], [24, 84], [21.8, 86.3, 1]] },
-    { on: 'body', fill: 'yellow', round: 0.5, nodes: [[40.2, 99.1, 1], [37.4, 101.9], [33.9, 103.8], [30, 104.4], [26.1, 103.8], [22.6, 101.9],
-      [19.8, 99.1, 1], [21.8, 97.7, 1], [24, 100], [26.9, 101.5], [30, 102], [33.1, 101.5], [36, 100], [38.2, 97.7, 1]] },
     // The hind feet in sky-blue socks, turned out slightly, with white fluffy trim at the top.
     { on: 'body', kind: 'ellipse', fill: 'sky', cx: -45, cy: 122, rx: 19, ry: 9.5, rot: -8 },
     { on: 'body', kind: 'ellipse', fill: 'sky', cx: 45, cy: 122, rx: 19, ry: 9.5, rot: 8 },
@@ -135,16 +121,9 @@ PhyFriends.define('mumuyou', {
     // The end of the white brush, cut into pointed tufts that reach up into the salmon tip.
     { on: 'tail', clip: true, fill: 'fur', cx: -14, cy: -62, rx: 31, ry: 54,
       fluff: [{ from: 235, to: 305, n: 3, len: 16, lean: 0, depth: 0.05, b1: 15, b2: 15, jit: 0 }] },
-    // The crescent on the tail, as every picture that shows it draws it: a ring left open toward the
-    // tip, thickest toward the base, yellow for two thirds of its length and pink for the last third,
-    // on the side away from the body, with a blue dot in the opening and a salmon speck beside it.
-    // The two parts of the ring share one center (cx, cy), so that they turn with the tail as one.
-    { on: 'tail', fill: 'yellow', cx: -4, cy: -64, nodes: [[9.9, -65.2, 1], [8.8, -58.4], [4.6, -52.9], [-1.7, -50.2], [-8.6, -50.8], [-14.4, -54.6],
-      [-17.6, -60.7], [-17.5, -67.6, 1], [-15.6, -68.1, 1], [-15.6, -63], [-13.2, -58.4], [-8.9, -55.5], [-3.7, -55.1], [1, -57.1], [4.2, -61.2], [5, -66.3, 1]] },
-    { on: 'tail', fill: 'earInner', cx: -4, cy: -64, nodes: [[-7.6, -77.5, 1], [0.4, -77.3], [7, -72.7], [9.9, -65.2, 1], [5, -66.3, 1], [2.8, -71.9],
-      [-2.1, -75.4], [-8.1, -75.6, 1]] },
-    { on: 'tail', kind: 'ellipse', fill: 'sky', cx: -12.2, cy: -73.1, rx: 3.5, ry: 3.5 },
-    { on: 'tail', kind: 'ellipse', fill: 'tailTip', cx: -12.8, cy: -79.2, rx: 1.8, ry: 1.8 },
+    // The yellow crescent moon, opening toward the body, and the blue dot inside its curve.
+    { on: 'tail', fill: 'moon', nodes: [[-18, -79, 1], [-5, -82], [6, -74], [6, -58], [-5, -50], [-18, -53, 1], [-8, -55], [-2, -66], [-8, -77]] },
+    { on: 'tail', kind: 'ellipse', fill: 'sky', cx: -16, cy: -61, rx: 3.5, ry: 3.5 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

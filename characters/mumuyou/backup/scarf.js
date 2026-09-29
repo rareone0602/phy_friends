@@ -1,3 +1,6 @@
+// An alternative to characters/mumuyou/mumuyou.js, for phy to see: mumuyou in the pink kerchief of scarf.png.
+// Only scarf.png and blond.png give him a scarf, and each a different one, so it is an outfit rather than part of
+// him, and the main design leaves it out. Kept per STYLE.md, principle 1.
 // Character spec for mumuyou, a white fox with a cream-blonde mop, sky-blue ears and socks, a blue
 // diamond on his forehead, a ringed mark on his left shoulder and a salmon-tipped tail.
 // Pictures: examples/sheet.png (the color standard), and five by other artists: badge.png, sitting.png,
@@ -18,6 +21,7 @@ PhyFriends.define('mumuyou', {
     blush: '#fcc2c6',
     tailTip: '#fc9494',    // Salmon, for the tip of the tail, the band of the ponytail and the speck beside the crescent.
     yellow: '#fce874',     // The yellow of the crescent on the tail and of the arcs of the mark on the shoulder.
+    scarf: '#fcacb0',      // The kerchief, in the pink of the color bar, as blond.png draws his scarf (scarf.png's is paler, #ffbfcb). Its house shade (scarfShade) fills the band.
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
@@ -122,6 +126,10 @@ PhyFriends.define('mumuyou', {
       [40.2, 84.9, 1], [38.2, 86.3, 1], [36, 84], [33.1, 82.5], [30, 82], [26.9, 82.5], [24, 84], [21.8, 86.3, 1]] },
     { on: 'body', fill: 'yellow', round: 0.5, nodes: [[40.2, 99.1, 1], [37.4, 101.9], [33.9, 103.8], [30, 104.4], [26.1, 103.8], [22.6, 101.9],
       [19.8, 99.1, 1], [21.8, 97.7, 1], [24, 100], [26.9, 101.5], [30, 102], [33.1, 101.5], [36, 100], [38.2, 97.7, 1]] },
+    // The kerchief of scarf.png: the band around the neck (in the house shade, because it lies behind
+    // the point) and the point hanging on the chest. The leaf on its point is left out.
+    { on: 'body', fill: 'scarfShade', nodes: [[-58, 40, 1, 0], [58, 40, 1, 0], [56, 60, 1, -10], [-56, 60, 1, 10]], round: 0.3 },
+    { on: 'body', fill: 'scarf', nodes: [[-56, 52, 1, -4], [56, 52, 1, -4], [0, 100, 1, -4]], round: 0.2 },
     // The hind feet in sky-blue socks, turned out slightly, with white fluffy trim at the top.
     { on: 'body', kind: 'ellipse', fill: 'sky', cx: -45, cy: 122, rx: 19, ry: 9.5, rot: -8 },
     { on: 'body', kind: 'ellipse', fill: 'sky', cx: 45, cy: 122, rx: 19, ry: 9.5, rot: 8 },

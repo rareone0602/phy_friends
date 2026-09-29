@@ -43,6 +43,10 @@ PhyFriends.cast.define({
       name: 'Brian', pronoun: 'he', species: 'cream fox',
       credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
     },
+    yuanyuan: {
+      name: 'YuanYuan', pronoun: 'he', species: 'lavender-haired cat',
+      credit: { handle: '@Milk_YuanYuan', href: 'https://x.com/Milk_YuanYuan' }, agreed: ['gallery'],
+    },
     tanyuan: {
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
       credit: { handle: '@tanyuan_UwU', href: 'https://x.com/tanyuan_UwU' }, agreed: ['gallery'],
@@ -50,6 +54,10 @@ PhyFriends.cast.define({
     teni: {
       name: 'Teni', pronoun: 'he', species: 'cyan-haired glaceon',
       credit: { handle: '@foxx_manome', href: 'https://x.com/foxx_manome' }, agreed: ['gallery'],
+    },
+    alfie: {
+      name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
+      credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
     },
   },
   know: [],
