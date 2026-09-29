@@ -727,12 +727,21 @@
       `<image data-pf-texture href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
   }
 
+  // Content under the pencil mask. Safari masks each shape of a group on its own rather than the group
+  // as drawn, so wherever the pencil lets the paper through, the shapes underneath show through too
+  // (the body under a white chest, the shade layer under a face), and a boiling texture makes them
+  // flicker. An isolated group inside the masked one is drawn whole first, in every browser; isolating
+  // the masked group itself does not help.
+  function penciled(maskId, inner) {
+    return `<g mask="url(#${maskId})"><g style="isolation:isolate">${inner}</g></g>`;
+  }
+
   // Draws any SVG content (in a viewBox of 0 0 w h) in the same pencil as the characters, for props
   // that share a scene with them. Returns an SVG string.
   function pencilSVG(inner, { w, h, uid = `pf${(++UID).toString(36)}`, flat = false } = {}) {
     const open = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(w)} ${num(h)}" data-pf-uid="${uid}">`;
     if (flat) return `${open}${inner}</svg>`;
-    return `${open}<defs>${pencilMask(`${uid}-pencil`, { w, h })}</defs><g mask="url(#${uid}-pencil)">${inner}</g></svg>`;
+    return `${open}<defs>${pencilMask(`${uid}-pencil`, { w, h })}</defs>${penciled(`${uid}-pencil`, inner)}</svg>`;
   }
 
   function resolveView(spec, v, size) {
@@ -956,7 +965,7 @@
       defs.push(pencilMask(`${uid}-pencil`, view));
       const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
       if (bg) defs.push(paperSheet(`${uid}-paper`));
-      drawing = `${sheet}<g mask="url(#${uid}-pencil)">${drawing}</g>`;
+      drawing = sheet + penciled(`${uid}-pencil`, drawing);
     }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(view.w)} ${num(view.h)}"${size} data-pf-uid="${uid}">` +
       `<defs>${defs.join('')}</defs>` +

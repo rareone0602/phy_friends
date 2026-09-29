@@ -38,6 +38,22 @@
     }
   });
 
+  // Safari masks each shape of a masked group on its own unless what the mask holds is an isolated
+  // group, and the parts under a part then show through the pencil's gaps. Chrome, which runs these
+  // tests, masks the group whole either way, so the structure is checked rather than the pixels.
+  test('the pencil masks one isolated group, for a character and for a prop', () => {
+    const renders = { character: PF.render('phy'), prop: PF.pencil.svg('<rect width="10" height="10"/>', { w: 10, h: 10 }) };
+    for (const [what, markup] of Object.entries(renders)) {
+      const box = document.createElement('div');
+      box.innerHTML = markup;  // As mount() puts a render on the page.
+      const masked = box.querySelectorAll('[mask]');
+      assertEqual(masked.length, 1, `masked groups in the ${what}`);
+      const held = [...masked[0].children];
+      assert(held.length === 1 && /isolation:\s*isolate/.test(held[0].getAttribute('style') || ''),
+        `the ${what}'s mask does not hold exactly one isolated group`);
+    }
+  });
+
   // The grey levels of an image drawn over black, as the rig's mask reads it.
   async function pixelsOf(src, width, height) {
     const image = new Image();
