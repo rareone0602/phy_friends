@@ -55,13 +55,13 @@ PhyFriends.cast.define({
       name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
       credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
     },
-    cowosus: {
-      name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
-      credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery'],
-    },
     bardell: {
       name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
       credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery'],
+    },
+    cowosus: {
+      name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
+      credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery'],
     },
     tanyuan: {
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
