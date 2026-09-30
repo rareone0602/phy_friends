@@ -357,7 +357,7 @@ python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idl
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
-python3 tools/pf.py test                                    # The in-browser tests in test/index.html
+python3 tools/pf.py test                                    # The in-browser tests, and the gallery's labels against the cast
 ```
 
 `compare` snaps every pixel of the reference and the render to the nearest
@@ -374,6 +374,10 @@ is refused unless `--draft` is given, in which case the page marks it as a draft
 
 `test` runs `test/index.html` in headless Chrome, prints each failure, and exits
 non-zero on a failure or a page error. The page also works opened by hand.
+`test` also checks the gallery against the cast, which `index.html` repeats by
+hand: each friend's name, species and credit, the name in its `aria-label`, the
+host, the owner's agreement to the gallery, and the names in the link preview's
+alt text. A mismatch is a failure that names the friend and the field.
 
 The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
 ffmpeg for video.

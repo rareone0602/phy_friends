@@ -13,7 +13,7 @@
   python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
   python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
-  python3 tools/pf.py test                              # Runs test/index.html headless; exits non-zero on a failure.
+  python3 tools/pf.py test                              # Runs test/index.html headless and checks the gallery's labels; exits non-zero on a failure.
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
@@ -21,6 +21,9 @@ view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
 
 `film` films any page that follows the film contract (see film() below) frame
 by frame, so a scene exports frame-exactly whatever the machine's speed.
+
+`test` also checks the labels that index.html repeats by hand against the
+cast in characters/cast.js (see label_drift() below).
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
 out/design/ for page mockups, and out/scratch/ for experiments.
@@ -30,6 +33,7 @@ output also requires ffmpeg.
 """
 import argparse
 import html
+import html.parser
 import json
 import math
 import re
@@ -528,8 +532,7 @@ def md_blocks(lines, tight=False):
             i += 1
         elif re.match(r'#{1,6} ', line):
             hashes, text = line.split(None, 1)
-            slug = re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
-            out.append(f'<h{len(hashes)} id="{slug}">{md_inline(text.strip())}</h{len(hashes)}>')
+            out.append(f'<h{len(hashes)} id="{heading_id(text)}">{md_inline(text.strip())}</h{len(hashes)}>')
             i += 1
         elif line.startswith('>'):
             j = i
@@ -557,6 +560,48 @@ def md_blocks(lines, tight=False):
             out.append(text if tight else f'<p class="lead">{text}</p>' if lead else f'<p>{text}</p>')
             i = j
     return '\n'.join(out)
+
+
+def heading_id(text):
+    """Return a heading's id: sN for section N ("3. words" takes s3), which its § references link to; else a slug."""
+    number = re.match(r'(\d+)\. ', text)
+    return f's{number[1]}' if number else re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
+
+
+HEADING = re.compile(r'<h([12]) id="([^"]+)">(.*?)</h\1>')
+# A code block or code span, which is left alone, or a section reference: §N, after the name of the
+# document it points into when that is another one ("`STYLE.md` §5").
+SECTION_REF = re.compile(r'<pre>.*?</pre>|(?:(?:<code>)?([\w-]+\.md)(?:</code>)?,? )?§(\d+)|<code>.*?</code>', re.S)
+
+
+def link_section_refs(part, name, ids):
+    """Link every §N in a part of the page to section N of the document it names, or else of its own.
+
+    name: the part's source file name. ids: {source file name: the ids of its headings}. A reference
+    into a document on the page must name one of its sections; one into any other document stays text.
+    """
+    def link(m):
+        doc, number = m[1] or name, m[2]
+        if number is None or doc not in ids:
+            return m[0]
+        if f's{number}' not in ids[doc]:
+            raise SystemExit(f'{name}: §{number} names no section of {doc}')
+        return m[0][:-len(number) - 1] + f'<a href="#s{number}">§{number}</a>'
+    return SECTION_REF.sub(link, part)
+
+
+def contents_lines(docs):
+    """Return the page's contents: for each document, a line of small print (.meta) listing its headings.
+
+    docs: for each document, its title and its headings' (id, inner HTML) pairs in order. Each line
+    is a block of its own, so a blank rule parts the documents, and a later document's line opens
+    with its part title, which names it.
+    """
+    def line(title, headings):
+        label = html.escape(f'contents of {title}', quote=False).replace('"', '&quot;')
+        items = ''.join(f'<li><a href="#{id_}">{text}</a></li>' for id_, text in headings)
+        return f'<nav aria-label="{label}">\n<ul class="meta">{items}</ul>\n</nav>'
+    return '\n'.join(line(title, headings) for title, headings in docs)
 
 
 # The page is styled only by site/notebook.css (the paper) and site/pencil.css (the .doc
@@ -627,17 +672,25 @@ def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.
 
     The first file's # title becomes the <title>; each later file's # title heads
     its own part of the page. The page's own h1 and intro are written in STYLE_PAGE.
+    The writing opens with a contents line that lists every part title and section,
+    and each §N in the text links to its section.
     """
-    title, parts = "phy's style guide", []
+    titles, parts = [], []
     for k, src in enumerate(srcs):
         lines = Path(src).read_text(encoding='utf-8').splitlines()
         head = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else None
-        if k == 0:
-            title = head or title
-        elif head:
+        titles.append(head or ("phy's style guide" if k == 0 else Path(src).stem))
+        if k and head:
             lines = ['---', '', '# ' + head, ''] + lines
         parts.append(md_blocks(lines))
-    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(title, quote=False), body='\n'.join(parts)), encoding='utf-8')
+    headings = [[(id_, text) for _, id_, text in HEADING.findall(part)] for part in parts]
+    ids = [id_ for doc in headings for id_, _ in doc]
+    if len(set(ids)) < len(ids):
+        raise SystemExit(f'two headings share an id: {", ".join(sorted({x for x in ids if ids.count(x) > 1}))}')
+    names = [Path(src).name for src in srcs]
+    ids = {name: {id_ for id_, _ in doc} for name, doc in zip(names, headings)}
+    body = [contents_lines(zip(titles, headings))] + [link_section_refs(part, name, ids) for part, name in zip(parts, names)]
+    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(titles[0], quote=False), body='\n'.join(body)), encoding='utf-8')
     return out
 
 
@@ -841,14 +894,20 @@ TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testRes
 
 
 def run_tests(page=TEST_PAGE):
-    """Run the in-browser tests, print each failure and a summary, and return the number of problems."""
+    """Run the in-browser tests and the gallery's label check, print each failure and a summary, and
+    return the number of problems."""
     with HeadlessChrome(1024, 768) as chrome:
         chrome.open(page)
         results = chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
+        cast = chrome.evaluate(READ_CAST_JS)
         errors = list(chrome.errors)
     if results is None:
         errors.append(f'{page} did not load test/harness.js: window.testsDone is missing')
         results = {'passed': [], 'failed': []}
+    drift = label_drift(cast)
+    results['failed'] += [{'name': LABEL_TEST, 'message': message} for message in drift]
+    if not drift:
+        results['passed'].append(LABEL_TEST)
     for failure in results['failed']:
         print(f'failed: {failure["name"]}: {failure["message"]}')
     for error in errors:
@@ -858,6 +917,131 @@ def run_tests(page=TEST_PAGE):
         summary += f', {len(errors)} page error{"" if len(errors) == 1 else "s"}'
     print(summary)
     return len(results['failed']) + len(errors)
+
+
+# ---- The gallery's labels, checked against the cast ----------------------------------
+
+GALLERY = ROOT / 'index.html'
+LABEL_TEST = "the gallery's labels agree with the cast"
+# The cast as the test page installed it (characters/cast.js), or null if it has none.
+READ_CAST_JS = """(() => {
+  try {
+    const cast = PhyFriends.cast;
+    return { host: cast.host, friends: Object.fromEntries(cast.names().map(name => [name, cast.friend(name)])) };
+  } catch (error) {
+    return null;
+  }
+})()"""
+NUMBER_WORDS = ('no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
+                'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty')
+
+
+class GalleryLabels(html.parser.HTMLParser):
+    """Reads the gallery page: for each .friend in page order, its key, whether it is the host, its
+    aria-label and its label (name, species, and the credit link's text and address); and the link
+    preview's alt text (og:image:alt)."""
+
+    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
+    TEXT = ('name', 'species', 'credit')  # The parts of a label whose text is read.
+
+    def __init__(self):
+        super().__init__()
+        self.friends, self.preview_alt = [], None
+        self.open = []  # The open elements, each as (tag, the part of a friend it lies in, or None).
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = (attrs.get('class') or '').split()
+        part = self.open[-1][1] if self.open else None
+        if tag == 'meta' and attrs.get('property') == 'og:image:alt':
+            self.preview_alt = attrs.get('content') or ''
+        elif tag == 'li' and 'friend' in classes:
+            self.friends.append({'key': attrs.get('data-friend'), 'host': 'data-host' in attrs, 'aria-label': '',
+                                 'name': '', 'species': '', 'credit': '', 'credit link': ''})
+            part = 'friend'
+        elif part:
+            friend = self.friends[-1]
+            if 'rig' in classes:
+                friend['aria-label'] = attrs.get('aria-label') or ''
+            if 'credit' in classes:
+                part = 'credit line'  # Its text outside the link, such as phy's "that's me", is not the credit.
+            elif tag == 'a' and part == 'credit line':
+                friend['credit link'], part = attrs.get('href') or '', 'credit'
+            else:
+                part = next((c for c in ('name', 'species') if c in classes), part)
+        if tag not in self.VOID:
+            self.open.append((tag, part))
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.open) - 1, -1, -1):  # Closes the innermost element of this tag, and any left open in it.
+            if self.open[i][0] == tag:
+                del self.open[i:]
+                return
+
+    def handle_data(self, data):
+        part = self.open[-1][1] if self.open else None
+        if part in self.TEXT:  # A <wbr> splits a handle's text, so the pieces are joined.
+            self.friends[-1][part] += data
+
+
+def label_drift(cast, gallery=GALLERY):
+    """Return every way in which the gallery disagrees with the cast, one line per friend and field.
+
+    The cast (characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
+    label (name, species and credit), the name that opens its aria-label, and which friend is the
+    host. A friend is there only with its owner's agreement to the gallery. The link preview's alt
+    text counts the friends and names them in the gallery's order, as the preview pictures them.
+    cast: {host, friends: {key: entry}}, as READ_CAST_JS reads it, or None.
+    """
+    if cast is None:
+        return ['the test page installed no cast (characters/cast.js) to check the labels against']
+    page = GalleryLabels()
+    page.feed(Path(gallery).read_text(encoding='utf-8'))
+    entries, keys = cast['friends'], [friend['key'] for friend in page.friends]
+    problems = [f'{key}: on the gallery {keys.count(key)} times' for key in sorted(set(keys)) if keys.count(key) > 1]
+    problems += [f'{key}: on the gallery but not in the cast' for key in keys if key not in entries]
+    problems += [f'{key}: in the cast but not on the gallery' for key in entries if key not in keys]
+    for friend in page.friends:
+        if friend['key'] in entries:
+            problems += friend_drift(friend, entries[friend['key']], cast['host'])
+    return problems + preview_drift(page.preview_alt, [entries[key]['name'] for key in keys if key in entries])
+
+
+def friend_drift(friend, entry, host):
+    """Return the ways in which one friend on the gallery disagrees with its entry in the cast."""
+    key, problems = friend['key'], []
+    expected = {'name': entry['name'], 'species': entry['species'], 'credit': entry['credit']['handle'],
+                'credit link': entry['credit']['href']}
+    for field, value in expected.items():
+        found = ' '.join(friend[field].split())
+        if found != value:
+            problems.append(f'{key}: the {field} is "{found}" on the gallery but "{value}" in the cast')
+    greeting, label = f'say hi to {entry["name"]}', friend['aria-label']
+    if label != greeting and not label.startswith(greeting + ', '):  # A description may follow the name.
+        problems.append(f'{key}: the aria-label opens "{label.split(",")[0]}", not "{greeting}"')
+    if friend['host'] != (key == host):
+        problems.append(f'{key}: {"marked" if friend["host"] else "not marked"} as the host (data-host), '
+                        f'but the cast\'s host is {host}')
+    if 'gallery' not in entry.get('agreed', []):
+        problems.append(f"{key}: on the gallery without its owner's agreement ('gallery' is not in its agreed media in the cast)")
+    return problems
+
+
+def preview_drift(alt, names):
+    """Return the ways in which the link preview's alt text ("thirteen fwiends ...: Howdi, a sky-blue
+    wolf; ...; and Claude, ...") disagrees with the gallery, whose friends' names are given in order."""
+    if alt is None:
+        return ['og:image:alt: index.html has no alt text for its link preview']
+    match = re.match(r'(\w+) fwiends\b[^:]*: (.+)', alt)
+    if not match:
+        return ['og:image:alt: it should give the number of fwiends, then name each after a colon']
+    problems, count = [], NUMBER_WORDS[len(names)] if len(names) < len(NUMBER_WORDS) else str(len(names))
+    if match[1] != count:
+        problems.append(f'og:image:alt: it counts "{match[1]}" fwiends, but the gallery has {count}')
+    named = [re.sub(r'^and ', '', item).split(',')[0].strip() for item in match[2].split('; ')]
+    if named != names:
+        problems.append(f'og:image:alt: it names {", ".join(named)}; the gallery has {", ".join(names)}, in that order')
+    return problems
 
 
 def frame_size(text):
@@ -920,7 +1104,7 @@ def main(argv=None):
                    help="film even without every owner's agreement; the page marks it as a draft")
     f.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
 
-    sub.add_parser('test', help='run the in-browser tests in test/index.html')
+    sub.add_parser('test', help="run the in-browser tests in test/index.html and check the gallery's labels against the cast")
 
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])

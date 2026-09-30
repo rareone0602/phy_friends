@@ -422,14 +422,17 @@ the specimen is:
 - A page has a title in the hand, one line of intro, the content, and a
   small footer. Nothing else is required.
 
-**Small print.** The nav, a date line and the footer are small print in
-`--ink-2`.
+**Small print.** The nav, a date line, a contents line and the footer are
+small print in `--ink-2`.
 - The nav sits on the rule under the intro, its items spaced apart: plain
   words, underlined only while hovered. The current page wears the ring.
   There are no menus and no hamburgers, and a page in one part needs no nav
   at all.
-- A date line and the footer split their items with middle dots: "28 sep 2026
-  · pencils · paper". Tags are plain words: no pills and no #.
+- A date line, a contents line and the footer split their items with middle
+  dots: "28 sep 2026 · pencils · paper". Tags are plain words: no pills and
+  no #.
+- A long page opens its writing with a contents line: its headings, each a
+  link.
 
 **Links** are the text itself, underlined like a pencil line (`1px`, `3px`
 below). Hovering darkens them to `--ink`.

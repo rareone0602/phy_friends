@@ -4,8 +4,10 @@ This file adds what only this project needs to phy's style guide
 (`STYLE.md`): the gallery page, its stage, the rules for drawing a friend
 with `src/phyfriends.js`, and the rules for putting friends together in
 films and games. If the two disagree, `STYLE.md` wins, unless this
-file says why. The site's `style.html` shows both files, one after the other;
-run `python3 tools/pf.py style` after editing either.
+file says why. The site's `style.html` shows both files, one after the other,
+under a contents line for each. Every § in the text links to its section, and
+section N of `STYLE.md` stays at `style.html#sN`. Run
+`python3 tools/pf.py style` after editing either.
 
 ---
 
@@ -128,6 +130,13 @@ voice, gets to the point: "say hi to Terry". What the friend looks like is
 its description, a hidden line the button points to (`aria-describedby`):
 "a yellow plush toy with huge floppy ears, a fluffy bib and dark felt
 soles". The specimen's portrait is named and described the same way.
+
+The cast (`characters/cast.js`) is the source of these facts, and the page
+repeats them by hand: each label's name, species and credit, the name in
+the `aria-label`, the host, and the names in the link preview's alt text, in
+the gallery's order. `python3 tools/pf.py test` names the friend and the
+field wherever the two disagree, and fails any friend whose owner has not
+agreed to the gallery.
 
 Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
 **Brian**, **Teni**, **Alfie** and **Claude** are capitalised; **YuanYuan**

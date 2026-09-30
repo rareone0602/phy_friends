@@ -3,10 +3,14 @@
  *
  * name     The friend's name as its owner writes it.
  * pronoun  As the owner gave it; "they" until told.
+ * species  Two or three lower-case words, as the friend's label on the gallery gives them.
  * credit   The owner's handle and page, as the gallery credits them.
  * agreed   The media the owner has agreed to: 'gallery', 'video', 'games'. Work in any other medium
  *          that shows the friend is a draft until the owner agrees.
  * voice    true only if the owner has given the friend lines; otherwise the friend speaks in marks.
+ *
+ * The gallery (index.html) repeats each name, species and credit by hand, and names the host;
+ * `python3 tools/pf.py test` fails wherever the two disagree.
  *
  * know lists pairs of friends whose owners know each other in real life; everyone else is a
  * stranger to everyone but the host. optIn lists pairs whose owners have both agreed to touch or

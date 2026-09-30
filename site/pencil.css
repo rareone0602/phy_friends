@@ -7,7 +7,7 @@
      .doc                 The writing column: h1-h3, lists, quotes, code, hr, tables, figures.
      td.n, th.n           A right-aligned number column.
      figure style="--rules: 6"   A picture this many rules tall; img.drawing blends into the paper.
-     .meta                A date line whose items are separated by dots.
+     .meta                A date line, or a contents line of links, whose items are separated by dots.
      header nav           The navigation; the aria-current="page" item gets the ring.
      .row                 A label, its field and its message, kept together.
      .field, select.field A text field or a select; aria-invalid="true" marks an error.
@@ -54,6 +54,7 @@
 .doc h1 { font: 300 54px/calc(var(--L) * 3) var(--face); height: auto; width: auto; white-space: normal; top: calc(var(--sit) + var(--L) - var(--lift)); }
 .doc h2 { font: 300 37px/calc(var(--L) * 2) var(--face); position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
 .doc h3 { font: 300 26px/var(--L) var(--face); position: relative; top: calc(var(--sit) - var(--lift)); }
+.doc [id] { scroll-margin-top: var(--L); }  /* A link to a heading lands it a rule below the top of the window. */
 
 /* Lists: a dash in the lightest ink; hand-lettered numbers, positioned out of flow so they cannot stretch a line. */
 .doc ul, .doc ol { padding-left: 1.4em; }
@@ -90,9 +91,9 @@
 .doc .drawing { mix-blend-mode: multiply; }
 .doc figcaption { flex-basis: 100%; font: 300 22px/var(--L) var(--face); color: var(--ink-2); position: relative; top: calc(var(--sit) - var(--lift)); }
 
-/* Small print: the date line and the navigation, styled like the footer (15px, ink-2, never ink-3). */
+/* Small print: the date line, the contents line and the navigation, styled like the footer (15px, ink-2, never ink-3). */
 .meta, .doc .meta { list-style: none; padding: 0; margin-left: -1.4em; display: flex; flex-wrap: wrap; font-size: 15px; color: var(--ink-2);
-  clip-path: inset(-8px 0 -8px 1.4em); }  /* Each item begins with a dot; the clip hides the dot that begins a line. */
+  clip-path: inset(-8px -5px -8px calc(1.4em - 5px)); }  /* Each item begins with a dot; the clip hides the dot that begins a line, and leaves room for a focus ring. */
 .meta li::before { content: '\b7'; content: '\b7' / ''; display: inline-block; width: 1.4em; text-align: center; }  /* Screen readers pass over the dot, as they do the footer's. */
 header nav { font-size: 15px; color: var(--ink-2); min-height: var(--L); position: relative; top: var(--sit); }
 header nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; column-gap: 1.4em; }
