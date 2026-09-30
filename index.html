@@ -28,13 +28,13 @@
 <script>
   // The opening (FWIENDS.md): the first time the page opens in a tab, the title writes itself and the
   // friends come in by roll call. It is decided here, before the page is first drawn, so that the title
-  // never shows before it is written. Screenshots (?px, ?hi, ?feel), keeping still, a reload and a step
-  // back through the history skip it. In forced colors the title is not written, since the pen's copy
+  // never shows before it is written. Screenshots (?px, ?hi, ?feel), a link to a friend (#yuda), keeping
+  // still, a reload and a step back through the history skip it. In forced colors the title is not written, since the pen's copy
   // would keep the page's ink rather than take the system's colors.
   (() => {
     const PEN_DEADLINE_MS = 5000;  // How long the pen has to start before the title is shown without it.
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
-    if (query.has('px') || query.has('hi') || query.has('feel') || keepingStill()) return;
+    if (query.has('px') || query.has('hi') || query.has('feel') || location.hash.length > 1 || keepingStill()) return;
     if (navigation && navigation.type !== 'navigate') return;
     try {
       if (sessionStorage.getItem('phy-friends-opening') !== null) return;
@@ -87,9 +87,10 @@
      grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
+  /* A link to a friend (#yuda) leaves room above it for its ears. */
   .friend {
     width: calc(var(--size) * (270 + var(--reach-left, 0) + var(--reach-right, 0)) / 270);
-    position: relative; margin: 0 calc(var(--size) * -0.03); z-index: 1;
+    position: relative; margin: 0 calc(var(--size) * -0.03); z-index: 1; scroll-margin-top: calc(var(--L) * 2);
   }
   .rig, figcaption { width: var(--size); margin-left: calc(var(--size) * var(--reach-left, 0) / 270); }
   .friend figure { margin: 0; }
@@ -245,55 +246,55 @@
     <div class="troupe">
       <p class="note"><span class="long">psst: they watch your cursor. </span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
       <ul class="friends">
-        <li class="friend" data-friend="howdi"><figure>
+        <li class="friend" id="howdi" data-friend="howdi"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Howdi, a sky-blue wolf"></div>
           <figcaption><span class="name hand">Howdi</span><span class="species">sky-blue wolf</span><span class="credit"><a href="https://x.com/howdi1129">@howdi1129</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="phy" data-host><figure>
+        <li class="friend" id="phy" data-friend="phy" data-host><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours, with Oreo crumbs on their ruff and tail"></div>
           <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me<span class="dot"> · </span></span><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116" rel="me">linkedin</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="yuda"><figure>
+        <li class="friend" id="yuda" data-friend="yuda"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana"></div>
           <figcaption><span class="name hand">Yuda</span><span class="species">slate-blue wolf</span><span class="credit"><a href="https://x.com/YuDa_Hay">@YuDa_Hay</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="terry"><figure>
+        <li class="friend" id="terry" data-friend="terry"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles"></div>
           <figcaption><span class="name hand">Terry</span><span class="species">yellow plush toy</span><span class="credit"><a href="https://x.com/FreshSnails_x_6">@FreshSnails_<wbr>x_6</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="mumuyou"><figure>
+        <li class="friend" id="mumuyou" data-friend="mumuyou"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou, a white fox with a blond mop, sky-blue ears, a blue diamond on his forehead, one blue eye and one yellow"></div>
           <figcaption><span class="name hand">mumuyou</span><span class="species">white fox</span><span class="credit"><a href="https://www.facebook.com/MuMuYouo">fb/MuMuYouo</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="brian"><figure>
+        <li class="friend" id="brian" data-friend="brian"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian, a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue"></div>
           <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/">fb/<wbr>brian.<wbr>ren.856964</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="kevin"><figure>
+        <li class="friend" id="k3v1n" data-friend="kevin"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N, an ice-blue cat with a yellow mark on his forehead, one blue eye and one orange, and a white-tipped tail"></div>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="bardell"><figure>
+        <li class="friend" id="bardell" data-friend="bardell"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell, a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail"></div>
           <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="yuanyuan"><figure>
+        <li class="friend" id="yuanyuan" data-friend="yuanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan, a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle"></div>
           <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan">@Milk_<wbr>YuanYuan</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="tanyuan"><figure>
+        <li class="friend" id="tanyuan" data-friend="tanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan, a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear"></div>
           <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU">@tanyuan_<wbr>UwU</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="teni"><figure>
+        <li class="friend" id="teni" data-friend="teni"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni, a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail"></div>
           <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome">@foxx_<wbr>manome</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="alfie"><figure>
+        <li class="friend" id="alfie" data-friend="alfie"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie, a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail"></div>
           <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="claude"><figure>
+        <li class="friend" id="claude" data-friend="claude"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Claude, the machine that drew this page, as it appears in Claude Code: a small terracotta block with two tall eyes, a stub of an arm on each side and four short legs"></div>
           <figcaption><span class="name hand">Claude</span><span class="species">language model</span><span class="credit"><a href="https://x.com/AnthropicAI">@AnthropicAI</a></span></figcaption>
         </figure></li>
@@ -343,6 +344,7 @@
   const SLOT_CLEARANCE = 6;              // Head units kept clear beside a body or tail that extends past its box.
   const GROUND = { width: 200, height: 12, inset: 6, y: 6.5, wobble: 1.6, step: 50 };  // In the ground line's viewBox units.
   const FONT_TIMEOUT_MS = 1000;          // Should the face take longer to arrive, the title shows without being written.
+  const LINK_HI_DELAY_MS = 400;          // A friend linked to says hi this long after it is brought into view.
   // The roll call (FWIENDS.md, "the opening"): the friends hop in and land one after another, row by
   // row, each along its row's rule from the nearer edge of the screen. The one farthest from its edge
   // comes first, so that nobody hops past anybody already standing. A friend smiles as it lands, and
@@ -382,6 +384,10 @@
   stage.start();
   rollCall = opening ? callTheRoll() : null;
   if (opening) writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
+  // The browser's own jump to a link comes as the page finishes loading, and would undo the greeting's scroll and focus.
+  if (document.readyState === 'complete') greetLinkedFriend();
+  else addEventListener('load', greetLinkedFriend, { once: true });
+  addEventListener('hashchange', greetLinkedFriend);
 
   // Mounts one friend in its slot and draws its ground. In forced colors the page takes the system's
   // background, so each friend is drawn on a sheet of paper cut to its outline, as on any background of
@@ -456,6 +462,19 @@
       points.push({ x: x0 + (i * (x1 - x0)) / segments, y: GROUND.y + (groundRandom() - 0.5) * GROUND.wobble });
     }
     return PhyFriends.shapes.pathD(points, false);
+  }
+
+  // A link to a friend (index.html#yuda: the name as the page writes it, in lower case, or the friend's
+  // own name, #kevin) brings it into view and into focus, and a moment later it says hi. The head script
+  // skips the opening for such a link; one followed later ends the roll call.
+  function greetLinkedFriend() {
+    const wanted = decodeURIComponent(location.hash.slice(1)).toLowerCase();
+    const friend = friends.find(f => f.element.id === wanted || f.name === wanted);
+    if (!friend) return;
+    endRollCall();
+    friend.element.scrollIntoView({ block: 'center' });
+    friend.rig.el.focus({ preventScroll: true, focusVisible: true });
+    setTimeout(() => friend.hi(), LINK_HI_DELAY_MS);
   }
 
   // A friend on its way in ignores a hi until it lands, as a friend in the air does. A friend still to

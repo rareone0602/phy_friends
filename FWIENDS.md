@@ -91,6 +91,9 @@ The page has five parts, in this order:
   portrait keeps to it too. On a phone held sideways, where the tallest
   ears reach into the note's rule, it moves up to the right end of the
   nav's. Without JavaScript it is not shown, since it would do nothing.
+- Each fwiend has a link of its own, to send its owner: `index.html#yuda`,
+  its name as the page writes it, in lower case (`#k3v1n`). The link skips
+  the opening, brings the fwiend into view and focus, and it says hi.
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
 
@@ -171,8 +174,8 @@ their feelings come from the emotion library, one rule each:
 
 **The opening.** The first time the page opens in a tab, the title writes
 itself and the fwiends come in by roll call. A reload, a step back through
-the history, reduced motion, "keep still" and the link preview show
-everything in place.
+the history, a link to a fwiend, reduced motion, "keep still" and the link
+preview show everything in place.
 - The title is written stroke by stroke, in the order a hand writes each
   letter, in just under three seconds. The pen slows at each end of a
   stroke and lifts between strokes, which gives it a hand's rhythm.
