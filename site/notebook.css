@@ -71,11 +71,13 @@ h1 a { text-decoration: none; }
 header > .intro { margin-top: var(--L); }
 
 /* Footer items wrap as whole items. Each begins with a separator dot in a strip hidden
-   to the left of the text, so a wrapped line never begins or ends with a dot. */
+   to the left of the text, so a wrapped line never begins or ends with a dot. The dot
+   has empty alternative text, so that screen readers pass over it; a browser without
+   that syntax keeps the first declaration. */
 footer { margin: calc(var(--L) * 2) -4px 0; padding: 0 4px; min-height: var(--L); font-size: 15px; color: var(--ink-2); position: relative; top: var(--sit); overflow: hidden; overflow-wrap: anywhere; }  /* The padding leaves room for a focus ring. */
 footer ul { list-style: none; margin: 0 0 0 -1.4em; padding: 0; display: flex; flex-wrap: wrap; }
 footer li { padding-left: 1.4em; text-indent: -1.4em; text-wrap: balance; }  /* A wrapped item indents its second line under its text. */
-footer li::before { content: '\b7'; display: inline-block; width: 1.4em; text-indent: 0; text-align: center; }
+footer li::before { content: '\b7'; content: '\b7' / ''; display: inline-block; width: 1.4em; text-indent: 0; text-align: center; }
 footer a:hover { color: var(--ink); }
 
 @media (max-width: 720px) {
@@ -86,9 +88,13 @@ footer a:hover { color: var(--ink); }
   .intro { min-height: calc(var(--L) * 2); font-size: 18px; line-height: var(--L); }
   header > .intro { margin-top: 0; }  /* The smaller title's descenders clear the next line. */
 }
-/* Phones in landscape: a shorter header keeps the characters on the first screen. */
+/* Phones in landscape: a shorter header keeps the characters on the first screen. It is
+   the phone's header: the title and the intro step down one, and the title's two rules
+   give its descenders room, so the intro follows at once. */
 @media (max-height: 500px) and (orientation: landscape) {
   :root { --band: 2; }
   main { padding-top: var(--L); }
   h1 { font-size: 54px; height: calc(var(--L) * 2); line-height: calc(var(--L) * 2); top: calc(var(--sit) + var(--L) / 2); }
+  .intro { font-size: 18px; }
+  header > .intro { margin-top: 0; }
 }

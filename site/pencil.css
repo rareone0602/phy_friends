@@ -93,7 +93,7 @@
 /* Small print: the date line and the navigation, styled like the footer (15px, ink-2, never ink-3). */
 .meta, .doc .meta { list-style: none; padding: 0; margin-left: -1.4em; display: flex; flex-wrap: wrap; font-size: 15px; color: var(--ink-2);
   clip-path: inset(-8px 0 -8px 1.4em); }  /* Each item begins with a dot; the clip hides the dot that begins a line. */
-.meta li::before { content: '\b7'; display: inline-block; width: 1.4em; text-align: center; }
+.meta li::before { content: '\b7'; content: '\b7' / ''; display: inline-block; width: 1.4em; text-align: center; }  /* Screen readers pass over the dot, as they do the footer's. */
 header nav { font-size: 15px; color: var(--ink-2); min-height: var(--L); position: relative; top: var(--sit); }
 header nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; column-gap: 1.4em; }
 header nav a { text-decoration-line: none; }

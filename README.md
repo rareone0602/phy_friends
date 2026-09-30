@@ -328,10 +328,13 @@ Each friend stands on the bottom edge of its box, breathes and blinks with the
 idle clip, follows the pointer, answers a hi (a click, a tap, Enter or Space),
 and feels what a visitor does to it (FWIENDS.md, "Saying hi"); the stage says
 what happened in the page's live region (`.announcer`, in `site/pencil.css`).
-A box that is a button takes `role="button"`, `tabindex="0"` and an
-`aria-label`. The page keeps its own layout; the gallery's roll call moves its
-friends and turns their eyes through two hooks on each friend, `travel` and
-`watch`. Options fix a pointer, a hi or a feeling for screenshots (the
+A box that is a button takes `role="button"`, `tabindex="0"`, a short
+`aria-label` ("say hi to phy") and an `aria-describedby` pointing at a
+`hidden` element that says what the friend looks like. That element stands
+beside the box, not in it, since mounting replaces what the box holds. The
+page keeps its own layout; the gallery's roll call moves its friends and
+turns their eyes through two hooks on each friend, `travel` and `watch`.
+Options fix a pointer, a hi or a feeling for screenshots (the
 gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`) and set how long
 the friends wait before they doze (`?doze=<seconds>`). Under reduced motion
 the friends keep still but for their eyes; `PhyFriends.live.keepStill(checkbox)`

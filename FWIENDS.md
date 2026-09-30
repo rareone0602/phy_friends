@@ -62,6 +62,10 @@ The page has five parts, in this order:
   shows two rows of friends. Below that they stand four to a row,
   below an 863px window three to a row, and on phones in pairs, and Claude,
   the last, stands alone under the rest.
+- A phone held sideways, if it is at least 390px tall, still shows the
+  first row and its names on the first screen. The kit gives it the
+  phone's header; the gallery, having no portrait to reach into it, gives
+  up the blank rule above the title, and the note the one below it.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
@@ -118,9 +122,12 @@ rather than running into its neighbour's.
 Both small-print lines are in `--ink-2`; the credit is told apart by being a
 link.
 
-Each friend is a button, and its `aria-label` says who it is in one line:
-"say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and
-dark felt soles".
+Each friend is a button, and its name (`aria-label`) is kept short, so that
+a screen reader moving from friend to friend, or a visitor who says hi by
+voice, gets to the point: "say hi to Terry". What the friend looks like is
+its description, a hidden line the button points to (`aria-describedby`):
+"a yellow plush toy with huge floppy ears, a fluffy bib and dark felt
+soles". The specimen's portrait is named and described the same way.
 
 Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
 **Brian**, **Teni**, **Alfie** and **Claude** are capitalised; **YuanYuan**
