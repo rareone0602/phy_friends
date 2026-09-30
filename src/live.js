@@ -89,15 +89,19 @@
   // Feelings in which a friend stops following the pointer: its eyes are shut, or it looks away.
   const INWARD = ['content', 'shy', 'sleepy', 'asleep'];
   // A mark (src/cast.js MARKS) in the hand, in head units within the friend's box, from its eyes: `size`
-  // tall, its bottom at (x, y), over the right ear and just above the box, clear of the labels of a row
-  // above. A mark that repeats (the z of sleep) starts lower, beside the head, and drifts up within the box.
-  const MARK = { size: 44, x: 112, y: -108, drifting: { x: 110, y: -50 } };
+  // tall, its bottom at (x, y), just outside the right ear and just above the box, clear of the labels of
+  // a row above. A mark that repeats (the z of sleep) starts lower, beside the head, and drifts up without
+  // rising above the box. Both stand far enough out to clear every right ear but Howdi's, the widest,
+  // which they graze, and near enough to read as their own friend's rather than a neighbor's.
+  const MARK = { size: 44, x: 145, y: -108, drifting: { x: 145, y: -50 } };
   const FIELDS_MIRRORED = ['lookX', 'turnX', 'headX', 'tilt', 'x'];  // What changes sign when a pose is mirrored.
   const ANNOUNCEMENT = { hop: name => `${name} hops twice.` };  // The greeting (E.greeting) bounces twice.
+  // A mark is bold, the pencil pressed harder (STYLE.md §5), so that it reads at a glance at the
+  // gallery's size; film/scene.js draws its marks alike.
   const STYLE = [
     '.pf-live { container-type: inline-size; }',
     '.pf-live-mark { position: absolute; left: 0; top: 0; margin: 0; pointer-events: none; white-space: pre; line-height: 1;',
-    '  font-family: var(--face, \'Shantell Sans\', sans-serif); font-weight: 300; color: var(--ink-2, #6d6a63); transform-origin: 50% 100%; }',
+    '  font-family: var(--face, \'Shantell Sans\', sans-serif); font-weight: 600; color: var(--ink-2, #6d6a63); transform-origin: 50% 100%; }',
   ].join('\n');
 
   const STILL_KEY = 'phy-friends-still';  // Where the reader's "keep still" is remembered; index.html's head script reads it too.

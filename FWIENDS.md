@@ -424,7 +424,9 @@ them.
   since only their owners know how they talk. A mark is a drawing over a
   fwiend's head, not punctuation, so the calm punctuation of `STYLE.md` §3
   doesn't apply to it. Likewise, nobody is given a
-  personality, a birthday or any other fact its owner didn't give it.
+  personality, a birthday or any other fact its owner didn't give it. A
+  mark is written in the hand pressed harder, bold (`600`) in `--ink-2`,
+  so that it reads at a glance in the gallery as in a film.
 - **Feelings are reactions, not temperaments.** Every fwiend feels with
   the same library, and a feeling answers something that happens in the
   scene (`actor.feel('surprised', { at })`, with its mark). Nobody is shy,

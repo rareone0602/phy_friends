@@ -511,7 +511,7 @@
 .pf-writing, .pf-mark, .pf-words { margin: 0; white-space: pre; font-family: var(--face, 'Shantell Sans', sans-serif); font-weight: 300; line-height: 1;
   color: var(--ink, #3d3c39); pointer-events: none; z-index: 50; }
 .pf-writing.ink-2, .pf-mark, .pf-words { color: var(--ink-2, #6d6a63); }
-.pf-mark { z-index: 60; font-size: ${MARK.size}px; }
+.pf-mark { z-index: 60; font-size: ${MARK.size}px; font-weight: 600; }  /* Bold, as on a live page (src/live.js), to read at a glance. */
 .pf-words { z-index: 60; font-size: ${WORDS.size}px; }
 .pf-frame { position: absolute; inset: 0; pointer-events: none; }
 /* One owner to a span, each kept whole; where the line wraps, the dot that would end a line is clipped. */
