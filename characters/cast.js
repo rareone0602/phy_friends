@@ -23,9 +23,17 @@ PhyFriends.cast.define({
       name: 'Howdi', pronoun: 'he', species: 'sky-blue wolf',
       credit: { handle: '@howdi1129', href: 'https://x.com/howdi1129' }, agreed: ['gallery'],
     },
+    yuanyuan: {
+      name: 'YuanYuan', pronoun: 'he', species: 'lavender-haired cat',
+      credit: { handle: '@Milk_YuanYuan', href: 'https://x.com/Milk_YuanYuan' }, agreed: ['gallery'],
+    },
     phy: {
       name: 'phy', pronoun: 'they', species: 'tuxedo eevee',
       credit: { handle: 'linkedin', href: 'https://www.linkedin.com/in/po-hung-yeh-6a8134116' }, agreed: ['gallery', 'video', 'games'], voice: true,
+    },
+    fruit: {
+      name: 'Fruit', pronoun: 'he', species: 'navy-blue wolf',
+      credit: { handle: 'fb/cheekullowo', href: 'https://www.facebook.com/cheekullowo/' }, agreed: ['gallery'],
     },
     yuda: {
       name: 'Yuda', pronoun: 'he', species: 'slate-blue wolf',
@@ -35,25 +43,25 @@ PhyFriends.cast.define({
       name: 'Terry', pronoun: 'they', species: 'yellow plush toy',
       credit: { handle: '@FreshSnails_x_6', href: 'https://x.com/FreshSnails_x_6' }, agreed: ['gallery'],
     },
-    mumuyou: {
-      name: 'mumuyou', pronoun: 'he', species: 'white fox',
-      credit: { handle: 'fb/MuMuYouo', href: 'https://www.facebook.com/MuMuYouo' }, agreed: ['gallery'],
-    },
     brian: {
       name: 'Brian', pronoun: 'he', species: 'cream fox',
       credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
+    },
+    mumuyou: {
+      name: 'mumuyou', pronoun: 'he', species: 'white fox',
+      credit: { handle: 'fb/MuMuYouo', href: 'https://www.facebook.com/MuMuYouo' }, agreed: ['gallery'],
     },
     kevin: {
       name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
       credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
     },
+    cowosus: {
+      name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
+      credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery'],
+    },
     bardell: {
       name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
       credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery'],
-    },
-    yuanyuan: {
-      name: 'YuanYuan', pronoun: 'he', species: 'lavender-haired cat',
-      credit: { handle: '@Milk_YuanYuan', href: 'https://x.com/Milk_YuanYuan' }, agreed: ['gallery'],
     },
     tanyuan: {
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
@@ -72,6 +80,6 @@ PhyFriends.cast.define({
       credit: { handle: '@AnthropicAI', href: 'https://x.com/AnthropicAI' }, agreed: ['gallery'],
     },
   },
-  know: [],
+  know: [['yuda', 'fruit']],
   optIn: [],
 });
