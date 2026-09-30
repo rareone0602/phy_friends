@@ -1,8 +1,9 @@
-// Character spec for K3V1N, an ice-blue cat with large pointed ears, one eye blue over mint and the other orange
-// over yellow, a yellow mark on his forehead and a bushy white-ended tail.
+// The spec before his owner pointed to the four colors of his eyes (examples/image.png): each eye in one color,
+// blue on his right and orange on his left. Kept per STYLE.md, principle 1.
+// Character spec for K3V1N, an ice-blue cat with large pointed ears, one blue eye and one orange eye, a
+// yellow mark on his forehead and a bushy white-ended tail.
 // Pictures: examples/sheet.png (the color standard), mark.png (the forehead mark as his owner draws it),
-// image.png (the sheet's eyes, which his owner sent to show their four colors), 67.png (a sticker) and two drawings
-// by other artists, by_yuda.png and gurumin1.png.
+// 67.png (a sticker) and two drawings by other artists, by_yuda.png and gurumin1.png.
 // Colors are taken from the color bar on examples/sheet.png; those it does not show are taken from the drawing.
 PhyFriends.define('kevin', {
   palette: {
@@ -12,11 +13,10 @@ PhyFriends.define('kevin', {
     earInner: '#fcaac8',   // The pink of the ears, also used for the tongue.
     band: '#4db5ca',       // The darker cyan of the ear tips and cuffs, one house step deeper than the sheet's (#80cfe0), which matches furShade.
     eye: '#202638',        // A deep navy, near-black, used for the open mouth.
-    eyeBlue: '#054dec',    // The upper half of his right eye: the royal blue of the color bar.
-    eyeMint: '#94fcb7',    // The lower half of his right eye: the mint of the color bar.
-    eyeOrange: '#fd8004',  // The upper half of his left eye: the orange of the color bar.
+    eyeBlue: '#054dec',    // His right eye: the royal blue of the color bar.
+    eyeOrange: '#fd8004',  // His left eye: the orange of the color bar.
     blush: '#fcc3d6',      // A soft pink, lighter than the ears.
-    mark: '#fdff3b',       // The yellow of the mark on his forehead, the crescents on his thighs and the lower half of his left eye.
+    mark: '#fdff3b',       // The yellow of the mark on his forehead and the crescents on his thighs.
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
@@ -54,15 +54,10 @@ PhyFriends.define('kevin', {
       [-36, -84, 0, 0, [0, -80]],
     ],
   },
-  // The eyes are tall pills, set wide and low, in the four colors of the color bar, as his owner asked: his right
-  // eye (the viewer's left) blue over mint, and his left orange over yellow, split at the middle, as on the sheet
-  // and in by_yuda.png. Each lower half is a flat mark clipped to the eye, level-edged like the sheet's, so that it
-  // follows every glance and blink. The sheet's darker lid and upper iris, its pale crescent at the bottom and its
-  // highlights are shading and are left out. Setting arc: 1 draws the happy, closed and squint strokes at the full
-  // eye width, in the upper colors.
-  eyes: { x: 34, y: 5, w: 13, h: 33, stroke: 4.8, arc: 1, color: 'eyeBlue',
-    shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'eyeMint' },
-    right: { color: 'eyeOrange', shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'mark' } } },
+  // The eyes are plain tall pills, set wide and low, in his own colors, as his owner asked: blue on his
+  // right (the viewer's left) and orange on his left, without the sheet's highlights or the mint and
+  // yellow of their lower halves. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
+  eyes: { x: 34, y: 5, w: 13, h: 33, stroke: 4.8, arc: 1, color: 'eyeBlue', right: { color: 'eyeOrange' } },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek. It
   // sits low enough that an eye looking down and outward does not land on it.
   blush: { x: 55, y: 29, rx: 11.5, ry: 7, tilt: 10 },

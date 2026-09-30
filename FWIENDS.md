@@ -332,7 +332,9 @@ Follow them when turning someone's picture or design sheet into a friend.
   other through `eyes.right`: mumuyou's, K3V1N's and Brian's. An eye its
   owner draws in two colours keeps both, flat, the second as a mark clipped
   to the eye (`shine`), so that it glances and blinks with it: the orange
-  lower quarter of cowosus's left eye. The palette keeps `eye`, a
+  lower quarter of cowosus's left eye, and the mint and yellow lower halves
+  of K3V1N's, which keep his colour bar's own tints because the blue and
+  orange above them hold the eye's shape. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,
   `#a9dbf3`);
