@@ -184,6 +184,20 @@
     });
   });
 
+  test('with no pointer, the others look at the friend the keyboard is on', () => {
+    withStage(['howdi', 'phy', 'yuda'], moving, (stage, [howdi, phy, yuda]) => {
+      // Focus counts as the keyboard's only after real input to a page that has the window's focus,
+      // which a test cannot give, so the box is told that its focus shows and is sent the event.
+      const box = phy.rig.el;
+      box.matches = selector => selector === ':focus-visible' || Element.prototype.matches.call(box, selector);
+      box.dispatchEvent(new FocusEvent('focus'));
+      assert(phy.focused, 'phy is focused from the keyboard');
+      for (let t = 0; t <= 1.2; t += 0.1) stage.draw(t);
+      assert(howdi.rig.pose.lookY > 0.3 && yuda.rig.pose.lookY < -0.3, 'the others look at phy, below and above them');
+      box.dispatchEvent(new FocusEvent('blur'));
+    });
+  });
+
   test('left alone, everyone but Claude dozes off, and any input wakes them with a start', () => {
     withStage(['howdi', 'phy', 'claude'], { ...moving, doze: 1 }, (stage, [howdi, phy, claude], said) => {
       stage.draw(0);

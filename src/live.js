@@ -4,7 +4,8 @@
  * A stage (stage()) keeps one clock and one frame loop for every friend on a page. Each friend is
  * mounted in a box of its own, standing on the box's bottom edge (PhyFriends.standingView), and lives
  * there. It breathes and blinks with the library's idle clip, as in a scene. It follows the pointer
- * with its eyes and, half as far, its head; it perks up while hovered or focused; and it answers a hi
+ * with its eyes and, half as far, its head, and without a pointer it watches the friend the keyboard is
+ * on; it perks up while hovered or focused; and it answers a hi
  * (a click, a tap, Enter or Space) with the emotion library's greeting (src/emotion.js).
  *
  * Its feelings come from the emotion library too, one rule each:
@@ -299,18 +300,19 @@
 
     // Draws the stage at time t on its clock, elapsed seconds after the frame before. Each friend looks
     // at what its page gives it to watch, or at a friend reacting to the reader, or else at the pointer,
-    // or else around; its idle motion, its feelings and any greeting play underneath.
+    // or, with no pointer, at the friend the keyboard is on, or else around; its idle motion, its
+    // feelings and any greeting play underneath.
     function draw(t, elapsed = Math.max(0, t - clock), time = now()) {
       const dt = Math.min(MAX_EASING_SECONDS, elapsed);
       clock = t;
       const reduced = self.reduced, gone = isPointerGone(time);
       updateDoze(t);
       for (const record of records) record.update(t);
-      const watched = watchedAt(t);
+      const watched = watchedAt(t), focus = gone ? records.find(r => r.friend.focused) : null;
       const watches = new Map(records.map(r => [r, r.friend.watch ? byFriend.get(r.friend.watch(t)) : null]));
       // Every friend's eyes are found before any friend is posed, since finding them after a pose would
       // make the browser lay out the page again, once for each friend.
-      const measure = watched || [...watches.values()].some(Boolean) || !gone;
+      const measure = watched || focus || [...watches.values()].some(Boolean) || !gone;
       const eyes = measure ? new Map(records.map(r => [r, r.eyes()])) : null;
       const frame = {
         reduced, moving: !reduced && !simulated,
@@ -319,7 +321,8 @@
       };
       for (const record of records) {
         const travel = record.friend.travel ? record.friend.travel(t) : null, newcomer = watches.get(record);
-        const target = newcomer ? eyes.get(newcomer) : watched && watched !== record ? eyes.get(watched) : !gone ? pointer : null;
+        const target = newcomer ? eyes.get(newcomer) : watched && watched !== record ? eyes.get(watched) : !gone ? pointer
+          : focus && focus !== record ? eyes.get(focus) : null;
         record.pose(t, { ...frame, travel, target, eyes: eyes && eyes.get(record) });
         if (o.afterPose) o.afterPose(record.friend, travel);
       }

@@ -355,7 +355,8 @@ Anthropic's.
   8 times a second, cycling through three versions, as in hand-drawn
   animation.
 - When the pointer leaves the window, or sits still for a while, the fwiends
-  drift back to centre or glance around. A pen is followed like a mouse. On
+  drift back to centre or glance around, unless one has been tabbed to: then
+  the others look at it. A pen is followed like a mouse. On
   touch screens they follow the finger while it touches; there is no
   gyroscope.
 - The stage stops drawing while none of it is in view, or the page is
