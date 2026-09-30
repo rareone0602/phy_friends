@@ -1,6 +1,6 @@
-// An alternative to characters/yuda/yuda.js: the bandana knotted at the side of his neck with its two ends sticking
-// out, as in waving.png and card.png, rather than out of sight at his back, as in bandana.png. Kept per STYLE.md,
-// principle 1.
+// An alternative to the redesign (backup/redesign.js): the bandana knotted at the side of his neck with its two ends
+// sticking out, as in waving.png and card.png, rather than out of sight at his back, as in bandana.png. Kept per
+// STYLE.md, principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png, the color standard; those it does not show are taken from waving.png. The

@@ -1,6 +1,6 @@
-// The designer's draft of characters/yuda/yuda.js for the redesign closer to examples/bandana.png and icon.png: the
-// ears splayed to 50°, two large white cheek tufts a side and the bandana's band standing proud of the neck, on the
-// old head, face and bandana sizes. Kept per STYLE.md, principle 1.
+// The designer's draft of the redesign (backup/redesign.js) closer to examples/bandana.png and icon.png: the ears
+// splayed to 50°, two large white cheek tufts a side and the bandana's band standing proud of the neck, on the old
+// head, face and bandana sizes. Kept per STYLE.md, principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png; those the icon does not show are taken from waving.png. The shapes

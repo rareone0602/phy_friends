@@ -1,6 +1,6 @@
 // Rejected by phy, kept only as a record: the designer's draft shapes in the colors of examples/bandana.png (a
 // royal blue, a pure cyan and azure eyes). phy chose examples/icon.png, by guruminn, as the color standard, and
-// bandana.png is for shapes only. It is not kept in step with characters/yuda/yuda.js.
+// bandana.png is for shapes only. It is not kept in step with backup/redesign.js.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/bandana.png; those it does not show (the blush, set by his owner, and the tail) are
