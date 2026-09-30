@@ -66,7 +66,7 @@ The page has five parts, in this order:
   page it is. The nav's ring marks the page, as it does everywhere.
 - The mock disclaimer is about the last fwiend, Claude, the machine that
   made the page: "this work was generated entirely by this machine", then
-  "no human intelligence, emotion or caffeine was utilised in its creation."
+  "human intelligence was confined to the characters and the corrections."
   It sits in small print on the rules under the last row, a blank rule below
   the labels, and its first line ends in the kit's arrow, turned to point up
   at Claude from under its middle (measured on load, as the reaches are), as
