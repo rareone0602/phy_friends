@@ -16,7 +16,9 @@
  * A friend that shows no feelings (Claude; E.fits()) takes part in none of these, and does the rest.
  *
  * Under reduced motion only the eyes follow the pointer and only the face changes, so that a hi is a
- * smile. The page keeps its own layout and says aloud what happens in its live region (announcer). It may drive a friend's travel and gaze through hooks on the
+ * smile. A reader may ask for the same with a page's "keep still" checkbox (keepStill()), a choice
+ * remembered on the device (still). The page keeps its own layout and says aloud what happens in its
+ * live region (announcer). It may drive a friend's travel and gaze through hooks on the
  * friend (travel, watch), as the gallery's roll call does, and keep fields of its own on a friend.
  *
  * Example:
@@ -58,8 +60,9 @@
   // With no pointer to follow and no one reacting, the friends only breathe and glance about, slowly
   // enough that 30 frames a second look as smooth as more, so a frame is drawn at most every 1/30 s
   // (a little under, so that a 60 Hz screen draws every other frame). This halves a phone's work.
-  // While every friend that shows feelings is asleep, a frame is drawn only when the pencil texture is
-  // redrawn (the boil), so that a page left open does little work while its friends sleep.
+  // While every friend that shows feelings is asleep, or while the friends keep still, a frame is drawn
+  // only as often as the pencil texture is redrawn (the boil), so that a page left open does little
+  // work.
   const CALM_FRAME_SECONDS = 0.85 / 30;
   const HI_FADE = 0.08;                  // The greeting starts and ends at rest, so it comes and goes quickly.
   const HELD_HI_SECONDS = 0.3;           // How far into its greeting the `hold` option holds a friend.
@@ -91,7 +94,59 @@
     '  font-family: var(--face, \'Shantell Sans\', sans-serif); font-weight: 300; color: var(--ink-2, #6d6a63); transform-origin: 50% 100%; }',
   ].join('\n');
 
+  const STILL_KEY = 'phy-friends-still';  // Where the reader's "keep still" is remembered; index.html's head script reads it too.
+
   const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+
+  // ------------------------------------------------------------ Keeping still
+
+  // Whether the friends keep still, as they do under reduced motion: the reader's choice, made with a
+  // page's "keep still" checkbox (keepStill()) and remembered on this device, or else the system's
+  // setting. It has a MediaQueryList's `matches`, so that a stage takes it as its reducedMotion, and
+  // every stage does by default. choose(true or false) makes the choice, and choose(null) forgets it.
+  const still = (() => {
+    const system = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+    let chosen = remembered();
+    // A choice made in another tab holds here too.
+    if (typeof addEventListener === 'function') addEventListener('storage', event => { if (event.key === STILL_KEY) chosen = remembered(); });
+    return {
+      system,
+      get matches() { return chosen ?? !!system.matches; },
+      choose(value) {
+        chosen = value === null ? null : !!value;
+        try {
+          if (chosen === null) localStorage.removeItem(STILL_KEY);
+          else localStorage.setItem(STILL_KEY, chosen ? '1' : '0');
+        } catch {
+          // Without storage, as in some private windows, the choice lasts as long as the page.
+        }
+      },
+    };
+  })();
+
+  // The choice remembered on this device: true, false, or null for none.
+  function remembered() {
+    try {
+      const value = localStorage.getItem(STILL_KEY);
+      return value === null ? null : value === '1';
+    } catch {
+      return null;
+    }
+  }
+
+  // Makes a checkbox the reader's "keep still": it is ticked while the friends keep still, and ticking
+  // or clearing it keeps or frees them from the next frame, on every page that has friends alive. The
+  // checkbox is shown only once it works, since without this script it would do nothing.
+  function keepStill(checkbox) {
+    const show = () => { checkbox.checked = still.matches; };
+    checkbox.addEventListener('change', () => still.choose(checkbox.checked));
+    if (still.system.addEventListener) still.system.addEventListener('change', show);
+    addEventListener('storage', event => { if (event.key === STILL_KEY) show(); });
+    show();
+    const shown = checkbox.closest('[hidden]');
+    if (shown) shown.hidden = false;
+    return checkbox;
+  }
 
   // ------------------------------------------------------------ Stage
 
@@ -114,7 +169,8 @@
   // of its greeting, for screenshots); feel (a feeling every friend that shows feelings holds still, for
   // screenshots and review); boil (texture redraws per second; anything but a positive number keeps it
   // still); doze (seconds without input before the friends doze off, or 0 for never); reducedMotion (a
-  // MediaQueryList, or anything with `matches`); announcer (the page's live region, role="status"), in
+  // MediaQueryList, or anything with `matches`; still, the reader's choice or else the system's, by
+  // default); announcer (the page's live region, role="status"), in
   // which the stage says what happened, or announce(text), to say it some other way; and
   // hooks: beforeHi(friend), which may refuse a hi by returning false; onFocus(friend); beforeFrame(t),
   // run before each frame; busy(t), true while the page wants every frame drawn; canDoze(), false while
@@ -122,7 +178,7 @@
   function stage(options = {}) {
     const o = {
       root: null, margin: 0, pointer: null, hold: null, feel: null, boil: BOIL, doze: DOZE.after,
-      reducedMotion: typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : { matches: false },
+      reducedMotion: still,
       announcer: null, announce: null, beforeHi: null, onFocus: null, beforeFrame: null, busy: null, canDoze: null, afterPose: null,
     };
     for (const key in options) if (options[key] !== undefined && options[key] !== null) o[key] = options[key];
@@ -198,15 +254,16 @@
     }
 
     // With nothing to watch and nobody reacting, a frame is drawn only every CALM_FRAME_SECONDS, and
-    // while everyone who shows feelings is asleep, only when the texture is redrawn. The stage waits on a
-    // timer rather than a request for every refresh, so that the browser has nothing to do in between.
+    // while everyone who shows feelings is asleep, or while the friends keep still, only when the texture
+    // would be redrawn. The stage waits on a timer rather than a request for every refresh, so that the
+    // browser has nothing to do in between.
     function animate(time) {
       frameRequest = 0;
       const elapsed = Math.max(0, (time - lastFrame) / 1000), t = clock + elapsed;
       if (o.beforeFrame) o.beforeFrame(t);
       const quiet = isPointerGone(time) && !watchedAt(t) && !records.some(r => r.friend.watch && r.friend.watch(t)) &&
         !(o.busy && o.busy(t));
-      const wait = !quiet ? 0 : doze && doze.asleep ? untilRedrawn(t) : CALM_FRAME_SECONDS - elapsed;
+      const wait = !quiet ? 0 : (doze && doze.asleep) || self.reduced ? untilRedrawn(t) : CALM_FRAME_SECONDS - elapsed;
       if (wait > 0) {
         frameTimer = setTimeout(() => {
           frameTimer = 0;
@@ -719,7 +776,7 @@
   }
 
   const api = {
-    stage, strokeDetector, dozeSchedule, dozeAnnouncement, wakeAnnouncement, gazeToward, mirrored,
+    stage, still, keepStill, strokeDetector, dozeSchedule, dozeAnnouncement, wakeAnnouncement, gazeToward, mirrored,
     SHY, STROKE, CURIOUS, DOZE, MARK,
   };
   PF.live = api;

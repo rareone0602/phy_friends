@@ -170,6 +170,34 @@
     });
   });
 
+  test('keep still: a checkbox makes the choice, which is remembered, or else the system decides', () => {
+    const checkbox = Object.assign(document.createElement('input'), { type: 'checkbox' });
+    const label = document.createElement('label');
+    label.hidden = true;
+    label.appendChild(checkbox);
+    document.body.appendChild(label);
+    try {
+      L.still.choose(null);
+      L.keepStill(checkbox);
+      assert(!label.hidden, 'shown once it works');
+      assertEqual([checkbox.checked, L.still.matches], [L.still.system.matches, L.still.system.matches], 'the system decides at first');
+      checkbox.checked = true;
+      checkbox.dispatchEvent(new Event('change'));
+      assert(L.still.matches, 'ticked, the friends keep still');
+      assertEqual(localStorage.getItem('phy-friends-still'), '1', 'and the choice is remembered');
+      checkbox.checked = false;
+      checkbox.dispatchEvent(new Event('change'));
+      assert(!L.still.matches, 'cleared, they move, whatever the system says');
+      withStage(['howdi'], {}, (stage, [howdi]) => {
+        L.still.choose(true);
+        assert(stage.reduced, 'a stage keeps to the choice by default');
+      });
+    } finally {
+      L.still.choose(null);
+      label.remove();
+    }
+  });
+
   test('a mirrored clip looks, turns and tilts the other way, and swaps its ears', () => {
     const pose = L.mirrored(PF.anim.still({ lookX: 0.5, turnX: 0.2, tilt: 5, earL: 10, earR: -3, flush: 0.4 }))(0);
     assertEqual([pose.lookX, pose.turnX, pose.tilt, pose.earL, pose.earR, pose.flush], [-0.5, -0.2, -5, -3, 10, 0.4]);

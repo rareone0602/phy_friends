@@ -619,7 +619,8 @@ type. `figures/phy-diagram.sty` carries it for TikZ, and
 - **Motion** is calm and alive. The eyes follow the pointer, smoothed so they
   never jitter, with breathing, irregular blinks and a slow sway
   underneath. Nothing bounces all the time. Under `prefers-reduced-motion`,
-  only the eyes move.
+  only the eyes move, and a page whose characters move of their own accord
+  offers the same as a checkbox, "keep still".
 
 ## 10. code
 

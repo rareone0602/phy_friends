@@ -111,8 +111,10 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 .field[aria-invalid=true] { background: var(--mark-wave) 0 calc(100% - var(--lift) + 3px) / 60px 8px repeat-x; }  /* An error turns the line into a red wave. */
 .field:disabled { color: var(--ink-3); }
 .doc .check { color: var(--ink); font-size: inherit; cursor: pointer; }
-.check input { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 0 .45em 0 0; vertical-align: -4px; cursor: pointer; background: var(--mark-checkbox) 0 0 / 22px 22px no-repeat; }
-.check input:checked { background: var(--mark-tick) 0 0 / 22px 22px no-repeat, var(--mark-checkbox) 0 0 / 22px 22px no-repeat; }
+/* The box is sized to its words: 22px beside 18px print, and smaller in small print. */
+.check input { -webkit-appearance: none; appearance: none; font-size: inherit; width: 1.22em; height: 1.22em; margin: 0 .45em 0 0; vertical-align: -.22em; cursor: pointer;
+  background: var(--mark-checkbox) 0 0 / 100% 100% no-repeat; }
+.check input:checked { background: var(--mark-tick) 0 0 / 100% 100% no-repeat, var(--mark-checkbox) 0 0 / 100% 100% no-repeat; }
 :is(.field, .btn, .check input):focus-visible { outline: 1.5px dashed var(--ink-2); outline-offset: 3px; border-radius: 3px; }
 
 /* Buttons: one primary button per view, boxed in pencil; every other button is quiet, with its label underlined. */

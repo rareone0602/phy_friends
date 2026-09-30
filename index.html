@@ -28,13 +28,13 @@
 <script>
   // The opening (FWIENDS.md): the first time the page opens in a tab, the title writes itself and the
   // friends come in by roll call. It is decided here, before the page is first drawn, so that the title
-  // never shows before it is written. Screenshots (?px, ?hi, ?feel), reduced motion, a reload and a step back
-  // through the history skip it. In forced colors the title is not written, since the pen's copy
+  // never shows before it is written. Screenshots (?px, ?hi, ?feel), keeping still, a reload and a step
+  // back through the history skip it. In forced colors the title is not written, since the pen's copy
   // would keep the page's ink rather than take the system's colors.
   (() => {
     const PEN_DEADLINE_MS = 5000;  // How long the pen has to start before the title is shown without it.
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
-    if (query.has('px') || query.has('hi') || query.has('feel') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (query.has('px') || query.has('hi') || query.has('feel') || keepingStill()) return;
     if (navigation && navigation.type !== 'navigate') return;
     try {
       if (sessionStorage.getItem('phy-friends-opening') !== null) return;
@@ -46,6 +46,18 @@
     if (!matchMedia('(forced-colors: active)').matches) document.documentElement.classList.add('writing-title');
     // Should the page's script fail before the pen starts, the title shows all the same.
     setTimeout(() => { if (!document.querySelector('.pf-pen')) document.documentElement.classList.remove('writing-title'); }, PEN_DEADLINE_MS);
+
+    // Whether the friends keep still, as src/live.js decides it (still): the reader's "keep still",
+    // remembered on this device, or else the system's reduced motion.
+    function keepingStill() {
+      try {
+        const chosen = localStorage.getItem('phy-friends-still');
+        if (chosen !== null) return chosen === '1';
+      } catch {
+        // Without storage, the system's setting decides.
+      }
+      return matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
   })();
 </script>
 <style>
@@ -102,7 +114,7 @@
      browsers leave out of a print with other background images. */
   .writing-title h1 { color: transparent; }
   @media print {
-    .writing-title h1 { color: inherit; } .pf-pen { display: none; }
+    .writing-title h1 { color: inherit; } .pf-pen, .still { display: none; }
     [data-host] .name::after, .disclaimer .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   .friend.on-its-way { z-index: 2; }
@@ -129,10 +141,14 @@
   .note { width: fit-content; height: var(--L); margin: 0 0 var(--L) auto; white-space: nowrap;
     transform: rotate(-1deg); transform-origin: 0 100%; }  /* The lettering, ink and phone size come from site/pencil.css. */
   .note .long, .note .touch { display: none; }
+  /* The reader's "keep still" (src/live.js) is small print on the note's rule, under the start of the nav, with
+     which it keeps to the margin line. It is shown once the script can make it work. */
+  .stage { position: relative; }
+  .still { position: absolute; left: 0; top: var(--sit); height: var(--L); margin: 0; font-size: 15px; color: var(--ink-2); white-space: nowrap; cursor: pointer; }
 
   /* Beside the margin line the stage spans the paper to the page's edge, keeping the 12px
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
-  @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } }
+  @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } .still { left: 16px; } }
   /* Four stand in a row once the stage is 4.690 boxes wide, which it is from an 863px window, five
      once it is 5.701 boxes wide, from a 1025px window, seven once it is 8.099 boxes wide, from a
      1408px window, and all thirteen once it is 14.432 boxes wide, from a 2422px window, where the
@@ -171,8 +187,13 @@
     figcaption { padding: 0 4px; }
     .species, .credit { height: auto; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; }
   }
-  /* Phones held sideways have little height, so the note gives up its blank rule. */
-  @media (max-height: 500px) and (orientation: landscape) { .note { margin-bottom: 0; } }
+  /* Phones held sideways have little height, so the note gives up its blank rule. The tallest ears then reach into
+     the note's rule, so "keep still" moves up to the right end of the nav's rule, clear of them. */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .note { margin-bottom: 0; }
+    .still { left: auto; right: 0; top: calc(var(--sit) - var(--L)); }
+  }
+  @media (max-height: 500px) and (orientation: landscape) and (min-width: 721px) { .still { right: 28px; } }
   /* The mock disclaimer is about the last friend, Claude, the machine that made the page. It sits in small
      print on the rules under the last row, a blank rule below the labels, and its first line ends under
      Claude with the kit's arrow turned to point up at it, as the ring marks the host. --to-claude, set on
@@ -219,6 +240,7 @@
   </header>
 
   <section class="stage" aria-label="the fwiends">
+    <label class="check still" hidden><input type="checkbox"> keep still</label>
     <noscript><p class="nojs">the fwiends are drawn live, so they need JavaScript to appear.</p></noscript>
     <div class="troupe">
       <p class="note"><span class="long">psst: they watch your cursor. </span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
@@ -333,7 +355,9 @@
     watch: { before: 0.6, after: 0.9 } };
 
   const groundRandom = PhyFriends.rng(5);  // Seeded, so that every visit draws the same ground lines.
-  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  // Whether the friends keep still: the reader's "keep still", or else the system's reduced motion.
+  const reducedMotion = PhyFriends.live.still;
+  PhyFriends.live.keepStill(document.querySelector('.still input'));
   const params = new URLSearchParams(location.search);
   const opening = document.documentElement.classList.contains('opening');
   let rollCall = null;
@@ -471,7 +495,7 @@
 
   // Moves the pen on each frame, on a clock that starts with its first frame, so that a page opened in
   // a background tab writes its title once it is shown. A change of the page's width or of the title's
-  // size, printing, a step back through the history or turning on reduced motion shows the title at once.
+  // size, printing, a step back through the history or keeping still shows the title at once.
   function penTitle(title, writing, reachFwiends, show) {
     const pageWidth = document.documentElement.clientWidth, size = getComputedStyle(title).fontSize;
     const fwiendsAt = writing.reaches(TITLE_PEN.text.indexOf(' ') + 1);
@@ -510,7 +534,7 @@
   // called in order, each once any of it comes into view, so that a row just below the fold comes in
   // with its ears showing and draws the eye down. A row scrolled past unseen is simply there. A change
   // of the page's width, which moves every place, printing or a step back through the history puts
-  // everyone in place at once, as does turning on reduced motion (animate).
+  // everyone in place at once, as does keeping still (followTheRollCall).
   function callTheRoll() {
     const rows = rowsOf(friends), pageWidth = document.documentElement.clientWidth;
     const queue = [];  // The friends called so far, in the order they come in.
@@ -596,7 +620,7 @@
   }
 
   // Before each frame: rows scrolled past come in at once, friends that have landed stay, and the roll
-  // call ends once everyone is in, or at once under reduced motion. It also ends once the friends doze
+  // call ends once everyone is in, or at once while the friends keep still. It also ends once the friends doze
   // off, which they may do while rows below wait to be called: a visitor who scrolls down after that
   // finds the rest simply there, dozing with the others.
   function followTheRollCall(seconds) {

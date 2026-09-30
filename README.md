@@ -333,7 +333,11 @@ A box that is a button takes `role="button"`, `tabindex="0"` and an
 friends and turns their eyes through two hooks on each friend, `travel` and
 `watch`. Options fix a pointer, a hi or a feeling for screenshots (the
 gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`) and set how long
-the friends wait before they doze (`?doze=<seconds>`). A page loads
+the friends wait before they doze (`?doze=<seconds>`). Under reduced motion
+the friends keep still but for their eyes; `PhyFriends.live.keepStill(checkbox)`
+gives a reader the same choice ("keep still"), remembered on the device in
+`live.still`, which every stage follows unless given a `reducedMotion` of its
+own. A page loads
 `src/phyfriends.js`, the characters, `src/anim.js`, `src/emotion.js` and
 `src/live.js`, in that order.
 

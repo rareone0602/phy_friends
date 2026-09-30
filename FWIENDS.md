@@ -84,6 +84,13 @@ The page has five parts, in this order:
   would climb half a rule; and sitting so close, it needs no arrow. Where
   fewer than five stand in a row it is only "click one to say hi", and touch
   screens, which have no cursor, read "tap one to say hi".
+- On the note's rule, at the left under the nav, a checkbox in small print
+  says "keep still". Ticked, it keeps the fwiends as still as reduced motion
+  does (below) and skips the opening. It starts as the system's setting,
+  the reader's choice is remembered on the device, and the specimen's
+  portrait keeps to it too. On a phone held sideways, where the tallest
+  ears reach into the note's rule, it moves up to the right end of the
+  nav's. Without JavaScript it is not shown, since it would do nothing.
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
 
@@ -161,7 +168,8 @@ their feelings come from the emotion library, one rule each:
 
 **The opening.** The first time the page opens in a tab, the title writes
 itself and the fwiends come in by roll call. A reload, a step back through
-the history, reduced motion and the link preview show everything in place.
+the history, reduced motion, "keep still" and the link preview show
+everything in place.
 - The title is written stroke by stroke, in the order a hand writes each
   letter, in just under three seconds. The pen slows at each end of a
   stroke and lifts between strokes, which gives it a hand's rhythm.
@@ -347,9 +355,10 @@ Anthropic's.
 - The stage stops drawing while none of it is in view, or the page is
   hidden, to spare a phone's battery. It keeps its own clock, which stops
   with it, so everything picks up where it left off.
-- With `prefers-reduced-motion`: eyes only, no idle motion, a still
-  pencil, and a hi or a feeling changes just the face (the eye and mouth
-  shapes, the lids and the blush). Marks neither pop nor drift.
+- With `prefers-reduced-motion`, or "keep still" ticked: eyes only, no idle
+  motion, a still pencil, and a hi or a feeling changes just the face (the
+  eye and mouth shapes, the lids and the blush). Marks neither pop nor
+  drift, and the stage draws only as often as the pencil would boil.
 
 ## scenes: films and games
 
