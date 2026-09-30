@@ -1,16 +1,17 @@
 // An alternative to characters/fruit/fruit.js: Fruit with the small dark-red mark that every picture draws under the
-// outer corner of each eye, as a wedge hanging from the corner. A pill eye cannot carry it, so it stays on the face
-// while the eye looks around, and at gallery size it reads as a tear or a drop of blood beside the red eye, so the main
-// spec leaves it out. The first draft's marks, set apart below the eyes, are in first-draft.js. Kept per STYLE.md,
-// principle 1.
+// outer corner of each eye, as a wedge hanging from the corner. His owner asked for the marks to go. The first draft's
+// marks, set apart below the eyes, are in first-draft.js. Kept per STYLE.md, principle 1.
 // Character spec for Fruit, a navy-blue wolf with a royal-blue mop of spiky locks, two small cyan horns, big
-// gray-tipped ears banded in dark red, red eyes with a dark-red mark under each, a blue-gray chest, banded ankles and a
-// big navy tail with a lighter blue end.
+// gray-tipped ears banded in dark red, red eyes with a dark-red mark under each, small bat-like wings, a blue-gray
+// chest edged in dark red, blue zigzags at the wrists, two stripes around each ankle and a big navy tail with a lighter
+// blue end.
 // Pictures: examples/icon.png (a close-up with both paws raised), sitting.png (seated, facing front), spoon.png
 // (standing, with a spoon) and moon.png (a sticker of him lying on a moon), of which only Fruit himself serves.
 // Colors are taken from examples/sitting.png, whose fills are flat; the navy, the dark red and the tail's lighter blue,
 // which it draws too dark to read on paper, and the eyes, which it draws shut, are taken from moon.png, which draws
 // each of them about one house step lighter.
+// The design is the one his owner chose from the first sketches: the first draft, with the chest edged in dark red
+// and two stripes around each ankle, and without the dark-red marks under the eyes.
 PhyFriends.define('fruit', {
   palette: {
     bg: '#1c1d21',
@@ -19,13 +20,14 @@ PhyFriends.define('fruit', {
     hair: '#3550e2',       // The royal blue of the mop, which every picture also gives the eyebrow dots.
     horn: '#23fbfd',       // The bright cyan of the horns, lighter than the inner ears.
     earInner: '#42d3d6',   // The cyan of the inner ears, also used for the tongue.
-    band: '#531710',       // The dark red of the bands on the ears and the marks under the eyes, as moon.png draws it; sitting.png's (#380706) reads as black.
+    band: '#531710',       // The dark red of the bands on the ears, the marks under the eyes and the edge of the chest, as moon.png draws it; sitting.png's (#380706) reads as black.
     eye: '#1b1f38',        // A navy near-black, for the open mouth.
     eyeRed: '#791718',     // The flat red of the irises in moon.png (icon.png's brightest band is #700d03). It holds its weight on the blue-gray (4.3:1), so it is not deepened.
     blush: '#e0a2b0',      // A soft pink, for the pink glow of moon.png (icon.png hatches the blush in lavender), about as light as the blue-gray, so that it reads as blush rather than as a highlight.
-    paw: '#1c6996',        // The steel blue of the forearms and the lower legs: the forepaws and the hind feet.
-    stripe: '#1793dc',     // The bright blue of the stripes on the lower legs and the diamonds on the flanks.
+    paw: '#1c6996',        // The steel blue of the forearms and the lower legs.
+    stripe: '#1793dc',     // The bright blue of the zigzags at the wrists, the stripes on the lower legs and the diamonds on the flanks.
     tailTip: '#3965a2',    // The lighter blue of the tail's end, as moon.png draws it; sitting.png's (#1f5494) sits too close to the navy.
+    wing: '#0298b7',       // The teal of the wings' membranes.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears.
   head: {
@@ -78,9 +80,7 @@ PhyFriends.define('fruit', {
   // the one fang of sitting.png.
   mouth: { y: 21, size: 3.8, fang: true },
   // The body is small, round and seated, in the house shade. Shoulder tufts sit under the cheeks, and small hip tufts
-  // below them. The small bat wings that sitting.png, spoon.png and moon.png draw on his back are left out: from the
-  // front only the tip of one shows (sitting.png), and at gallery size wings beside the shoulders read as fins or a
-  // collar.
+  // below them.
   body: {
     cx: 0, cy: 84, rx: 66, ry: 48, color: 'furShade',
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
@@ -100,13 +100,12 @@ PhyFriends.define('fruit', {
     { on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -42, to: 21, n: 3, len: 15, lean: -2, depth: 0.1, b1: -35, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
-    // The two small horns, rising in front of the ears on either side of the mop, as in icon.png and sitting.png:
-    // pointed cones whose inner edges bow out and whose tips lean out, so that they read as horns rather than as a
-    // second pair of ears. They are drawn on the head, under the mop, which covers their inner edges, so that they stay
-    // put while the hair sways. The cyan teardrop that spoon.png draws on the forehead, which no front view shows, is
-    // left out.
-    { on: 'base', fill: 'horn', round: 0.12, nodes: [[-60, -74, 1, 8], [-56, -116, 1, -14], [-34, -84, 1, 0]] },
-    { on: 'base', fill: 'horn', round: 0.12, nodes: [[34, -84, 1, -14], [56, -116, 1, 8], [60, -74, 1, 0]] },
+    // The two small horns, rising in front of the ears on either side of the mop, as in icon.png and sitting.png: slim
+    // cones whose tips lean out, their inner edges rounded. They are drawn on the head, under the mop, which covers
+    // their inner edges, so that they stay put while the hair sways. The cyan teardrop that spoon.png draws on the
+    // forehead, which no front view shows, is left out.
+    { on: 'base', fill: 'horn', round: 0.25, nodes: [[-32, -80, 1, 22], [-54, -130, 1, 6], [-58, -76, 1, 0]] },
+    { on: 'base', fill: 'horn', round: 0.25, nodes: [[58, -76, 1, 6], [54, -130, 1, 22], [32, -80, 1, 0]] },
     // The eyebrow dots: a round dot above the inner half of each eye, on the navy under the mop.
     { on: 'hair', kind: 'ellipse', fill: 'hair', cx: -26, cy: -30, rx: 7, ry: 6 },
     { on: 'hair', kind: 'ellipse', fill: 'hair', cx: 26, cy: -30, rx: 7, ry: 6 },
@@ -115,28 +114,50 @@ PhyFriends.define('fruit', {
     // moves off it as it looks around.
     { on: 'face', fill: 'band', round: 0.15, nodes: [[37, 12, 1], [48, 9, 1], [45, 23, 1]] },
     { on: 'face', fill: 'band', round: 0.15, nodes: [[-48, 9, 1], [-37, 12, 1], [-45, 23, 1]] },
+    // The small bat wings of sitting.png, spoon.png and moon.png, behind the body: each peeks out from behind a
+    // shoulder, under the cheek fluff, its leading edge rising to a point and its trailing edge cut into scallops
+    // between the fingers. Only the teal membrane is drawn; the pictures draw the frame as line work, in the outline's
+    // color or in dark red.
+    { on: 'body', under: true, fill: 'wing',
+      nodes: [[44, 52, 1, -6], [112, 20, 1, 0], [110, 46, 1, 30], [96, 54, 1, 30], [82, 64, 1, 30], [60, 80, 1, 0]] },
+    { on: 'body', under: true, fill: 'wing',
+      nodes: [[-44, 52, 1, 0], [-60, 80, 1, 30], [-82, 64, 1, 30], [-96, 54, 1, 30], [-110, 46, 1, 0], [-112, 20, 1, -6]] },
     // The blue-gray chest and belly: a V whose sides zigzag like a lightning bolt, as in sitting.png, narrowing to a
     // point between the forepaws. It starts a little below the chin, so that a band of the shaded body parts the
-    // blue-gray chin from the blue-gray chest, as for Teni. The dark-red line along its edges in sitting.png is an
-    // outline in that color, as heavy as the other lines, so it is left out as line work; the lavender at the top of
-    // the chest in icon.png is shading.
+    // blue-gray chin from the blue-gray chest, as for Teni. The lavender at the top of the chest in icon.png is
+    // shading.
+    // The dark-red edge that sitting.png draws along the chest, which his owner keeps as a marking: a band a few units
+    // wide down each side of the V, which a larger V behind it shows.
+    { on: 'body', clip: true, fill: 'band',
+      nodes: [[-29, 60, 1], [29, 60, 1], [25, 72, 1], [33, 80, 1], [21, 88, 1], [27, 96, 1], [0, 129, 1], [-27, 96, 1],
+        [-21, 88, 1], [-33, 80, 1], [-25, 72, 1]] },
     { on: 'body', clip: true, fill: 'face',
       nodes: [[-24, 60, 1], [24, 60, 1], [20, 72, 1], [28, 80, 1], [16, 88, 1], [22, 96, 1], [0, 122, 1], [-22, 96, 1],
         [-16, 88, 1], [-28, 80, 1], [-20, 72, 1]] },
     // A bright-blue diamond on each hip, for the small diamonds that the pictures scatter over the flanks. The diamond
     // with a dark-red center that spoon.png and moon.png draw on the upper arm lies under the cheek fluff in this pose.
     { on: 'body', fill: 'stripe', polys: [[-50, 88, 9, 4, 90, 0.6], [50, 88, 9, 4, 90, 0.6]] },
-    // The hind feet in the steel blue of the lower legs, turned out slightly, each under a bright-blue band: one band
-    // for the two stripes that the pictures draw around the lower leg, which merge at gallery size.
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 110, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 110, rx: 19, ry: 10, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -48, cy: 120, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 48, cy: 120, rx: 19, ry: 10, rot: 8 },
-    // The steel-blue forepaws on the ground between them. The bright-blue zigzag that every picture draws where the
-    // navy of the arm meets the steel blue of the forearm is left out: as for BarDell, the arms are not drawn, so it
-    // would sit on each paw as a cap, like the band on each hind foot.
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 15, cy: 121, rx: 12.5, ry: 10 },
+    // The hind feet in the steel blue of the lower legs, turned out slightly, under the two bright-blue stripes that
+    // the pictures draw around the lower leg, parted by a band of the shaded body.
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 106, rx: 19, ry: 9, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 106, rx: 19, ry: 9, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: -48, cy: 110, rx: 19, ry: 9, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: 48, cy: 110, rx: 19, ry: 9, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 114, rx: 19, ry: 9, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 114, rx: 19, ry: 9, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -48, cy: 121, rx: 19, ry: 10, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 48, cy: 121, rx: 19, ry: 10, rot: 8 },
+    // The steel-blue forepaws on the ground between them, each topped by the bright-blue zigzag where the navy of the
+    // arm meets the steel blue of the forearm in every picture: two shapes with the same sawtooth top, the steel blue a
+    // little lower. As with every friend, the arms are not drawn, and the claws and pads are too small to keep.
+    { on: 'body', fill: 'stripe', cx: -15, cy: 115, rx: 12.5, ry: 14,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    { on: 'body', fill: 'stripe', cx: 15, cy: 115, rx: 12.5, ry: 14,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    { on: 'body', fill: 'paw', cx: -15, cy: 119, rx: 12.5, ry: 12,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    { on: 'body', fill: 'paw', cx: 15, cy: 119, rx: 12.5, ry: 12,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The lighter blue end, which every picture draws, its edge cut into
     // flame-shaped tufts that reach back toward the base. It is an extra no wider than the plume rather than the tail's

@@ -1,9 +1,10 @@
-// An alternative to characters/fruit/fruit.js: Fruit with the two stripes that sitting.png, spoon.png and moon.png
-// draw around each lower leg, where the main spec draws one band. Through the pencil at gallery size the two merge
-// into a busier foot. Kept per STYLE.md, principle 1.
+// The spec after the adversarial review, before his owner's answers: without the wings, the forepaws' zigzags or the
+// dark-red marks under the eyes, with horns redrawn as pointed cones, one band on each ankle and a plain chest. His
+// owner chose the first draft instead (first-draft.js), with the chest edged in dark red and two stripes around each
+// ankle, and without the marks under the eyes. Kept per STYLE.md, principle 1.
 // Character spec for Fruit, a navy-blue wolf with a royal-blue mop of spiky locks, two small cyan horns, big
-// gray-tipped ears banded in dark red, red eyes, a blue-gray chest, two stripes around each ankle and a big navy tail
-// with a lighter blue end.
+// gray-tipped ears banded in dark red, red eyes, a blue-gray chest, banded ankles and a big navy tail with a lighter
+// blue end.
 // Pictures: examples/icon.png (a close-up with both paws raised), sitting.png (seated, facing front), spoon.png
 // (standing, with a spoon) and moon.png (a sticker of him lying on a moon), of which only Fruit himself serves.
 // Colors are taken from examples/sitting.png, whose fills are flat; the navy, the dark red and the tail's lighter blue,
@@ -121,16 +122,12 @@ PhyFriends.define('fruit', {
     // A bright-blue diamond on each hip, for the small diamonds that the pictures scatter over the flanks. The diamond
     // with a dark-red center that spoon.png and moon.png draw on the upper arm lies under the cheek fluff in this pose.
     { on: 'body', fill: 'stripe', polys: [[-50, 88, 9, 4, 90, 0.6], [50, 88, 9, 4, 90, 0.6]] },
-    // The hind feet in the steel blue of the lower legs, turned out slightly, under the two bright-blue stripes that
-    // the pictures draw around the lower leg, parted by a band of the shaded body.
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 106, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 106, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: -48, cy: 110, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: 48, cy: 110, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 114, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 114, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -48, cy: 121, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 48, cy: 121, rx: 19, ry: 10, rot: 8 },
+    // The hind feet in the steel blue of the lower legs, turned out slightly, each under a bright-blue band: one band
+    // for the two stripes that the pictures draw around the lower leg, which merge at gallery size.
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 110, rx: 19, ry: 10, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 110, rx: 19, ry: 10, rot: 8 },
+    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -48, cy: 120, rx: 19, ry: 10, rot: -8 },
+    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 48, cy: 120, rx: 19, ry: 10, rot: 8 },
     // The steel-blue forepaws on the ground between them. The bright-blue zigzag that every picture draws where the
     // navy of the arm meets the steel blue of the forearm is left out: as for BarDell, the arms are not drawn, so it
     // would sit on each paw as a cap, like the band on each hind foot.
