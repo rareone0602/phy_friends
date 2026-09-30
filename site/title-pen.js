@@ -1,5 +1,5 @@
 /*
- * The pen strokes that write the gallery's title, made by design/title_pen.py; do not edit by hand.
+ * The pen strokes that write the gallery's title, made by tools/title_pen.py; do not edit by hand.
  *
  * Each stroke follows the centerline of a letter of "phy's fwiends" in the order and direction a hand
  * writes it, as Shantell Sans sets the title in the gallery ("BNCE" 50, "INFM" 100, weight 300).

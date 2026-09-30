@@ -16,7 +16,7 @@
  * words or a personality their owner never gave them. And a friend appears in a medium (a film, a
  * game) only once its owner has agreed to it; until then, work that shows it is a draft.
  *
- * The data lives in characters/cast.js. src/scene.js checks these rules wherever friends meet, and
+ * The data lives in characters/cast.js. film/scene.js checks these rules wherever friends meet, and
  * a game calls ensure() before anything the scene cannot see, such as putting two friends on one
  * side. A broken rule throws, with a message that says what would make it allowed.
  *

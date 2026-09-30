@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Screenshot a design mockup with headless Chrome, using a throwaway profile.
 
-  python3 design/shoot.py design/backup/a.html out/design/a-desktop.png --size 1280x800 --query 'px=900&py=260'
-  python3 design/shoot.py design/fonts.html out/design/fonts.png --size 1280x2400
+  python3 tools/shoot.py design/backup/a.html out/design/a-desktop.png --size 1280x800 --query 'px=900&py=260'
+  python3 tools/shoot.py design/fonts.html out/design/fonts.png --size 1280x2400
 
 Modeled on shoot() in tools/pf.py, but loads a real file:// URL (so that
 relative ../src and ../characters paths resolve) and gives Google Fonts time to

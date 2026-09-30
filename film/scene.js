@@ -24,7 +24,7 @@
  *   phy.enter({ from: 'left', at: 0.5 }).emote('♪', { at: 2.5 });
  *   if (!scene.film({ duration: 4 })) scene.play();  // Filmable by tools/pf.py film; plays live otherwise.
  *
- * Loads as a classic script after phyfriends.js, anim.js, cast.js and characters/cast.js
+ * Loads as a classic script after src/phyfriends.js, src/anim.js, src/cast.js and characters/cast.js
  * (PhyFriends.scene).
  */
 (function (root) {

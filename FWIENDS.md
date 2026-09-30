@@ -146,7 +146,7 @@ the history, reduced motion and the link preview show everything in place.
 - The title is written stroke by stroke, in the order a hand writes each
   letter, in just under three seconds. The pen slows at each end of a
   stroke and lifts between strokes, which gives it a hand's rhythm.
-  `src/pen.js` does the writing; `python3 design/title_pen.py` derives the
+  `src/pen.js` does the writing; `python3 tools/title_pen.py` derives the
   strokes (`site/title-pen.js`) from the title as the page sets it, and
   must be run again if the title or its face changes. Should the face be
   slow to arrive or not match the strokes, or colours be forced, the title
@@ -165,7 +165,7 @@ the history, reduced motion and the link preview show everything in place.
 - A change in the window's width, or tabbing to a fwiend still to come,
   brings everyone in at once.
 
-**The link preview and icons** come from `python3 design/site_assets.py`, run
+**The link preview and icons** come from `python3 tools/site_assets.py`, run
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
@@ -318,7 +318,7 @@ Anthropic's.
 ## scenes: films and games
 
 Beyond the gallery, the fwiends appear in scenes built with
-`src/scene.js`: short films, listed in `demo/index.html`, and in time
+`film/scene.js`: short films, listed in `demo/index.html`, and in time
 games. A scene is a sheet of ruled paper measured in head units, a rule
 every 54, so a fwiend stands five rules tall, as in the gallery.
 Everything in it happens at a time on the scene's clock, so a film plays
@@ -365,7 +365,7 @@ them.
 - Each fwiend is drawn on its own piece of paper, cut to its outline: its
   pencil stays put while it breathes, turns or hops on the spot, and
   travels with it when it moves about the page (`STYLE.md` §9).
-- Films boil as the gallery does, 8 times a second (`demo/film.js`), and
+- Films boil as the gallery does, 8 times a second (`film/film.js`), and
   keep still under reduced motion.
 - Under `prefers-reduced-motion` a scene plays no idle motion, travel
   becomes a glide and a greeting changes only the face; a film shows its

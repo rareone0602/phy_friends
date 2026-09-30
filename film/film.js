@@ -1,5 +1,6 @@
 /*!
- * How a demo page shows its film (demo/roll-call.html, demo/card.html).
+ * How a page shows its film: the page side of the film kit, which every film page loads (the films
+ * in demo/ do).
  *
  * A film plays once, the first time most of its stage scrolls into view, and the page's button
  * starts it again from the beginning; the button reads "play" until the film has started, and "play
@@ -12,7 +13,7 @@
  * eye: ?at=<seconds> holds that frame, for screenshots, and ?boil=<redraws per second> sets how often
  * the texture is redrawn (0 keeps it still).
  *
- * Loads as a classic script after src/scene.js (window.filmPage).
+ * Loads as a classic script after film/scene.js (window.filmPage).
  */
 (function (root) {
   'use strict';
@@ -25,7 +26,7 @@
   const BOIL = 8;  // Texture redraws per second in a film.
 
   const params = new URLSearchParams(location.search);
-  const filming = params.has('film');  // A filmed scene never glides (src/scene.js), and nor should what moves with a friend.
+  const filming = params.has('film');  // A filmed scene never glides (film/scene.js), and nor should what moves with a friend.
 
   // Texture redraws per second: BOIL, or ?boil=N, where anything but a positive number keeps the
   // texture still. Reduced motion keeps it still too.

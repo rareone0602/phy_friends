@@ -1,4 +1,4 @@
-// Tests for src/scene.js. Each test builds a scene in its own laid-out stage and destroys it after.
+// Tests for film/scene.js. Each test builds a scene in its own laid-out stage and destroys it after.
 (function () {
   'use strict';
   const S = PhyFriends.scene;

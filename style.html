@@ -495,13 +495,13 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 </ul>
 <p class="lead"><strong>The opening.</strong> The first time the page opens in a tab, the title writes itself and the fwiends come in by roll call. A reload, a step back through the history, reduced motion and the link preview show everything in place.</p>
 <ul>
-<li>The title is written stroke by stroke, in the order a hand writes each letter, in just under three seconds. The pen slows at each end of a stroke and lifts between strokes, which gives it a hand's rhythm. <code>src/pen.js</code> does the writing; <code>python3 design/title_pen.py</code> derives the strokes (<code>site/title-pen.js</code>) from the title as the page sets it, and must be run again if the title or its face changes. Should the face be slow to arrive or not match the strokes, or colours be forced, the title simply shows.</li>
+<li>The title is written stroke by stroke, in the order a hand writes each letter, in just under three seconds. The pen slows at each end of a stroke and lifts between strokes, which gives it a hand's rhythm. <code>src/pen.js</code> does the writing; <code>python3 tools/title_pen.py</code> derives the strokes (<code>site/title-pen.js</code>) from the title as the page sets it, and must be run again if the title or its face changes. Should the face be slow to arrive or not match the strokes, or colours be forced, the title simply shows.</li>
 <li>The fwiends begin to come in as the pen reaches "fwiends", and land one after another, row by row. Each hops in along its row's rule from the nearer edge of the screen, in hops a little lower than a scene's, so that ears clear the labels above. The one farthest from its edge comes first, so that nobody hops past anybody already standing. Its neighbours watch it land while it smiles; the rest keep watching the cursor.</li>
 <li>The labels are there from the start, so the empty places above them read as the names still to be called.</li>
 <li>A row is called once it comes into view, so on a phone the lower rows come in as they are scrolled to. A row scrolled past unseen is simply there.</li>
 <li>A change in the window's width, or tabbing to a fwiend still to come, brings everyone in at once.</li>
 </ul>
-<p class="lead"><strong>The link preview and icons</strong> come from <code>python3 design/site_assets.py</code>, run after any character changes:</p>
+<p class="lead"><strong>The link preview and icons</strong> come from <code>python3 tools/site_assets.py</code>, run after any character changes:</p>
 <ul>
 <li>the favicon is phy's head;</li>
 <li>the preview (1200×630) is a snapshot of the page with the whole set. The page is photographed at 2422×1272, the same shape, and scaled down, because 2422px is the narrowest window where all thirteen stand in one row; narrower, the second row would fall out of the picture.</li>
@@ -561,7 +561,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>With <code>prefers-reduced-motion</code>: eyes only, no idle motion, a still pencil, and saying hi changes just the face.</li>
 </ul>
 <h2 id="scenes-films-and-games">scenes: films and games</h2>
-<p>Beyond the gallery, the fwiends appear in scenes built with <code>src/scene.js</code>: short films, listed in <code>demo/index.html</code>, and in time games. A scene is a sheet of ruled paper measured in head units, a rule every 54, so a fwiend stands five rules tall, as in the gallery. Everything in it happens at a time on the scene's clock, so a film plays in a page and is filmed frame by frame (<code>pf.py film</code>) from the same script.</p>
+<p>Beyond the gallery, the fwiends appear in scenes built with <code>film/scene.js</code>: short films, listed in <code>demo/index.html</code>, and in time games. A scene is a sheet of ruled paper measured in head units, a rule every 54, so a fwiend stands five rules tall, as in the gallery. Everything in it happens at a time on the scene's clock, so a film plays in a page and is filmed frame by frame (<code>pf.py film</code>) from the same script.</p>
 <p><strong>Who knows whom.</strong> Every fwiend belongs to someone, and not every owner knows every other one. phy, the host, knows everyone; any other two are strangers until phy says their owners know each other (<code>characters/cast.js</code>). The scene checks these rules and refuses to break them.</p>
 <table>
 <thead><tr><th></th><th>strangers</th><th>know each other</th></tr></thead>
@@ -583,7 +583,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li>Fwiends get about by hopping, since they sit. They turn with <code>turnX</code>, never with a mirror image, which would swap two-coloured eyes and reverse K3V1N's mark.</li>
 <li>Each fwiend is drawn on its own piece of paper, cut to its outline: its pencil stays put while it breathes, turns or hops on the spot, and travels with it when it moves about the page (<code>STYLE.md</code> §9).</li>
-<li>Films boil as the gallery does, 8 times a second (<code>demo/film.js</code>), and keep still under reduced motion.</li>
+<li>Films boil as the gallery does, 8 times a second (<code>film/film.js</code>), and keep still under reduced motion.</li>
 <li>Under <code>prefers-reduced-motion</code> a scene plays no idle motion, travel becomes a glide and a greeting changes only the face; a film shows its last frame and waits to be played.</li>
 </ul>
 <hr>

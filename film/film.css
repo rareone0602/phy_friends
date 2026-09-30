@@ -1,5 +1,5 @@
-/* A film on a demo page (demo/roll-call.html, demo/card.html): the stage, and the credits and
-   controls under it. Load it after site/notebook.css and site/pencil.css. */
+/* A film on a page (the films in demo/, for example): the stage, and the credits and controls under
+   it. Load it after site/notebook.css and site/pencil.css. */
 
 /* As in the gallery, the page widens so that the one picture on it can; the header, the text under
    the film and the footer keep to their column. */

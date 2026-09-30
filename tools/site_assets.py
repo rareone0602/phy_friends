@@ -3,7 +3,7 @@
 
 Run this after a character changes:
 
-  python3 design/site_assets.py
+  python3 tools/site_assets.py
 
 Outputs:
 
@@ -20,9 +20,9 @@ from pathlib import Path
 
 from PIL import Image
 
+import pf
+
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / 'tools'))
-import pf  # noqa: E402
 
 POSE = {'tail': -75}
 ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 47, 'scale': 0.31}
@@ -48,7 +48,7 @@ def main():
     # 1200x630: 2422px is the narrowest window where all thirteen friends stand in one row (FWIENDS.md).
     # The simulated pointer sits below the middle so that they look out at the viewer.
     preview = ROOT / 'site/preview.png'
-    subprocess.run([sys.executable, str(ROOT / 'design/shoot.py'), str(ROOT / 'index.html'), str(preview),
+    subprocess.run([sys.executable, str(ROOT / 'tools/shoot.py'), str(ROOT / 'index.html'), str(preview),
                     '--size', f'{PREVIEW_SHOT[0]}x{PREVIEW_SHOT[1]}', '--query', 'px=1211&py=880'], check=True)
     Image.open(preview).convert('RGB').resize(PREVIEW, Image.LANCZOS).save(preview)
 

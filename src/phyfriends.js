@@ -485,7 +485,7 @@
   // angle and reaches past the sheet's farthest corner. Views of one size share one image.
   // Variant 0 is the texture every still uses; other variants reseed the noises, so that a page can
   // redraw the texture a few times a second, as hand-drawn animation does ("boil": rig.setTexture,
-  // src/scene.js).
+  // film/scene.js).
   function pencilTexture(x, y, w, h, variant = 0) {
     const box = [x, y, w, h].join(' '), key = `${box} ${variant}`;
     if (!pencilTextures.has(key)) {
@@ -1019,7 +1019,7 @@
     render, mount, poseState, resolveView,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
     rng, hash, SHADE, shadeOf,
-    // The pencil, for drawing props in the characters' texture and for redrawing it (src/scene.js).
+    // The pencil, for drawing props in the characters' texture and for redrawing it (film/scene.js).
     pencil: { settings: PENCIL, texture: pencilTexture, svg: pencilSVG, bitmap: pencilBitmap },
     // The palette a render uses: the spec's colors plus the house shades that the spec refers to.
     palette: specOrName => {

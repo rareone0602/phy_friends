@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Derive the pen strokes that write the gallery's title, and write site/title-pen.js.
 
-  python3 design/title_pen.py            # Requires numpy, scipy, Pillow and Google Chrome.
-  python3 design/title_pen.py --check    # Also writes out/design/title-pen.png, the strokes over the title.
+  python3 tools/title_pen.py            # Requires numpy, scipy, Pillow and Google Chrome.
+  python3 tools/title_pen.py --check    # Also writes out/design/title-pen.png, the strokes over the title.
 
 Headless Chrome sets the title exactly as the gallery does (Shantell Sans, weight 300, INFM 100 and
 BNCE 50), large and upright, and the ink is thinned to its centerlines. Each letter's strokes are
@@ -23,9 +23,9 @@ from scipy import ndimage
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import dijkstra
 
+from cdp import HeadlessChrome
+
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / 'tools'))
-from cdp import HeadlessChrome  # noqa: E402
 
 TITLE = "phy's fwiends"
 SIZE = 400                    # The font size, in px, at which the title is set and measured.
@@ -271,7 +271,7 @@ def write_module(strokes, axes, width):
         length = sum(np.hypot(x1 - x0, y1 - y0) for (x0, y0), (x1, y1) in zip(points, points[1:]))
         lines.append(f"    {{ letter: {stroke['letter']}, width: {round(stroke['width'] * EM)}, length: {round(length)}, d: '{path}' }},")
     OUT.write_text(f'''/*
- * The pen strokes that write the gallery's title, made by design/title_pen.py; do not edit by hand.
+ * The pen strokes that write the gallery's title, made by tools/title_pen.py; do not edit by hand.
  *
  * Each stroke follows the centerline of a letter of "{TITLE}" in the order and direction a hand
  * writes it, as Shantell Sans sets the title in the gallery ({axes}, weight 300).

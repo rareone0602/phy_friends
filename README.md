@@ -22,26 +22,61 @@ GitHub Pages.
 
 ## Layout
 
+The repository is laid out by what each part is for:
+
+```
+index.html  style.html  specimen.html    the site (GitHub Pages serves it from the root)
+site/          the site's stylesheets, icons, link preview and title strokes
+src/           the library: what a friend is and does
+film/          the film kit: friends together on a sheet, played in a page or filmed
+characters/    the fwiends: a spec each, and the cast
+demo/          one-off pieces, each in a folder of its own
+design/        page mockups, and the candidates not taken
+tools/         the command line, and the scripts that rebuild the site's assets
+test/          the in-browser tests
+figures/       the house style for charts and diagrams
+out/           generated output (git-ignored)
+```
+
 | path | what |
 |---|---|
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig |
 | `src/anim.js` | animation clips, composition, a browser player, and the hop by which a friend gets about |
 | `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
-| `src/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
 | `src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
+| `film/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
+| `film/film.js`, `film/film.css` | a film on a page: it plays once when it scrolls into view, with a button to play it again, and boils as it plays; the stage, and the credits and controls under it |
 | `characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
-| `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`) and `examples/` |
+| `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`), `examples/`, and `backup/` for the versions not taken |
+| `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`), which are made with the film kit |
+| `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages and run the tests (headless Chrome + ffmpeg) |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
+| `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
+| `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
+| `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
+| `tools/animate.html` | a page for trying clips on every friend, live |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
+| `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
 | `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site (GitHub Pages): the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
-| `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
-| `demo/` | the demos (`index.html` lists them): short films built with `src/scene.js`; `animate.html` is a dev page for trying clips |
-| `design/` | design scratch: `index.html` lists the mockups (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken), `shoot.py` takes page screenshots, `site_assets.py` rebuilds the site's icons and link preview after a character changes, and `title_pen.py` derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/scratch/` for experiments |
 | `LICENSE` | the GNU Affero General Public License, version 3, which covers everything here but the fwiends and the font (see [Licence](#licence)) |
+
+New work goes where it will be used from:
+- **What every friend can do goes in `src/`**: a new module is a classic script that
+  adds to `PhyFriends`, loads after `src/anim.js`, and has its tests in `test/`.
+  It works from the parts that every friend drawn to the house template has (the
+  eyes, ears, blush, mouth, body and tail), so it suits all of them. Claude keeps
+  every rule but the shape (FWIENDS.md, "Claude, the exception"), so a module
+  may leave it out.
+- **What every film needs goes in `film/`**, and `pf.py film` is how a film is
+  recorded. A film's own script, props and soundtrack stay in its folder under
+  `demo/`.
+- **A one-off goes in `demo/`**, in a folder of its own. It may use anything in
+  the library or the film kit, but nothing outside `demo/` may use it, so any
+  one-off can be deleted without breaking the rest.
 
 ## Characters and examples
 
@@ -168,7 +203,7 @@ reference picture.
 
 ## Scenes
 
-`src/scene.js` puts several friends on one sheet of ruled paper, measured in
+`film/scene.js` puts several friends on one sheet of ruled paper, measured in
 head units (a rule every 54, so a friend stands five rules tall). Everything in
 it is a cue at a time on the scene's clock, and a frame depends on the time
 alone, so a film plays in a page and `pf.py film` films it frame by frame from
@@ -198,10 +233,12 @@ through, and `write(text, { graphite: true })` is for a title only (STYLE.md
 §6); `write(text, { pen: TITLE_PEN })` writes the gallery's title stroke by
 stroke (`src/pen.js`). A page loads, in order, `src/phyfriends.js`, the
 characters, `src/anim.js`, `src/cast.js`, `characters/cast.js` and
-`src/scene.js`, with `src/pen.js` and `site/title-pen.js` before the scene where
-a title writes itself. The demos in `demo/` are built this way: `python3
-tools/pf.py film demo/roll-call.html --draft -o out/roll-call.mp4` films one
-while its friends' owners have yet to agree to video.
+`film/scene.js`, with `src/pen.js` and `site/title-pen.js` before the scene where
+a title writes itself. A page that shows a film also loads `film/film.css` after
+the site's stylesheets and `film/film.js` after the scene. The films in `demo/`
+are built this way: `python3 tools/pf.py film demo/roll-call/index.html --draft
+-o out/roll-call.mp4` films one while its friends' owners have yet to agree to
+video.
 
 ## Pose
 

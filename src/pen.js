@@ -1,7 +1,7 @@
 /*!
  * phy_friends/pen: text that writes itself, stroke by stroke, the way a hand writes it.
  *
- * A pen is { text, width, strokes }, as design/title_pen.py writes it (site/title-pen.js holds the
+ * A pen is { text, width, strokes }, as tools/title_pen.py writes it (site/title-pen.js holds the
  * gallery's title): each stroke follows a letter's centerline in writing order, in thousandths of
  * an em from the start of the text on its baseline. write() lays a copy of the text over an
  * element's own and reveals it through a mask of those strokes; at(seconds) moves the pen on. The
