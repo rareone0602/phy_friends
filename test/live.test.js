@@ -123,6 +123,53 @@
     });
   });
 
+  test('the left and right arrow keys, pressed in turn, stroke a friend too', () => {
+    withStage(['terry'], moving, (stage, [terry], said) => {
+      stage.draw(0);
+      const press = key => {
+        const event = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true });
+        terry.rig.el.dispatchEvent(event);
+        return event.defaultPrevented;
+      };
+      assert(press('ArrowRight') && press('ArrowRight'), 'the arrow keys do not scroll the page');
+      assertEqual(terry.feeling, null, 'one way only is not a stroke');
+      press('ArrowLeft');
+      assertEqual(terry.feeling, null, 'nor is one turn');
+      press('ArrowRight');
+      assertEqual(terry.feeling, 'content', 'right, left and right again is');
+      assertEqual(said, ['Terry looks content.']);
+    });
+  });
+
+  test('a finger held still on a friend strokes it, and the tap that ends the press is not a hi', async () => {
+    const box = document.createElement('div');
+    Object.assign(box.style, { position: 'relative', width: '160px', height: '160px' });
+    document.body.appendChild(box);
+    const said = [];
+    try {
+      const stage = L.stage({ announce: text => said.push(text), ...moving });
+      const alfie = stage.add(box, 'alfie', { label: 'Alfie' });
+      const touches = x => [new Touch({ identifier: 1, target: box, clientX: x, clientY: 80 })];
+      stage.draw(0);
+      box.dispatchEvent(new TouchEvent('touchstart', { touches: touches(80), bubbles: true }));
+      await new Promise(resolve => setTimeout(resolve, L.STROKE.press * 1000 + 100));
+      assertEqual(alfie.feeling, 'content', 'content while the finger stays');
+      stage.draw(3);
+      assertEqual(alfie.feeling, 'content', 'for as long as it stays');
+      box.dispatchEvent(new TouchEvent('touchend', { touches: [], bubbles: true }));
+      box.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      assertEqual(said, ['Alfie looks content.'], 'no hi');
+      stage.draw(3 + L.STROKE.linger + 0.1);
+      assertEqual(alfie.feeling, null, 'calm a moment after it lifts');
+      box.dispatchEvent(new TouchEvent('touchstart', { touches: touches(80), bubbles: true }));
+      box.dispatchEvent(new TouchEvent('touchend', { touches: [], bubbles: true }));
+      box.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      assertEqual(said.at(-1), 'Alfie hops twice.', 'a quick tap is a hi');
+    } finally {
+      box.remove();
+    }
+  });
+
   test('a friend hovered for a moment grows curious until the pointer leaves', () => {
     withStage(['yuda'], moving, (stage, [yuda]) => {
       yuda.rig.el.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));

@@ -145,8 +145,11 @@ their feelings come from the emotion library, one rule each:
 - A third hi within six seconds of the first makes a friend shy instead: it
   blushes, ducks and looks away for a moment, and takes no notice of
   another hi until it recovers.
-- Stroking a friend, with the pointer or a finger moved back and forth over
-  it, makes it content: it shuts its eyes happily, and a ♪ shows once.
+- Stroking a friend makes it content: it shuts its eyes happily, and a ♪
+  shows once. The pointer or a finger moved back and forth over it strokes
+  it, as do ← and → pressed in turn on a fwiend tabbed to, and a finger held
+  still on it for half a second; the tap that ends a long press is not a
+  hi.
 - Left alone for 30 seconds, the fwiends grow sleepy one by one and fall
   asleep, a z drifting up from each now and then. Claude, a machine, stays
   up. Any input wakes them: those asleep start, with a "!", nearest the
@@ -162,9 +165,9 @@ their feelings come from the emotion library, one rule each:
   "Howdi goes shy.", "Howdi looks content.", "Everyone but Claude falls
   asleep." and "Everyone wakes up." Names keep their owner's case: "phy
   hops twice."
-- A double-click or a long press on a friend selects nothing, and a quick
-  second tap doesn't zoom the page. The labels stay selectable, so a handle
-  can still be copied.
+- A double-click or a long press on a friend selects nothing and opens no
+  menu, and a quick second tap doesn't zoom the page. The labels stay
+  selectable, so a handle can still be copied.
 
 **The opening.** The first time the page opens in a tab, the title writes
 itself and the fwiends come in by roll call. A reload, a step back through

@@ -9,7 +9,8 @@
  *
  * Its feelings come from the emotion library too, one rule each:
  *   a third hi within a few seconds of the first makes a friend shy, and it ignores a hi until it recovers;
- *   stroking it (the pointer or a finger moved back and forth over it) makes it content;
+ *   stroking it (the pointer or a finger moved back and forth over it, the left and right arrow keys
+ *   pressed in turn, or a finger held still on it) makes it content;
  *   hovering over it or focusing it for a moment makes it curious;
  *   with no input for a while the friends grow sleepy one by one and fall asleep, and any input
  *   wakes them, those asleep with a start.
@@ -71,8 +72,12 @@
   // during which it ignores another hi.
   const SHY = { his: 3, within: 6, seconds: 2.5 };
   // A stroke: `reversals` turns along x within `within` seconds, each after at least `distance` px one
-  // way; the friend stays content until `linger` seconds after the stroking stops.
-  const STROKE = { reversals: 2, distance: 12, within: 0.8, linger: 1 };
+  // way; the friend stays content until `linger` seconds after the stroking stops. From the keyboard,
+  // the left and right arrow keys pressed in turn stroke it, each press a `distance` one way, and the
+  // turns may fall within `keyWithin` seconds, since keys are slower than a hand. A finger held on a
+  // friend for `press` seconds, moving less than `steady` px, strokes it for as long as it stays.
+  // The click that follows a long press within `click` seconds of the finger lifting is not a hi.
+  const STROKE = { reversals: 2, distance: 12, within: 0.8, keyWithin: 1.5, linger: 1, press: 0.5, steady: 10, click: 0.6 };
   // Hovered or focused for `after` seconds without a hi, a friend grows curious; the feeling comes on
   // over `fade` seconds, since it has no reaction of its own.
   const CURIOUS = { after: 1.5, fade: 0.4 };
@@ -443,8 +448,10 @@
       rig.svg.setAttribute('aria-hidden', 'true');  // The box's label says who the friend is.
       const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS });
       const greeting = E.greeting(spec), layers = A.stack(), marks = [], strokes = strokeDetector();
+      const keyStrokes = strokeDetector({ within: STROKE.keyWithin });
       let lookX = 0, lookY = 0, glance = 1, perk = 0, hovered = false, focused = false;
       let run = null, feeling = null, attendedSince = null, stroking = null, pendingWake = null;
+      let keyX = 0, press = null;  // Where the arrow keys have moved an imaginary hand; a finger held on the friend.
 
       const friend = {
         name, label, spec, rig, view, fits,
@@ -472,10 +479,23 @@
 
       // A click, a tap, Enter or Space says hi; a key held down says it once. Hovering or focusing from
       // the keyboard perks the friend up, and either is enough on its own. Moving the pointer or a finger
-      // back and forth over it strokes it.
+      // back and forth over it strokes it, as do the left and right arrow keys pressed in turn and a
+      // finger held still on it (a long press), after which the tap that ends the press is not a hi.
       function listen() {
-        box.addEventListener('click', () => hi());
+        box.addEventListener('click', event => {
+          const endsPress = press && press.held && !press.down && event.timeStamp - press.liftedAt <= STROKE.click * 1000;
+          press = null;
+          if (!endsPress) hi();
+        });
         box.addEventListener('keydown', event => {
+          if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+            // The press moves the hand from where it was, so that right, left and right stroke once.
+            event.preventDefault();
+            keyStrokes.move(keyX, event.timeStamp / 1000);
+            keyX += event.key === 'ArrowRight' ? STROKE.distance : -STROKE.distance;
+            stroke(keyX, event.timeStamp, keyStrokes);
+            return;
+          }
           if (event.key !== 'Enter' && event.key !== ' ') return;
           event.preventDefault();
           if (!event.repeat) hi();
@@ -483,11 +503,21 @@
         box.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') hovered = true; });
         box.addEventListener('pointerleave', () => { hovered = false; strokes.reset(); });
         box.addEventListener('pointermove', event => { if (event.pointerType !== 'touch') stroke(event.clientX, event.timeStamp); });
-        box.addEventListener('touchstart', () => strokes.reset(), { passive: true });
+        box.addEventListener('touchstart', event => {
+          strokes.reset();
+          releasePress(event.timeStamp);
+          const touch = event.touches.length === 1 ? event.touches[0] : null;
+          press = touch ? { x: touch.clientX, y: touch.clientY, down: true, held: false, liftedAt: 0, timer: setTimeout(holdPress, STROKE.press * 1000) } : null;
+        }, { passive: true });
         box.addEventListener('touchmove', event => {
           const touch = event.touches[0];
-          if (touch) stroke(touch.clientX, event.timeStamp);
+          if (!touch) return;
+          if (press && !press.held && Math.hypot(touch.clientX - press.x, touch.clientY - press.y) > STROKE.steady) press = releasePress(event.timeStamp);
+          stroke(touch.clientX, event.timeStamp);
         }, { passive: true });
+        for (const type of ['touchend', 'touchcancel']) box.addEventListener(type, event => releasePress(event.timeStamp), { passive: true });
+        // A long press would otherwise open the system's menu for the page.
+        box.addEventListener('contextmenu', event => { if (press && press.down) event.preventDefault(); });
         box.addEventListener('focus', () => {
           focused = box.matches(':focus-visible');
           if (o.onFocus) o.onFocus(friend);
@@ -566,14 +596,37 @@
         record.reaction = { at: t, until: t + E.react('surprised').duration, watchedUntil: t };  // Nobody glances at it.
       }
 
-      function stroke(x, timeStamp) {
-        if (!strokes.move(x, timeStamp / 1000) || reacting(clock)) return;
+      function stroke(x, timeStamp, detector = strokes) {
+        if (detector.move(x, timeStamp / 1000)) strokeNow();
+      }
+
+      function strokeNow() {
+        if (reacting(clock)) return;
         if (stroking) {
           stroking.last = clock;
           return;
         }
         stroking = { last: clock };
         if (feel('content')) o.announce(E.describe('content', label));
+      }
+
+      // A finger held still for STROKE.press seconds: the friend is stroked until it lifts.
+      function holdPress() {
+        press.held = true;
+        strokeNow();
+        hurry();
+      }
+
+      // The finger lifts, at timeStamp (ms). The stroking lingers from here, and a press that was held
+      // is kept, lifted, so that the click that may follow is not taken for a hi. Returns the press.
+      function releasePress(timeStamp) {
+        if (!press || !press.down) return press;
+        clearTimeout(press.timer);
+        press.down = false;
+        press.liftedAt = timeStamp;
+        if (press.held && stroking) stroking.last = clock;
+        if (!press.held) press = null;
+        return press;
       }
 
       // Starts and ends what depends on the time: a start from sleep, a stroke that has stopped, a
@@ -584,6 +637,7 @@
           pendingWake = null;
         }
         if (feeling && t >= feeling.until) feeling = null;
+        if (stroking && press && press.held && press.down) stroking.last = t;  // The finger is still on it.
         if (stroking && t - stroking.last > STROKE.linger) {
           if (feeling && feeling.name === 'content') calm(t);
           stroking = null;
