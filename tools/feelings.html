@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>phy's fwiends · feelings</title>
+<style>
+  :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --rule: #cfdbe8; --cell: 132px; }
+  body { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
+  p { margin: 0 0 16px; color: var(--ink-2); }
+  label { cursor: pointer; }
+  table { border-collapse: collapse; }
+  th { font-weight: 400; color: var(--ink-2); padding: 4px 6px; white-space: nowrap; }
+  thead th { position: sticky; top: 0; background: var(--paper); z-index: 1; }
+  tbody th { text-align: right; }
+  td { padding: 0; border-bottom: 1px solid var(--rule); }
+  .cell { width: var(--cell); height: var(--cell); }
+  .cell svg { display: block; width: 100%; height: 100%; overflow: visible; }
+</style>
+</head>
+<body>
+<p>every friend in every feeling of src/emotion.js. <label><input id="live" type="checkbox"> play them</label>
+  (each plays its reaction, then holds the feeling, then starts again). ?who=howdi,phy and ?feel=sad,cross narrow the sheet;
+  ?live plays it.</p>
+<table><thead><tr id="feelings"><th></th></tr></thead><tbody id="rows"></tbody></table>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../src/anim.js"></script>
+<script src="../src/emotion.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../characters/yuda/yuda.js"></script>
+<script src="../characters/terry/terry.js"></script>
+<script src="../characters/mumuyou/mumuyou.js"></script>
+<script src="../characters/brian/brian.js"></script>
+<script src="../characters/kevin/kevin.js"></script>
+<script src="../characters/bardell/bardell.js"></script>
+<script src="../characters/yuanyuan/yuanyuan.js"></script>
+<script src="../characters/tanyuan/tanyuan.js"></script>
+<script src="../characters/teni/teni.js"></script>
+<script src="../characters/alfie/alfie.js"></script>
+<script src="../characters/claude/claude.js"></script>
+<script>
+  // A review sheet for the emotion library: a row per friend and a column per feeling, drawn still
+  // (the feeling's face) or playing (its reaction, then the feeling held, over and over). Claude's row
+  // shows what the library gives a friend that shows no feelings: the movement alone.
+  const PF = PhyFriends, A = PF.anim, E = PF.emotion;
+  const LOOP_SECONDS = 6;   // A playing cell starts its feeling again this often.
+  const VIEW = { w: 300, h: 300, x: 150, y: 150, scale: 0.95, rotate: 0 };  // Room for ears and a hop.
+  const query = new URLSearchParams(location.search);
+  const pick = (key, all) => (query.get(key) ? query.get(key).split(',').filter(name => all.includes(name)) : all);
+  const friends = pick('who', PF.list()), feelings = pick('feel', E.names);
+
+  for (const feeling of feelings) document.getElementById('feelings').insertAdjacentHTML('beforeend', `<th>${feeling}</th>`);
+  const cells = [];
+  for (const name of friends) {
+    const row = document.createElement('tr');
+    row.innerHTML = `<th>${name}</th>`;
+    for (const feeling of feelings) {
+      const cell = document.createElement('td'), box = document.createElement('div');
+      box.className = 'cell';
+      cell.appendChild(box);
+      row.appendChild(cell);
+      const rig = PF.mount(box, name, { view: VIEW, bg: false });
+      rig.svg.setAttribute('role', 'img');
+      rig.svg.setAttribute('aria-label', `${name}, ${feeling}`);
+      cells.push({ rig, clip: E.feel(feeling, { spec: name }), still: A.sample(E.face(feeling, { spec: name })) });
+    }
+    document.getElementById('rows').appendChild(row);
+  }
+
+  const live = document.getElementById('live');
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  live.checked = query.has('live');
+  let start = 0;
+
+  // Under reduced motion a playing cell shows only the faces, as a live page does.
+  function frame(now) {
+    if (!live.checked) return drawStill();
+    const t = ((now - start) / 1000) % LOOP_SECONDS;
+    for (const cell of cells) {
+      const partial = cell.clip(t);
+      cell.rig.setPose(A.sample(reduced.matches ? A.faceOnly(partial) : partial), true);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function drawStill() {
+    for (const cell of cells) cell.rig.setPose(cell.still, true);
+  }
+
+  live.addEventListener('change', () => {
+    start = performance.now();
+    requestAnimationFrame(frame);
+  });
+  requestAnimationFrame(frame);
+</script>
+</body>
+</html>

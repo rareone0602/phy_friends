@@ -28,13 +28,13 @@
 <script>
   // The opening (FWIENDS.md): the first time the page opens in a tab, the title writes itself and the
   // friends come in by roll call. It is decided here, before the page is first drawn, so that the title
-  // never shows before it is written. Screenshots (?px, ?hi), reduced motion, a reload and a step back
+  // never shows before it is written. Screenshots (?px, ?hi, ?feel), reduced motion, a reload and a step back
   // through the history skip it. In forced colors the title is not written, since the pen's copy
   // would keep the page's ink rather than take the system's colors.
   (() => {
     const PEN_DEADLINE_MS = 5000;  // How long the pen has to start before the title is shown without it.
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
-    if (query.has('px') || query.has('hi') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (query.has('px') || query.has('hi') || query.has('feel') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (navigation && navigation.type !== 'navigate') return;
     try {
       if (sessionStorage.getItem('phy-friends-opening') !== null) return;
@@ -105,6 +105,8 @@
     [data-host] .name::after, .disclaimer .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   .friend.on-its-way { z-index: 2; }
+  /* A mark over a friend's head (src/live.js) may reach over a neighbor's slot, so the friend showing it is drawn on top. */
+  .friend:has(.pf-live-mark) { z-index: 3; }
   /* The ground's line, 6.5px down its 12px, lands on the middle of the rule at the box's bottom edge. */
   .ground { position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; pointer-events: none; z-index: 5;
     color: var(--ink); filter: url(#graphite); }
@@ -188,8 +190,6 @@
   .disclaimer.alone { padding-right: 0; text-align: center; }
   .disclaimer.alone .mark.arrow { transform: rotate(-135deg); }
   .nojs { margin: 0; min-height: var(--L); color: var(--ink-2); position: relative; top: var(--sit); text-align: center; }
-  /* The live region that says what a greeting did is for screen readers only, so it is hidden from view. */
-  .announcer { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -305,34 +305,20 @@
 <script src="characters/alfie/alfie.js"></script>
 <script src="characters/claude/claude.js"></script>
 <script src="src/anim.js"></script>
+<script src="src/emotion.js"></script>
+<script src="src/live.js"></script>
 <script src="src/pen.js"></script>
 <script src="site/title-pen.js"></script>
 <script>
-  // The stage (FWIENDS.md). Each friend is mounted in its slot, stands on its own penciled ground
-  // and follows the pointer. For screenshots, ?px=..&py=.. (CSS pixels) fixes a simulated pointer,
-  // and ?hi=<name> holds that friend in the middle of its hop; ?boil=<redraws per second> sets how
-  // often the pencil texture is redrawn (0 keeps it still).
-  const VIEW_SIZE = 270;                 // The camera is 270 head units square (FWIENDS.md).
-  const DEFAULT_GROUND = 120;            // The ground line for a spec without rig.ground, in head units.
+  // The stage (FWIENDS.md). Each friend is mounted in its slot and brought to life by the live library
+  // (src/live.js): it stands on its own penciled ground, follows the pointer and answers a hi, and its
+  // feelings come from the emotion library (src/emotion.js). For screenshots, ?px=..&py=.. (CSS pixels)
+  // fixes a simulated pointer, ?hi=<name> holds that friend in the middle of its hop, and ?feel=<feeling>
+  // has every friend that shows feelings hold that one still; ?boil=<redraws per second> sets how often
+  // the pencil texture is redrawn (0 keeps it still), and ?doze=<seconds> how long the friends wait for
+  // input before they doze off.
   const SLOT_CLEARANCE = 6;              // Head units kept clear beside a body or tail that extends past its box.
   const GROUND = { width: 200, height: 12, inset: 6, y: 6.5, wobble: 1.6, step: 50 };  // In the ground line's viewBox units.
-  const PHASE_STEP = 1.7;                // Offsets each friend's idle cycles so that they do not move in step.
-  const POINTER_TIMEOUT_MS = 8000;       // A pointer that stays still this long is treated as gone.
-  const GAZE_RATE = 7;                   // How fast the gaze eases toward its target, per second.
-  const PERK_RATE = 10;                  // How fast a friend perks up or relaxes, per second.
-  const SOFT_GAZE_RADIUS = 0.6;          // Within this fraction of a friend's width, the gaze softens.
-  const HEAD_TURN = 0.5;                 // The head turns half as far as the eyes look.
-  const GLANCE = { x: 0.3, rateX: 0.5, y: 0.15, rateY: 0.37 };  // The gaze's drift with no pointer to follow.
-  const BLINK = { seconds: 0.16, first: [1, 4], gap: [2, 6] };
-  const EAR_FLICK = { seconds: 0.35, degrees: 9, first: [4, 12], gap: [5, 14] };
-  const BREATH = { depth: 0.012, rate: 1.7 };
-  const TAIL_SWAY = { degrees: 3, rate: 0.8 };
-  const BOIL = 8;                        // Pencil texture redraws per second, as in a film (film/film.js).
-  const PERK = { earDegrees: 6, widen: 0.06 };
-  const GREETING = PhyFriends.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 });
-  const GREETING_FADE = { in: 0.08, out: 0.2 };
-  const SMILE_THRESHOLD = 0.3;           // The happy face shows once the greeting is this far faded in.
-  const HELD_HOP_SECONDS = 0.3;          // How far into its hop ?hi holds a friend.
   const FONT_TIMEOUT_MS = 1000;          // Should the face take longer to arrive, the title shows without being written.
   // The roll call (FWIENDS.md, "the opening"): the friends hop in and land one after another, row by
   // row, each along its row's rule from the nearer edge of the screen. The one farthest from its edge
@@ -344,62 +330,48 @@
   // a rule above.
   const ROLL_CALL = { first: 0.2, stride: 200, maxHops: 6, height: 20, clearance: 24, cadence: 0.4, smile: 0.8,
     inView: 0.6, watch: { before: 0.6, after: 0.9 } };
-  // A friend on its way looks and turns where it is going, about as far as in a scene (film/scene.js).
-  const TRAVEL = { look: 0.5, turn: 0.35 };
-  const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
-  const NOT_TRAVELING = { squash: 0, lean: 0, dir: 0 };
-  // With no pointer to follow and no one greeted, the friends only breathe and glance about, slowly
-  // enough that 30 frames a second look as smooth as more, so a frame is drawn at most every 1/30 s
-  // (a little under, so that a 60 Hz screen draws every other frame). This halves a phone's work.
-  const CALM_FRAME_SECONDS = 0.85 / 30;
-  // What the live region says when a friend is greeted: GREETING has two bounces, and under reduced
-  // motion only the face changes.
-  const ANNOUNCEMENT = { hop: name => `${name} hops twice.`, smile: name => `${name} smiles.` };
-  const ANNOUNCEMENT_GAP_MS = 100;       // Screen readers repeat a message only if the region was empty for a moment.
 
   const groundRandom = PhyFriends.rng(5);  // Seeded, so that every visit draws the same ground lines.
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const params = new URLSearchParams(location.search);
-  const simulatedPointer = params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null;
-  const boilRate = params.has('boil') ? Number(params.get('boil')) : BOIL;  // Anything but a positive number keeps it still.
-  const announcer = document.querySelector('.announcer');
+  const opening = document.documentElement.classList.contains('opening');
+  let rollCall = null;
 
+  // Ears may reach up to a rule past the stage, so it counts as in view a rule early.
+  const rule = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'));
+  const stage = PhyFriends.live.stage({
+    root: document.querySelector('.stage'), margin: rule, reducedMotion, announcer: document.querySelector('.announcer'),
+    pointer: params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null,
+    hold: params.get('hi'),
+    feel: PhyFriends.emotion.names.includes(params.get('feel')) ? params.get('feel') : null,
+    boil: params.has('boil') ? Number(params.get('boil')) : undefined,
+    doze: params.has('doze') ? Number(params.get('doze')) : undefined,
+    beforeHi, beforeFrame: followTheRollCall, canDoze: () => !rollCall,
+    // The keyboard has reached a friend still to come, so everyone comes at once.
+    onFocus: friend => { if (friend.arrival && friend.focused) endRollCall(); },
+    busy: () => friends.some(friend => friend.arrival && friend.arrival.start < Infinity),  // Uncalled rows do not count.
+    afterPose: (friend, travel) => { if (friend.arrival) showOnItsWay(friend, travel); },
+  });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
   widenSlots(friends);
   placeDisclaimerArrow(friends.find(friend => friend.name === 'claude'));
-  const heldMidHop = friends.find(friend => friend.name === params.get('hi'));
-  let pointer = simulatedPointer, pointerMovedAt = performance.now();
-  // The stage keeps its own clock, which stands still while the stage is out of sight, so that the idle
-  // cycles, blinks and greetings carry on from where they stopped.
-  let stageSeconds = 0, lastFrame = 0, frameRequest = 0, stageInView = true, announcementTimer = 0;
-  if (!simulatedPointer) followPointer();
-  animateWhileVisible();
-  const opening = document.documentElement.classList.contains('opening');
-  let rollCall = opening ? callTheRoll() : null;
+  stage.start();
+  rollCall = opening ? callTheRoll() : null;
   if (opening) writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
 
-  // Mounts one friend in its slot, draws its ground and listens for greetings.
+  // Mounts one friend in its slot and draws its ground. In forced colors the page takes the system's
+  // background, so each friend is drawn on a sheet of paper cut to its outline, as on any background of
+  // its own (STYLE.md §9). The roll call keeps its own fields on each friend, and tells the library
+  // where the friend is going and whom it watches.
   function mountFriend(element, index) {
-    const spec = PhyFriends.get(element.dataset.friend), view = cameraFor(spec);
-    // In forced colors the page takes the system's background, so each friend is drawn on a sheet of paper
-    // cut to its outline, as on any background of its own (STYLE.md §9).
     const bg = matchMedia('(forced-colors: active)').matches ? 'transparent' : false;
-    const box = element.querySelector('.rig'), rig = PhyFriends.mount(box, spec, { bg, view });
-    rig.svg.setAttribute('aria-hidden', 'true');  // The button's label says who the friend is.
+    const label = element.querySelector('.name').textContent;
+    const friend = stage.add(element.querySelector('.rig'), element.dataset.friend, { label, bg, index });
     drawGround(element);
-    const friend = { name: element.dataset.friend, displayName: element.querySelector('.name').textContent,
-      element, rig, view, lookX: 0, lookY: 0, phase: index * PHASE_STEP,
-      blinkAt: randomIn(BLINK.first), flickAt: randomIn(EAR_FLICK.first), flickEar: 'earL',
-      greetedAt: -Infinity, hovered: false, focused: false, perk: 0, reach: null, arrival: null, landedAt: -Infinity,
-      neighbors: [] };
-    listenForGreetings(box, friend);
+    Object.assign(friend, { element, reach: null, arrival: null, landedAt: -Infinity, neighbors: [] });
+    friend.travel = seconds => travelAt(friend, seconds);
+    friend.watch = seconds => newcomerFor(friend, seconds);
     return friend;
-  }
-
-  // The camera puts the friend's ground on its bottom edge.
-  function cameraFor(spec) {
-    const ground = (spec.rig && spec.rig.ground) ?? DEFAULT_GROUND;
-    return { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 };
   }
 
   // Keeps the disclaimer's arrow under Claude, whichever row it stands in, and marks the disclaimer
@@ -462,212 +434,12 @@
     return PhyFriends.shapes.pathD(points, false);
   }
 
-  // A click, a tap, Enter or Space greets a friend; a key held down greets it once. Hovering over it
-  // or focusing it from the keyboard makes it perk up, and either is enough on its own.
-  function listenForGreetings(box, friend) {
-    box.addEventListener('click', () => greet(friend));
-    box.addEventListener('keydown', event => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      if (!event.repeat) greet(friend);
-    });
-    box.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') friend.hovered = true; });
-    box.addEventListener('pointerleave', () => { friend.hovered = false; });
-    box.addEventListener('focus', () => {
-      friend.focused = box.matches(':focus-visible');
-      if (friend.arrival && friend.focused) endRollCall();  // The keyboard has reached a friend still to come, so everyone comes at once.
-    });
-    box.addEventListener('blur', () => { friend.focused = false; });
-  }
-
-  // A friend that is already hopping ignores further greetings until it lands: the hop under way
-  // answers them, and restarting it would drop the friend to the ground in one frame (FWIENDS.md).
-  // So does a friend on its way in. A friend still to come can be greeted only by assistive technology,
-  // which cannot see the roll call, so everyone comes at once.
-  function greet(friend) {
-    if (isWaiting(friend, stageSeconds)) endRollCall();
-    if (friend.arrival || isGreeting(friend, stageSeconds)) return;
-    friend.greetedAt = stageSeconds;
-    announce((reducedMotion.matches ? ANNOUNCEMENT.smile : ANNOUNCEMENT.hop)(friend.displayName));
-  }
-
-  // Puts a message in the live region. The region is emptied first, so that a second hop is announced
-  // even when its message is the same as the first.
-  function announce(message) {
-    clearTimeout(announcementTimer);
-    announcer.textContent = '';
-    announcementTimer = setTimeout(() => { announcer.textContent = message; }, ANNOUNCEMENT_GAP_MS);
-  }
-
-  // Follows a mouse or a pen while it is over the window, and a finger while it touches the screen.
-  // A finger is followed through touch events, which keep arriving while the page scrolls under it.
-  function followPointer() {
-    addEventListener('pointermove', event => {
-      if (event.pointerType !== 'touch') { pointer = { x: event.clientX, y: event.clientY }; pointerMovedAt = performance.now(); }
-    });
-    document.addEventListener('mouseout', event => { if (!event.relatedTarget) pointer = null; });
-    const followTouch = event => {
-      const touch = event.touches[0];
-      pointer = touch ? { x: touch.clientX, y: touch.clientY } : null;
-      pointerMovedAt = performance.now();
-    };
-    for (const type of ['touchstart', 'touchmove', 'touchend', 'touchcancel']) addEventListener(type, followTouch, { passive: true });
-  }
-
-  // Draws frames only while the page is shown and some part of the stage is in view, which spares a
-  // phone's battery. Ears may reach up to a rule past the stage, so it counts as in view a rule early.
-  function animateWhileVisible() {
-    const rule = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'));
-    const observer = new IntersectionObserver(entries => {
-      stageInView = entries.at(-1).isIntersecting;  // The latest entry wins when several arrive at once.
-      pauseOrResume();
-    }, { rootMargin: `${rule}px` });
-    observer.observe(document.querySelector('.stage'));
-    document.addEventListener('visibilitychange', pauseOrResume);
-    pauseOrResume();
-  }
-
-  function pauseOrResume() {
-    if (stageInView && !document.hidden) resume();
-    else pause();
-  }
-
-  function pause() {
-    cancelAnimationFrame(frameRequest);
-    frameRequest = 0;
-  }
-
-  // The first frame after a pause advances the stage by one frame rather than by the time away, so
-  // that the gaze eases toward wherever the pointer is now at its usual rate.
-  function resume() {
-    if (frameRequest) return;
-    lastFrame = performance.now();
-    frameRequest = requestAnimationFrame(animate);
-  }
-
-  // Each frame, every friend looks at a neighbor landing, or at a friend being greeted, or else at the
-  // pointer, or else around; its idle motion and any greeting play underneath. A friend on its way in
-  // looks ahead.
-  function animate(now) {
-    const elapsed = Math.max(0, (now - lastFrame) / 1000), seconds = stageSeconds + elapsed;
-    const pointerGone = !pointer || (!simulatedPointer && now - pointerMovedAt > POINTER_TIMEOUT_MS);
-    if (heldMidHop) heldMidHop.greetedAt = seconds - HELD_HOP_SECONDS;
-    if (rollCall) rollCall.skipRowsOffScreen(seconds);
-    settleArrivals(seconds);
-    if (rollCall && (rollCall.done || reducedMotion.matches)) endRollCall();
-    const watched = latestGreeted(seconds);
-    const newcomers = new Map(friends.map(friend => [friend, newcomerFor(friend, seconds)]));
-    const watching = [...newcomers.values()].some(Boolean);
-    const comingIn = friends.some(friend => friend.arrival && friend.arrival.start < Infinity);  // Uncalled rows do not count.
-    if (pointerGone && !watched && !watching && !comingIn && elapsed < CALM_FRAME_SECONDS) {
-      frameRequest = requestAnimationFrame(animate);
-      return;
-    }
-    const dt = Math.min(MAX_EASING_SECONDS, elapsed);
-    lastFrame = now;
-    stageSeconds = seconds;
-    const gazeEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * GAZE_RATE);
-    const perkEase = simulatedPointer ? 1 : 1 - Math.exp(-dt * PERK_RATE);
-    // Every friend's eyes are found before any friend is posed, since finding them after a pose would
-    // make the browser lay out the page again, once for each friend.
-    const eyes = watched || watching || !pointerGone ? new Map(friends.map(friend => [friend, eyesOf(friend)])) : null;
-    for (const friend of friends) {
-      const travel = travelAt(friend, seconds), newcomer = newcomers.get(friend);
-      const target = newcomer ? eyes.get(newcomer) : watched && watched !== friend ? eyes.get(watched) : !pointerGone && pointer;
-      const [lookX, lookY] = travel ? [travel.dir * TRAVEL.look, 0]
-        : target ? gazeToward(eyes.get(friend), target) : glanceAround(friend, seconds);
-      friend.lookX += (lookX - friend.lookX) * gazeEase;
-      friend.lookY += (lookY - friend.lookY) * gazeEase;
-      const perked = (friend.hovered || friend.focused) && !reducedMotion.matches;
-      friend.perk += ((perked ? 1 : 0) - friend.perk) * perkEase;
-      scheduleIdle(friend, seconds);
-      friend.rig.setPose(poseAt(friend, seconds, travel ?? NOT_TRAVELING));
-      if (friend.arrival) showOnItsWay(friend, travel);
-    }
-    boil(seconds);
-    frameRequest = requestAnimationFrame(animate);
-  }
-
-  // The pencil texture "boils": every friend's is redrawn boilRate times a second, cycling through the
-  // library's variants in step, as in hand-drawn animation. Under reduced motion, or with a simulated
-  // pointer, it keeps still.
-  function boil(seconds) {
-    const still = reducedMotion.matches || simulatedPointer || !(Number.isFinite(boilRate) && boilRate > 0);
-    const variant = still ? 0 : Math.floor(seconds * boilRate) % PhyFriends.pencil.settings.variants;
-    for (const friend of friends) friend.rig.setTexture(variant);
-  }
-
-  // The friend greeted most recently, while its greeting lasts.
-  function latestGreeted(seconds) {
-    return friends.filter(friend => isGreeting(friend, seconds)).sort((a, b) => b.greetedAt - a.greetedAt)[0];
-  }
-
-  function isGreeting(friend, seconds) {
-    return seconds - friend.greetedAt < GREETING.duration;
-  }
-
-  // The on-screen position of a friend's eyes (the origin of head space), and the friend's width.
-  function eyesOf(friend) {
-    const rect = friend.rig.svg.getBoundingClientRect(), view = friend.view;
-    return { x: rect.left + rect.width * view.x / view.w, y: rect.top + rect.height * view.y / view.h, width: rect.width };
-  }
-
-  // The direction from a friend's eyes to the target, at full length unless the target is near the face.
-  function gazeToward(eyes, target) {
-    const dx = target.x - eyes.x, dy = target.y - eyes.y;
-    const distance = Math.max(Math.hypot(dx, dy), eyes.width * SOFT_GAZE_RADIUS);
-    return [dx / distance, dy / distance];
-  }
-
-  // With nothing to look at, the gaze drifts slowly; under reduced motion it rests at the center.
-  function glanceAround(friend, seconds) {
-    if (reducedMotion.matches) return [0, 0];
-    return [GLANCE.x * Math.sin(seconds * GLANCE.rateX + friend.phase), GLANCE.y * Math.sin(seconds * GLANCE.rateY + friend.phase * 2)];
-  }
-
-  // Schedules the next blink and ear flick once the current one has finished, at irregular intervals.
-  function scheduleIdle(friend, seconds) {
-    if (seconds - friend.blinkAt >= BLINK.seconds) friend.blinkAt = seconds + randomIn(BLINK.gap);
-    if (seconds - friend.flickAt >= EAR_FLICK.seconds) {
-      friend.flickAt = seconds + randomIn(EAR_FLICK.gap);
-      friend.flickEar = Math.random() < 0.5 ? 'earL' : 'earR';
-    }
-  }
-
-  // The pose for this frame: the gaze, then the idle motion (blinks, breathing, a tail sway and ear
-  // flicks), then the greeting and any hop on the way in (travel, or NOT_TRAVELING). Under reduced
-  // motion only the eyes move; with a simulated pointer the idle motion stops, so that a screenshot
-  // comes out the same every time.
-  function poseAt(friend, seconds, travel) {
-    const moving = !reducedMotion.matches && !simulatedPointer;
-    const turn = reducedMotion.matches ? 0 : HEAD_TURN;
-    const blink = moving ? pulse(seconds - friend.blinkAt, BLINK.seconds) : 0;
-    const flick = moving ? EAR_FLICK.degrees * pulse(seconds - friend.flickAt, EAR_FLICK.seconds) : 0;
-    const breath = moving ? BREATH.depth * Math.sin(seconds * BREATH.rate + friend.phase) : 0;
-    const sway = moving ? TAIL_SWAY.degrees * Math.sin(seconds * TAIL_SWAY.rate + friend.phase) : 0;
-    const greeting = greetingAt(friend, seconds), hop = greeting.offset;
-    const smiling = greeting.smiling || isSmilingOnLanding(friend, seconds);
-    const ear = side => (friend.flickEar === side ? flick : 0) - PERK.earDegrees * friend.perk + hop(side);
-    return {
-      lookX: friend.lookX, lookY: friend.lookY, turnX: friend.lookX * turn + travel.dir * TRAVEL.turn, turnY: friend.lookY * turn + hop('turnY'),
-      blink: smiling ? 0 : blink, squash: breath + hop('squash') + travel.squash, tail: sway + hop('tail'),
-      earL: ear('earL'), earR: ear('earR'), widen: PERK.widen * friend.perk,
-      y: hop('y'), tilt: hop('tilt') + travel.lean, hair: hop('hair'), headY: hop('headY'),
-      eyes: smiling ? 'happy' : 'open', mouth: smiling ? 'w' : null,
-    };
-  }
-
-  // The greeting's share of the pose: the happy hop, faded in and out. Under reduced motion only the
-  // happy face shows.
-  function greetingAt(friend, seconds) {
-    const elapsed = seconds - friend.greetedAt;
-    const hop = elapsed >= 0 && elapsed < GREETING.duration ? GREETING(elapsed) : null;
-    const strength = hop ? Math.min(1, elapsed / GREETING_FADE.in, (GREETING.duration - elapsed) / GREETING_FADE.out) : 0;
-    const motion = reducedMotion.matches ? 0 : strength;
-    return {
-      smiling: strength > SMILE_THRESHOLD,
-      offset: key => (hop && typeof hop[key] === 'number' ? hop[key] * motion : 0),
-    };
+  // A friend on its way in ignores a hi until it lands, as a friend in the air does. A friend still to
+  // come can be greeted only by assistive technology, which cannot see the roll call, so everyone comes
+  // at once.
+  function beforeHi(friend) {
+    if (isWaiting(friend, stage.seconds)) endRollCall();
+    return !friend.arrival;
   }
 
   // ---- The opening: the title
@@ -765,7 +537,7 @@
     return { begin, finish, skipRowsOffScreen, get done() { return next === rows.length && friends.every(friend => !friend.arrival); } };
 
     function begin(delay) {
-      beginsAt = stageSeconds + delay;
+      beginsAt = stage.seconds + delay;
       schedule(beginsAt);
     }
 
@@ -788,7 +560,7 @@
         friend.arrival = { ...entrance, start: Infinity, land: Infinity };
         queue.push(friend);
       }
-      schedule(stageSeconds);
+      schedule(stage.seconds);
     }
 
     // Times the friends in the queue that have not set off: each lands a cadence after the one before,
@@ -827,6 +599,14 @@
     }
   }
 
+  // Before each frame: rows scrolled past come in at once, friends that have landed stay, and the roll
+  // call ends once everyone is in, or at once under reduced motion.
+  function followTheRollCall(seconds) {
+    if (rollCall) rollCall.skipRowsOffScreen(seconds);
+    settleArrivals(seconds);
+    if (rollCall && (rollCall.done || reducedMotion.matches)) endRollCall();
+  }
+
   function endRollCall() {
     if (!rollCall) return;
     rollCall.finish();
@@ -861,7 +641,7 @@
   // hops of about ROLL_CALL.stride. offset is where it starts, in px from its place; height is a hop's
   // height in px; dir is the way it goes (1, rightward, or -1).
   function entranceFor(friend) {
-    const box = friend.rig.el.getBoundingClientRect(), unit = box.width / VIEW_SIZE;
+    const box = friend.rig.el.getBoundingClientRect(), unit = box.width / friend.view.w;
     const pageWidth = document.documentElement.clientWidth, fromLeft = box.left + box.width / 2 < pageWidth / 2;
     const offset = fromLeft
       ? -(box.right + (friend.reach.right + ROLL_CALL.clearance) * unit)
@@ -870,13 +650,14 @@
     return { offset, hops, duration: hops * PhyFriends.anim.HOP.seconds, height: ROLL_CALL.height * unit, dir: fromLeft ? 1 : -1 };
   }
 
-  // A friend that has reached its place stays there.
+  // A friend that has reached its place stays there, and smiles as it lands.
   function settleArrivals(seconds) {
     for (const friend of friends) {
       const arrival = friend.arrival;
       if (!arrival || seconds < arrival.land) continue;
       arrive(friend);
       friend.landedAt = arrival.land;
+      friend.smile({ at: arrival.land, lasting: ROLL_CALL.smile });
     }
   }
 
@@ -930,14 +711,6 @@
     friend.rig.el.style.transform = travel ? `translate(${travel.offset}px, ${-travel.lift}px)` : '';
   }
 
-  // A half sine wave that rises from 0 to 1 and falls back over the given duration, and is 0 outside it.
-  function pulse(elapsed, duration) {
-    return elapsed > 0 && elapsed < duration ? Math.sin((elapsed / duration) * Math.PI) : 0;
-  }
-
-  function randomIn([min, max]) {
-    return min + Math.random() * (max - min);
-  }
 </script>
 </body>
 </html>

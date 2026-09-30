@@ -79,6 +79,7 @@
 <script src="../../characters/alfie/alfie.js"></script>
 <script src="../../characters/claude/claude.js"></script>
 <script src="../../src/anim.js"></script>
+<script src="../../src/emotion.js"></script>
 <script src="../../src/pen.js"></script>
 <script src="../../site/title-pen.js"></script>
 <script src="../../src/cast.js"></script>
@@ -116,7 +117,7 @@
   // An entrance takes the scene's hop at two and a half times its length, and a little higher, so
   // that a friend crosses half the frame in about two seconds. It starts just out of the frame.
   const ENTRY = { stride: 200, hopSeconds: PF.scene.HOP.seconds, height: 46, clearance: 24, cadence: 0.7 };
-  const GREETING = { clip: PF.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 }), delay: 0.15 };  // The gallery's hop.
+  const GREETING = { delay: 0.15 };               // A friend says the gallery's hi (PhyFriends.emotion.greeting) this long after landing.
   const GLANCE = { lead: 0.6, hold: 0.9 };       // Seconds before and after a landing that its neighbor watches it.
   // phy's last word, at the names' size, centered above phy (film.css) on the seventh rule above the
   // floor, clear of the tallest ears in the row.
@@ -172,7 +173,7 @@
   function stageArrival({ actor, x, from, hops, travel, start, land }) {
     actor.enter({ from, to: x, at: start, hops, duration: travel, height: ENTRY.height });
     const greetAt = land + GREETING.delay;
-    actor.play(GREETING.clip, { at: greetAt, until: greetAt + GREETING.clip.duration });  // The clip loops; one round is the greeting.
+    actor.play(PF.emotion.greeting(actor.spec), { at: greetAt });
     writeName(actor, x, land + NAME.delay);
   }
 

@@ -32,7 +32,7 @@
     <select id="char" aria-label="Character"></select>
     <select id="clip" aria-label="Clip"></select>
     <input id="expr" type="text" spellcheck="false" aria-label="Clip expression"
-           placeholder="or an expression: layer(idle, curious)">
+           placeholder="or an expression: layer(idle, hold('curious'))">
   </div>
   <div class="row">
     <button id="play" type="button">Play</button>
@@ -44,11 +44,12 @@
     <label><input id="loop" type="checkbox" checked> Loop</label>
     <label><input id="look" type="checkbox" checked> Look at pointer</label>
   </div>
-  <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim.</p>
+  <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim, and face, react, hold and feel from PhyFriends.emotion.</p>
 </main>
 
 <script src="../src/phyfriends.js"></script>
 <script src="../src/anim.js"></script>
+<script src="../src/emotion.js"></script>
 <script src="../characters/howdi/howdi.js"></script>
 <script src="../characters/phy/phy.js"></script>
 <script src="../characters/yuda/yuda.js"></script>
@@ -63,12 +64,20 @@
 <script src="../characters/alfie/alfie.js"></script>
 <script src="../characters/claude/claude.js"></script>
 <script>
-  const PF = PhyFriends, A = PF.anim, $ = id => document.getElementById(id);
+  const PF = PhyFriends, A = PF.anim, E = PF.emotion, $ = id => document.getElementById(id);
   const LOOK_OFF = { lookX: null, lookY: null, turnX: null, turnY: null };
   let rig = null, player = null;
 
   for (const n of PF.list()) $('char').add(new Option(n));
-  for (const n of Object.keys(A.clips)) $('clip').add(new Option(n));
+  // The movements, then each feeling in full (its reaction, then the feeling held; src/emotion.js).
+  const group = (label, values) => {
+    const g = document.createElement('optgroup');
+    g.label = label;
+    for (const [text, value] of values) g.append(new Option(text, value));
+    $('clip').append(g);
+  };
+  group('movements', Object.keys(A.clips).map(n => [n, n]));
+  group('feelings', E.names.map(n => [n, `layer(idle, feel('${n}'))`]));
 
   // Portrait zoomed out about the bottom edge, so hops stay in frame.
   function stageView(spec, k = 0.85) {

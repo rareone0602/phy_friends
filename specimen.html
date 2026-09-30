@@ -40,8 +40,9 @@
   <header>
     <div class="titleline">
       <h1>specimen</h1>
-      <div class="portrait" role="img" aria-label="phy, a tuxedo eevee"></div>
+      <div class="portrait" role="button" tabindex="0" aria-label="say hi to phy, a tuxedo eevee"></div>
     </div>
+    <p class="announcer" role="status"></p>
     <p class="intro">every part of the house style, working, on the rules.</p>
     <nav aria-label="pages">
       <ul>
@@ -114,11 +115,22 @@
 
 <script src="src/phyfriends.js"></script>
 <script src="characters/phy/phy.js"></script>
+<script src="src/anim.js"></script>
+<script src="src/emotion.js"></script>
+<script src="src/live.js"></script>
 <script>
-  // The portrait: a still drawing of phy, grounded on the bottom edge of a box a whole number of rules tall.
-  const spec = PhyFriends.get('phy'), ground = (spec.rig && spec.rig.ground) ?? 120;
-  document.querySelector('.portrait').innerHTML = PhyFriends.render('phy', {
-    view: { w: 270, h: 270, x: 135, y: 270 - ground, scale: 1, rotate: 0 }, bg: false, fluid: true, pose: { lookX: -0.5, lookY: 0.2 } });
+  // The portrait: phy, alive (src/live.js), standing on the bottom edge of a box a whole number of rules
+  // tall. It watches the cursor and answers a hi, as the friends on the gallery do. For screenshots,
+  // ?px=..&py=.. (CSS pixels) fixes a simulated pointer.
+  const params = new URLSearchParams(location.search);
+  const portrait = document.querySelector('.portrait');
+  const stage = PhyFriends.live.stage({
+    root: portrait, announcer: document.querySelector('.announcer'),
+    pointer: params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null,
+  });
+  stage.add(portrait, 'phy', { label: 'phy' });
+  stage.start();
+  const ground = PhyFriends.groundOf('phy');
   // The pictures: the house close-up on its own dark background (a photo), and phy on a transparent background (a character).
   const img = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   document.getElementById('photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));

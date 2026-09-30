@@ -374,17 +374,22 @@
     lookX: 0, lookY: 0, // Gaze direction, -1..1
     blink: 0,           // Eyelid closure, 0 open to 1 shut (only the open eye shape squashes)
     widen: 0,           // Eye size: positive widens (0.3 = 30% larger), negative squints
+    lid: 0,             // A lid held over the open eyes, cut straight across: 0 none to 1 shut (heavy, sad or cross eyes)
+    lidTilt: 0,         // The lid's slant in degrees: positive lowers its inner end (cross), negative raises it (sad)
     earL: 0, earR: 0,   // Extra outward ear rotation in degrees
     hair: 0,            // Hair sway in degrees
     tail: 0,            // Tail wag in degrees: positive swings the tip outward, negative tucks it in behind
     blush: 1,           // Blush opacity
+    flush: 0,           // How far the blush spreads: 0 as drawn, 0.5 half as large again
     eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override it)
-    mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'o' | 'v' | 'open'
+    mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open'
   };
 
   // Parallax depth per layer: how far each layer slides when the head turns.
   const DEPTH = { tail: -0.4, body: -0.15, earL: -0.5, earR: -0.5, face: 0.35, blush: 0.55, eyes: 0.6, mouth: 0.55, hair: 0.45 };
 
+  const LID_CLEARANCE = 2;     // How far above the eye the lid rests while it is up, in head units.
+  const DEFAULT_GROUND = 120;  // The ground line, in head units, of a spec without rig.ground.
   const EAR_DEFAULT = { base: [-70, -70], angle: 35, width: 60, length: 70 };
   const EYE_DEFAULT = { x: 35, y: 0, w: 14, h: 28, shape: 'pill', range: 6 };
   // Default tail: a bushy plume that curls up behind the left side of the body (see tailNodes).
@@ -414,12 +419,20 @@
     return `translate(${num(bx)} ${num(by)}) rotate(${num(out * ((tail.angle || 0) + wag))})${out < 0 ? ' scale(-1 1)' : ''}`;
   }
 
+  // The lid is the edge of a clip over the open eye, in the eye's own units: it comes down from above the eye
+  // by `lid` of the eye's height (and a little more, so that 1 shuts it) and turns about its middle, the inner
+  // end (d = 1 for the left eye, -1 for the right) lowering as lidTilt grows.
+  function lidPlace(eye, p, d) {
+    const lid = Math.min(1, Math.max(0, p.lid || 0));
+    return `translate(0 ${num(lid * (eye.h + LID_CLEARANCE))}) rotate(${num(d * (p.lidTilt || 0))} 0 ${num(-eye.h / 2 - LID_CLEARANCE)})`;
+  }
+
   function poseState(spec, pose) {
     const p = { ...POSE, ...(pose || {}) }, rig = spec.rig || {};
     const turn = rig.turn ?? 14;
     const tx = p.turnX * turn, ty = p.turnY * turn * 0.7;
     const par = z => `translate(${num(tx * z)} ${num(ty * z)})`;
-    const ground = rig.ground ?? 120, neck = rig.neck || [0, 50];
+    const ground = rig.ground ?? DEFAULT_GROUND, neck = rig.neck || [0, 50];
     const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
     const lx = p.lookX * eye.range, ly = p.lookY * eye.range * 0.8;
     const k = Math.max(0.2, 1 + p.widen), eyeOpen = `scale(${num(k)} ${num(k * Math.max(0.06, 1 - p.blink))})`;
@@ -433,9 +446,16 @@
       eyeR: `translate(${num(eye.x + lx)} ${num(eye.y + ly)})`,
       eyeLopen: eyeOpen,
       eyeRopen: eyeOpen,
+      lidL: lidPlace(eye, p, 1),
+      lidR: lidPlace(eye, p, -1),
       hair: `${par(DEPTH.hair)} rotate(${num(p.hair)} ${hc[0]} ${hc[1]})`,
     };
     for (const k of ['body', 'face', 'blush', 'eyes', 'mouth']) t[k] = par(DEPTH[k]);
+    if (spec.blush) {
+      const { x, y } = spec.blush, k = num(Math.max(0, 1 + p.flush));
+      t.cheekL = `translate(${num(-x)} ${num(y)}) scale(${k}) translate(${num(x)} ${num(-y)})`;
+      t.cheekR = `translate(${num(x)} ${num(y)}) scale(${k}) translate(${num(-x)} ${num(-y)})`;
+    }
     if (spec.tail) t.tail = `${par(DEPTH.tail)} ${tailPlace(tailFor(spec), p.tail)}`;
     for (const s of ['L', 'R']) if (earFor(spec, s).inner?.front) t[`ear${s}front`] = t[`ear${s}`];
     const mouth = p.mouth || (spec.mouth && spec.mouth.shape) || 'none';
@@ -744,6 +764,18 @@
     return `${open}<defs>${pencilMask(`${uid}-pencil`, { w, h })}</defs>${penciled(`${uid}-pencil`, inner)}</svg>`;
   }
 
+  // The standing view: a square box `box` head units a side whose bottom edge is the friend's ground
+  // (rig.ground), so that friends drawn in it stand on one line at one scale. The gallery's box and a
+  // scene's cut-out are 270 head units, five rules (FWIENDS.md).
+  const STANDING_BOX = 270;
+  function groundOf(specOrName) {
+    const spec = resolve(specOrName);
+    return (spec.rig && spec.rig.ground) ?? DEFAULT_GROUND;
+  }
+  function standingView(specOrName, box = STANDING_BOX) {
+    return { w: box, h: box, x: box / 2, y: box - groundOf(specOrName), scale: 1, rotate: 0 };
+  }
+
   function resolveView(spec, v, size) {
     const views = spec.views || {};
     const base = { ...DEFAULT_VIEW, ...(views.portrait || {}) };
@@ -765,6 +797,7 @@
   const MOUTHS = {
     w: s => `M${-s} ${-s * 0.3}Q${-s * 0.5} ${s * 0.7} 0 ${-s * 0.1}Q${s * 0.5} ${s * 0.7} ${s} ${-s * 0.3}`,
     smile: s => `M${-s} ${-s * 0.2}Q0 ${s * 0.9} ${s} ${-s * 0.2}`,
+    frown: s => `M${-s * 0.9} ${s * 0.35}Q0 ${-s * 0.6} ${s * 0.9} ${s * 0.35}`,
     v: s => `M${-s * 0.6} ${-s * 0.3}L0 ${s * 0.4}L${s * 0.6} ${-s * 0.3}`,
     o: s => `M0 ${-s * 0.5}a${s * 0.45} ${s * 0.55} 0 1 0 0.01 0Z`,
   };
@@ -881,6 +914,11 @@
       const stroke = k => `<path d="${EYE_STROKES[k](w, h, eye.arc ?? 0.9, side === 'L' ? 1 : -1)}" fill="none" stroke="${c}"` +
         ` stroke-width="${num(eye.stroke ?? w * 0.42)}" stroke-linecap="round" stroke-linejoin="round"/>`;
       const key = `eye${side}`;
+      // The lid (pose.lid) is a clip whose edge comes down over the open eye; it widens and blinks with the eye.
+      const reach = Math.max(w, h) * 2, top = -h / 2 - LID_CLEARANCE;
+      defs.push(`<clipPath id="${uid}-lid${side}"><rect data-pf="lid${side}"${st.transform[`lid${side}`] ? ` transform="${st.transform[`lid${side}`]}"` : ''}` +
+        ` x="${num(-reach)}" y="${num(top)}" width="${num(reach * 2)}" height="${num(reach * 2)}"/></clipPath>`);
+      open = `<g clip-path="url(#${uid}-lid${side})">${open}</g>`;
       return g(key, when(key, 'open', g(`${key}open`, open)) +
         ['happy', 'closed', 'squint'].map(k => when(key, k, stroke(k))).join(''));
     };
@@ -902,9 +940,9 @@
 
     // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt).
     const bl = spec.blush;
-    const blushSvg = bl ? [-1, 1].map(sx =>
+    const blushSvg = bl ? [-1, 1].map(sx => g(sx < 0 ? 'cheekL' : 'cheekR',
       `<ellipse cx="${num(sx * bl.x)}" cy="${num(bl.y)}" rx="${bl.rx}" ry="${bl.ry}"` +
-      `${bl.tilt ? ` transform="rotate(${num(-sx * bl.tilt)} ${num(sx * bl.x)} ${num(bl.y)})"` : ''} fill="${col(bl.color || 'blush')}"/>`).join('') : '';
+      `${bl.tilt ? ` transform="rotate(${num(-sx * bl.tilt)} ${num(sx * bl.x)} ${num(bl.y)})"` : ''} fill="${col(bl.color || 'blush')}"/>`)).join('') : '';
 
     const layers = {
       earL: () => ear('L'),
@@ -1016,7 +1054,7 @@
   return {
     VERSION, POSE, DEPTH,
     define, get: resolve, list: () => [...registry.keys()], merge,
-    render, mount, poseState, resolveView,
+    render, mount, poseState, resolveView, standingView, groundOf, STANDING_BOX,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle },
     rng, hash, SHADE, shadeOf,
     // The pencil, for drawing props in the characters' texture and for redrawing it (film/scene.js).

@@ -88,6 +88,7 @@
 <script src="../../characters/alfie/alfie.js"></script>
 <script src="../../characters/claude/claude.js"></script>
 <script src="../../src/anim.js"></script>
+<script src="../../src/emotion.js"></script>
 <script src="../../src/cast.js"></script>
 <script src="../../characters/cast.js"></script>
 <script src="../../film/scene.js"></script>
@@ -117,7 +118,6 @@
   const SPEECH = { size: 40, rulesAboveFloor: 6 };
   // The beats after phy lands, in seconds.
   const BEAT = { say: 0.3, words: 2.2, give: 1.4, handing: 0.8, surprise: 2.3, write: 2.5, song: 3.4, smile: [3.5, 4.7], end: 0.8 };
-  const GREETING = PF.anim.make.happy({ duration: 1.1, bounces: 2, height: 10 });  // The gallery's happy hop.
   const OBJECT_PRONOUN = { he: 'him', she: 'her', they: 'them', it: 'it' };  // As the owners give them (characters/cast.js).
   const CAKE = cakeDrawing();
 
@@ -182,10 +182,10 @@
     phy.say(`for you, ${name}.`, { to: friend, side: 0, size: SPEECH.size, rise, at: land + BEAT.say, seconds: BEAT.words });
     phy.give(cake, friend, { at: land + BEAT.give, duration: BEAT.handing, height: 0 });  // Handed over along the floor's arc, paw to paw.
     friend.look(cake, { at: land + BEAT.give + BEAT.handing / 2 });
-    friend.emote('!', { at: land + BEAT.surprise }).play('surprised', { at: land + BEAT.surprise });
+    friend.feel('surprised', { at: land + BEAT.surprise });
     friend.look(phy, { at: land + BEAT.song });
-    friend.emote('♪', { at: land + BEAT.song }).play(GREETING, { at: land + BEAT.song, until: land + BEAT.song + GREETING.duration });
-    phy.pose({ eyes: 'happy', mouth: 'w' }, { at: land + BEAT.smile[0], until: land + BEAT.smile[1] });
+    friend.emote('♪', { at: land + BEAT.song }).play(PF.emotion.greeting(friend.spec), { at: land + BEAT.song });  // The gallery's hi.
+    phy.pose(PF.emotion.face('happy'), { at: land + BEAT.smile[0], until: land + BEAT.smile[1] });
     const asideAt = writeLine(heading, CARD.heading, land + BEAT.write, { graphite: true });
     const done = writeLine(CARD.aside.text, CARD.aside, asideAt, { tone: 'ink-2' });
     return done + BEAT.end;

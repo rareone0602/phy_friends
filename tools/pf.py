@@ -8,7 +8,7 @@
   python3 tools/pf.py compare howdi                     # Every example -> out/howdi/compare/<example>.png.
   python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example; metrics and a zoom for a box.
   python3 tools/pf.py anim howdi --clip idle            # Writes out/howdi/anim/idle.gif.
-  python3 tools/pf.py anim howdi --clip "layer(idle, curious)" --size 512 --sheet -o out/scratch/x.mp4
+  python3 tools/pf.py anim howdi --clip "layer(idle, hold('curious'))" --size 512 --sheet -o out/scratch/x.mp4
   python3 tools/pf.py render howdi --with out/scratch/mine.js   # A working copy that may redefine howdi.
   python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
   python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
@@ -304,7 +304,7 @@ def zoom_view(name, view='portrait', k=1.0):
 
 
 def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', size=384, bg=True, sheet=None, zoom=1.0):
-    """Render a PhyFriends.anim clip (a name or an expression such as "layer(idle, curious)").
+    """Render a PhyFriends.anim clip (a name or an expression such as "layer(idle, hold('curious'))").
 
     sheet: a path for a contact sheet of sampled frames, or True for <out>-sheet.png.
     zoom: a value below 1 zooms out about the bottom edge, for clips that travel upward (hop).
@@ -895,7 +895,7 @@ def main(argv=None):
 
     n = sub.add_parser('anim', help='render an animation clip to .gif / .mp4 / .webm / .apng', parents=[common])
     n.add_argument('name')
-    n.add_argument('--clip', default='idle', help='clip name or expression, e.g. "layer(idle, curious)"')
+    n.add_argument('--clip', default='idle', help='clip name or expression, e.g. "layer(idle, hold(\'curious\'))"')
     n.add_argument('--fps', type=int, default=30)
     n.add_argument('--seconds', type=float, help="default: the clip's duration")
     n.add_argument('--size', type=int, default=384)

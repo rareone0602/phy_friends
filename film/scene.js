@@ -21,16 +21,16 @@
  *
  *   const scene = PhyFriends.scene.create(el, { width: 1600, height: 900 });
  *   const phy = scene.add('phy', { x: 800 });
- *   phy.enter({ from: 'left', at: 0.5 }).emote('♪', { at: 2.5 });
+ *   phy.enter({ from: 'left', at: 0.5 }).emote('♪', { at: 2.5 }).feel('surprised', { at: 3 });
  *   if (!scene.film({ duration: 4 })) scene.play();  // Filmable by tools/pf.py film; plays live otherwise.
  *
- * Loads as a classic script after src/phyfriends.js, src/anim.js, src/cast.js and characters/cast.js
- * (PhyFriends.scene).
+ * Loads as a classic script after src/phyfriends.js, src/anim.js, src/emotion.js, src/cast.js and
+ * characters/cast.js (PhyFriends.scene).
  */
 (function (root) {
   'use strict';
-  const PF = root.PhyFriends, A = PF && PF.anim;
-  if (!A || !PF.cast) throw new Error('phy_friends/scene: load src/phyfriends.js, src/anim.js and src/cast.js first');
+  const PF = root.PhyFriends, A = PF && PF.anim, E = PF && PF.emotion;
+  if (!A || !E || !PF.cast) throw new Error('phy_friends/scene: load src/phyfriends.js, src/anim.js, src/emotion.js and src/cast.js first');
 
   const RULE = 54;            // The paper's rule spacing in head units: a friend stands five rules tall, as in the gallery.
   const BOX = 270;            // A friend's cut-out is this many head units square, with its ground on the bottom edge (FWIENDS.md).
@@ -41,9 +41,8 @@
   const HOP = A.HOP;
   const GAZE = { seconds: 0.3, depth: 180, turn: 0.5 };      // As in the gallery: the head turns half as far as the eyes.
   const TRAVEL = { look: 0.5, turn: 0.6, weight: 0.7 };      // A traveling friend looks where it is going.
-  const MARK = { size: 64, pop: 0.18, fade: 0.25, seconds: 1.4, x: 70, y: -200 };
+  const MARK = { size: 64, x: 70, y: -200 };                 // A mark's size and place; its timing is the emotion library's.
   const WORDS = { size: 34, perSecond: 14, fade: 0.25, x: 115, y: -130 };
-  const FADE = 0.15;          // Default fade in and out of a clip layer, in seconds.
   const BOIL_VARIANTS = PF.pencil.settings.variants;  // Texture variants a boiling scene cycles through.
   const IN_FRAME = -1;        // frameRequest while a live frame is being drawn.
   const PRUNE_AFTER = 2;      // A live scene forgets cues that ended this many seconds ago.
@@ -545,7 +544,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     const rig = PF.mount(node, spec, { bg: false, view, bitmap: false });
     const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS, energy: a.energy });
     const home = { x: a.x, y: a.y };
-    const moves = [], layers = [], gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
+    const moves = [], layers = A.stack(), gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
     // Entrances and exits, in time order: the friend is shown after an entrance until the next exit.
     const showings = [{ at: a.at, shown: true, placed: true }];
     let extent = null;
@@ -640,15 +639,29 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       },
 
       // Layers a clip (a name, an expression or a clip) from `at` until it ends, or until `until`.
-      play(clip, { at = scene.time, until, fade = FADE, weight = 1 } = {}) {
-        const c = A.parse(clip), end = until ?? (c.loop || c.duration == null ? Infinity : at + c.duration);
-        layers.push({ clip: c, at, end, fade, weight });
+      play(clip, { at = scene.time, until, fade, weight } = {}) {
+        layers.add(A.parse(clip), { at, until, fade, weight });
         return actor;
       },
 
       // Holds a partial pose (a face, say { eyes: 'happy', mouth: 'w' }) from `at` until `until`.
-      pose(partial, { at = scene.time, until = Infinity, fade = FADE } = {}) {
-        layers.push({ clip: A.still(partial), at, end: until, fade, weight: 1 });
+      pose(partial, { at = scene.time, until = Infinity, fade } = {}) {
+        layers.add(A.still(partial), { at, until, fade });
+        return actor;
+      },
+
+      // Shows a feeling from the emotion library (src/emotion.js) from `at`: its reaction alone, or,
+      // given `until`, the reaction and then the feeling held until then. Its mark shows with it unless
+      // mark is false; a mark that repeats (the z of sleep) does so while the feeling is held. A friend
+      // that shows no feelings, as Claude does not, makes the reaction's movement and shows the mark.
+      feel(feeling, { at = scene.time, until, mark = true, strength = 1, fade } = {}) {
+        const clip = until === undefined ? E.react(feeling, { strength, spec }) : E.feel(feeling, { strength, spec });
+        layers.add(clip, { at, until, fade });
+        const shown = mark && E.mark(feeling);
+        if (!shown) return actor;
+        const end = until ?? at + clip.duration;
+        if (!shown.every) return actor.emote(shown.text, { at });
+        for (let t = at; t < end; t += shown.every) addMark(shown.text, { at: t, seconds: Math.min(E.MARK.seconds, end - t), drifting: true });
         return actor;
       },
 
@@ -661,20 +674,17 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return actor;
       },
 
-      // Greets another friend from where it stands: a happy hop while looking at them.
+      // Greets another friend from where it stands, looking at them, with the hi every page uses
+      // (the emotion library's greeting()).
       greet(other, { at = scene.time } = {}) {
         PF.cast.ensure('greet', name, other.name);
         actor.look(other, { at });
-        const hop = A.make.happy({ duration: 1.1, bounces: 2, height: 10 });
-        return actor.play(hop, { at, until: at + hop.duration });
+        return actor.play(E.greeting(spec), { at });
       },
 
       // Shows a mark (one of PhyFriends.cast.MARKS) above the head.
-      emote(mark, { at = scene.time, seconds = MARK.seconds } = {}) {
-        if (!VOICED_MARKS.includes(mark)) throw new Error(`phy_friends/scene: "${mark}" is not a mark; use one of ${VOICED_MARKS.join(' ')}`);
-        const node = textNode(dom, 'pf-mark hand', mark);
-        node.setAttribute('aria-hidden', 'true');  // A mark is a drawing, not words; a game says what happened in words.
-        marks.push({ text: mark, at, until: at + seconds, node });
+      emote(mark, { at = scene.time, seconds = E.MARK.seconds } = {}) {
+        addMark(mark, { at, seconds });
         return actor;
       },
 
@@ -710,7 +720,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
           }
         };
         keep(marks); keep(words);
-        for (let i = layers.length - 1; i >= 0; i--) if (layers[i].end < t) layers.splice(i, 1);
+        layers.prune(t);
         while (gazes.length > 1 && gazes[1].at < t) gazes.shift();
         while (moves.length && moveEnd(moves[0]) < t) {
           const m = moves.shift();
@@ -743,12 +753,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         A.combine(acc, idlePose);
         A.combine(acc, glances, glancingAt(t));
       }
-      for (const layer of layers) {
-        const k = envelope(layer, t);
-        if (k <= 0) continue;
-        const partial = layer.clip(t - layer.at);
-        A.combine(acc, reduced ? stringsOnly(partial) : partial, k * layer.weight);
-      }
+      A.combine(acc, layers.sample(t, { reduced }));
       const [lookX, lookY] = gazeAt(t, s);
       const turn = reduced ? 0 : GAZE.turn;
       A.combine(acc, { lookX, lookY, turnX: lookX * turn, turnY: lookY * turn });
@@ -816,14 +821,22 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       return { x: s.x, y: s.y - rigGround - s.lift };
     };
 
+    // Adds a mark (one of PhyFriends.cast.MARKS) shown from `at` for `seconds`; a drifting one rises as it goes.
+    function addMark(mark, { at, seconds, drifting = false }) {
+      if (!VOICED_MARKS.includes(mark)) throw new Error(`phy_friends/scene: "${mark}" is not a mark; use one of ${VOICED_MARKS.join(' ')}`);
+      const node = textNode(dom, 'pf-mark hand', mark);
+      node.setAttribute('aria-hidden', 'true');  // A mark is a drawing, not words; a game says what happened in words.
+      marks.push({ text: mark, at, until: at + seconds, node, drifting });
+    }
+
     function drawMark(m, t, eyes) {
       const active = t >= m.at && t < m.until;
       m.node.style.display = active ? '' : 'none';
       if (!active) return;
-      const u = t - m.at, pop = scene.reduced ? 1 : A.ease.back(clamp(u / MARK.pop, 0, 1));
-      const fade = clamp((m.until - t) / MARK.fade, 0, 1);
-      m.node.style.opacity = String(Math.min(fade, clamp(u / 0.06, 0, 1)));
-      m.node.style.transform = `translate(${eyes.x + MARK.x}px, ${eyes.y + MARK.y}px) translate(-50%, -100%) scale(${0.6 + 0.4 * pop}) rotate(-2deg)`;
+      const look = E.markAt(t - m.at, m.until - t, { reduced: scene.reduced, drifting: m.drifting });
+      m.node.style.opacity = String(look.opacity);
+      m.node.style.transform = `translate(${eyes.x + MARK.x}px, ${eyes.y + MARK.y - look.rise}px) translate(-50%, -100%) ` +
+        `scale(${look.scale}) rotate(-2deg)`;
     }
 
     function drawWords(w, t, eyes) {
@@ -855,19 +868,6 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     if (glide) return { x: lerp(m.from, m.to, smooth(u)), lift: 0, squash: 0, lean: 0, dir };
     const hop = A.hopping(u, m.hops);
     return { x: lerp(m.from, m.to, hop.along), lift: m.height * hop.lift, squash: hop.squash, lean: hop.lean * dir, dir };
-  }
-
-  function envelope(layer, t) {
-    if (t < layer.at || t >= layer.end) return 0;
-    if (!(layer.fade > 0)) return 1;
-    return Math.min(1, (t - layer.at) / layer.fade, (layer.end - t) / layer.fade);
-  }
-
-  // Under reduced motion only the face changes: eye and mouth shapes, not movement.
-  function stringsOnly(partial) {
-    const out = {};
-    for (const key in partial) if (typeof partial[key] !== 'number') out[key] = partial[key];
-    return out;
   }
 
   function mixLook(a, b, u) {

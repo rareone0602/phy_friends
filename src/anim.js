@@ -10,7 +10,11 @@
  * Partial poses stack like layers: numbers add onto the neutral POSE (blush
  * multiplies), strings (eyes, eyeL, eyeR, mouth) are last-wins, undefined
  * leaves the field to lower layers, and null selects the spec default.
- * Afterward, sample() clamps blink to 0..1 and look/turn to -1..1.
+ * Afterward, sample() clamps blink and lid to 0..1 and look/turn to -1..1.
+ *
+ * The clips here are movements (idle, hop, bounce, nod, ...). Feelings, which
+ * add a face and a posture to a movement, are in src/emotion.js, which adds
+ * its react(), hold() and feel() to what parse() understands (extend()).
  *
  * Example:
  *
@@ -18,6 +22,9 @@
  *   const tip = A.track({ tilt: [[0, 0], [0.3, 8, 'back'], [1, 8], [1.4, 0]] });
  *   const player = A.play(PhyFriends.mount(el, 'howdi'), A.layer(A.clips.idle, tip));
  *   el.onpointermove = e => player.override(A.lookAt(player.rig, e.clientX, e.clientY));
+ *
+ * A stack (stack()) holds a friend's timed layers, faded in and out, for a scene
+ * (film/scene.js) or a live page (src/live.js).
  *
  * Loads as a classic script after phyfriends.js (PhyFriends.anim), or through require().
  */
@@ -62,7 +69,10 @@
   // ------------------------------------------------------------ Pose math
 
   const MULT = { blush: 1 }; // Fields that multiply instead of add
-  const RANGE = { blink: [0, 1], widen: [-0.8, 1], lookX: [-1, 1], lookY: [-1, 1], turnX: [-1, 1], turnY: [-1, 1], tail: [-45, 45] };
+  const RANGE = {
+    blink: [0, 1], lid: [0, 1], lidTilt: [-30, 30], widen: [-0.8, 1], flush: [0, 1],
+    lookX: [-1, 1], lookY: [-1, 1], turnX: [-1, 1], turnY: [-1, 1], tail: [-45, 45],
+  };
 
   // Stacks partial pose `p` onto `acc` (in place) with weight k; strings apply only when k >= 0.5.
   function combine(acc, p, k = 1) {
@@ -304,7 +314,9 @@
     earR: [[0, 0], [0.2, -4], [0.42, 6], [0.64, -3], [0.86, 3], [1.1, 0]],
   }, { duration: 1.4 });
 
-  make.happy = ({ duration = 1, bounces = 2, height = 8, wags = 3 } = {}) => clip(t => {
+  // Bounces on the spot, ears flapping and tail wagging: the motion of a hop for joy (the emotion
+  // library's happy reaction, which adds the face, and the gallery's hi).
+  make.bounce = ({ duration = 1.1, bounces = 2, height = 10, wags = 3 } = {}) => clip(t => {
     const T = duration / bounces, u = mod(t, T) / T, a = (TAU * t) / duration;
     const air = 4 * u * (1 - u), contact = Math.exp(-((Math.min(u, 1 - u) / 0.09) ** 2));
     return {
@@ -316,7 +328,6 @@
       headY: 2.5 * contact,
       earL: -7 + 12 * contact, earR: -7 + 12 * contact,
       tail: -2 + 9 * Math.sin(wags * a + 0.6), // Brisk wag, held slightly high
-      eyes: 'happy', mouth: 'w',
     };
   }, duration, true);
 
@@ -325,36 +336,6 @@
     const u = t / duration, env = Math.sin(Math.PI * u), w = TAU * wags * u;
     return { tail: env * (amp * Math.sin(w) - 2), tilt: 1.5 * env * Math.sin(w - 1.2), hair: -env * Math.sin(w - 1.8) };
   }, duration);
-
-  make.sleepy = () => layer(track({
-    blink: [[0, 0.5], [1.1, 0.55], [1.5, 1, 'in'], [2.1, 0.55, 'out'], [2.9, 0.7], [3.3, 1], [5.9, 1], [6.0, 0, 'out'], [6.8, 0.3], [8, 0.5]],
-    eyes: [[0, _], [3.3, 'closed'], [5.9, _]],
-    mouth: [[0, _], [4.0, 'o'], [5.9, _]],
-    turnY: [[0, 0.1], [3.2, 0.4], [5.8, 0.7], [6.05, -0.15, 'out'], [6.6, 0], [8, 0.1]],
-    lookY: [[0, 0.2], [3.2, 0.3], [5.9, 0.3], [6.05, -0.1, 'out'], [6.6, 0], [8, 0.2]],
-    tilt: [[0, 2], [3.2, 6], [5.8, 11], [6.1, -2, 'out'], [7, 1], [8, 2]],
-    y: [[0, 1], [5.8, 3], [6.05, -2, 'out'], [6.5, 0], [8, 1]],
-    headY: [[0, 1], [3.2, 2.5], [5.8, 5], [6.05, -2, 'out'], [6.6, 0], [8, 1]],
-    earL: [[0, 8], [5.8, 16], [6.05, -8, 'out'], [6.6, 0], [8, 8]],
-    earR: [[0, 9], [5.8, 17], [6.1, -6, 'out'], [6.7, 1], [8, 9]],
-    hair: [[0, 0], [5.8, 2], [6.05, -3, 'out'], [6.5, 1], [7.2, 0]],
-    tail: [[0, -5], [5.8, -9], [6.05, 5, 'out'], [6.6, -1], [8, -5]], // Curled in; flicks on waking
-  }, { duration: 8, loop: true }), clip(t => ({ squash: 0.02 * Math.sin((TAU * t * 3) / 8) }), 8, true));
-
-  make.surprised = () => track({
-    squash: [[0, 0], [0.1, 0.05, 'out'], [0.3, -0.03], [0.5, 0.01], [0.7, 0]],
-    y: [[0, 0], [0.1, -3, 'out'], [0.35, 0, 'in']],
-    headY: [[0, 0], [0.1, -2, 'out'], [0.3, 1], [0.5, 0]],
-    turnY: [[0, 0], [0.1, -0.35, 'out'], [1.2, -0.25], [1.7, 0]],
-    lookY: [[0, 0], [0.1, -0.2, 'out'], [1.3, -0.2], [1.7, 0]],
-    widen: [[0, 0], [0.1, 0.35, 'back'], [1.2, 0.25], [1.7, 0]],
-    earL: [[0, 0], [0.1, -16, 'out'], [0.3, -8], [1.2, -10], [1.7, 0]],
-    earR: [[0, 0], [0.1, -16, 'out'], [0.3, -8], [1.2, -10], [1.7, 0]],
-    hair: [[0, 0], [0.1, 4, 'out'], [0.3, -2], [0.5, 1], [0.7, 0]],
-    tail: [[0, 0], [0.1, -12, 'out'], [0.3, -6], [1.2, -8], [1.7, 0]], // Snaps up
-    mouth: [[0, _], [0.08, 'o'], [1.3, _]],
-    blink: [[0, 0], [0.9, 0], [0.96, 1, 'in'], [1.05, 0, 'out'], [1.12, 1, 'in'], [1.22, 0, 'out']],
-  }, { duration: 1.9 });
 
   make.hop = ({ height = 22 } = {}) => track({
     squash: [[0, 0], [0.18, -0.12, 'out'], [0.26, 0.1, 'out'], [0.5, 0.01], [0.68, 0.07, 'in'], [0.74, -0.11, 'out'], [0.9, 0.03], [1.05, 0]],
@@ -367,19 +348,6 @@
     headY: [[0, 0], [0.18, 2], [0.28, 3], [0.5, -1], [0.72, -1.5], [0.8, 4, 'out'], [0.95, -0.5], [1.1, 0]],
     blink: [[0, 0], [0.14, 0], [0.18, 0.5], [0.24, 0], [0.72, 0], [0.76, 0.6], [0.86, 0]],
   }, { duration: 1.2 });
-
-  make.curious = () => layer(track({
-    tilt: [[0, 0], [0.5, 11, 'back'], [1.7, 11], [2.2, -9, 'back'], [3.4, -9], [4, 0]],
-    lookX: [[0, 0], [0.3, 0.5, 'out'], [1.7, 0.5], [1.95, -0.45, 'out'], [3.4, -0.45], [3.8, 0]],
-    lookY: [[0, 0], [0.3, -0.35, 'out'], [1.7, -0.35], [1.95, -0.3, 'out'], [3.4, -0.3], [3.8, 0]],
-    turnX: [[0, 0], [0.5, 0.3], [1.7, 0.3], [2.2, -0.3], [3.4, -0.3], [4, 0]],
-    headX: [[0, 0], [0.5, 2.5], [1.7, 2.5], [2.2, -2.5], [3.4, -2.5], [4, 0]],
-    earL: [[0, 0], [0.5, 6], [1.7, 6], [2.2, -10, 'back'], [3.4, -10], [4, 0]],
-    earR: [[0, 0], [0.5, -10, 'back'], [1.7, -10], [2.2, 6], [3.4, 6], [4, 0]],
-    hair: [[0, 0], [0.6, -1.5], [1.7, -1.5], [2.3, 1.5], [3.4, 1.5], [4, 0]],
-    tail: [[0, 0], [0.5, -7, 'back'], [1.1, -4], [1.7, -6], [2.2, 4, 'back'], [2.8, 1], [3.4, 3], [4, 0]],
-    mouth: [[0, _], [0.35, 'o'], [1.6, _]],
-  }, { duration: 4, loop: true }), blinks([1.2, 2.9], 4));
 
   make.talk = ({ seed = 3, duration = 2, rate = 7 } = {}) => {
     const R = PF.rng(seed), n = Math.round(duration * rate), shapes = ['o', 'w', 'smile', 'o', 'v'];
@@ -396,13 +364,93 @@
   const clips = {};
   for (const k in make) clips[k] = make[k]();
 
-  // Accepts a clip name, a JS expression over this API and the clips (e.g., "layer(idle, curious)"),
-  // or a clip. Expressions are evaluated with Function(), so never pass untrusted input.
+  // Names that other modules add to what parse() understands (see extend()).
+  const vocabulary = {};
+
+  // Adds functions or clips to parse()'s scope under the given names, as src/emotion.js adds react,
+  // hold and feel, so that an expression such as "layer(idle, hold('content'))" can use them.
+  function extend(names) {
+    for (const name in names) {
+      if (name in api || name in clips) throw new Error(`phy_friends/anim: "${name}" is already a name in PhyFriends.anim`);
+    }
+    Object.assign(vocabulary, names);
+    return api;
+  }
+
+  // Accepts a clip name, a JS expression over this API, the clips and the names added by extend()
+  // (e.g., "layer(idle, hold('curious'))"), or a clip. Expressions are evaluated with Function(), so
+  // never pass untrusted input.
   function parse(expr) {
     if (typeof expr !== 'string') return toClip(expr);
     if (clips[expr]) return clips[expr];
-    const scope = { ...api, ...clips };
+    const scope = { ...api, ...clips, ...vocabulary };
     return toClip(Function(...Object.keys(scope), `'use strict'; return (${expr});`)(...Object.values(scope)));
+  }
+
+  // --------------------------------------------------------------- Stacks
+
+  const STACK_FADE = 0.15; // Default fade in and out of a layer on a stack, in seconds.
+
+  // A friend's timed layers, for a scene or a live page. Each layer is a clip that plays from `at`
+  // until `until` (by default until the clip ends, or for ever if it loops or never ends), faded in
+  // and out over `fade` seconds and scaled by `weight`; its time starts at `at`. sample(t) combines
+  // the layers that are on at t, in the order they were added, into a partial pose. Under reduced
+  // motion (sample(t, { reduced: true })) only the face changes (faceOnly()), and nothing moves.
+  function stack() {
+    const layers = [];
+    const envelope = (layer, t) => {
+      if (t < layer.at || t >= layer.end) return 0;
+      if (!(layer.fade > 0)) return 1;
+      return Math.min(1, (t - layer.at) / layer.fade, (layer.end - t) / layer.fade);
+    };
+    const self = {
+      get layers() { return layers.slice(); },
+      add(c, { at = 0, until, fade = STACK_FADE, weight = 1 } = {}) {
+        c = toClip(c);
+        const end = until ?? (c.loop || c.duration == null ? Infinity : at + c.duration);
+        const layer = { clip: c, at, end, fade, weight };
+        layers.push(layer);
+        return layer;
+      },
+      // Ends a layer at t: it fades out from there over its fade.
+      release(layer, t) {
+        layer.end = Math.min(layer.end, t + (layer.fade > 0 ? layer.fade : 0));
+        return self;
+      },
+      // How much of a layer shows at t, from 0 to 1, before its weight.
+      envelope,
+      sample(t, { reduced = false } = {}) {
+        const acc = {};
+        for (const layer of layers) {
+          const k = envelope(layer, t);
+          if (k <= 0) continue;
+          const partial = layer.clip(t - layer.at);
+          combine(acc, reduced ? faceOnly(partial) : partial, k * layer.weight);
+        }
+        return acc;
+      },
+      // Whether any layer is on at t.
+      active(t) {
+        return layers.some(layer => envelope(layer, t) > 0);
+      },
+      // Forgets the layers that ended before t.
+      prune(t) {
+        for (let i = layers.length - 1; i >= 0; i--) if (layers[i].end < t) layers.splice(i, 1);
+        return self;
+      },
+    };
+    return self;
+  }
+
+  // The fields that change a face without moving anything: besides the eye and mouth shapes (the
+  // strings), the lids and the blush.
+  const FACE = ['lid', 'lidTilt', 'flush', 'blush'];
+
+  // The face of a partial pose alone, as reduced motion shows it.
+  function faceOnly(partial) {
+    const out = {};
+    for (const key in partial) if (typeof partial[key] !== 'number' || FACE.includes(key)) out[key] = partial[key];
+    return out;
   }
 
   // --------------------------------------------------------------- Player
@@ -537,7 +585,8 @@
 
   const api = {
     ease, clip, still, rest, track, layer, seq, loop, repeat, speed, delay, remap, pingpong, weight,
-    combine, mix, sample, frames, pulses, blinks, parse, play, lookAt, make, clips, HOP, hopping,
+    combine, mix, sample, frames, pulses, blinks, parse, extend, play, lookAt, make, clips, HOP, hopping,
+    stack, faceOnly, blinkShape, flickShape, swishShape,
   };
   PF.anim = api;
   return api;

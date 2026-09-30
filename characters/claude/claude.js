@@ -50,4 +50,7 @@ PhyFriends.define('claude', {
   // The legs reach y 112, so squash and stretch pivot about that height, and the block turns about the middle of its
   // bottom edge, so that it rocks on its legs.
   rig: { ground: 112, neck: [0, 80] },
+  // Claude keeps every rule but the shape, and its ears are arms, so the emotion library (src/emotion.js) leaves it
+  // out: it moves as the others do, but shows no feelings.
+  emotions: false,
 });

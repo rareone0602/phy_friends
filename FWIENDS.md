@@ -124,18 +124,35 @@ The "psst" and the disclaimer are the page's two winks, both in corners of
 the stage (`STYLE.md` §3): one over the right end of the row, the other
 under its last fwiend.
 
-**Saying hi:**
+**Saying hi, and how they take it.** The fwiends are brought to life by
+`src/live.js`, which any page can use (the specimen's portrait does), and
+their feelings come from the emotion library, one rule each:
 - Hovering over a friend (or tabbing to it) perks it up: ears in, eyes a
-  touch wider. It stays perked while either lasts, click or no click.
-- A click, a tap, Enter or Space plays the library's happy hop: happy eyes,
-  a small mouth, two bounces. The other fwiends glance at the one being
-  greeted.
+  touch wider. It stays perked while either lasts, click or no click. Kept
+  there for a moment and it grows curious: its head tilts one way, then the
+  other.
+- A click, a tap, Enter or Space says hi, with the emotion library's hop for
+  joy: happy eyes, a small mouth, two bounces. The other fwiends glance at
+  the one being greeted.
+- A third hi within six seconds of the first makes a friend shy instead: it
+  blushes, ducks and looks away for a moment.
+- Stroking a friend, with the pointer or a finger moved back and forth over
+  it, makes it content: it shuts its eyes happily, and a ♪ shows once.
+- Left alone for 30 seconds, the fwiends grow sleepy one by one and fall
+  asleep, a z drifting up from each now and then. Claude, a machine, stays
+  up. Any input wakes them: those asleep start, with a "!", nearest the
+  pointer first.
+- Claude shows no feelings. It perks up, watches and hops like the others,
+  but its hi is a hop without a smile, and none of the feelings above
+  touch it.
 - A friend in mid-air ignores another hi until it lands, and a key held down
   says hi once. Starting the hop again would drop it to the ground in one
   frame.
 - A hidden status line tells a screen reader what happened, in one flat
-  sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion.
-  Names keep their owner's case: "phy hops twice."
+  sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion
+  (Claude, having no smile, blinks: "Claude blinks."); "Howdi goes shy.",
+  "Howdi looks content.", "Everyone but Claude falls asleep." and
+  "Everyone wakes up." Names keep their owner's case: "phy hops twice."
 - A double-click or a long press on a friend selects nothing, and a quick
   second tap doesn't zoom the page. The labels stay selectable, so a handle
   can still be copied.
@@ -236,7 +253,7 @@ Follow them when turning someone's picture or design sheet into a friend.
 **Proportions, in head space:** a big head on a small, seated body.
 - The origin sits between the eyes. The head is widest around eye level,
   about 140–190 units across the cheeks.
-- Ear tips reach about −155 (floppy or splayed ears less), and the paws reach
+- Ear tips reach about −155 (floppy ears less), and the paws reach
   `rig.ground`, about +131. A tail may curl out to one side.
 - The eyes are about 13 × 32 units, centred 31–35 either side of the origin.
 - A reference in the house template (a 1254px close-up, head tipped 20°,
@@ -268,9 +285,16 @@ Follow them when turning someone's picture or design sheet into a friend.
 **Layering:** ears, head, face mask, blush, eyes, mouth, then hair on top.
 Bangs may cross the face.
 
-**Expressions come from the pose, not from new drawings:** `eyes: 'happy' |
-'closed'`, `mouth`, `blink`, and ear angles. `eyes.arc` and `eyes.stroke`
-set how wide and thick the happy and closed strokes are.
+**Feelings come from the pose, not from new drawings.** The emotion library
+(`src/emotion.js`) has eleven, each shown with the parts every fwiend on the
+house template has: the eye shapes (`happy`, `closed`, `squint`), a lid held
+over the open eyes (`lid`, slanted by `lidTilt` for a sad or a cross look),
+the blush spreading (`flush`), a mouth (`w`, `smile`, `frown`, `o`, `open`),
+the ears, the tail and the posture. So a spec needs nothing for its
+feelings, and a new fwiend has them all. A feeling's body language follows
+from how pleasant and how alert it is, so feelings that sit close look
+alike. `eyes.arc` and `eyes.stroke` set how wide and thick the happy and
+closed strokes are.
 
 **Keep the spec small.** Tune the `fluffy`, `star` and ear parameters rather
 than writing raw `nodes`. A new friend matches the set in size and in the
@@ -288,7 +312,10 @@ is drawn in raw `nodes`, rounded as a pencil rounds them: its top corners
 are soft and its bottom ones nearly square, so that its sides run straight
 into its outer legs. Its arms take the place of ears and are in its own
 colour, as the glyphs draw them; each turns about a shoulder inside the
-block, so that the arms rise when it is pleased or startled. Its legs are
+block, so that the arms rise as it hops. It moves as the others do but
+shows no feelings: its spec sets `emotions: false`, so the emotion library
+gives it a feeling's movement without the face, and its hi is a hop without
+a smile. Its legs are
 its body, in its one house shade. Its eyes look a whole unit aside (16 head
 units, where the house's move 6), as the glyphs move the notches, and its
 blush is a soft rose, since a pale pink on terracotta reads as a highlight.
@@ -301,8 +328,11 @@ Anthropic's.
 - Each friend works out the direction from its own head to the pointer, so
   the group converges on it. The eyes take the full offset (`lookX/lookY`);
   the head turns about half as much (`turnX/turnY`, drawn as layer parallax).
-- Idle underneath: breathing, blinks at irregular intervals, a slow tail
-  sway, an occasional ear flick. The pencil "boils": its texture is redrawn
+- Idle underneath, the library's idle clip, as in a scene: breathing,
+  blinks at irregular intervals, a slow sway of the head and tail, a glance
+  about now and then and an occasional ear flick, on an 8-second loop that
+  each fwiend starts at a different point. The glances give way whenever
+  there is something to look at. The pencil "boils": its texture is redrawn
   8 times a second, cycling through three versions, as in hand-drawn
   animation.
 - When the pointer leaves the window, or sits still for a while, the fwiends
@@ -313,7 +343,8 @@ Anthropic's.
   hidden, to spare a phone's battery. It keeps its own clock, which stops
   with it, so everything picks up where it left off.
 - With `prefers-reduced-motion`: eyes only, no idle motion, a still
-  pencil, and saying hi changes just the face.
+  pencil, and a hi or a feeling changes just the face (the eye and mouth
+  shapes, the lids and the blush). Marks neither pop nor drift.
 
 ## scenes: films and games
 
@@ -346,6 +377,10 @@ them.
   fwiend's head, not punctuation, so the calm punctuation of `STYLE.md` §3
   doesn't apply to it. Likewise, nobody is given a
   personality, a birthday or any other fact its owner didn't give it.
+- **Feelings are reactions, not temperaments.** Every fwiend feels with
+  the same library, and a feeling answers something that happens in the
+  scene (`actor.feel('surprised', { at })`, with its mark). Nobody is shy,
+  cross or sleepy by nature.
 - Nobody is hurt, frightened for a laugh or beaten by another fwiend. Games
   are won against the clock or the page; a miss ends with a fwiend sitting
   down, not falling over or knocked out. Nobody is blamed for a miss, and
@@ -368,8 +403,8 @@ them.
 - Films boil as the gallery does, 8 times a second (`film/film.js`), and
   keep still under reduced motion.
 - Under `prefers-reduced-motion` a scene plays no idle motion, travel
-  becomes a glide and a greeting changes only the face; a film shows its
-  last frame and waits to be played.
+  becomes a glide and a greeting or a feeling changes only the face; a film
+  shows its last frame and waits to be played.
 
 ---
 

@@ -36,7 +36,7 @@
     withScene({}, (scene, el) => {
       const phy = scene.add('phy', { x: 500 }), yuda = scene.add('yuda', { x: 1100 });
       yuda.enter({ from: 'right', at: 0.2 });
-      phy.look(yuda, { at: 0.5 }).play('happy', { at: 1 });
+      phy.look(yuda, { at: 0.5 }).feel('happy', { at: 1, until: 3 });
       scene.seek(1.3);
       const first = snapshot(el);
       scene.seek(0.1).seek(2.7).seek(1.3);
@@ -51,6 +51,32 @@
       assert(!yuda.visibleAt(0.5), 'hidden before');
       assert(yuda.state(1.2).x > 1100, 'on the way in from the right');
       assertEqual(yuda.state(10).x, 1100);
+    });
+  });
+
+  test('a feeling shows its face and its mark, and a mark that repeats does so while it is held', () => {
+    withScene({}, (scene, el) => {
+      const yuda = scene.add('yuda', { x: 800 });
+      yuda.feel('surprised', { at: 1 }).feel('asleep', { at: 3, until: 9 });
+      scene.seek(1.2);
+      assertEqual(yuda.rig.pose.mouth, 'o', 'the surprised mouth');
+      const shown = () => [...el.querySelectorAll('.pf-mark')].filter(node => node.style.display !== 'none').map(node => node.textContent);
+      assertEqual(shown(), ['!']);
+      scene.seek(6);
+      assertEqual(yuda.rig.pose.eyes, 'closed', 'asleep');
+      assertEqual(shown(), ['z'], 'one z at a time');
+      assertEqual(el.querySelectorAll('.pf-mark').length, 1 + 3, 'a z every 2 s while asleep');
+    });
+  });
+
+  test('a friend that shows no feelings makes their movements without their faces', () => {
+    withScene({}, scene => {
+      const claude = scene.add('claude', { x: 500 }), phy = scene.add('phy', { x: 1100 });
+      claude.greet(phy, { at: 1 }).feel('surprised', { at: 3 });
+      scene.seek(1.3);
+      assert(claude.rig.pose.eyes !== 'happy' && claude.rig.pose.y < 0, 'in the air, without happy eyes');
+      scene.seek(3.2);
+      assert(claude.rig.pose.mouth !== 'o' && claude.rig.pose.y < 0, 'starts, without the surprised mouth');
     });
   });
 
