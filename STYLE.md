@@ -30,8 +30,8 @@ For an agent's brief, when there is no room for the rest:
   from a small source with a script, and when something goes, remove all of
   it.
 - **Few rules (low Kolmogorov complexity).** Derive values rather than pick
-  them. Measure against one named reference. A special case gets a comment
-  saying why.
+  them. Measure against one named reference. If special cases pile up, the
+  rule is wrong.
 - **Not the mode.** The most likely choice (a template, a stock phrase, a
   default chart, a formal tone) is the boring one. Across works, phy stays
   consistent through the rules, not through sameness.
@@ -62,9 +62,8 @@ For an agent's brief, when there is no room for the rest:
   Clean Code. The dial, the lower case and the jokes stop at its edge.
 - **A paper's main diagram**, the picture people remember it by, is drawn
   in the face at `0` with `figures/phy-diagram.sty`.
-- **Show it first.** Discuss before building anything big, ask which part
-  is meant when a request is unclear, put the options side by side, and let
-  phy review before anything is published.
+- **Show it first.** Discuss before building anything big, put the options
+  side by side, and let phy review before anything is published.
 - **Private stays private.**
 
 ## 1. who phy is
@@ -108,8 +107,7 @@ For an agent's brief, when there is no room for the rest:
      reference and what is being matched (shape, colour, size or spacing),
      and measure the difference at the size people will see, rather than
      eyeballing it.
-   - A special case gets a comment saying why. If special cases pile up, the
-     rule is wrong.
+   - Special cases are few. If they pile up, the rule is wrong.
 3. **Don't make it too artificial.** It should feel drawn, not designed:
    honest and quiet.
    - Tilt a hand-drawn thing by up to `2°`, anticlockwise. Let lines wobble,
@@ -173,8 +171,7 @@ puns and irony. Words are few, exact and honest, like a note in the margin.
   another kind.
 - **The exact word, in a short sentence.** A long or academic word is welcome
   when it is the precise one ("orthogonal", "idiosyncratic", "a trade-off"),
-  never to sound clever. The structure stays plain: one idea to a sentence,
-  one line per job. Say how a thing is made ("each one drawn from a
+  never to sound clever. Say how a thing is made ("each one drawn from a
   hundred-odd lines of code") rather than how good it is, with numbers and
   names rather than adjectives.
 - **English only.** Another script appears only inside someone's own name or
@@ -183,9 +180,8 @@ puns and irony. Words are few, exact and honest, like a note in the margin.
   "revolutionary", "leverage" or "unlock". No "welcome" and no calls to
   action ("get started", "learn more"); when the reader can do something,
   say what, plainly.
-- **No ceremony.** Lead with the work. No throat-clearing, no "I hope this
-  finds you well", no titles or credentials before the point, no sign-off.
-  A formal piece is the same voice with the jokes taken out.
+- **No ceremony.** Lead with the work, and end without a sign-off. A formal
+  piece is the same voice with the jokes taken out.
 - **Calm punctuation:** full stops and colons, no exclamation marks and no
   emoji.
 - **Case follows the dial** (§5).
@@ -422,15 +418,15 @@ put together as the specimen is:
 
 **Layout.**
 - One column, `42em` at most, left-aligned against the margin line.
-- Nothing scrolls sideways. Long words break.
 - A page has a title in the hand, one line of intro, the content, and a
   small footer. Nothing else is required.
 
 **Small print.** The nav, a date line and the footer are small print in
 `--ink-2`.
 - The nav sits on the rule under the intro, its items spaced apart: plain
-  words, underlined only while hovered. The current page wears the ring. There are no menus and no hamburgers, and a
-  page in one part needs no nav at all.
+  words, underlined only while hovered. The current page wears the ring.
+  There are no menus and no hamburgers, and a page in one part needs no nav
+  at all.
 - A date line and the footer split their items with middle dots: "28 sep 2026
   · pencils · paper". Tags are plain words: no pills and no #.
 
@@ -458,7 +454,6 @@ and wraps rather than scrolls.
 **Tables.** The rules are the rows: no borders, stripes or vertical lines.
 - The head is in the hand in `--ink-2`, and the rule under it is gone over in
   pencil.
-- Numbers are right-aligned.
 - A cell that wraps takes whole rules.
 - A phone fits three columns. Fold the rest into a label, or split the table.
 
@@ -548,7 +543,6 @@ the paper; where two still sat too close, one took another step.
   the series colour at `16%`.
 - Label lines at their ends. Use a legend only where labels would collide,
   and give it no frame.
-- Bars start at zero.
 - Words and numbers are in the face at the neat end of the dial, `0`.
   matplotlib can't turn the dial, and the font file's default is exactly
   that. Register it before plotting, or matplotlib falls back to Helvetica
@@ -561,12 +555,11 @@ the paper; where two still sat too close, one took another step.
   versions: the last one halves it". Never just "results".
 - A chart is made by a script and redrawn by running it again, never
   touched up by hand.
-- Check that everything reads at the size it will be seen.
 
 **Slides.** A slide is the notebook page with everything `×1.5`: at
 `1280×720` the rules are `48px` apart, 15 to a slide, and the title is `96px`.
 A chart on a slide takes the slides overlay's sizes rather than `×1.5`.
-- One idea per slide, and the title states the point, not the topic.
+- The title states the point, not the topic.
 - A chart gets blank paper with no rules behind it, since they would read
   as gridlines. The slides overlay's paper-toned figure covers them.
 - One note with an arrow may point at the one thing to see.
@@ -639,26 +632,8 @@ the lower-case chrome and the humour stop at its edge.
   text, a label, an error message) are copy, and follow §3.
 - **Formal.** Comments and docstrings are full sentences in sentence case,
   plain and precise: no jokes, no asides and no metaphors.
-- **Names reveal intent.** A name says what a thing is or does, and can be
-  said aloud and searched for. Use one word per concept across a codebase;
-  no cute names, no puns, and no abbreviations beyond the field's own
-  (`rgb`, `L*`). A number that means something gets a name (principle 2).
-- **Functions are small and do one thing**, at one level of abstraction,
-  with few arguments and no hidden side effects. A file reads from the top
-  down, each caller above what it calls.
-- **Comments say why**: intent, a constraint, a warning, a reference
-  ("STYLE.md §5"). If a comment has to explain what the code does, rename or
-  extract instead. No commented-out code, no changelogs and no bylines; git
-  keeps those.
-- **Errors** are raised with a message that says what went wrong and what to
-  do, not returned as codes.
-- **Tests** are as clean as the code: one concept each, fast, independent
-  and repeatable.
-- **Formatting** follows the language's convention (PEP 8 for Python) and
-  the project's formatter, so a codebase reads as if one person wrote it.
-- **Commit messages** have a subject line in the imperative and in sentence
-  case, of about 50 characters ("Add the formality dial"), and the why in
-  the body.
+- **Plain names:** no cute names, no puns, and no abbreviations beyond the
+  field's own (`rgb`, `L*`).
 
 ## 11. working with phy
 
@@ -668,8 +643,6 @@ For anyone, or any agent, making something for phy:
 - **Show, don't describe.** Render the options and put them side by side.
   Rules about looks are settled by looking; once one is settled, write it
   down at the source.
-- **Ask which part** when a request names a region or a word that could mean
-  two things, before changing anything. A marked-up crop helps.
 - **Let phy review before anything is published.** Pushing, posting and
   sharing are phy's call, each time.
 - **Keep folders tidy:** one folder per thing, with its examples beside it,

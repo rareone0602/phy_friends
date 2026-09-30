@@ -52,7 +52,7 @@
 <p class="lead">For an agent's brief, when there is no room for the rest:</p>
 <ul>
 <li><strong>Work in pencil.</strong> Keep everything easy to erase cleanly and redo: make it from a small source with a script, and when something goes, remove all of it.</li>
-<li><strong>Few rules (low Kolmogorov complexity).</strong> Derive values rather than pick them. Measure against one named reference. A special case gets a comment saying why.</li>
+<li><strong>Few rules (low Kolmogorov complexity).</strong> Derive values rather than pick them. Measure against one named reference. If special cases pile up, the rule is wrong.</li>
 <li><strong>Not the mode.</strong> The most likely choice (a template, a stock phrase, a default chart, a formal tone) is the boring one. Across works, phy stays consistent through the rules, not through sameness.</li>
 <li><strong>Don't make it too artificial.</strong> No gradients, glows, glass, drop shadows, emoji, stock icons, hype or template layouts.</li>
 <li><strong>Graphite on paper, never black.</strong> Colour goes only to the subject, a character or the data, and red only to an error. A character is coloured in with coloured pencil, has no outline and wears one shade, a single step darker; data colour is flat.</li>
@@ -64,7 +64,7 @@
 <li><strong>British English, as The Economist writes it:</strong> opinionated, analytical and dry; British in idiom and grammar, not merely in spelling; the exact word in a short sentence, and numbers rather than adjectives. No ceremony and no exclamation marks. The humour is dark, with puns and irony, and stays out of formal work.</li>
 <li><strong>Code is American English</strong>, formal and clean, after Robert C. Martin's Clean Code. The dial, the lower case and the jokes stop at its edge.</li>
 <li><strong>A paper's main diagram</strong>, the picture people remember it by, is drawn in the face at <code>0</code> with <code>figures/phy-diagram.sty</code>.</li>
-<li><strong>Show it first.</strong> Discuss before building anything big, ask which part is meant when a request is unclear, put the options side by side, and let phy review before anything is published.</li>
+<li><strong>Show it first.</strong> Discuss before building anything big, put the options side by side, and let phy review before anything is published.</li>
 <li><strong>Private stays private.</strong></li>
 </ul>
 <h2 id="1-who-phy-is">1. who phy is</h2>
@@ -89,7 +89,7 @@
 <ul>
 <li>Derive values rather than pick them: shades from colours, and every vertical measure from the rule spacing.</li>
 <li>Measure against one standard. When matching something, name the one reference and what is being matched (shape, colour, size or spacing), and measure the difference at the size people will see, rather than eyeballing it.</li>
-<li>A special case gets a comment saying why. If special cases pile up, the rule is wrong.</li>
+<li>Special cases are few. If they pile up, the rule is wrong.</li>
 </ul></li>
 <li><strong>Don't make it too artificial.</strong> It should feel drawn, not designed: honest and quiet.
 <ul>
@@ -118,10 +118,10 @@ An owner's wish beats a house rule. A character appears only with its owner's sa
 <ul>
 <li><strong>British English, all the way down.</strong> The spelling is British (colour, centre, grey, programme, -ise), and so are the vocabulary, grammar, collocations and phrasal verbs: "at the weekend", "in hospital", "a fortnight", "take a decision", "have got", "I've just finished", "sort it out", "muddle through". American prose in British spelling, a New York Times piece run through a spell-checker, is not British English.</li>
 <li><strong>Take a view, and show the working.</strong> Say which is better and why, with the evidence or the mechanism behind it. Hedging everything is ceremony of another kind.</li>
-<li><strong>The exact word, in a short sentence.</strong> A long or academic word is welcome when it is the precise one ("orthogonal", "idiosyncratic", "a trade-off"), never to sound clever. The structure stays plain: one idea to a sentence, one line per job. Say how a thing is made ("each one drawn from a hundred-odd lines of code") rather than how good it is, with numbers and names rather than adjectives.</li>
+<li><strong>The exact word, in a short sentence.</strong> A long or academic word is welcome when it is the precise one ("orthogonal", "idiosyncratic", "a trade-off"), never to sound clever. Say how a thing is made ("each one drawn from a hundred-odd lines of code") rather than how good it is, with numbers and names rather than adjectives.</li>
 <li><strong>English only.</strong> Another script appears only inside someone's own name or a quote of theirs.</li>
 <li><strong>No hype.</strong> No "magical", "seamless", "powerful", "novel", "revolutionary", "leverage" or "unlock". No "welcome" and no calls to action ("get started", "learn more"); when the reader can do something, say what, plainly.</li>
-<li><strong>No ceremony.</strong> Lead with the work. No throat-clearing, no "I hope this finds you well", no titles or credentials before the point, no sign-off. A formal piece is the same voice with the jokes taken out.</li>
+<li><strong>No ceremony.</strong> Lead with the work, and end without a sign-off. A formal piece is the same voice with the jokes taken out.</li>
 <li><strong>Calm punctuation:</strong> full stops and colons, no exclamation marks and no emoji.</li>
 <li><strong>Case follows the dial</strong> (§5).
 <ul>
@@ -283,7 +283,6 @@ An owner's wish beats a house rule. A character appears only with its owner's sa
 <p class="lead"><strong>Layout.</strong></p>
 <ul>
 <li>One column, <code>42em</code> at most, left-aligned against the margin line.</li>
-<li>Nothing scrolls sideways. Long words break.</li>
 <li>A page has a title in the hand, one line of intro, the content, and a small footer. Nothing else is required.</li>
 </ul>
 <p class="lead"><strong>Small print.</strong> The nav, a date line and the footer are small print in <code>--ink-2</code>.</p>
@@ -305,7 +304,6 @@ An owner's wish beats a house rule. A character appears only with its owner's sa
 <p class="lead"><strong>Tables.</strong> The rules are the rows: no borders, stripes or vertical lines.</p>
 <ul>
 <li>The head is in the hand in <code>--ink-2</code>, and the rule under it is gone over in pencil.</li>
-<li>Numbers are right-aligned.</li>
 <li>A cell that wraps takes whole rules.</li>
 <li>A phone fits three columns. Fold the rest into a label, or split the table.</li>
 </ul>
@@ -362,16 +360,14 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li>Draw two spines, short ticks, no box and no grid. Where a grid helps, draw pale rules (<code>#cfdbe8</code>, <code>0.6pt</code>) across y only, under the data.</li>
 <li>Lines are <code>1.2pt</code> with round caps. Fills are flat, and a band of spread is the series colour at <code>16%</code>.</li>
 <li>Label lines at their ends. Use a legend only where labels would collide, and give it no frame.</li>
-<li>Bars start at zero.</li>
 <li>Words and numbers are in the face at the neat end of the dial, <code>0</code>. matplotlib can't turn the dial, and the font file's default is exactly that. Register it before plotting, or matplotlib falls back to Helvetica Neue without a word: <code>font_manager.fontManager.addfont('figures/fonts/ShantellSans-Variable.ttf')</code>. A chart inside a document with its own typeface takes that typeface instead (the print overlay).</li>
 <li>No wobble and no graphite filter: on a chart they look bent, not drawn.</li>
 <li>A caption says what is shown, then what it shows: "build time for four versions: the last one halves it". Never just "results".</li>
 <li>A chart is made by a script and redrawn by running it again, never touched up by hand.</li>
-<li>Check that everything reads at the size it will be seen.</li>
 </ul>
 <p class="lead"><strong>Slides.</strong> A slide is the notebook page with everything <code>×1.5</code>: at <code>1280×720</code> the rules are <code>48px</code> apart, 15 to a slide, and the title is <code>96px</code>. A chart on a slide takes the slides overlay's sizes rather than <code>×1.5</code>.</p>
 <ul>
-<li>One idea per slide, and the title states the point, not the topic.</li>
+<li>The title states the point, not the topic.</li>
 <li>A chart gets blank paper with no rules behind it, since they would read as gridlines. The slides overlay's paper-toned figure covers them.</li>
 <li>One note with an arrow may point at the one thing to see.</li>
 <li>The bottom line, in small print, gives the source and what is missing: "one run each; no error bars".</li>
@@ -400,20 +396,13 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li><strong>American English</strong> in identifiers, comments, docstrings and commit messages: <code>color</code>, <code>center</code>, <code>gray</code>, <code>normalize</code>, <code>behavior</code>, <code>license</code>, <code>labeled</code>, <code>toward</code>. Words the code puts in front of people (a page's text, a label, an error message) are copy, and follow §3.</li>
 <li><strong>Formal.</strong> Comments and docstrings are full sentences in sentence case, plain and precise: no jokes, no asides and no metaphors.</li>
-<li><strong>Names reveal intent.</strong> A name says what a thing is or does, and can be said aloud and searched for. Use one word per concept across a codebase; no cute names, no puns, and no abbreviations beyond the field's own (<code>rgb</code>, <code>L*</code>). A number that means something gets a name (principle 2).</li>
-<li><strong>Functions are small and do one thing</strong>, at one level of abstraction, with few arguments and no hidden side effects. A file reads from the top down, each caller above what it calls.</li>
-<li><strong>Comments say why</strong>: intent, a constraint, a warning, a reference ("STYLE.md §5"). If a comment has to explain what the code does, rename or extract instead. No commented-out code, no changelogs and no bylines; git keeps those.</li>
-<li><strong>Errors</strong> are raised with a message that says what went wrong and what to do, not returned as codes.</li>
-<li><strong>Tests</strong> are as clean as the code: one concept each, fast, independent and repeatable.</li>
-<li><strong>Formatting</strong> follows the language's convention (PEP 8 for Python) and the project's formatter, so a codebase reads as if one person wrote it.</li>
-<li><strong>Commit messages</strong> have a subject line in the imperative and in sentence case, of about 50 characters ("Add the formality dial"), and the why in the body.</li>
+<li><strong>Plain names:</strong> no cute names, no puns, and no abbreviations beyond the field's own (<code>rgb</code>, <code>L*</code>).</li>
 </ul>
 <h2 id="11-working-with-phy">11. working with phy</h2>
 <p class="lead">For anyone, or any agent, making something for phy:</p>
 <ul>
 <li><strong>Discuss before building</strong> anything big. Say what you'll make and wait for a yes.</li>
 <li><strong>Show, don't describe.</strong> Render the options and put them side by side. Rules about looks are settled by looking; once one is settled, write it down at the source.</li>
-<li><strong>Ask which part</strong> when a request names a region or a word that could mean two things, before changing anything. A marked-up crop helps.</li>
 <li><strong>Let phy review before anything is published.</strong> Pushing, posting and sharing are phy's call, each time.</li>
 <li><strong>Keep folders tidy:</strong> one folder per thing, with its examples beside it, and working output in a git-ignored <code>out/</code> (principle 1).</li>
 <li><strong>Fanning out is welcome:</strong> phy is happy for a big job to go to several agents in parallel. Visual work then goes to an adversarial reviewer who knows the references.</li>
