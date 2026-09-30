@@ -218,6 +218,23 @@
     });
   });
 
+  test('falling asleep is told once a visit, and waking is not told when the reader only moves about the page', () => {
+    withStage(['howdi', 'phy'], { ...moving, doze: 1 }, (stage, friends, said) => {
+      // From t, a second for the wait, then long enough for everyone to fall asleep.
+      const dozeFrom = t => { stage.draw(t + 1); stage.draw(t + 1 + L.DOZE.spread + L.DOZE.asleep + 1); };
+      stage.draw(0);
+      dozeFrom(0);
+      assertEqual(said, ['Everyone falls asleep.']);
+      stage.noteInput(null, { quiet: true });
+      assertEqual(said, ['Everyone falls asleep.'], 'a scroll or a Tab wakes them quietly');
+      dozeFrom(stage.seconds);
+      assert(stage.dozing, 'asleep again');
+      assertEqual(said.length, 1, 'and not told again');
+      stage.noteInput({ x: 0, y: 0 });
+      assertEqual(said.at(-1), 'Everyone wakes up.', 'a click or the pointer wakes them aloud');
+    });
+  });
+
   test('the hold and feel options hold a greeting or a feeling still, for screenshots', () => {
     withStage(['phy', 'claude'], { ...moving, pointer: { x: 0, y: 0 }, feel: 'sad' }, (stage, [phy, claude]) => {
       stage.draw(0.5);

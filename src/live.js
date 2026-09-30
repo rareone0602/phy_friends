@@ -157,6 +157,9 @@
   // ------------------------------------------------------------ Stage
 
   const ANNOUNCEMENT_GAP_MS = 100;  // Screen readers repeat a message only if the region was empty for a moment.
+  // Keys that move focus or scroll the page, which wake the friends quietly.
+  const MOVING_KEYS = new Set(['Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End',
+    'Shift', 'Control', 'Alt', 'Meta']);
 
   // Says a message in a live region. The region is emptied first, so that a second hop is announced
   // even when its message is the same as the first.
@@ -195,7 +198,7 @@
     // The stage keeps its own clock, which stands still while the stage is out of sight, so that idle
     // cycles, reactions and dozing carry on from where they stopped.
     let clock = 0, lastFrame = 0, frameRequest = 0, frameTimer = 0, inView = true, started = false;
-    let lastInput = 0, doze = null;
+    let lastInput = 0, doze = null, toldAsleep = false;
     addStyle();
 
     const self = {
@@ -372,19 +375,22 @@
     }
 
     // Any input keeps the friends awake, and wakes them if they doze. The listeners capture, so that a
-    // friend is awake before a click or a key reaches it.
+    // friend is awake before a click or a key reaches it. Input that only moves about the page (a
+    // scroll, focus moving, or a key that does either) wakes them quietly, so that the live region does
+    // not talk over what a screen reader says about the move.
     function listenForInput() {
-      const input = event => noteInput(pointOf(event));
+      const input = event => noteInput(pointOf(event), { quiet: event.type === 'wheel' || (event.type === 'keydown' && MOVING_KEYS.has(event.key)) });
       for (const type of ['pointerdown', 'keydown', 'wheel', 'touchstart']) addEventListener(type, input, { capture: true, passive: true });
       addEventListener('pointermove', event => { if (event.pointerType !== 'touch') input(event); }, { capture: true, passive: true });
-      addEventListener('scroll', () => noteInput(null), { capture: true, passive: true });
-      addEventListener('focusin', () => noteInput(null), true);
+      addEventListener('scroll', () => noteInput(null, { quiet: true }), { capture: true, passive: true });
+      addEventListener('focusin', () => noteInput(null, { quiet: true }), true);
     }
 
-    // Notes input at point (client px), or at no point for a key or a scroll.
-    function noteInput(point = null) {
+    // Notes input at point (client px), or at no point for a key or a scroll; quiet input wakes the
+    // friends without saying so.
+    function noteInput(point = null, { quiet = false } = {}) {
       lastInput = clock;
-      if (doze) wake(point);
+      if (doze) wake(point, { quiet });
       hurry();
     }
 
@@ -418,16 +424,18 @@
           entry.record.friend.feel('asleep', { at: entry.asleepAt });
         }
       }
+      // Falling asleep is told once a visit: after that, a screen reader knows what a quiet page means.
       if (!doze.asleep && doze.entries.every(entry => entry.asleep)) {
         doze.asleep = true;
         const awake = records.filter(record => !record.friend.fits).map(record => record.friend.label);
-        o.announce(dozeAnnouncement(doze.entries.map(entry => entry.record.friend.label), awake));
+        if (!toldAsleep) o.announce(dozeAnnouncement(doze.entries.map(entry => entry.record.friend.label), awake));
+        toldAsleep = true;
       }
     }
 
     // Wakes the friends: those asleep with a start, the nearest to point first (all at once for a key),
-    // and those only sleepy by opening their eyes.
-    function wake(point = null) {
+    // and those only sleepy by opening their eyes. Unless quiet, it says so.
+    function wake(point = null, { quiet = false } = {}) {
       if (!doze) return;
       const t = clock, woken = [];
       for (const entry of doze.entries) {
@@ -439,7 +447,7 @@
         } else if (entry.sleepy) entry.record.friend.calm(t);
       }
       doze = null;
-      if (woken.length) o.announce(wakeAnnouncement(woken, records.filter(record => record.friend.fits).length));
+      if (woken.length && !quiet) o.announce(wakeAnnouncement(woken, records.filter(record => record.friend.fits).length));
     }
 
     // ---- A friend

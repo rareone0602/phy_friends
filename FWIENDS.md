@@ -167,7 +167,10 @@ their feelings come from the emotion library, one rule each:
   sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion;
   "Howdi goes shy.", "Howdi looks content.", "Everyone but Claude falls
   asleep." and "Everyone wakes up." Names keep their owner's case: "phy
-  hops twice."
+  hops twice." Falling asleep is told once a visit, and a wake is not told
+  when the reader only moves about the page (a scroll, or Tab, the arrows
+  and the like), so that the line never talks over the screen reader's
+  own account of the move.
 - A double-click or a long press on a friend selects nothing and opens no
   menu, and a quick second tap doesn't zoom the page. The labels stay
   selectable, so a handle can still be copied.
