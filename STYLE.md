@@ -17,8 +17,9 @@ rework. Colour belongs only to what the work is about.
 guide wins; where the guide is wrong, it is corrected here. The source is
 `STYLE.md` in [rareone0602/phy_friends](https://github.com/rareone0602/phy_friends),
 also at [its raw address](https://raw.githubusercontent.com/rareone0602/phy_friends/main/STYLE.md)
-for an agent to read. Other projects copy the kit (§7) and point to the
-source, so every copy stays the same.
+for an agent to read. Other projects copy the kit (§7) from the same commit
+as the guide and point to the source. A copy does not update itself: when
+the source changes, copy it again.
 
 ---
 
@@ -34,14 +35,17 @@ For an agent's brief, when there is no room for the rest:
 - **Not the mode.** The most likely choice (a template, a stock phrase, a
   default chart, a formal tone) is the boring one. Across works, phy stays
   consistent through the rules, not through sameness.
-- **Don't make it too artificial.** No gradients, glows, glass, heavy
+- **Don't make it too artificial.** No gradients, glows, glass, drop
   shadows, emoji, stock icons, hype or template layouts.
 - **Graphite on paper, never black.** Colour goes only to the subject, a
-  character or the data. A character is coloured in with coloured pencil and
-  has no outline; data colour is flat. Either has at most one shade step.
+  character or the data, and red only to an error. A character is coloured
+  in with coloured pencil, has no outline and wears one shade, a single
+  step darker; data colour is flat.
 - **One hand on one dial.** Everything is in Shantell Sans, set by one
   number: `0` for a paper's diagram, `50` for a site, `100` for a hobby
-  project. Titles, notes and names are never neater than `50`.
+  project. Titles, notes and names are never neater than `50`, except on a
+  chart, which is all at `0`. Code is in the system monospace, and a host
+  that sets its own type (a paper's text, a README) keeps it.
 - **Keep a set aligned**: within one set, in look, size and structure.
 - **Tell things apart first**, but never simplify away what makes a thing
   itself.
@@ -55,10 +59,10 @@ For an agent's brief, when there is no room for the rest:
   and no exclamation marks. The humour is dark, with puns and irony, and
   stays out of formal work.
 - **Code is American English**, formal and clean, after Robert C. Martin's
-  *Clean Code*. The dial, the lower case and the jokes stop at its edge.
+  Clean Code. The dial, the lower case and the jokes stop at its edge.
 - **A paper's main diagram**, the picture people remember it by, is drawn
   in the face at `0` with `figures/phy-diagram.sty`.
-- **Show, then ship.** Discuss before building anything big, ask which part
+- **Show it first.** Discuss before building anything big, ask which part
   is meant when a request is unclear, put the options side by side, and let
   phy review before anything is published.
 - **Private stays private.**
@@ -66,7 +70,8 @@ For an agent's brief, when there is no room for the rest:
 ## 1. who phy is
 
 - **phy**, always lower case, even at the start of a sentence. The handle is
-  `rareone0602` on GitHub and X.
+  `rareone0602` on GitHub and X; a credit to phy links to
+  [LinkedIn](https://www.linkedin.com/in/po-hung-yeh-6a8134116).
 - **A pencil user**, who likes work that can be erased cleanly and reworked.
 - **Work over ceremony.** phy skips formality put on for show, lets the work
   speak, and looks for more than one way to put an idea. The single most
@@ -86,9 +91,10 @@ For an agent's brief, when there is no room for the rest:
 
 1. **Work in pencil.** Everything should be as easy to erase and redraw as a
    pencil line.
-   - Keep sources, not results. A spec, a script or a Markdown file is the
-     source, and pictures, pages and figures are generated from it. Never
-     hand-edit a generated file.
+   - Keep the source and the command that builds from it. A spec, a script
+     or a Markdown file is the source, and pictures, pages and figures are
+     built from it. Working output goes in a git-ignored `out/`; a built file
+     is committed only where publishing needs it, and never edited by hand.
    - Erase cleanly. When something goes, all of it goes: no leftover
      references, no half-renamed words, no commented-out code. Git remembers
      the old version.
@@ -98,8 +104,10 @@ For an agent's brief, when there is no room for the rest:
 2. **Few rules (low Kolmogorov complexity).**
    - Derive values rather than pick them: shades from colours, and every
      vertical measure from the rule spacing.
-   - Measure against one standard. Pick one reference, say which it is, and
-     lower the diff against it rather than eyeballing.
+   - Measure against one standard. When matching something, name the one
+     reference and what is being matched (shape, colour, size or spacing),
+     and measure the difference at the size people will see, rather than
+     eyeballing it.
    - A special case gets a comment saying why. If special cases pile up, the
      rule is wrong.
 3. **Don't make it too artificial.** It should feel drawn, not designed:
@@ -107,18 +115,22 @@ For an agent's brief, when there is no room for the rest:
    - Tilt a hand-drawn thing by up to `2°`, anticlockwise. Let lines wobble,
      and leave horizontal spacing a little uneven. Vertical measures still
      sit on the rules.
-   - Never use gradients, glassmorphism, glows, heavy drop shadows, emoji
-     bullets, stock icons, marketing hero copy, calls to action, generic card
-     grids, or a layout snapped to a grid.
+   - Never use gradients, glassmorphism, glows, drop shadows, emoji bullets,
+     stock icons, marketing hero copy, calls to action ("get started", "sign
+     up") or generic card grids.
 4. **Graphite on paper; colour for the subject.** Everything is in paper and
    ink tones except what the work is about. On a page of characters, the
    characters are the only saturated things. In a figure, the data is.
 5. **One layer.** Colour goes on in one layer: flat in a chart, in coloured
-   pencil on a character (§9). Each colour may have at most one shade, a
-   single step darker. The shade is used only to tell apart two neighbours
-   of the same colour. There are no lighting effects, highlights or second
-   steps, and nothing is copied from a reference's light and shade. The
-   pencil's texture is the same everywhere, so it is paper, not shading.
+   pencil on a character (§9). Each colour may have at most one shade, the
+   house step darker: CIELAB L* `−10` and chroma `×1.2` at the same hue,
+   with a near-grey leaning to lavender, as `shadeOf` in `src/phyfriends.js`
+   computes it. The shade is used only to tell apart two neighbours of the
+   same colour, such as a character's body under its head. There are no
+   lighting effects, highlights or second steps, and nothing is copied from
+   a reference's light and shade. The pencil's texture is the same
+   everywhere, so it is paper, not shading. A scale of data values (§8) is
+   data, not shading.
 6. **Keep the set aligned.** Within a set (a family of characters, a figure
    series, a deck), anything new matches what is already there in look, size
    and structure. Where the set is made of code, as a family of character
@@ -148,14 +160,14 @@ For an agent's brief, when there is no room for the rest:
 
 ## 3. words
 
-The model is *The Economist*: opinionated, analytical and dry, with wit,
+The model is The Economist: opinionated, analytical and dry, with wit,
 puns and irony. Words are few, exact and honest, like a note in the margin.
 - **British English, all the way down.** The spelling is British (colour,
   centre, grey, programme, -ise), and so are the vocabulary, grammar,
   collocations and phrasal verbs: "at the weekend", "in hospital", "a
   fortnight", "take a decision", "have got", "I've just finished", "sort it
-  out", "muddle through". American prose in British spelling, a *New York
-  Times* piece run through a spell-checker, is not British English.
+  out", "muddle through". American prose in British spelling, a New York
+  Times piece run through a spell-checker, is not British English.
 - **Take a view, and show the working.** Say which is better and why, with
   the evidence or the mechanism behind it. Hedging everything is ceremony of
   another kind.
@@ -169,7 +181,8 @@ puns and irony. Words are few, exact and honest, like a note in the margin.
   a quote of theirs.
 - **No hype.** No "magical", "seamless", "powerful", "novel",
   "revolutionary", "leverage" or "unlock". No "welcome" and no calls to
-  action.
+  action ("get started", "learn more"); when the reader can do something,
+  say what, plainly.
 - **No ceremony.** Lead with the work. No throat-clearing, no "I hope this
   finds you well", no titles or credentials before the point, no sign-off.
   A formal piece is the same voice with the jokes taken out.
@@ -179,11 +192,14 @@ puns and irony. Words are few, exact and honest, like a note in the margin.
   - From `50` up (a site, notes, slides, a poster, a hobby project), the
     chrome is lower case: titles, headings, intros, nav, labels, notes,
     captions, buttons and footers. Running prose is in sentence case.
-  - At `0` (a paper's diagram), and in plain text the face can't reach
+  - Below `50` (a paper's diagram), and in plain text the face can't reach
     (READMEs, email), write in sentence case throughout.
   - A chart takes the case of the work it sits in, though its face is always
     at `0`.
-  - Names always keep their owner's case.
+  - People's and characters' names always keep their owner's case. Other
+    names in lower-case chrome, such as a species in a label or a site's
+    name as a link, go lower case with it; in running prose they keep
+    their capitals.
 - **Person.** A page talks about the work. Where phy speaks for themself, as
   in a credit line, it may say "me". The reader is "you", told the one thing
   they can do.
@@ -231,8 +247,10 @@ The tokens, from `site/notebook.css`:
   --red: #a64a3f;       /* For errors only. */
   --face: 'Shantell Sans', ui-rounded, system-ui, sans-serif;
   --informal: 50;       /* The dial (§5): 0 a paper's diagram, 50 a site, 100 a hobby project. */
-  --sit: calc(var(--L) / 2 - 1px - .35em);  /* Moves a line onto its rule (§5). */
 }
+/* Moves a line onto its rule (§5). It is declared on every element, not on :root,
+   so that each resolves the em at its own size and a part with its own --L gets its own. */
+*, ::before, ::after { --sit: calc(var(--L) / 2 - 1px - .35em); }
 ```
 
 The inks, measured on the paper:
@@ -264,19 +282,27 @@ setting of the one voice, never a different voice. Above the neat end, a
 letter that repeats is drawn a little differently each time (the face swaps
 in alternates by itself), so no two words come out the same.
 
+Two things keep other type: code, in the system monospace, and words in a
+host that sets its own (a paper's text and maths, a README on GitHub).
+
 **The dial.** Each piece of work has one number, `--informal`, from `0` to
 `100`:
 - `0` for a paper's diagram, and for charts (matplotlib can't turn it);
 - `50` for a site, notes, slides and posters;
 - `100` for a hobby project: the face as informal as it goes.
 
-A piece may sit anywhere in between; these are the usual stops.
+The number follows what the work is, not where it appears: a hobby
+project's site is at `100`. A piece may sit anywhere in between; these are
+the usual stops.
 
 **The print and the hand.** Running words, the print, sit at the work's
 number, which is the face's informality (`INFM`). A few words written
 rather than set, the hand (titles, headings, notes, captions, table heads
 and names), are never neater than `50`, and in the top half of the dial
-they bounce as well (`BNCE`, rising to `50` at the top).
+they bounce as well (`BNCE`, rising to `50` at the top). For a work at `d`,
+the print is at `INFM d` with no bounce, and the hand at
+`INFM max(d, 50)`, `BNCE max(d − 50, 0)`. A chart's words, hand and print
+alike, are all at `0` (§8).
 - Past `50` a lower-case s grows towards a capital. A site stops there, so
   "saved" still reads as "saved"; a hobby project goes all the way, big s
   and all.
@@ -290,7 +316,8 @@ they bounce as well (`BNCE`, rising to `50` at the top).
 | a hobby project, `100` | loosest | loosest, bouncing |
 
 **Weight is pressure.** Everything is Light (`300`). Bold is `600`, the
-pencil pressed harder. There are no other weights and no italics.
+pencil pressed harder. There are no other weights and no italics, not even
+for the title of a book.
 
 **Sizes** step by `1.2` from the `18px` print. On a phone the hand and the
 intro step down one; the rest of the print keeps its size.
@@ -320,6 +347,9 @@ intro step down one; the rest of the print keeps its size.
   print.
 - A title is a few words: about 12 letters fit on one line on a phone. It
   sits on the first rule, and the rule under it stays blank for its tails.
+  On a phone the title is two rules tall, which gives its tails room, so
+  the intro follows at once; a title too long for the phone shrinks to fit
+  rather than wrap.
 - **Loading it:**
   `https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap`,
   about 170 KB for Latin. `site/notebook.css` sets the dial; a page changes
@@ -336,18 +366,21 @@ intro step down one; the rest of the print keeps its size.
 
 Every mark is a single pencil stroke: an SVG path with round caps, `1.1–1.5px`
 wide, in an ink, never filled. There are nine:
-- a **ground line** along a rule, for a character to stand on;
+- a **ground line** along a rule, for a character to stand on, or in
+  `--ink-2` going over a rule (under a table's head, under a field);
 - a **ring**, one loose loop that doesn't quite close, round "this one": the
   current page, or the one thing that matters;
 - an **arrow** from a note to what it's about;
-- a **squiggle** for a break;
+- a **squiggle** for a break, or while loading; in red, it is the wave
+  under a field in error;
 - a **side line** down a quote;
 - a **box** round the one primary button;
 - a **tick**;
 - a **cross**, in red, for errors;
 - a **caret** on a select.
 
-If something needs a tenth mark, write a word instead.
+If something needs a tenth mark, write a word instead. A mark may turn to
+point somewhere or grow a size to hold its own; it is still the same mark.
 
 - **Focus** is a dashed pencil outline, `1.5px` in `--ink-2`, `3–4px` clear of
   the thing.
@@ -378,7 +411,14 @@ If something needs a tenth mark, write a word instead.
 - `figures/`, for charts and diagrams (§8);
 - the graphite filter (§6).
 
-`specimen.html` shows every part below, working, on the rules.
+`specimen.html` shows every part below, working, on the rules. A page is
+put together as the specimen is:
+- `<html lang="en-GB">`, with the colour-scheme meta (§4);
+- in the head, the face (§5), then `notebook.css`, then `pencil.css`, and
+  `--informal` set on `:root` where the work is not at `50`;
+- the graphite filter first in the body;
+- a `main` holding a `header` (the title, the intro and any nav), the
+  writing inside `.doc`, and a `footer`.
 
 **Layout.**
 - One column, `42em` at most, left-aligned against the margin line.
@@ -388,8 +428,8 @@ If something needs a tenth mark, write a word instead.
 
 **Small print.** The nav, a date line and the footer are small print in
 `--ink-2`.
-- The nav sits on the rule under the intro, its items spaced apart. The
-  current page wears the ring. There are no menus and no hamburgers, and a
+- The nav sits on the rule under the intro, its items spaced apart: plain
+  words, underlined only while hovered. The current page wears the ring. There are no menus and no hamburgers, and a
   page in one part needs no nav at all.
 - A date line and the footer split their items with middle dots: "28 sep 2026
   · pencils · paper". Tags are plain words: no pills and no #.
@@ -473,10 +513,9 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 ```
 
 **Data colours** come from phy's characters. Each is a character's colour
-taken down in the one-shade step (CIELAB L* `−10`, chroma `×1.2`, same hue)
-until it holds `3:1` on the paper; where two still sat too close, one took
-another step. `python3 figures/palette.py` derives them again and prints the
-tests.
+taken down in the house shade step (principle 5) until it holds `3:1` on
+the paper; where two still sat too close, one took another step.
+`python3 figures/palette.py` derives them again and prints the tests.
 
 | series | colour | shade |
 |---|---|---|
@@ -493,8 +532,9 @@ tests.
 - Take the colours in order. A series keeps its colour from figure to figure,
   never its rank.
 - **Data on a scale** takes the blue in the same steps: `#e4f3ff` `#abdafe`
-  `#83c0ea` `#55a6d7` `#0c8dc3` `#09729f` `#06587c`. The lightest two are for
-  fills only.
+  `#83c0ea` `#55a6d7` `#0c8dc3` `#09729f` `#06587c`. The lightest four fall
+  short of `3:1` on the paper, so they are for fills only; a line or a
+  small mark takes one of the last three.
 - **Data either side of a middle** takes the blue and the red, with the
   paper in the middle.
 - The five fall into only two tiers of grey. A figure that may be printed in
@@ -525,6 +565,7 @@ tests.
 
 **Slides.** A slide is the notebook page with everything `×1.5`: at
 `1280×720` the rules are `48px` apart, 15 to a slide, and the title is `96px`.
+A chart on a slide takes the slides overlay's sizes rather than `×1.5`.
 - One idea per slide, and the title states the point, not the topic.
 - A chart gets blank paper with no rules behind it, since they would read
   as gridlines. The slides overlay's paper-toned figure covers them.
@@ -579,12 +620,9 @@ type. `figures/phy-diagram.sty` carries it for TikZ, and
   character is drawn on a sheet of paper cut to its outline, so the pencil
   shows paper, never the background. An icon too small to hold it, such as a
   favicon, is drawn flat.
-- The shapes came from the template of the
-  [Grokbot Icon](https://grokbot-icon-studio.serio-ai.chatgpt.site/) prompt:
-  a close-up with the head tipped, pill eyes and blush on a dark ground.
-  Reviewers of a character should know its examples.
 - Every character is a small spec (about 100 lines) that a factory draws.
-  The rules for drawing one are in `FWIENDS.md`, next to the factory.
+  The rules for drawing one, and the references a reviewer of one needs,
+  are in `FWIENDS.md`, next to the factory.
 - **Motion** is calm and alive. The eyes follow the pointer, smoothed so they
   never jitter, with breathing, irregular blinks and a slow sway
   underneath. Nothing bounces all the time. Under `prefers-reduced-motion`,
@@ -593,7 +631,7 @@ type. `figures/phy-diagram.sty` carries it for TikZ, and
 ## 10. code
 
 Code is a language of its own, with its own conventions: American English,
-formal, and clean in the sense of Robert C. Martin's *Clean Code*. The dial,
+formal, and clean in the sense of Robert C. Martin's Clean Code. The dial,
 the lower-case chrome and the humour stop at its edge.
 - **American English** in identifiers, comments, docstrings and commit
   messages: `color`, `center`, `gray`, `normalize`, `behavior`, `license`,
@@ -635,7 +673,7 @@ For anyone, or any agent, making something for phy:
 - **Let phy review before anything is published.** Pushing, posting and
   sharing are phy's call, each time.
 - **Keep folders tidy:** one folder per thing, with its examples beside it,
-  and generated output in a git-ignored `out/`.
+  and working output in a git-ignored `out/` (principle 1).
 - **Fanning out is welcome:** phy is happy for a big job to go to several
   agents in parallel. Visual work then goes to an adversarial reviewer who
   knows the references.
@@ -648,15 +686,16 @@ For anyone, or any agent, making something for phy:
 Before calling something done:
 - Could it be erased and redrawn from its source in one command?
 - Could its rules fit on an index card?
-- Is anything saturated that isn't the subject?
-- Is there a gradient, a glow, a shadow, an emoji or a hype word?
+- Is anything saturated that isn't the subject, or red that isn't an error?
+- Is there a gradient, a glow, a drop shadow, an emoji or a hype word?
 - Is there more than one shade of any colour, or shading that isn't parting
   two neighbours?
 - Does it match the rest of the set in size, look and structure?
 - Can every part be told apart at the size people will see it?
 - Is everyone credited as they wish, with every name written as its owner
   writes it?
-- Is it in the one face, at the work's place on the dial?
+- Is it in the one face, at the work's place on the dial, with code in
+  monospace?
 - Is it British English as The Economist would write it, with no ceremony?
 - Is the code American English, formal and clean?
 - Is any part of it the first template that came to mind?

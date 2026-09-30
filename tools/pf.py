@@ -623,7 +623,7 @@ $body
   <footer>
     <ul>
       <li><a href="index.html">back to the fwiends</a></li>
-      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
     </ul>
   </footer>
 </main>

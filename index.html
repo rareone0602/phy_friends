@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="twelve fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; YuanYuan, a white cat with a lavender mop, in a navy yukata; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="twelve fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; YuanYuan, a white cat with a lavender mop, in a navy yukata; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,11 +27,12 @@
 <link rel="stylesheet" href="site/pencil.css">
 <script>
   // The opening (FWIENDS.md): the first time the page opens in a tab, the title writes itself and the
-  // fwiends come in by roll call. It is decided here, before the page is first drawn, so that the title
+  // friends come in by roll call. It is decided here, before the page is first drawn, so that the title
   // never shows before it is written. Screenshots (?px, ?hi), reduced motion, a reload and a step back
-  // through the history skip it. In forced colours the title is not written, since the pen's copy
-  // would keep the page's ink rather than take the system's colours.
+  // through the history skip it. In forced colors the title is not written, since the pen's copy
+  // would keep the page's ink rather than take the system's colors.
   (() => {
+    const PEN_DEADLINE_MS = 5000;  // How long the pen has to start before the title is shown without it.
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
     if (query.has('px') || query.has('hi') || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if (navigation && navigation.type !== 'navigate') return;
@@ -44,7 +45,7 @@
     document.documentElement.classList.add('opening');
     if (!matchMedia('(forced-colors: active)').matches) document.documentElement.classList.add('writing-title');
     // Should the page's script fail before the pen starts, the title shows all the same.
-    setTimeout(() => { if (!document.querySelector('.pf-pen')) document.documentElement.classList.remove('writing-title'); }, 5000);
+    setTimeout(() => { if (!document.querySelector('.pf-pen')) document.documentElement.classList.remove('writing-title'); }, PEN_DEADLINE_MS);
   })();
 </script>
 <style>
@@ -54,19 +55,19 @@
      --reach-left and --reach-right (in head units, measured on load) widen a friend's
      slot where its body or tail extends past the box at ground level, so neighbors
      stand close without overlapping a tail. The stage is the one centered thing on the
-     page, as the subject of a group photo stands in the middle of the frame. */
+     page (FWIENDS.md). */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 for the overlap. The twelve reaches add up to 556 head units (Claude's is nil), so
+     less 0.06 per slot for the overlap. The twelve reaches add up to 556 head units (Terry's and Claude's are nil), so
      all twelve take 13.3393 boxes. In the smaller splits the widest rows are the first six, Howdi
-     to K3V1N, at 6.9141 boxes, mumuyou to YuanYuan at 4.597, and the first three at 3.5607. Each
+     to K3V1N, at 6.9141 boxes, mumuyou to YuanYuan at 4.5970, and the first three at 3.5607. Each
      is rounded up so that those friends always fit in one row. The box is five rules, so that two
      rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 3.561; --size: calc(var(--L) * 5); }
   /* The page is wider than the kit's column so that the stage has room for a row of twelve; the
      header and footer keep to the margin line. */
-  main { max-width: 2248px; }
+  main { max-width: 2247px; }
   /* Friends stand in one row where all twelve fit. Otherwise they split six and six; where six do
      not fit, four, four and four; and where four do not fit, three to a row, so that no row is left
      with one friend. Each row is grounded on a rule. */
@@ -81,10 +82,12 @@
   /* Each friend is a button: hovering over it or focusing it perks it up, and a click, a tap, Enter or Space greets it.
      A double-click or a long press on it selects nothing, and a quick second tap does not zoom the page; the labels
      under it stay selectable, so a handle can still be copied. */
-  .rig { height: var(--size); cursor: pointer; border-radius: 3px; -webkit-tap-highlight-color: transparent;
+  .rig { position: relative; height: var(--size); cursor: pointer; border-radius: 3px; -webkit-tap-highlight-color: transparent;
     touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .rig:focus { outline: none; }
-  .rig:focus-visible { outline: 1.5px dashed var(--ink-2); outline-offset: 4px; }
+  /* The ring goes round the friend's slot, so that it stays clear of a tail that reaches past the box (STYLE.md §6). */
+  .rig:focus-visible::after { content: ''; position: absolute; pointer-events: none; border: 1.5px dashed var(--ink-2); border-radius: 3px;
+    inset: -5.5px calc(var(--size) * var(--reach-right, 0) / -270 - 4px) -5.5px calc(var(--size) * var(--reach-left, 0) / -270 - 4px); }
   .rig svg { display: block; width: 100%; height: auto; overflow: visible; }
   /* The roll call (FWIENDS.md). A friend not yet called is invisible and ignores the pointer, though
      the keyboard can still reach it; one on its way is drawn over the empty places it crosses. While
@@ -93,12 +96,18 @@
   html.calling-the-roll { overflow-x: hidden; }
   .friend.waiting .rig { opacity: 0; pointer-events: none; }
   /* While the title writes itself, a copy of it in SVG (src/pen.js) is revealed stroke by stroke over
-     the title, which is kept out of sight; the graphite filter textures both. Print shows the title. */
+     the title, which is kept out of sight; the graphite filter textures both. Print shows the title, and keeps the ring and the arrow, which
+     browsers leave out of a print with other background images. */
   .writing-title h1 { color: transparent; }
-  @media print { .writing-title h1 { color: inherit; } .pf-pen { display: none; } }
+  @media print {
+    .writing-title h1 { color: inherit; } .pf-pen { display: none; }
+    [data-host] .name::after, .disclaimer .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
   .friend.on-its-way { z-index: 2; }
+  /* The ground's line, 6.5px down its 12px, lands on the middle of the rule at the box's bottom edge. */
   .ground { position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; pointer-events: none; z-index: 5;
     color: var(--ink); filter: url(#graphite); }
+  @media (forced-colors: active) { .ground { color: CanvasText; } }
 
   figcaption { text-align: center; }
   .name { display: block; height: var(--L); font: 300 31px/var(--L) var(--face); position: relative; top: var(--sit); }
@@ -122,12 +131,14 @@
   @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } }
   /* Four stand in a row once the stage is 4.598 boxes wide, which it is from an 848px window, six
      once it is 6.915 boxes wide, from a 1219px window, and all twelve once it is 13.34 boxes wide,
-     from a 2248px window, where the page stops growing. */
+     from a 2247px window, where the page stops growing. */
   @container (width >= 736px) { .troupe { --abreast: 4.598; } }
   @container (width >= 1107px) {
     .troupe { --abreast: 6.915; }
     .note .long { display: inline; }  /* A row of six leaves room for the whole note. */
   }
+  /* The twelve fit the capped row with only 0.1px to spare, so the cap is lifted here: rounding must not
+     send the last friend to a second row. */
   @container (width >= 2135px) {
     .troupe { --abreast: 13.34; }
     .friends { max-width: none; }
@@ -142,6 +153,7 @@
   @media (max-width: 419px) {
     .friend { width: var(--size); }
     .rig, figcaption { margin-left: 0; }
+    .rig:focus-visible::after { inset: -5.5px -4px; }  /* No reach is reserved here, so the ring keeps to the box. */
     .credit { height: auto; } .credit .me { display: block; } .credit .dot { display: none; }
   }
   /* On the smallest phones everything steps down once more, so that two friends still fit side by side. */
@@ -151,23 +163,23 @@
     /* Neighboring labels touch at this width, so each keeps a small gap, and a long species wraps, as
        does a long handle, where its markup allows (<wbr>). */
     figcaption { padding: 0 4px; }
-    .species, .credit { height: auto; white-space: normal; text-wrap: balance; }
+    .species, .credit { height: auto; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; }
   }
   /* Phones held sideways have little height, so the note gives up its blank rule. */
   @media (max-height: 500px) and (orientation: landscape) { .note { margin-bottom: 0; } }
-  /* The mock disclaimer is about the last fwiend, Claude, the machine that made the page. It sits in small
+  /* The mock disclaimer is about the last friend, Claude, the machine that made the page. It sits in small
      print on the rules under the last row, a blank rule below the labels, and its first line ends under
      Claude with the kit's arrow turned to point up at it, as the ring marks the host. --to-claude, set on
-     load and whenever the stage changes width, is how far Claude's middle stands in from the troupe's
+     load and whenever the troupe changes size, is how far Claude's middle stands in from the troupe's
      right edge. The disclaimer takes no part in the troupe's width, so it cannot move what it measures. */
-  .disclaimer { contain: inline-size; margin: var(--L) 0 0; padding-right: max(0px, calc(var(--to-claude, 0px) - 1.1em));
+  .disclaimer { --arrow-width: 2.2em; contain: inline-size; margin: var(--L) 0 0; padding-right: max(0px, calc(var(--to-claude, 0px) - var(--arrow-width) / 2));
     font-size: 15px; color: var(--ink-2); text-align: right; text-wrap: balance; position: relative; top: var(--sit); }
   /* Each sentence is a line of its own, balanced where it wraps, and the arrow stays with its words. The
      arrow is the kit's, drawn a size up so that it holds its own against the labels above it. */
   .disclaimer .line { display: block; text-wrap: balance; }
   .disclaimer .machine { white-space: nowrap; }
-  .disclaimer .mark.arrow { width: 2.2em; height: 1.4em; margin-left: .1em; vertical-align: -.35em; transform: rotate(-90deg); }
-  .nojs { margin: 0; height: var(--L); color: var(--ink-2); position: relative; top: var(--sit); text-align: center; }
+  .disclaimer .mark.arrow { width: var(--arrow-width); height: 1.4em; margin-left: .1em; vertical-align: -.35em; transform: rotate(-90deg); filter: url(#graphite); }
+  .nojs { margin: 0; min-height: var(--L); color: var(--ink-2); position: relative; top: var(--sit); text-align: center; }
   /* The live region that says what a greeting did is for screen readers only, so it is hidden from view. */
   .announcer { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 </style>
@@ -207,7 +219,7 @@
           <figcaption><span class="name hand">Howdi</span><span class="species">sky-blue wolf</span><span class="credit"><a href="https://x.com/howdi1129">@howdi1129</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="phy" data-host><figure>
-          <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours with cookie crumbs on their ruff and tail"></div>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to phy, an Eevee in tuxedo-cat colours, with Oreo crumbs on their ruff and tail"></div>
           <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me<span class="dot"> · </span></span><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116" rel="me">linkedin</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="yuda"><figure>
@@ -216,7 +228,7 @@
         </figure></li>
         <li class="friend" data-friend="terry"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Terry, a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles"></div>
-          <figcaption><span class="name hand">Terry</span><span class="species">yellow plush toy</span><span class="credit"><a href="https://x.com/FreshSnails_x_6">@FreshSnails_x_6</a></span></figcaption>
+          <figcaption><span class="name hand">Terry</span><span class="species">yellow plush toy</span><span class="credit"><a href="https://x.com/FreshSnails_x_6">@FreshSnails_<wbr>x_6</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="mumuyou"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou, a white fox with a blond mop, sky-blue ears, a blue diamond on his forehead, one blue eye and one yellow"></div>
@@ -232,15 +244,15 @@
         </figure></li>
         <li class="friend" data-friend="yuanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan, a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle"></div>
-          <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan">@Milk_YuanYuan</a></span></figcaption>
+          <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan">@Milk_<wbr>YuanYuan</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="tanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan, a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear"></div>
-          <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU">@tanyuan_UwU</a></span></figcaption>
+          <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU">@tanyuan_<wbr>UwU</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="teni"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni, a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail"></div>
-          <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome">@foxx_manome</a></span></figcaption>
+          <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome">@foxx_<wbr>manome</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="alfie"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie, a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail"></div>
@@ -261,7 +273,7 @@
     <ul>
       <li>characters belong to the people named under them</li>
       <li><a href="style.html">style guide</a></li>
-      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a></li>
+      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
     </ul>
   </footer>
 </main>
@@ -290,7 +302,7 @@
   const VIEW_SIZE = 270;                 // The camera is 270 head units square (FWIENDS.md).
   const DEFAULT_GROUND = 120;            // The ground line for a spec without rig.ground, in head units.
   const SLOT_CLEARANCE = 6;              // Head units kept clear beside a body or tail that extends past its box.
-  const GROUND = { width: 200, inset: 6, y: 6.5, wobble: 1.6, step: 50 };  // In the ground line's viewBox units.
+  const GROUND = { width: 200, height: 12, inset: 6, y: 6.5, wobble: 1.6, step: 50 };  // In the ground line's viewBox units.
   const PHASE_STEP = 1.7;                // Offsets each friend's idle cycles so that they do not move in step.
   const POINTER_TIMEOUT_MS = 8000;       // A pointer that stays still this long is treated as gone.
   const GAZE_RATE = 7;                   // How fast the gaze eases toward its target, per second.
@@ -341,7 +353,7 @@
 
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
   widenSlots(friends);
-  pointAtTheMachine(friends.find(friend => friend.name === 'claude'));
+  placeDisclaimerArrow(friends.find(friend => friend.name === 'claude'));
   const heldMidHop = friends.find(friend => friend.name === params.get('hi'));
   let pointer = simulatedPointer, pointerMovedAt = performance.now();
   // The stage keeps its own clock, which stands still while the stage is out of sight, so that the idle
@@ -356,7 +368,11 @@
   // Mounts one friend in its slot, draws its ground and listens for greetings.
   function mountFriend(element, index) {
     const spec = PhyFriends.get(element.dataset.friend), view = cameraFor(spec);
-    const box = element.querySelector('.rig'), rig = PhyFriends.mount(box, spec, { bg: false, view });
+    // In forced colors the page takes the system's background, so each friend is drawn on a sheet of paper
+    // cut to its outline, as on any background of its own (STYLE.md §9).
+    const bg = matchMedia('(forced-colors: active)').matches ? 'transparent' : false;
+    const box = element.querySelector('.rig'), rig = PhyFriends.mount(box, spec, { bg, view });
+    rig.svg.setAttribute('aria-hidden', 'true');  // The button's label says who the friend is.
     drawGround(element);
     const friend = { name: element.dataset.friend, displayName: element.querySelector('.name').textContent,
       element, rig, view, lookX: 0, lookY: 0, phase: index * PHASE_STEP,
@@ -373,12 +389,12 @@
     return { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 };
   }
 
-  // Keeps the disclaimer's arrow under the machine it is about, whichever row Claude stands in. Claude is
-  // measured by its labels, which stay put while it hops in.
-  function pointAtTheMachine(machine) {
+  // Keeps the disclaimer's arrow under Claude, whichever row it stands in. Claude is measured by its
+  // labels, which stay put while it hops in.
+  function placeDisclaimerArrow(claude) {
     const disclaimer = document.querySelector('.disclaimer');
-    if (!machine || !disclaimer) return;
-    const troupe = disclaimer.parentElement, caption = machine.element.querySelector('figcaption');
+    if (!claude || !disclaimer) return;
+    const troupe = disclaimer.parentElement, caption = claude.element.querySelector('figcaption');
     const place = () => {
       const labels = caption.getBoundingClientRect();
       disclaimer.style.setProperty('--to-claude', `${troupe.getBoundingClientRect().right - (labels.left + labels.width / 2)}px`);
@@ -417,7 +433,7 @@
   function drawGround(element) {
     const start = groundRandom() * GROUND.inset, end = GROUND.width - groundRandom() * GROUND.inset;
     element.insertAdjacentHTML('beforeend',
-      `<svg class="ground" viewBox="0 0 ${GROUND.width} 12" preserveAspectRatio="none" aria-hidden="true">` +
+      `<svg class="ground" viewBox="0 0 ${GROUND.width} ${GROUND.height}" preserveAspectRatio="none" aria-hidden="true">` +
       `<path d="${wobblyLine(start, end)}" fill="none" stroke="currentColor" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`);
   }
 
@@ -449,7 +465,7 @@
   }
 
   // A friend that is already hopping ignores further greetings until it lands: the hop under way
-  // answers them, and restarting it would drop the friend to the ground in one frame (STYLE.md §9).
+  // answers them, and restarting it would drop the friend to the ground in one frame (FWIENDS.md).
   // So does a friend on its way in. A friend still to come can be greeted only by assistive technology,
   // which cannot see the roll call, so everyone comes at once.
   function greet(friend) {
@@ -526,7 +542,7 @@
     const watched = latestGreeted(seconds);
     const newcomers = new Map(friends.map(friend => [friend, newcomerFor(friend, seconds)]));
     const watching = [...newcomers.values()].some(Boolean);
-    const comingIn = friends.some(friend => friend.arrival && friend.arrival.start < Infinity);  // Uncalled rows don't count.
+    const comingIn = friends.some(friend => friend.arrival && friend.arrival.start < Infinity);  // Uncalled rows do not count.
     if (pointerGone && !watched && !watching && !comingIn && elapsed < CALM_FRAME_SECONDS) {
       frameRequest = requestAnimationFrame(animate);
       return;
@@ -604,7 +620,8 @@
 
   // The pose for this frame: the gaze, then the idle motion (blinks, breathing, a tail sway and ear
   // flicks), then the greeting and any hop on the way in (travel, or NOT_TRAVELING). Under reduced
-  // motion, or with a simulated pointer, only the eyes move.
+  // motion only the eyes move; with a simulated pointer the idle motion stops, so that a screenshot
+  // comes out the same every time.
   function poseAt(friend, seconds, travel) {
     const moving = !reducedMotion.matches && !simulatedPointer;
     const turn = reducedMotion.matches ? 0 : HEAD_TURN;
@@ -666,7 +683,7 @@
 
   // Moves the pen on each frame, on a clock that starts with its first frame, so that a page opened in
   // a background tab writes its title once it is shown. A change of the page's width or of the title's
-  // size, printing or turning on reduced motion shows the title at once.
+  // size, printing, a step back through the history or turning on reduced motion shows the title at once.
   function penTitle(title, writing, reachFwiends, show) {
     const pageWidth = document.documentElement.clientWidth, size = getComputedStyle(title).fontSize;
     const fwiendsAt = writing.reaches(TITLE_PEN.text.indexOf(' ') + 1);
@@ -675,14 +692,18 @@
       finished = true;
       removeEventListener('resize', finishOnResize);
       removeEventListener('beforeprint', finish);
+      removeEventListener('pageshow', finishOnRestore);
       writing.remove();
       show();
     };
     const finishOnResize = () => {
       if (document.documentElement.clientWidth !== pageWidth || getComputedStyle(title).fontSize !== size) finish();
     };
+    // A page restored from the back-forward cache runs no script again, so it would go on writing.
+    const finishOnRestore = event => { if (event.persisted) finish(); };
     addEventListener('resize', finishOnResize);
     addEventListener('beforeprint', finish);
+    addEventListener('pageshow', finishOnRestore);
     requestAnimationFrame(function write(now) {
       if (finished) return;
       if (reducedMotion.matches) return finish();
@@ -698,10 +719,10 @@
   // ---- The opening: the roll call
 
   // Sets up the roll call: every friend waits out of sight until it begins (begin), and the rows are
-  // called in order, each once it comes into view (the first once any of it shows, since a phone held sideways may have room for
-  // only part of it). A row scrolled past unseen is simply there. A change of the page's width, which
-  // moves every place, or printing puts everyone in place at once, as does turning on reduced motion
-  // (animate).
+  // called in order, each once it comes into view (the first once any of it shows, since a phone held
+  // sideways may have room for only part of it). A row scrolled past unseen is simply there. A change
+  // of the page's width, which moves every place, printing or a step back through the history puts
+  // everyone in place at once, as does turning on reduced motion (animate).
   function callTheRoll() {
     const rows = rowsOf(friends), pageWidth = document.documentElement.clientWidth;
     const queue = [];  // The friends called so far, in the order they come in.
@@ -714,15 +735,17 @@
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
         const row = rows.find(r => r.sentinel === entry.target);
-        // The ratio reported at the crossing may fall a hair short of the threshold.
+        // The ratio reported at the crossing may fall slightly short of the threshold.
         row.inView = entry.intersectionRatio >= ROLL_CALL.inView * 0.99 || (row === rows[0] && entry.isIntersecting);
       }
       callRowsInView();
     }, { threshold: [0, ROLL_CALL.inView] });
     for (const row of rows) observer.observe(row.sentinel);
     const finishOnResize = () => { if (document.documentElement.clientWidth !== pageWidth) endRollCall(); };
+    const finishOnRestore = event => { if (event.persisted) endRollCall(); };
     addEventListener('resize', finishOnResize);
     addEventListener('beforeprint', endRollCall);
+    addEventListener('pageshow', finishOnRestore);
     return { begin, finish, skipRowsOffScreen, get done() { return next === rows.length && friends.every(friend => !friend.arrival); } };
 
     function begin(delay) {
@@ -753,7 +776,7 @@
     }
 
     // Times the friends in the queue that have not set off: each lands a cadence after the one before,
-    // and none sets off before `from` or before the roll call begins. Those in the air keep their times.
+    // and none sets off before `earliest` or before the roll call begins. Those in the air keep their times.
     function schedule(earliest) {
       const from = Math.max(earliest, beginsAt);
       const inTheAir = queue.filter(friend => friend.arrival && friend.arrival.start <= from);
@@ -761,8 +784,8 @@
       for (const friend of queue) {
         const arrival = friend.arrival;
         if (!arrival || arrival.start <= from) continue;
-        arrival.land = Math.max(from + arrival.travel, lastLanding + ROLL_CALL.cadence);
-        arrival.start = arrival.land - arrival.travel;
+        arrival.land = Math.max(from + arrival.duration, lastLanding + ROLL_CALL.cadence);
+        arrival.start = arrival.land - arrival.duration;
         lastLanding = arrival.land;
       }
     }
@@ -781,6 +804,7 @@
       observer.disconnect();
       removeEventListener('resize', finishOnResize);
       removeEventListener('beforeprint', endRollCall);
+      removeEventListener('pageshow', finishOnRestore);
       document.documentElement.classList.remove('calling-the-roll');
       next = rows.length;
       friends.forEach(arrive);
@@ -809,7 +833,7 @@
     return rows.sort((a, b) => a.top - b.top);
   }
 
-  // Whether any of the row's places, where its friends stand, is on the screen; its labels don't count.
+  // Whether any of the row's places, where its friends stand, is on the screen; its labels do not count.
   // The place is found from the slot, since the friend's own box may be on its way.
   function isOnScreen(row) {
     const first = row.friends[0], box = first.rig.el;
@@ -827,7 +851,7 @@
       ? -(box.right + (friend.reach.right + ROLL_CALL.clearance) * unit)
       : pageWidth - box.left + (friend.reach.left + ROLL_CALL.clearance) * unit;
     const hops = Math.min(ROLL_CALL.maxHops, Math.max(1, Math.round(Math.abs(offset) / unit / ROLL_CALL.stride)));
-    return { offset, hops, travel: hops * PhyFriends.anim.HOP.seconds, height: ROLL_CALL.height * unit, dir: fromLeft ? 1 : -1 };
+    return { offset, hops, duration: hops * PhyFriends.anim.HOP.seconds, height: ROLL_CALL.height * unit, dir: fromLeft ? 1 : -1 };
   }
 
   // A friend that has reached its place stays there.
@@ -856,7 +880,7 @@
   }
 
   // The neighbor a standing friend watches: of those about to land beside it or just landed, the one
-  // landing last. A friend that has only just landed smiles out of the page instead.
+  // landing last. A friend that has only just landed watches no neighbor while it smiles.
   function newcomerFor(friend, seconds) {
     if (friend.arrival || isSmilingOnLanding(friend, seconds)) return null;
     let newcomer = null;
@@ -872,18 +896,18 @@
     return friend.arrival ? friend.arrival.land : friend.landedAt;
   }
 
-  // Where a friend on its way is now: its offset from its place and its height, in px; its squash and
+  // Where a friend on its way is now: its offset from its place and its lift, in px; its squash and
   // lean; and the way it goes. Null for a friend in place or still waiting.
   function travelAt(friend, seconds) {
     const arrival = friend.arrival;
     if (!arrival || seconds < arrival.start) return null;
-    const hop = PhyFriends.anim.hopping((seconds - arrival.start) / arrival.travel, arrival.hops);
+    const hop = PhyFriends.anim.hopping((seconds - arrival.start) / arrival.duration, arrival.hops);
     return { offset: arrival.offset * (1 - hop.along), lift: arrival.height * hop.lift, squash: hop.squash,
       lean: hop.lean * arrival.dir, dir: arrival.dir };
   }
 
   // Shows a friend once its way in has begun and moves it along, box and all: its paper travels with
-  // it, like a cut-out (STYLE.md §9).
+  // it (STYLE.md §9).
   function showOnItsWay(friend, travel) {
     friend.element.classList.toggle('waiting', !travel);
     friend.element.classList.toggle('on-its-way', !!travel);

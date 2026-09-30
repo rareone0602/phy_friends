@@ -515,7 +515,7 @@
   // drawn from the texture's filter, since Safari drew the filter into a canvas in one piece that held
   // the page up for seconds; it is computed a slice of rows at a time, no slice longer than `slice`
   // milliseconds, so that the page stays responsive meanwhile, and one bitmap at a time, in the order
-  // in which they are asked for, so that the one a rig shows first arrives first. The bitmap is grey
+  // in which they are asked for, so that the one a rig shows first arrives first. The bitmap is gray
   // on black, which masks as the white texture does, so that it can be a JPEG, which is quick to
   // encode. Rigs whose views are the same size share one bitmap per density and variant. A browser
   // that cannot make the bitmap keeps the texture.
@@ -724,7 +724,7 @@
     const x = num(-view.w * PENCIL.margin), y = num(-view.h * PENCIL.margin);
     const w = num(view.w * (1 + 2 * PENCIL.margin)), h = num(view.h * (1 + 2 * PENCIL.margin));
     return `<mask id="${id}" maskUnits="userSpaceOnUse" x="${x}" y="${y}" width="${w}" height="${h}">` +
-      `<image data-pf-texture href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
+      `<image data-pf-texture="" href="${pencilTexture(x, y, w, h)}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="none"/></mask>`;
   }
 
   // Content under the pencil mask. Safari masks each shape of a group on its own rather than the group

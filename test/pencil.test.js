@@ -54,7 +54,7 @@
     }
   });
 
-  // The grey levels of an image drawn over black, as the rig's mask reads it.
+  // The gray levels of an image drawn over black, as the rig's mask reads it.
   async function pixelsOf(src, width, height) {
     const image = new Image();
     await new Promise((resolve, reject) => {
@@ -72,7 +72,7 @@
     return data.filter((_, i) => i % 4 === 0);
   }
 
-  // The mean and the standard deviation of the grey levels, and the share of pixels that let the paper through.
+  // The mean and the standard deviation of the gray levels, and the share of pixels that let the paper through.
   function grainOf(levels) {
     const mean = levels.reduce((sum, v) => sum + v, 0) / levels.length;
     const spread = Math.sqrt(levels.reduce((sum, v) => sum + (v - mean) ** 2, 0) / levels.length);

@@ -34,6 +34,7 @@ h1, .hand { --hand: 50; }
   font-variation-settings: 'INFM' max(var(--informal), var(--hand, 0)),
     'BNCE' max(var(--informal) + var(--hand, 0) - 100, 0) !important; }
 strong, b { font-weight: 600; }  /* Bold is the only heavier weight. */
+em, i, cite, var, dfn, address { font-style: normal; }  /* The face has no italics, so a browser would only slant it (STYLE.md §5). */
 html { background: var(--paper); }
 body {
   margin: 0; min-height: 100vh; color: var(--ink); font: 300 18px/var(--L) var(--face);
@@ -71,7 +72,7 @@ header > .intro { margin-top: var(--L); }
 
 /* Footer items wrap as whole items. Each begins with a separator dot in a strip hidden
    to the left of the text, so a wrapped line never begins or ends with a dot. */
-footer { margin: calc(var(--L) * 2) -4px 0; padding: 0 4px; min-height: var(--L); font-size: 15px; color: var(--ink-2); position: relative; top: var(--sit); overflow: hidden; }  /* The padding leaves room for a focus ring. */
+footer { margin: calc(var(--L) * 2) -4px 0; padding: 0 4px; min-height: var(--L); font-size: 15px; color: var(--ink-2); position: relative; top: var(--sit); overflow: hidden; overflow-wrap: anywhere; }  /* The padding leaves room for a focus ring. */
 footer ul { list-style: none; margin: 0 0 0 -1.4em; padding: 0; display: flex; flex-wrap: wrap; }
 footer li { padding-left: 1.4em; text-indent: -1.4em; text-wrap: balance; }  /* A wrapped item indents its second line under its text. */
 footer li::before { content: '\b7'; display: inline-block; width: 1.4em; text-indent: 0; text-align: center; }

@@ -37,7 +37,7 @@ The page has five parts, in this order:
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 2248px.
+  paper's edge, and the page stops at 2247px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
   rules, so the ground stays on a rule: 5 rules. The smallest phones, below
@@ -47,7 +47,7 @@ The page has five parts, in this order:
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All twelve stand in one row from a 2248px window, where the page stops
+- All twelve stand in one row from a 2247px window, where the page stops
   growing. The twelve reaches add up to 556 head units and neighbours
   overlap by 0.06 of a box, so the row is 13.34 boxes wide. Narrower, they
   split six and six, from a 1219px window, and both rows fit a laptop's
@@ -56,6 +56,9 @@ The page has five parts, in this order:
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
+- In forced colours the page takes the system's background, so each friend
+  is drawn on a sheet of paper cut to its outline (`STYLE.md` §9), and its
+  ground is in the system's text colour.
 - The ring circles the host's name, phy's: "this one" is the one whose
   page it is. The nav's ring marks the page, as it does everywhere.
 - The mock disclaimer is about the last fwiend, Claude, the machine that
@@ -98,9 +101,9 @@ Each friend is a button, and its `aria-label` says who it is in one line:
 dark felt soles".
 
 Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
-**Brian**, **Teni** and **Alfie** are capitalised; **YuanYuan** has two
-capitals; **phy**, **mumuyou** and **tanyuan** are always lower case, even at
-the start of a line; and **K3V1N** is spelt with a 3 and a 1.
+**Brian**, **Teni**, **Alfie** and **Claude** are capitalised; **YuanYuan**
+has two capitals; **phy**, **mumuyou** and **tanyuan** are always lower
+case, even at the start of a line; and **K3V1N** is spelt with a 3 and a 1.
 
 **The copy**, against what it isn't:
 
@@ -135,7 +138,7 @@ under its last fwiend.
 itself and the fwiends come in by roll call. A reload, a step back through
 the history, reduced motion and the link preview show everything in place.
 - The title is written stroke by stroke, in the order a hand writes each
-  letter, in about two and a half seconds. The pen slows at each end of a
+  letter, in just under three seconds. The pen slows at each end of a
   stroke and lifts between strokes, which gives it a hand's rhythm.
   `src/pen.js` does the writing; `python3 design/title_pen.py` derives the
   strokes (`site/title-pen.js`) from the title as the page sets it, and
@@ -160,8 +163,8 @@ the history, reduced motion and the link preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 2248×1180, the same shape, and scaled down, because
-  2248px is the narrowest window where all twelve stand in one row; narrower,
+  page is photographed at 2247×1180, the same shape, and scaled down, because
+  2247px is the narrowest window where all twelve stand in one row; narrower,
   the second row would fall out of the picture.
 
 ## drawing a friend
@@ -215,7 +218,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
-    shade: phy's crumb went a step darker, so the tail's cookie base stays
+    shade: phy's crumb went a step darker, so the tail's biscuit base stays
     apart from the shaded hip.
 - Nothing is copied from a reference's lighting: no pale rim along an ear, no
   darker far side, no highlights.
@@ -283,7 +286,8 @@ block, so that the arms rise when it is pleased or startled. Its legs are
 its body, in its one house shade. Its eyes look a whole unit aside (16 head
 units, where the house's move 6), as the glyphs move the notches, and its
 blush is a soft rose, since a pale pink on terracotta reads as a highlight.
-It is short, so its legs meet the ground at 112 rather than about 131. Its
+Having no tail, it does not sway. It is short, so its legs meet the ground
+at 112 rather than about 131. Its
 species is "language model", its pronoun is "it", and its credit is
 Anthropic's.
 
