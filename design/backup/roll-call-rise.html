@@ -352,8 +352,11 @@
   if (!simulatedPointer) followPointer();
   animateWhileVisible();
   const opening = document.documentElement.classList.contains('opening');
-  let rollCall = opening ? callTheRoll() : null;
-  if (opening) writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
+  let rollCall = opening ? callTheRoll() : null, finishTitle = null;
+  if (opening) {
+    writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
+    endOpeningOnRequest();
+  }
 
   // Mounts one friend in its slot, draws its ground and listens for greetings.
   function mountFriend(element, index) {
@@ -639,6 +642,24 @@
     };
   }
 
+  // ---- The opening
+
+  // A click or a tap anywhere, or Escape, ends the opening, as on index.html: the title is written at
+  // once and everyone still to come is in place. Scrolling does not. The listeners capture, so that the
+  // click that ends the opening also reaches a friend already standing, which says hi.
+  function endOpeningOnRequest() {
+    const end = event => {
+      if (event.type === 'keydown' && event.key !== 'Escape') return;
+      removeEventListener('click', end, true);
+      removeEventListener('keydown', end, true);
+      if (finishTitle) finishTitle();
+      document.documentElement.classList.remove('writing-title');  // A pen yet to start does not.
+      endRollCall();
+    };
+    addEventListener('click', end, true);
+    addEventListener('keydown', end, true);
+  }
+
   // ---- The opening: the title
 
   // Writes the title with src/pen.js and the strokes in site/title-pen.js; the copy then gives way to
@@ -668,13 +689,15 @@
 
   // Moves the pen on each frame, on a clock that starts with its first frame, so that a page opened in
   // a background tab writes its title once it is shown. A change of the page's width or of the title's
-  // size, printing or turning on reduced motion shows the title at once.
+  // size, printing, turning on reduced motion or a request to end the opening (finishTitle) shows the
+  // title at once.
   function penTitle(title, writing, reachFwiends, show) {
     const pageWidth = document.documentElement.clientWidth, size = getComputedStyle(title).fontSize;
     const fwiendsAt = writing.reaches(TITLE_PEN.text.indexOf(' ') + 1);
     let finished = false, startedAt = null;
     const finish = () => {
       finished = true;
+      finishTitle = null;
       removeEventListener('resize', finishOnResize);
       removeEventListener('beforeprint', finish);
       writing.remove();
@@ -685,6 +708,7 @@
     };
     addEventListener('resize', finishOnResize);
     addEventListener('beforeprint', finish);
+    finishTitle = finish;
     requestAnimationFrame(function write(now) {
       if (finished) return;
       if (reducedMotion.matches) return finish();

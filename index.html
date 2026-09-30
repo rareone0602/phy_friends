@@ -362,7 +362,7 @@
   PhyFriends.live.keepStill(document.querySelector('.still input'));
   const params = new URLSearchParams(location.search);
   const opening = document.documentElement.classList.contains('opening');
-  let rollCall = null;
+  let rollCall = null, finishTitle = null;  // While the opening lasts: the roll call, and what writes the title at once.
 
   // Ears may reach up to a rule past the stage, so it counts as in view a rule early.
   const rule = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'));
@@ -383,7 +383,10 @@
   placeDisclaimerArrow(friends.find(friend => friend.name === 'claude'));
   stage.start();
   rollCall = opening ? callTheRoll() : null;
-  if (opening) writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
+  if (opening) {
+    writeTitle(delay => { if (rollCall) rollCall.begin(delay); });
+    endOpeningOnRequest();
+  }
   // The browser's own jump to a link comes as the page finishes loading, and would undo the greeting's scroll and focus.
   if (document.readyState === 'complete') greetLinkedFriend();
   else addEventListener('load', greetLinkedFriend, { once: true });
@@ -485,6 +488,25 @@
     return !friend.arrival;
   }
 
+  // ---- The opening
+
+  // A click or a tap anywhere, or Escape, ends the opening: the title is written at once and everyone
+  // still to come is in place, as after a reload. Scrolling does not, since on a phone the lower rows
+  // are meant to come in as they are scrolled to. The listeners capture, so that the click that ends
+  // the opening also reaches a friend already standing, which says hi.
+  function endOpeningOnRequest() {
+    const end = event => {
+      if (event.type === 'keydown' && event.key !== 'Escape') return;
+      removeEventListener('click', end, true);
+      removeEventListener('keydown', end, true);
+      if (finishTitle) finishTitle();
+      document.documentElement.classList.remove('writing-title');  // A pen yet to start does not.
+      endRollCall();
+    };
+    addEventListener('click', end, true);
+    addEventListener('keydown', end, true);
+  }
+
   // ---- The opening: the title
 
   // Writes the title with src/pen.js and the strokes in site/title-pen.js; the copy then gives way to
@@ -514,13 +536,15 @@
 
   // Moves the pen on each frame, on a clock that starts with its first frame, so that a page opened in
   // a background tab writes its title once it is shown. A change of the page's width or of the title's
-  // size, printing, a step back through the history or keeping still shows the title at once.
+  // size, printing, a step back through the history, keeping still or a request to end the opening
+  // (finishTitle) shows the title at once.
   function penTitle(title, writing, reachFwiends, show) {
     const pageWidth = document.documentElement.clientWidth, size = getComputedStyle(title).fontSize;
     const fwiendsAt = writing.reaches(TITLE_PEN.text.indexOf(' ') + 1);
     let finished = false, startedAt = null;
     const finish = () => {
       finished = true;
+      finishTitle = null;
       removeEventListener('resize', finishOnResize);
       removeEventListener('beforeprint', finish);
       removeEventListener('pageshow', finishOnRestore);
@@ -535,6 +559,7 @@
     addEventListener('resize', finishOnResize);
     addEventListener('beforeprint', finish);
     addEventListener('pageshow', finishOnRestore);
+    finishTitle = finish;
     requestAnimationFrame(function write(now) {
       if (finished) return;
       if (reducedMotion.matches) return finish();

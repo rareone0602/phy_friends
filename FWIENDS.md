@@ -198,8 +198,10 @@ preview show everything in place.
   phone the lower rows come in as they are scrolled to. A row scrolled past
   unseen is simply there, as are the rows still to come once the fwiends
   doze off.
-- A change in the window's width, or tabbing to a fwiend still to come,
-  brings everyone in at once.
+- A click or a tap anywhere, Escape, a change in the window's width, or
+  tabbing to a fwiend still to come, brings everyone in at once and shows
+  the title written. Scrolling does not, since on a phone the lower rows
+  are meant to come in as they are scrolled to.
 
 **The link preview and icons** come from `python3 tools/site_assets.py`, run
 after any character changes:
