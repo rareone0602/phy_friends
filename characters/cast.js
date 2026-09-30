@@ -35,13 +35,17 @@ PhyFriends.cast.define({
       name: 'mumuyou', pronoun: 'he', species: 'white fox',
       credit: { handle: 'fb/MuMuYouo', href: 'https://www.facebook.com/MuMuYouo' }, agreed: ['gallery'],
     },
+    brian: {
+      name: 'Brian', pronoun: 'he', species: 'cream fox',
+      credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
+    },
     kevin: {
       name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
       credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
     },
-    brian: {
-      name: 'Brian', pronoun: 'he', species: 'cream fox',
-      credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
+    bardell: {
+      name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
+      credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery'],
     },
     yuanyuan: {
       name: 'YuanYuan', pronoun: 'he', species: 'lavender-haired cat',

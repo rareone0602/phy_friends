@@ -37,7 +37,7 @@ The page has five parts, in this order:
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 2247px.
+  paper's edge, and the page stops at 2422px.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
   rules, so the ground stays on a rule: 5 rules. The smallest phones, below
@@ -47,12 +47,14 @@ The page has five parts, in this order:
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All twelve stand in one row from a 2247px window, where the page stops
-  growing. The twelve reaches add up to 556 head units and neighbours
-  overlap by 0.06 of a box, so the row is 13.34 boxes wide. Narrower, they
-  split six and six, from a 1219px window, and both rows fit a laptop's
-  first screen. Below that they stand four to a row, and below an 848px
-  window three to a row; on phones they stand in pairs.
+- All thirteen stand in one row from a 2422px window, where the page stops
+  growing. The thirteen reaches add up to 597 head units and neighbours
+  overlap by 0.06 of a box, so the row is 14.43 boxes wide. Thirteen do not
+  split evenly: narrower, they stand seven and six, from a 1408px window,
+  and five, five and three, from a 1025px window; either way the first two
+  rows fit a laptop's first screen. Below that they stand four to a row,
+  below an 863px window three to a row, and on phones in pairs, and Claude,
+  the last, stands alone under the rest.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
   seeded wobble (`PhyFriends.rng(5)`), ink at 70%, 1.4px, through the
   graphite filter.
@@ -67,7 +69,10 @@ The page has five parts, in this order:
   It sits in small print on the rules under the last row, a blank rule below
   the labels, and its first line ends in the kit's arrow, turned to point up
   at Claude from under its middle (measured on load, as the reaches are), as
-  the ring marks the host. Each sentence is a line of its own, balanced
+  the ring marks the host. Where Claude stands alone, its middle is the
+  page's, and ending the line there would squeeze both sentences into the
+  left half; so the disclaimer is centred under it, and the arrow turns to
+  point up and in at it. Each sentence is a line of its own, balanced
   where it wraps. A fwiend added later goes before Claude, so that the
   disclaimer stays under the machine.
 - A pencilled note says what to do: "psst: they watch your cursor. click one
@@ -76,7 +81,7 @@ The page has five parts, in this order:
   the first screen of every device. Being one long line, it takes the
   title's tilt, `−1°`, rather than a margin note's `−2°`, at which its far end
   would climb half a rule; and sitting so close, it needs no arrow. Where
-  fewer than six stand in a row it is only "click one to say hi", and touch
+  fewer than five stand in a row it is only "click one to say hi", and touch
   screens, which have no cursor, read "tap one to say hi".
 - Without JavaScript: "the fwiends are drawn live, so they need JavaScript
   to appear."
@@ -102,8 +107,9 @@ dark felt soles".
 
 Names keep their owner's capitalisation: **Howdi**, **Yuda**, **Terry**,
 **Brian**, **Teni**, **Alfie** and **Claude** are capitalised; **YuanYuan**
-has two capitals; **phy**, **mumuyou** and **tanyuan** are always lower
-case, even at the start of a line; and **K3V1N** is spelt with a 3 and a 1.
+and **BarDell** have two capitals; **phy**, **mumuyou** and **tanyuan** are
+always lower case, even at the start of a line; and **K3V1N** is spelt with
+a 3 and a 1.
 
 **The copy**, against what it isn't:
 
@@ -163,8 +169,8 @@ the history, reduced motion and the link preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 2247×1180, the same shape, and scaled down, because
-  2247px is the narrowest window where all twelve stand in one row; narrower,
+  page is photographed at 2422×1272, the same shape, and scaled down, because
+  2422px is the narrowest window where all thirteen stand in one row; narrower,
   the second row would fall out of the picture.
 
 ## drawing a friend
@@ -198,8 +204,8 @@ Follow them when turning someone's picture or design sheet into a friend.
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
 - A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current twelve use 3–12 each, plus
-  `bg` (`#1c1d21`, the same for all).
+  `earInner`, `eye`, `blush`, `chest`, … The current thirteen use 3–12
+  each, plus `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
   `−10`, chroma `×1.2`, the same hue, and near-whites lean to lavender. The
@@ -270,7 +276,7 @@ set how wide and thick the happy and closed strokes are.
 than writing raw `nodes`. A new friend matches the set in size and in the
 spec's structure as well as in its look.
 
-**Claude, the exception.** The twelfth fwiend, standing last, is Claude, the
+**Claude, the exception.** The last fwiend is Claude, the
 model that drew the others, as Claude Code draws it on its welcome screen:
 three lines of block characters. It keeps every rule above but the shape.
 Its figure comes from the glyphs. A terminal cell is about twice as tall as

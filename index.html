@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="twelve fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Brian, a cream fox in an orange newsboy cap; YuanYuan, a white cat with a lavender mop, in a navy yukata; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="thirteen fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; phy, a tuxedo Eevee; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; mumuyou, a white fox with a blond mop; Brian, a cream fox in an orange newsboy cap; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; YuanYuan, a white cat with a lavender mop, in a navy yukata; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -58,19 +58,20 @@
      page (FWIENDS.md). */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 per slot for the overlap. The twelve reaches add up to 556 head units (Terry's and Claude's are nil), so
-     all twelve take 13.3393 boxes. In the smaller splits the widest rows are the first six, Howdi
-     to K3V1N, at 6.9141 boxes, mumuyou to YuanYuan at 4.5970, and the first three at 3.5607. Each
-     is rounded up so that those friends always fit in one row. The box is five rules, so that two
-     rows fit a laptop's first screen. */
+     less 0.06 per slot for the overlap. The thirteen reaches add up to 597 head units (Terry's and Claude's are nil), so
+     all thirteen take 14.4311 boxes. In the smaller splits the widest rows are the first seven, Howdi
+     to K3V1N, at 8.0985 boxes, the first five at 5.7000, mumuyou to BarDell at 4.6896, and the first
+     three at 3.5607. Each is rounded up so that those friends always fit in one row. The box is five
+     rules, so that two rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 3.561; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of twelve; the
+  /* The page is wider than the kit's column so that the stage has room for a row of thirteen; the
      header and footer keep to the margin line. */
-  main { max-width: 2247px; }
-  /* Friends stand in one row where all twelve fit. Otherwise they split six and six; where six do
-     not fit, four, four and four; and where four do not fit, three to a row, so that no row is left
-     with one friend. Each row is grounded on a rule. */
+  main { max-width: 2422px; }
+  /* Friends stand in one row where all thirteen fit. Otherwise they split seven and six, and where
+     seven do not fit, five, five and three. Narrower, they stand four or three to a row, or in pairs,
+     and Claude, the last, stands alone under the rest, over the disclaimer about it. Each row is
+     grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   .friend {
@@ -129,18 +130,20 @@
   /* Beside the margin line the stage spans the paper to the page's edge, keeping the 12px
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
   @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } }
-  /* Four stand in a row once the stage is 4.598 boxes wide, which it is from an 848px window, six
-     once it is 6.915 boxes wide, from a 1219px window, and all twelve once it is 13.34 boxes wide,
-     from a 2247px window, where the page stops growing. */
-  @container (width >= 736px) { .troupe { --abreast: 4.598; } }
-  @container (width >= 1107px) {
-    .troupe { --abreast: 6.915; }
-    .note .long { display: inline; }  /* A row of six leaves room for the whole note. */
+  /* Four stand in a row once the stage is 4.690 boxes wide, which it is from an 863px window, five
+     once it is 5.701 boxes wide, from a 1025px window, seven once it is 8.099 boxes wide, from a
+     1408px window, and all thirteen once it is 14.432 boxes wide, from a 2422px window, where the
+     page stops growing. */
+  @container (width >= 751px) { .troupe { --abreast: 4.690; } }
+  @container (width >= 913px) {
+    .troupe { --abreast: 5.701; }
+    .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
   }
-  /* The twelve fit the capped row with only 0.1px to spare, so the cap is lifted here: rounding must not
-     send the last friend to a second row. */
-  @container (width >= 2135px) {
-    .troupe { --abreast: 13.34; }
+  @container (width >= 1296px) { .troupe { --abreast: 8.099; } }
+  /* The thirteen fit the capped row with only a pixel to spare, so the cap is lifted here:
+     rounding must not send the last friend to a second row. */
+  @container (width >= 2310px) {
+    .troupe { --abreast: 14.432; }
     .friends { max-width: none; }
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
@@ -179,6 +182,11 @@
   .disclaimer .line { display: block; text-wrap: balance; }
   .disclaimer .machine { white-space: nowrap; }
   .disclaimer .mark.arrow { width: var(--arrow-width); height: 1.4em; margin-left: .1em; vertical-align: -.35em; transform: rotate(-90deg); filter: url(#graphite); }
+  /* Where Claude stands alone under the rest, its middle is the troupe's, and ending the first line there would
+     squeeze both sentences into its left half. So the disclaimer is centered under Claude instead, and the
+     arrow at the end of its first line turns to point up and in at it. */
+  .disclaimer.alone { padding-right: 0; text-align: center; }
+  .disclaimer.alone .mark.arrow { transform: rotate(-135deg); }
   .nojs { margin: 0; min-height: var(--L); color: var(--ink-2); position: relative; top: var(--sit); text-align: center; }
   /* The live region that says what a greeting did is for screen readers only, so it is hidden from view. */
   .announcer { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
@@ -234,13 +242,17 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou, a white fox with a blond mop, sky-blue ears, a blue diamond on his forehead, one blue eye and one yellow"></div>
           <figcaption><span class="name hand">mumuyou</span><span class="species">white fox</span><span class="credit"><a href="https://www.facebook.com/MuMuYouo">fb/MuMuYouo</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="brian"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian, a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue"></div>
+          <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/">fb/<wbr>brian.<wbr>ren.856964</a></span></figcaption>
+        </figure></li>
         <li class="friend" data-friend="kevin"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N, an ice-blue cat with a yellow mark on his forehead, one blue eye and one orange, and a white-tipped tail"></div>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="brian"><figure>
-          <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian, a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue"></div>
-          <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/">fb/<wbr>brian.<wbr>ren.856964</a></span></figcaption>
+        <li class="friend" data-friend="bardell"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell, a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail"></div>
+          <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="yuanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan, a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle"></div>
@@ -284,8 +296,9 @@
 <script src="characters/yuda/yuda.js"></script>
 <script src="characters/terry/terry.js"></script>
 <script src="characters/mumuyou/mumuyou.js"></script>
-<script src="characters/kevin/kevin.js"></script>
 <script src="characters/brian/brian.js"></script>
+<script src="characters/kevin/kevin.js"></script>
+<script src="characters/bardell/bardell.js"></script>
 <script src="characters/yuanyuan/yuanyuan.js"></script>
 <script src="characters/tanyuan/tanyuan.js"></script>
 <script src="characters/teni/teni.js"></script>
@@ -389,14 +402,17 @@
     return { w: VIEW_SIZE, h: VIEW_SIZE, x: VIEW_SIZE / 2, y: VIEW_SIZE - ground, scale: 1, rotate: 0 };
   }
 
-  // Keeps the disclaimer's arrow under Claude, whichever row it stands in. Claude is measured by its
-  // labels, which stay put while it hops in.
+  // Keeps the disclaimer's arrow under Claude, whichever row it stands in, and marks the disclaimer
+  // `alone` where Claude has a row to itself. Friends are measured by their labels, which stay put
+  // while they hop in.
   function placeDisclaimerArrow(claude) {
     const disclaimer = document.querySelector('.disclaimer');
     if (!claude || !disclaimer) return;
     const troupe = disclaimer.parentElement, caption = claude.element.querySelector('figcaption');
+    const previous = claude.element.previousElementSibling.querySelector('figcaption');
     const place = () => {
       const labels = caption.getBoundingClientRect();
+      disclaimer.classList.toggle('alone', Math.abs(previous.getBoundingClientRect().top - labels.top) > 1);
       disclaimer.style.setProperty('--to-claude', `${troupe.getBoundingClientRect().right - (labels.left + labels.width / 2)}px`);
     };
     place();
