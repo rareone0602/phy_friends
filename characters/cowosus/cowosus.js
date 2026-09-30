@@ -113,9 +113,10 @@ PhyFriends.define('cowosus', {
     // The mint band across the bridge of the muzzle, as in every view, from under one eye to under the other: it covers
     // the seam at the top of the peach and tapers at the ends, as the sheet's stroke does.
     { on: 'face', kind: 'ellipse', fill: 'mint', cx: 0, cy: 30, rx: 56, ry: 4 },
-    // The peach eyebrow dots: an oval above each eye, on the lime and on the white.
-    { on: 'hair', kind: 'ellipse', fill: 'peach', cx: -32, cy: -34, rx: 8, ry: 6 },
-    { on: 'hair', kind: 'ellipse', fill: 'peach', cx: 32, cy: -34, rx: 8, ry: 6 },
+    // The peach eyebrow dots, one on the lime and one on the white: each shaped like Pac-Man, as on the sheet, a 9 x 7
+    // oval with a 76-degree wedge cut from its outer side, a little below the middle.
+    { on: 'hair', fill: 'peach', d: 'M-33.35 -34L-39.95 -37.29A9 7 0 1 1 -38.02 -28.8Z' },
+    { on: 'hair', fill: 'peach', d: 'M33.35 -34L38.02 -28.8A9 7 0 1 1 39.95 -37.29Z' },
     // The curl on the crown, which every view draws: a thick white lock that rises left of the middle and hooks over to
     // the right into a point, and its red tip, whose edge is cut into points that reach down into the white.
     { on: 'hair', fill: 'fur', nodes: [[-28, -100, 1, 0], [-34, -118], [-34, -134], [-26, -146], [-10, -153], [20, -152, 1, 0],
