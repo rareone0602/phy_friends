@@ -12,13 +12,14 @@ position, so a still shows the eyes following it.
 import argparse
 import os
 import shutil
-import signal
 import subprocess
 import tempfile
 import time
 from pathlib import Path
 
 from PIL import Image
+
+from cdp import kill_process_group
 
 ROOT = Path(__file__).resolve().parent.parent
 CHROME = os.environ.get('CHROME', '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome')
@@ -54,11 +55,7 @@ def shoot(page, out_png, w, h, query='', scale=1, budget=12000, timeout=90):
             elif proc.poll() is not None:
                 break
             time.sleep(0.25)
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        proc.wait()
+        kill_process_group(proc)
         if not shot.exists():
             raise RuntimeError('Chrome produced no screenshot')
         img = Image.open(shot)

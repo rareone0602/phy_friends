@@ -97,6 +97,20 @@ def page_url(page, query=''):
     return url
 
 
+def kill_process_group(process):
+    """Kill a process started with start_new_session=True, with every process it started, and reap it.
+
+    Once the process has exited, its group holds only its zombie until it is reaped. Linux then reports the group
+    as gone (ProcessLookupError), while macOS refuses to signal it (PermissionError); either way nothing is left
+    to kill.
+    """
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except (ProcessLookupError, PermissionError):
+        pass
+    process.wait()
+
+
 class HeadlessChrome:
     """One headless Chrome with a single page, driven over the DevTools protocol."""
 
@@ -126,11 +140,7 @@ class HeadlessChrome:
     def close(self):
         """Kill Chrome with every process it started, and remove its profile."""
         if self._process:
-            try:
-                os.killpg(self._process.pid, signal.SIGKILL)
-            except ProcessLookupError:
-                pass
-            self._process.wait()
+            kill_process_group(self._process)
             self._process = None
         for fd in (self._command_write, self._reply_read):
             if fd is not None:

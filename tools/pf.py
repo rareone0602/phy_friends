@@ -32,10 +32,8 @@ import argparse
 import html
 import json
 import math
-import os
 import re
 import shutil
-import signal
 import subprocess
 import sys
 import tempfile
@@ -46,7 +44,7 @@ from string import Template
 
 from PIL import Image
 
-from cdp import CHROME, ChromeError, HeadlessChrome, PageError
+from cdp import CHROME, ChromeError, HeadlessChrome, PageError, kill_process_group
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/ and out/scratch/.
@@ -111,11 +109,7 @@ def shoot(html, w, h, out_png, timeout=60):
             elif proc.poll() is not None:
                 break
             time.sleep(0.25)
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        proc.wait()
+        kill_process_group(proc)
         if not shot.exists():
             raise RuntimeError('Chrome produced no screenshot (see $CHROME / page errors)')
         img = Image.open(shot)
@@ -163,11 +157,7 @@ def evaluate(js_expr, timeout=60):
             if not chunk:
                 break
             buf += chunk
-        try:
-            os.killpg(proc.pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        proc.wait()
+        kill_process_group(proc)
         html = buf.decode('utf-8', 'replace')
         import html as htmlmod
         import re
