@@ -42,7 +42,7 @@ out/           generated output (git-ignored)
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig |
 | `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod), composition, stacks of timed layers, a browser player, and the hop by which a friend gets about |
 | `src/emotion.js` | feelings: happy, content, shy, proud, surprised, scared, curious, sleepy, asleep, sad and cross, each as a face, a reaction and a held loop, for every friend drawn on the house template |

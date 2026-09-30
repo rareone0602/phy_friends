@@ -407,8 +407,9 @@ point somewhere or grow a size to hold its own; it is still the same mark.
 - `figures/`, for charts and diagrams (§8);
 - the graphite filter (§6).
 
-`specimen.html` shows every part below, working, on the rules. A page is
-put together as the specimen is:
+`specimen.html` shows every part below, working, on the rules, and lets
+you turn the dial (§5) through its three stops. A page is put together as
+the specimen is:
 - `<html lang="en-GB">`, with the colour-scheme meta (§4);
 - in the head, the face (§5), then `notebook.css`, then `pencil.css`, and
   `--informal` set on `:root` where the work is not at `50`;

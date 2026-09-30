@@ -12,9 +12,15 @@ run `python3 tools/pf.py style` after editing either.
 ## the gallery page
 
 The files are `index.html` (the gallery), `style.html` (the guides) and
-`specimen.html` (the kit at work). All three wear the kit, `site/notebook.css`
-(the paper) and `site/pencil.css` (the pencil). The paper is
-design C from the mockups in `design/`; A and B are kept in `design/backup/`.
+`specimen.html` (the kit at work, with the dial to turn). All three wear
+the kit, `site/notebook.css` (the paper) and `site/pencil.css` (the
+pencil). The paper is design C from the mockups in `design/`; A and B are
+kept in `design/backup/`.
+
+The specimen shows the kit as a site wears it, at `50`. Its dial turns
+the page to `0` or `100` and back, and a reload returns it to `50`. Only
+the face turns: the chrome stays lower case at every stop, since case is
+written rather than set (`STYLE.md` §3).
 
 The gallery is a hobby project, so it sits at `100`, the top of the dial
 (`STYLE.md` §5): every letter is as informal as the face goes, big s and

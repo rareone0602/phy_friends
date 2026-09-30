@@ -273,7 +273,7 @@ An owner's wish beats a house rule. A character appears only with its owner's sa
 <li><code>figures/</code>, for charts and diagrams (§8);</li>
 <li>the graphite filter (§6).</li>
 </ul>
-<p class="lead"><code>specimen.html</code> shows every part below, working, on the rules. A page is put together as the specimen is:</p>
+<p class="lead"><code>specimen.html</code> shows every part below, working, on the rules, and lets you turn the dial (§5) through its three stops. A page is put together as the specimen is:</p>
 <ul>
 <li><code>&lt;html lang="en-GB"&gt;</code>, with the colour-scheme meta (§4);</li>
 <li>in the head, the face (§5), then <code>notebook.css</code>, then <code>pencil.css</code>, and <code>--informal</code> set on <code>:root</code> where the work is not at <code>50</code>;</li>
@@ -430,7 +430,8 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <p>This file adds what only this project needs to phy's style guide (<code>STYLE.md</code>): the gallery page, its stage, the rules for drawing a friend with <code>src/phyfriends.js</code>, and the rules for putting friends together in films and games. If the two disagree, <code>STYLE.md</code> wins, unless this file says why. The site's <code>style.html</code> shows both files, one after the other; run <code>python3 tools/pf.py style</code> after editing either.</p>
 <hr>
 <h2 id="the-gallery-page">the gallery page</h2>
-<p>The files are <code>index.html</code> (the gallery), <code>style.html</code> (the guides) and <code>specimen.html</code> (the kit at work). All three wear the kit, <code>site/notebook.css</code> (the paper) and <code>site/pencil.css</code> (the pencil). The paper is design C from the mockups in <code>design/</code>; A and B are kept in <code>design/backup/</code>.</p>
+<p>The files are <code>index.html</code> (the gallery), <code>style.html</code> (the guides) and <code>specimen.html</code> (the kit at work, with the dial to turn). All three wear the kit, <code>site/notebook.css</code> (the paper) and <code>site/pencil.css</code> (the pencil). The paper is design C from the mockups in <code>design/</code>; A and B are kept in <code>design/backup/</code>.</p>
+<p>The specimen shows the kit as a site wears it, at <code>50</code>. Its dial turns the page to <code>0</code> or <code>100</code> and back, and a reload returns it to <code>50</code>. Only the face turns: the chrome stays lower case at every stop, since case is written rather than set (<code>STYLE.md</code> §3).</p>
 <p>The gallery is a hobby project, so it sits at <code>100</code>, the top of the dial (<code>STYLE.md</code> §5): every letter is as informal as the face goes, big s and all, and the hand bounces.</p>
 <p class="lead">The page has five parts, in this order:</p>
 <ol>

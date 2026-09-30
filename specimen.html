@@ -54,6 +54,12 @@
   </header>
 
   <article class="doc">
+    <h2 id="dial">the dial</h2>
+    <p>Everything here is in one face on <a href="style.html#5-type">one dial</a>, <code>--informal</code>. Turn it and the letters follow, from neat print at 0 to a bouncing hand at 100. The case stays put: sentence case below 50 is the writer's job, and a stylesheet given it would capitalise phy.</p>
+    <div class="row">
+      <label for="informal">informality</label>
+      <select class="field" id="informal"><option value="0">0, a paper's diagram</option><option value="50" selected>50, a site</option><option value="100">100, a hobby project</option></select>
+    </div>
     <h2 id="notes">a page of notes</h2>
     <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
     <p>A notes page is the style guide with the numbers taken off. Links are <a href="style.html">underlined in pencil</a>, and <strong>bold</strong> is the only emphasis that shows from across the room. Long words and <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a> break rather than push the page sideways.</p>
@@ -136,6 +142,13 @@
   document.getElementById('photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));
   document.getElementById('drawing').src = img(PhyFriends.render('phy', {
     view: { w: 300, h: 300, x: 150, y: 300 - ground - 12, scale: 1.02, rotate: 0 }, bg: false, pose: { eyes: 'closed', tail: -40 } }));
+  // The dial: the select sets --informal on the root, which site/notebook.css turns into every letter's
+  // informality and bounce (STYLE.md §5). It starts at the page's own value, read from the stylesheet, so a
+  // reload returns the page to it even where the browser would restore the select's last choice.
+  const root = document.documentElement;
+  const dial = document.getElementById('informal');
+  dial.value = getComputedStyle(root).getPropertyValue('--informal').trim();
+  dial.addEventListener('change', () => root.style.setProperty('--informal', dial.value));
 </script>
 </body>
 </html>
