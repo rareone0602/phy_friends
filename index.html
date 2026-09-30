@@ -62,7 +62,8 @@
      all thirteen take 14.4311 boxes. In the smaller splits the widest rows are the first seven, Howdi
      to K3V1N, at 8.0985 boxes, the first five at 5.7000, mumuyou to BarDell at 4.6896, and the first
      three at 3.5607. Each is rounded up so that those friends always fit in one row. The box is five
-     rules, so that two rows fit a laptop's first screen. */
+     rules, so that the second row stands on its rule 768px down the page: a window at least that tall
+     shows two rows of friends. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 3.561; --size: calc(var(--L) * 5); }
   /* The page is wider than the kit's column so that the stage has room for a row of thirteen; the
@@ -324,12 +325,12 @@
   // row, each along its row's rule from the nearer edge of the screen. The one farthest from its edge
   // comes first, so that nobody hops past anybody already standing. A friend smiles as it lands, and
   // its neighbors in the row watch it land. It begins as the title's pen reaches "fwiends", or `first`
-  // seconds in if the title is not written, and a row is called once most of its first friend's box is
+  // seconds in if the title is not written, and a row is called once any of its first friend's box is
   // in view. Lengths are in head units: a friend coming from far away takes more hops, up to maxHops,
   // and then longer ones. A hop is lower than a scene's (26), so that ears in the air clear the labels
   // a rule above.
   const ROLL_CALL = { first: 0.2, stride: 200, maxHops: 6, height: 20, clearance: 24, cadence: 0.4, smile: 0.8,
-    inView: 0.6, watch: { before: 0.6, after: 0.9 } };
+    watch: { before: 0.6, after: 0.9 } };
 
   const groundRandom = PhyFriends.rng(5);  // Seeded, so that every visit draws the same ground lines.
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
@@ -346,10 +347,9 @@
     feel: PhyFriends.emotion.names.includes(params.get('feel')) ? params.get('feel') : null,
     boil: params.has('boil') ? Number(params.get('boil')) : undefined,
     doze: params.has('doze') ? Number(params.get('doze')) : undefined,
-    beforeHi, beforeFrame: followTheRollCall, canDoze: () => !rollCall,
+    beforeHi, beforeFrame: followTheRollCall, busy: onTheirWay, canDoze: () => !onTheirWay(),
     // The keyboard has reached a friend still to come, so everyone comes at once.
     onFocus: friend => { if (friend.arrival && friend.focused) endRollCall(); },
-    busy: () => friends.some(friend => friend.arrival && friend.arrival.start < Infinity),  // Uncalled rows do not count.
     afterPose: (friend, travel) => { if (friend.arrival) showOnItsWay(friend, travel); },
   });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
@@ -507,8 +507,8 @@
   // ---- The opening: the roll call
 
   // Sets up the roll call: every friend waits out of sight until it begins (begin), and the rows are
-  // called in order, each once it comes into view (the first once any of it shows, since a phone held
-  // sideways may have room for only part of it). A row scrolled past unseen is simply there. A change
+  // called in order, each once any of it comes into view, so that a row just below the fold comes in
+  // with its ears showing and draws the eye down. A row scrolled past unseen is simply there. A change
   // of the page's width, which moves every place, printing or a step back through the history puts
   // everyone in place at once, as does turning on reduced motion (animate).
   function callTheRoll() {
@@ -521,13 +521,9 @@
       friend.element.classList.add('waiting');
     }
     const observer = new IntersectionObserver(entries => {
-      for (const entry of entries) {
-        const row = rows.find(r => r.sentinel === entry.target);
-        // The ratio reported at the crossing may fall slightly short of the threshold.
-        row.inView = entry.intersectionRatio >= ROLL_CALL.inView * 0.99 || (row === rows[0] && entry.isIntersecting);
-      }
+      for (const entry of entries) rows.find(r => r.sentinel === entry.target).inView = entry.isIntersecting;
       callRowsInView();
-    }, { threshold: [0, ROLL_CALL.inView] });
+    });
     for (const row of rows) observer.observe(row.sentinel);
     const finishOnResize = () => { if (document.documentElement.clientWidth !== pageWidth) endRollCall(); };
     const finishOnRestore = event => { if (event.persisted) endRollCall(); };
@@ -600,11 +596,19 @@
   }
 
   // Before each frame: rows scrolled past come in at once, friends that have landed stay, and the roll
-  // call ends once everyone is in, or at once under reduced motion.
+  // call ends once everyone is in, or at once under reduced motion. It also ends once the friends doze
+  // off, which they may do while rows below wait to be called: a visitor who scrolls down after that
+  // finds the rest simply there, dozing with the others.
   function followTheRollCall(seconds) {
     if (rollCall) rollCall.skipRowsOffScreen(seconds);
     settleArrivals(seconds);
-    if (rollCall && (rollCall.done || reducedMotion.matches)) endRollCall();
+    if (rollCall && (rollCall.done || reducedMotion.matches || stage.dozing)) endRollCall();
+  }
+
+  // Whether any friend is on its way in or has been given its time to set off. Friends in rows not yet
+  // called do not count, so that the others may doze while they wait.
+  function onTheirWay() {
+    return friends.some(friend => friend.arrival && friend.arrival.start < Infinity);
   }
 
   function endRollCall() {

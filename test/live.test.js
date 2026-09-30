@@ -58,7 +58,7 @@
     assertEqual(L.wakeAnnouncement(['Howdi'], 2), 'Everyone wakes up.');
   });
 
-  test('a hi hops twice, a friend in the air ignores another, and the third hi of a run makes it shy', () => {
+  test('a hi hops twice, a friend in the air ignores another, and the third hi of a run makes it shy for a while', () => {
     withStage(['howdi'], moving, (stage, [howdi], said) => {
       stage.draw(0);
       assert(howdi.hi(), 'the first hi');
@@ -72,6 +72,9 @@
       assert(howdi.hi(), 'the third hi');
       assertEqual(howdi.feeling, 'shy');
       assertEqual(said, ['Howdi hops twice.', 'Howdi hops twice.', 'Howdi goes shy.']);
+      stage.draw(2.6 + L.SHY.seconds - 0.2);
+      assert(!howdi.hi(), 'a hi while shy is ignored');
+      assertEqual(howdi.feeling, 'shy', 'still shy, not hopping for joy');
       stage.draw(9);
       assertEqual(howdi.feeling, null, 'shy for a while only');
       howdi.hi();

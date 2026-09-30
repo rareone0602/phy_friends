@@ -51,8 +51,9 @@ The page has five parts, in this order:
   growing. The thirteen reaches add up to 597 head units and neighbours
   overlap by 0.06 of a box, so the row is 14.43 boxes wide. Thirteen do not
   split evenly: narrower, they stand seven and six, from a 1408px window,
-  and five, five and three, from a 1025px window; either way the first two
-  rows fit a laptop's first screen. Below that they stand four to a row,
+  and five, five and three, from a 1025px window. Either way the second row
+  stands on its rule 768px down the page, so a window at least that tall
+  shows two rows of friends. Below that they stand four to a row,
   below an 863px window three to a row, and on phones in pairs, and Claude,
   the last, stands alone under the rest.
 - Each friend's ground is its own patch of rule, gone over in pencil: a
@@ -135,7 +136,8 @@ their feelings come from the emotion library, one rule each:
   joy: happy eyes, a small mouth, two bounces. The other fwiends glance at
   the one being greeted.
 - A third hi within six seconds of the first makes a friend shy instead: it
-  blushes, ducks and looks away for a moment.
+  blushes, ducks and looks away for a moment, and takes no notice of
+  another hi until it recovers.
 - Stroking a friend, with the pointer or a finger moved back and forth over
   it, makes it content: it shuts its eyes happily, and a ♪ shows once.
 - Left alone for 30 seconds, the fwiends grow sleepy one by one and fall
@@ -177,8 +179,11 @@ the history, reduced motion and the link preview show everything in place.
   cursor.
 - The labels are there from the start, so the empty places above them read
   as the names still to be called.
-- A row is called once it comes into view, so on a phone the lower rows come
-  in as they are scrolled to. A row scrolled past unseen is simply there.
+- A row is called once any of it comes into view. A row just below the fold
+  comes in with only its ears showing, which draws the eye down, and on a
+  phone the lower rows come in as they are scrolled to. A row scrolled past
+  unseen is simply there, as are the rows still to come once the fwiends
+  doze off.
 - A change in the window's width, or tabbing to a fwiend still to come,
   brings everyone in at once.
 

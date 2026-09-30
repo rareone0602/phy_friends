@@ -8,7 +8,7 @@
  * (a click, a tap, Enter or Space) with the emotion library's greeting (src/emotion.js).
  *
  * Its feelings come from the emotion library too, one rule each:
- *   a third hi within a few seconds of the first makes a friend shy;
+ *   a third hi within a few seconds of the first makes a friend shy, and it ignores a hi until it recovers;
  *   stroking it (the pointer or a finger moved back and forth over it) makes it content;
  *   hovering over it or focusing it for a moment makes it curious;
  *   with no input for a while the friends grow sleepy one by one and fall asleep, and any input
@@ -59,11 +59,14 @@
   // With no pointer to follow and no one reacting, the friends only breathe and glance about, slowly
   // enough that 30 frames a second look as smooth as more, so a frame is drawn at most every 1/30 s
   // (a little under, so that a 60 Hz screen draws every other frame). This halves a phone's work.
+  // While every friend that shows feelings is asleep, a frame is drawn only when the pencil texture is
+  // redrawn (the boil), so that a page left open does little work while its friends sleep.
   const CALM_FRAME_SECONDS = 0.85 / 30;
   const HI_FADE = 0.08;                  // The greeting starts and ends at rest, so it comes and goes quickly.
   const HELD_HI_SECONDS = 0.3;           // How far into its greeting the `hold` option holds a friend.
   const FEEL_FADE = 0.15;                // How long a feeling takes to come on or wear off, in seconds.
-  // The third hi to a friend within `within` seconds of the first of the run makes it shy for `seconds`.
+  // The third hi to a friend within `within` seconds of the first of the run makes it shy for `seconds`,
+  // during which it ignores another hi.
   const SHY = { his: 3, within: 6, seconds: 2.5 };
   // A stroke: `reversals` turns along x within `within` seconds, each after at least `distance` px one
   // way; the friend stays content until `linger` seconds after the stroking stops.
@@ -134,7 +137,7 @@
     let pointer = simulated, pointerMovedAt = now();
     // The stage keeps its own clock, which stands still while the stage is out of sight, so that idle
     // cycles, reactions and dozing carry on from where they stopped.
-    let clock = 0, lastFrame = 0, frameRequest = 0, inView = true, started = false;
+    let clock = 0, lastFrame = 0, frameRequest = 0, frameTimer = 0, inView = true, started = false;
     let lastInput = 0, doze = null;
     addStyle();
 
@@ -187,29 +190,53 @@
 
     function pause() {
       cancelAnimationFrame(frameRequest);
-      frameRequest = 0;
+      clearTimeout(frameTimer);
+      frameRequest = frameTimer = 0;
     }
 
     // The first frame after a pause advances the stage by one frame rather than by the time away, so
     // that the gaze eases toward wherever the pointer is now at its usual rate.
     function resume() {
-      if (frameRequest) return;
+      if (frameRequest || frameTimer) return;
       lastFrame = now();
       frameRequest = requestAnimationFrame(animate);
     }
 
-    // With nothing to watch and nobody reacting, a frame is drawn only every CALM_FRAME_SECONDS.
+    // With nothing to watch and nobody reacting, a frame is drawn only every CALM_FRAME_SECONDS, and
+    // while everyone who shows feelings is asleep, only when the texture is redrawn. The stage waits on a
+    // timer rather than a request for every refresh, so that the browser has nothing to do in between.
     function animate(time) {
+      frameRequest = 0;
       const elapsed = Math.max(0, (time - lastFrame) / 1000), t = clock + elapsed;
       if (o.beforeFrame) o.beforeFrame(t);
       const quiet = isPointerGone(time) && !watchedAt(t) && !records.some(r => r.friend.watch && r.friend.watch(t)) &&
         !(o.busy && o.busy(t));
-      if (quiet && elapsed < CALM_FRAME_SECONDS) {
-        frameRequest = requestAnimationFrame(animate);
+      const wait = !quiet ? 0 : doze && doze.asleep ? untilRedrawn(t) : CALM_FRAME_SECONDS - elapsed;
+      if (wait > 0) {
+        frameTimer = setTimeout(() => {
+          frameTimer = 0;
+          frameRequest = requestAnimationFrame(animate);
+        }, wait * 1000);
         return;
       }
       lastFrame = time;
       draw(t, elapsed, time);
+      frameRequest = requestAnimationFrame(animate);
+    }
+
+    // Seconds from t until the texture is next redrawn, or 0 if it has been since the last frame. Where
+    // the texture keeps still, the frames keep to the rate at which it would boil.
+    function untilRedrawn(t) {
+      const rate = Number.isFinite(o.boil) && o.boil > 0 ? o.boil : BOIL;
+      const drawn = Math.floor(clock * rate);
+      return Math.floor(t * rate) > drawn ? 0 : (drawn + 1) / rate - t;
+    }
+
+    // Input brings the next frame forward, rather than leaving it until a calm wait ends.
+    function hurry() {
+      if (!frameTimer) return;
+      clearTimeout(frameTimer);
+      frameTimer = 0;
       frameRequest = requestAnimationFrame(animate);
     }
 
@@ -252,13 +279,13 @@
       for (const record of records) record.friend.rig.setTexture(variant);
     }
 
-    // The friend that reacted to the reader most recently (a hi, going shy), while its reaction lasts:
-    // the others glance at it.
+    // The friend that reacted to the reader most recently (a hi, going shy), while its reaction is worth
+    // watching (watchedUntil): the others glance at it.
     function watchedAt(t) {
       let latest = null;
       for (const record of records) {
         const reaction = record.reaction;
-        if (reaction && reaction.watched && reaction.at <= t && t < reaction.until && (!latest || reaction.at > latest.reaction.at)) latest = record;
+        if (reaction && reaction.at <= t && t < reaction.watchedUntil && (!latest || reaction.at > latest.reaction.at)) latest = record;
       }
       return latest;
     }
@@ -298,6 +325,7 @@
     function noteInput(point = null) {
       lastInput = clock;
       if (doze) wake(point);
+      hurry();
     }
 
     // ---- Dozing
@@ -316,7 +344,7 @@
       const sleepers = records.filter(record => record.friend.fits);
       if (!sleepers.length) return null;
       const times = dozeSchedule(sleepers.length, t);
-      return { entries: sleepers.map((record, i) => ({ record, ...times[i], sleepy: false, asleep: false })), announced: false };
+      return { entries: sleepers.map((record, i) => ({ record, ...times[i], sleepy: false, asleep: false })), asleep: false };
     }
 
     function advanceDoze(t) {
@@ -330,8 +358,8 @@
           entry.record.friend.feel('asleep', { at: entry.asleepAt });
         }
       }
-      if (!doze.announced && doze.entries.every(entry => entry.asleep)) {
-        doze.announced = true;
+      if (!doze.asleep && doze.entries.every(entry => entry.asleep)) {
+        doze.asleep = true;
         const awake = records.filter(record => !record.friend.fits).map(record => record.friend.label);
         o.announce(dozeAnnouncement(doze.entries.map(entry => entry.record.friend.label), awake));
       }
@@ -380,7 +408,7 @@
 
       if (o.hold === name) {
         layers.add(A.still(greeting(HELD_HI_SECONDS)), { at: -Infinity, fade: 0 });
-        record.reaction = { at: -Infinity, until: Infinity, watched: true };
+        record.reaction = { at: -Infinity, until: Infinity, watchedUntil: Infinity };
       }
       if (o.feel && fits) {
         feeling = feelingOf(o.feel, layers.add(A.still(E.face(o.feel, { spec })), { at: -Infinity, fade: 0 }), Infinity);
@@ -429,13 +457,14 @@
           run = null;
           const own = eyes();
           feel('shy', { at: t, lasting: SHY.seconds, mirror: !!pointer && pointer.x > own.x });  // It looks away from the pointer.
-          record.reaction = { at: t, until: t + E.react('shy').duration, watched: true };
+          // It ignores a hi for as long as it is shy, and the others glance at it only while it ducks.
+          record.reaction = { at: t, until: t + SHY.seconds, watchedUntil: t + E.react('shy').duration };
           o.announce(E.describe('shy', label));
           return true;
         }
         const reduced = self.reduced;
         layers.add(reduced && !fits ? BLINK : greeting, { at: t, fade: HI_FADE });
-        record.reaction = { at: t, until: t + greeting.duration, watched: true };
+        record.reaction = { at: t, until: t + greeting.duration, watchedUntil: t + greeting.duration };
         o.announce(!reduced ? ANNOUNCEMENT.hop(label) : fits ? E.describe('happy', label) : ANNOUNCEMENT.blink(label));
         return true;
       }
@@ -483,7 +512,7 @@
       // Wakes the friend with a start at time t.
       function wakeAt(t) {
         pendingWake = t;
-        record.reaction = { at: t, until: t + E.react('surprised').duration, watched: false };
+        record.reaction = { at: t, until: t + E.react('surprised').duration, watchedUntil: t };  // Nobody glances at it.
       }
 
       function stroke(x, timeStamp) {
