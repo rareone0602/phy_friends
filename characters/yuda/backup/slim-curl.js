@@ -1,3 +1,5 @@
+// An alternative to characters/yuda/yuda.js: bandana.png's slim curl leaning right on the crown, in place of the
+// tall crest leaning left that icon.png, waving.png and card.png draw. Kept per STYLE.md, principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png, the color standard; those it does not show are taken from waving.png. The
@@ -34,22 +36,22 @@ PhyFriends.define('yuda', {
     base: [-60, -46], angle: 50, width: 88, length: 78, lean: 0, tip: 9, b1: -13, b2: 0,
     inner: { scale: 0.7, dx: -1, dy: -9 },
   },
-  // The mop is in the fur color, with a tall crest leaning left on the crown (as in icon.png, waving.png and
-  // card.png), a smaller spike beside it, and a flame-shaped lock down each side of the face, outside the eyes.
+  // The mop is in the fur color, with a slim curl leaning right on the crown (as in bandana.png), a smaller spike
+  // beside it, and a flame-shaped lock down each side of the face, outside the eyes.
   // Between those locks its edge runs above the eyes and under the eyebrow spots, then rises to a point between the
   // spots: the white V of bandana.png, teacup.png and snowman.webp. It clears the eyes as they look around.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
     cx: 0, cy: -50, rx: 74, ry: 34, color: 'fur',
     tips: [
-      [-32, -118, 2, 12, [0, -84]],
-      [22, -98, -6, -10, [54, -66]],
+      [12, -114, -16, 22, [20, -84]],
+      [42, -90, -6, -10, [58, -62]],
       [80, -26, 0, 0, [72, -20]],
       [62, -2, 10, -6, [42, -21]],
       [18, -27, 0, 0, [0, -42]],
       [-18, -27, 0, 0, [-42, -21]],
       [-62, -2, -6, 10, [-72, -20]],
-      [-80, -26, 0, 0, [-52, -70]],
+      [-80, -26, 0, 0, [2, -84]],
     ],
   },
   // The eyes are plain tall pills in Yuda's own blue, set wide and low. Setting arc: 1 draws the happy,

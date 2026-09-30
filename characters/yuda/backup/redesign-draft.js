@@ -1,7 +1,10 @@
+// The designer's draft of characters/yuda/yuda.js for the redesign closer to examples/bandana.png and icon.png: the
+// ears splayed to 50°, two large white cheek tufts a side and the bandana's band standing proud of the neck, on the
+// old head, face and bandana sizes. Kept per STYLE.md, principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
-// Colors are taken from examples/icon.png, the color standard; those it does not show are taken from waving.png. The
-// shapes follow icon.png and bandana.png.
+// Colors are taken from examples/icon.png; those the icon does not show are taken from waving.png. The shapes
+// follow icon.png and bandana.png.
 PhyFriends.define('yuda', {
   palette: {
     bg: '#1c1d21',
@@ -11,45 +14,49 @@ PhyFriends.define('yuda', {
     eye: '#23263d',        // A deep slate navy, for the open mouth.
     eyeBlue: '#4e7ec0',    // The blue of the eyes in waving.png and card.png.
     blush: '#a9dbf3',      // A soft sky blue, as his owner set it (the pictures draw it peach or pink).
-    scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band.
+    scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band and the knot.
     tailMid: '#94a1d9',    // The periwinkle band on the tail, drawn in both waving.png and teacup.png.
     tailTip: '#bfbdf1',    // The pale lavender tip of the tail.
   },
-  // The head is broad and low, as in icon.png and bandana.png, with two spiky tufts down each side under the ears.
+  // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -16, rx: 92, ry: 60,
-    fluff: [{ from: -34, to: -2, n: 2, len: 11, lean: 4, depth: 0.04, b1: -30, b2: 10, jit: 0, sym: true }],
+    cx: 0, cy: -22, rx: 90, ry: 68,
+    fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
-  // The white face is large, as in bandana.png. Its plump round cheeks end at each side in two large white tufts, as
-  // in icon.png and bandana.png; the fur ruff behind them (an extra) makes longer cheek spikes that edge them.
+  // The white muzzle and plump round cheeks end at each side in two large white tufts, as in icon.png and
+  // bandana.png; the fur ruff behind them (an extra) makes longer cheek spikes that edge them. Setting len < 0
+  // flattens the top, under the forehead locks.
   face: {
-    cx: 0, cy: 12, rx: 82, ry: 40,
-    fluff: [{ from: -30, to: 20, n: 2, len: 12, lean: 4, depth: 0.1, b1: -22, b2: 6, jit: 0, sym: true }],
+    cx: 0, cy: 14, rx: 80, ry: 38,
+    fluff: [
+      { from: -30, to: 20, n: 2, len: 12, lean: 4, depth: 0.1, b1: -22, b2: 6, jit: 0, sym: true },
+      { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
+    ],
   },
   // The ears are large and broad, with soft points, and splay out from the upper corners of the head, as in
   // icon.png and bandana.png; each inner edge runs on from the crown, dipping a little where it meets it. They lean
-  // out between the icon's more upright ears and bandana.png's lower, wider ones. The cyan inner ear keeps a broad
-  // slate margin, as in icon.png, waving.png and card.png, because a thin rim would read as an outline.
+  // out as far as fits the head's outline to both pictures best: leaning further, it fits bandana.png better and the
+  // icon worse, and less, the other way round. The cyan inner ear keeps a broad slate margin, as in icon.png,
+  // waving.png and card.png, because a thin rim would read as an outline.
   ears: {
-    base: [-60, -46], angle: 50, width: 88, length: 78, lean: 0, tip: 9, b1: -13, b2: 0,
+    base: [-58, -56], angle: 50, width: 88, length: 78, lean: 0, tip: 9, b1: -13, b2: 0,
     inner: { scale: 0.7, dx: -1, dy: -9 },
   },
-  // The mop is in the fur color, with a tall crest leaning left on the crown (as in icon.png, waving.png and
-  // card.png), a smaller spike beside it, and a flame-shaped lock down each side of the face, outside the eyes.
-  // Between those locks its edge runs above the eyes and under the eyebrow spots, then rises to a point between the
-  // spots: the white V of bandana.png, teacup.png and snowman.webp. It clears the eyes as they look around.
+  // The mop is in the fur color, with a tall crest leaning left on the crown (every picture has it),
+  // a smaller spike beside it, and flame-shaped locks hanging over the forehead beside each eye.
+  // The valleys sit high enough to clear the eyes as they look around.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -50, rx: 74, ry: 34, color: 'fur',
+    cx: 0, cy: -58, rx: 72, ry: 40, color: 'fur',
     tips: [
-      [-32, -118, 2, 12, [0, -84]],
-      [22, -98, -6, -10, [54, -66]],
-      [80, -26, 0, 0, [72, -20]],
-      [62, -2, 10, -6, [42, -21]],
-      [18, -27, 0, 0, [0, -42]],
-      [-18, -27, 0, 0, [-42, -21]],
-      [-62, -2, -6, 10, [-72, -20]],
-      [-80, -26, 0, 0, [-52, -70]],
+      [-34, -132, 2, 12, [0, -96]],
+      [22, -110, -6, -10, [52, -76]],
+      [76, -30, 0, 0, [70, -24]],
+      [60, -4, 10, -12, [40, -33]],
+      [14, -7, 8, -12, [0, -46]],
+      [-14, -7, -12, 8, [-40, -33]],
+      [-60, -4, -12, 10, [-70, -24]],
+      [-76, -30, 0, 0, [-50, -80]],
     ],
   },
   // The eyes are plain tall pills in Yuda's own blue, set wide and low. Setting arc: 1 draws the happy,
@@ -84,8 +91,8 @@ PhyFriends.define('yuda', {
     { on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -36, to: 22, n: 2, len: 19, lean: 2, depth: 0.1, b1: -30, b2: 10, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
-    // The white rises in a broad V between the eyes to a point between the eyebrow spots; the mop's edge shapes it.
-    { on: 'face', fill: 'face', nodes: [[0, -44, 1, 0], [44, -12, 1, 0], [-44, -12, 1, 0]] },
+    // The white rises into a tall point between the eyes, up between the eyebrow spots (as in teacup.png and bandana.png).
+    { on: 'face', fill: 'face', nodes: [[0, -42, 1, -12], [13, -12, 1, 0], [-13, -12, 1, -12]] },
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the
     // head); on: 'ears' puts them on both.
     // The zigzag tuft of fur rising from the base of the inner ear.
@@ -97,11 +104,16 @@ PhyFriends.define('yuda', {
     // The white chest and belly: a round bib under the bandana, its sides cut into tufts, ending above the forepaws.
     { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 46, ry: 30,
       fluff: [{ from: -40, to: 60, n: 3, len: 6, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
-    // The bandana, as bandana.png draws it: a band of cloth around the neck, knotted out of sight at his back, and a
-    // large point hanging over it on the chest. The band is not clipped to the body: each end stands a few units
-    // proud of the neck, which shows its thickness. It lies behind the point, so it takes the house shade.
-    { on: 'body', fill: 'scarfShade', nodes: [[-70, 43, 1, 6], [70, 43, 1, -8], [68, 59, 1, -8], [-68, 59, 1, -8]] },
-    { on: 'body', fill: 'scarf', nodes: [[-62, 49, 1, 6], [62, 49, 1, -4], [0, 116, 1, -4]], round: 0.2 },
+    // The bandana: a band of cloth around the neck, the broad point hanging over it on the chest, as in
+    // bandana.png, and two ends sticking out from a knot at the side of the neck, as in waving.png and card.png
+    // (bandana.png hides the knot behind him). The band is not clipped to the body: its end stands a few units
+    // proud of the neck, which shows its thickness. It lies behind the point and the knot lies behind the ends,
+    // so both take the house shade.
+    { on: 'body', fill: 'scarfShade', nodes: [[-66, 44, 1, 6], [60, 44, 1, 0], [60, 60, 1, -6], [-64, 59, 1, -8]] },
+    { on: 'body', fill: 'scarf', nodes: [[-56, 50, 1, 6], [54, 52, 1, -4], [-4, 106, 1, -4]], round: 0.2 },
+    { on: 'body', fill: 'scarf', nodes: [[52, 56, 1, -20], [90, 84, 1, -20], [50, 74, 1, 0]], round: 0.2 },
+    { on: 'body', fill: 'scarf', nodes: [[46, 52, 1, -20], [96, 44, 1, -20], [60, 66, 1, 0]], round: 0.2 },
+    { on: 'body', kind: 'ellipse', fill: 'scarfShade', cx: 54, cy: 59, rx: 8.5, ry: 8 },
     // White forepaws on the ground, under the bib.
     { on: 'body', kind: 'ellipse', fill: 'face', cx: -21, cy: 121, rx: 14, ry: 10 },
     { on: 'body', kind: 'ellipse', fill: 'face', cx: 21, cy: 121, rx: 14, ry: 10 },

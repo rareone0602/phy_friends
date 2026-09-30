@@ -1,3 +1,6 @@
+// An alternative to characters/yuda/yuda.js: the bandana knotted at the side of his neck with its two ends sticking
+// out, as in waving.png and card.png, rather than out of sight at his back, as in bandana.png. Kept per STYLE.md,
+// principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png, the color standard; those it does not show are taken from waving.png. The
@@ -11,7 +14,7 @@ PhyFriends.define('yuda', {
     eye: '#23263d',        // A deep slate navy, for the open mouth.
     eyeBlue: '#4e7ec0',    // The blue of the eyes in waving.png and card.png.
     blush: '#a9dbf3',      // A soft sky blue, as his owner set it (the pictures draw it peach or pink).
-    scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band.
+    scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band and the knot.
     tailMid: '#94a1d9',    // The periwinkle band on the tail, drawn in both waving.png and teacup.png.
     tailTip: '#bfbdf1',    // The pale lavender tip of the tail.
   },
@@ -97,11 +100,15 @@ PhyFriends.define('yuda', {
     // The white chest and belly: a round bib under the bandana, its sides cut into tufts, ending above the forepaws.
     { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 46, ry: 30,
       fluff: [{ from: -40, to: 60, n: 3, len: 6, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
-    // The bandana, as bandana.png draws it: a band of cloth around the neck, knotted out of sight at his back, and a
-    // large point hanging over it on the chest. The band is not clipped to the body: each end stands a few units
-    // proud of the neck, which shows its thickness. It lies behind the point, so it takes the house shade.
-    { on: 'body', fill: 'scarfShade', nodes: [[-70, 43, 1, 6], [70, 43, 1, -8], [68, 59, 1, -8], [-68, 59, 1, -8]] },
-    { on: 'body', fill: 'scarf', nodes: [[-62, 49, 1, 6], [62, 49, 1, -4], [0, 116, 1, -4]], round: 0.2 },
+    // The bandana: a band of cloth around the neck, the large point hanging over it on the chest, as in bandana.png,
+    // and two ends sticking out from a knot at the side of the neck, as in waving.png and card.png. The band is not
+    // clipped to the body: its end stands a few units proud of the neck, which shows its thickness. It lies behind
+    // the point and the knot lies behind the ends, so both take the house shade.
+    { on: 'body', fill: 'scarfShade', nodes: [[-70, 43, 1, 6], [60, 43, 1, 0], [60, 60, 1, -6], [-68, 59, 1, -8]] },
+    { on: 'body', fill: 'scarf', nodes: [[-62, 49, 1, 6], [58, 51, 1, -4], [-4, 116, 1, -4]], round: 0.2 },
+    { on: 'body', fill: 'scarf', nodes: [[52, 56, 1, -20], [90, 84, 1, -20], [50, 74, 1, 0]], round: 0.2 },
+    { on: 'body', fill: 'scarf', nodes: [[46, 52, 1, -20], [96, 44, 1, -20], [60, 66, 1, 0]], round: 0.2 },
+    { on: 'body', kind: 'ellipse', fill: 'scarfShade', cx: 54, cy: 59, rx: 8.5, ry: 8 },
     // White forepaws on the ground, under the bib.
     { on: 'body', kind: 'ellipse', fill: 'face', cx: -21, cy: 121, rx: 14, ry: 10 },
     { on: 'body', kind: 'ellipse', fill: 'face', cx: 21, cy: 121, rx: 14, ry: 10 },

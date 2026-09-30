@@ -1,3 +1,5 @@
+// An alternative to characters/yuda/yuda.js: the ears as bandana.png draws them, lower, further out and rounder at
+// the tip, so that the head's outline fits bandana.png better and the icon worse. Kept per STYLE.md, principle 1.
 // Character spec for Yuda, a slate-blue wolf with white eyebrow spots and a cyan bandana.
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png, the color standard; those it does not show are taken from waving.png. The
@@ -26,12 +28,11 @@ PhyFriends.define('yuda', {
     cx: 0, cy: 12, rx: 82, ry: 40,
     fluff: [{ from: -30, to: 20, n: 2, len: 12, lean: 4, depth: 0.1, b1: -22, b2: 6, jit: 0, sym: true }],
   },
-  // The ears are large and broad, with soft points, and splay out from the upper corners of the head, as in
-  // icon.png and bandana.png; each inner edge runs on from the crown, dipping a little where it meets it. They lean
-  // out between the icon's more upright ears and bandana.png's lower, wider ones. The cyan inner ear keeps a broad
-  // slate margin, as in icon.png, waving.png and card.png, because a thin rim would read as an outline.
+  // The ears are large and broad, with round points, and splay far out from the upper corners of the head, as in
+  // bandana.png; each inner edge runs on from the crown, dipping a little where it meets it. The cyan inner ear
+  // keeps a broad slate margin, as in icon.png, waving.png and card.png, because a thin rim would read as an outline.
   ears: {
-    base: [-60, -46], angle: 50, width: 88, length: 78, lean: 0, tip: 9, b1: -13, b2: 0,
+    base: [-64, -44], angle: 54, width: 92, length: 76, lean: 0, tip: 11, b1: -14, b2: -4,
     inner: { scale: 0.7, dx: -1, dy: -9 },
   },
   // The mop is in the fur color, with a tall crest leaning left on the crown (as in icon.png, waving.png and

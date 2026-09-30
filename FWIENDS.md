@@ -236,7 +236,7 @@ Follow them when turning someone's picture or design sheet into a friend.
 **Proportions, in head space:** a big head on a small, seated body.
 - The origin sits between the eyes. The head is widest around eye level,
   about 140–190 units across the cheeks.
-- Ear tips reach about −155 (floppy ears less), and the paws reach
+- Ear tips reach about −155 (floppy or splayed ears less), and the paws reach
   `rig.ground`, about +131. A tail may curl out to one side.
 - The eyes are about 13 × 32 units, centred 31–35 either side of the origin.
 - A reference in the house template (a 1254px close-up, head tipped 20°,
