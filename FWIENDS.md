@@ -145,16 +145,16 @@ their feelings come from the emotion library, one rule each:
   up. Any input wakes them: those asleep start, with a "!", nearest the
   pointer first.
 - Claude shows no feelings. It perks up, watches and hops like the others,
-  but its hi is a hop without a smile, and none of the feelings above
-  touch it.
+  and returns a hi with the same smile, which is manners rather than a
+  feeling; none of the feelings above touch it.
 - A friend in mid-air ignores another hi until it lands, and a key held down
   says hi once. Starting the hop again would drop it to the ground in one
   frame.
 - A hidden status line tells a screen reader what happened, in one flat
-  sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion
-  (Claude, having no smile, blinks: "Claude blinks."); "Howdi goes shy.",
-  "Howdi looks content.", "Everyone but Claude falls asleep." and
-  "Everyone wakes up." Names keep their owner's case: "phy hops twice."
+  sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion;
+  "Howdi goes shy.", "Howdi looks content.", "Everyone but Claude falls
+  asleep." and "Everyone wakes up." Names keep their owner's case: "phy
+  hops twice."
 - A double-click or a long press on a friend selects nothing, and a quick
   second tap doesn't zoom the page. The labels stay selectable, so a handle
   can still be copied.
@@ -319,8 +319,8 @@ into its outer legs. Its arms take the place of ears and are in its own
 colour, as the glyphs draw them; each turns about a shoulder inside the
 block, so that the arms rise as it hops. It moves as the others do but
 shows no feelings: its spec sets `emotions: false`, so the emotion library
-gives it a feeling's movement without the face, and its hi is a hop without
-a smile. Its legs are
+gives it a feeling's movement without the face. It smiles only to greet,
+with the happy eyes and mouth and without the blush. Its legs are
 its body, in its one house shade. Its eyes look a whole unit aside (16 head
 units, where the house's move 6), as the glyphs move the notches, and its
 blush is a soft rose, since a pale pink on terracotta reads as a highlight.

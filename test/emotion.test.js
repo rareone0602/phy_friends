@@ -22,8 +22,15 @@
       assertEqual(E.face(feeling, { spec: 'claude' }), {});
       assertEqual(E.hold(feeling, { spec: 'claude' })(1), {});
     }
-    assertEqual(Object.keys(E.greeting('claude')(0.5)).includes('eyes'), false, 'the hi is a hop without happy eyes');
     assertEqual(E.greeting('howdi')(0.5).eyes, 'happy');
+  });
+
+  test('a friend that shows no feelings still smiles when greeted, without the blush or posture of joy', () => {
+    const hi = E.greeting('claude')(0.5);
+    assertEqual([hi.eyes, hi.mouth], ['happy', 'w']);
+    assert(!('flush' in hi) && !('widen' in hi) && !('lid' in hi), 'the smile alone, and the hop');
+    assertEqual(E.smile('claude'), { eyes: 'happy', mouth: 'w' });
+    assertEqual(E.smile('howdi').eyes, 'happy');
   });
 
   test('a feeling that is not in the library is an error that lists the ones that are', () => {

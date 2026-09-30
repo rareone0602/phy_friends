@@ -15,9 +15,8 @@
  *   wakes them, those asleep with a start.
  * A friend that shows no feelings (Claude; E.fits()) takes part in none of these, and does the rest.
  *
- * Under reduced motion only the eyes follow the pointer and only the face changes; a friend that shows
- * no feelings has no face to change, so it blinks when greeted. The page keeps its own layout and says
- * aloud what happens in its live region (announcer). It may drive a friend's travel and gaze through hooks on the
+ * Under reduced motion only the eyes follow the pointer and only the face changes, so that a hi is a
+ * smile. The page keeps its own layout and says aloud what happens in its live region (announcer). It may drive a friend's travel and gaze through hooks on the
  * friend (travel, watch), as the gallery's roll call does, and keep fields of its own on a friend.
  *
  * Example:
@@ -85,11 +84,7 @@
   // above. A mark that repeats (the z of sleep) starts lower, beside the head, and drifts up within the box.
   const MARK = { size: 44, x: 112, y: -108, drifting: { x: 110, y: -50 } };
   const FIELDS_MIRRORED = ['lookX', 'turnX', 'headX', 'tilt', 'x'];  // What changes sign when a pose is mirrored.
-  const ANNOUNCEMENT = {
-    hop: name => `${name} hops twice.`,  // The greeting (E.greeting) bounces twice.
-    blink: name => `${name} blinks.`,
-  };
-  const BLINK = A.track({ eyes: [[0, 'closed'], [0.15, undefined]] });  // A blink drawn with the closed eye, which reduced motion shows.
+  const ANNOUNCEMENT = { hop: name => `${name} hops twice.` };  // The greeting (E.greeting) bounces twice.
   const STYLE = [
     '.pf-live { container-type: inline-size; }',
     '.pf-live-mark { position: absolute; left: 0; top: 0; margin: 0; pointer-events: none; white-space: pre; line-height: 1;',
@@ -462,10 +457,9 @@
           o.announce(E.describe('shy', label));
           return true;
         }
-        const reduced = self.reduced;
-        layers.add(reduced && !fits ? BLINK : greeting, { at: t, fade: HI_FADE });
+        layers.add(greeting, { at: t, fade: HI_FADE });
         record.reaction = { at: t, until: t + greeting.duration, watchedUntil: t + greeting.duration };
-        o.announce(!reduced ? ANNOUNCEMENT.hop(label) : fits ? E.describe('happy', label) : ANNOUNCEMENT.blink(label));
+        o.announce(self.reduced ? E.describe('happy', label) : ANNOUNCEMENT.hop(label));
         return true;
       }
 
@@ -499,10 +493,10 @@
         feeling = null;
       }
 
-      // Shows the happy face's shapes (no movement) from `at` for `lasting` seconds, as a friend landing
-      // after the gallery's roll call does.
+      // Smiles (E.smile) from `at` for `lasting` seconds, as a friend landing after the gallery's roll
+      // call does.
       function smile({ at = clock, lasting }) {
-        layers.add(A.still(A.faceOnly(E.face('happy', { spec }))), { at, until: at + lasting, fade: 0 });
+        layers.add(A.still(E.smile(spec)), { at, until: at + lasting, fade: 0 });
       }
 
       function reacting(t) {

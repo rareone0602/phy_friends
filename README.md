@@ -309,8 +309,9 @@ friend, and `tools/feelings.html` shows every friend in every feeling.
 
 Claude keeps every rule but the shape, and its ears are arms, so its spec sets
 `emotions: false` (`E.fits('claude')` is false): given its spec, a feeling is
-its movement alone, with no face (`E.react('surprised', { spec: 'claude' })`),
-and its hi is the same hop without a smile.
+its movement alone, with no face (`E.react('surprised', { spec: 'claude' })`).
+Its hi is the same hop with a smile alone (`E.smile('claude')`): the happy eyes
+and mouth, without the blush or the posture.
 
 ## Alive on a page
 

@@ -26,8 +26,9 @@
  * Claude is the exception (FWIENDS.md, "Claude, the exception"): it keeps every rule but the shape,
  * and its ears are arms, so its spec sets `emotions: false` and fits() is false for it. Such a friend
  * moves as the others do but shows no feelings: given its spec, react() and feel() play a reaction's
- * movement alone, with no face and no posture, and hold() and face() leave it at rest. Its hi
- * (greeting()) is therefore the hop for joy without the face.
+ * movement alone, with no face and no posture, and hold() and face() leave it at rest. It still
+ * returns a greeting: its hi (greeting()) is the hop for joy with a smile (smile()), the happy face's
+ * eyes and mouth alone.
  *
  * Loads as a classic script after src/phyfriends.js and src/anim.js (PhyFriends.emotion), or through
  * require().
@@ -355,10 +356,22 @@
     return out;
   }
 
-  // A friend's hi, the same on every page: the hop for joy (react('happy')), or, for a friend that
-  // shows no feelings, the same hop without the face.
+  // A friend's hi, the same on every page: the hop for joy (react('happy')). A friend that shows no
+  // feelings makes the same hop with a smile.
   function greeting(specOrName) {
-    return react('happy', { spec: specOrName });
+    const hop = react('happy', { spec: specOrName });
+    if (showsFeelings(specOrName)) return hop;
+    const shapes = smile(specOrName);
+    return A.clip(t => ({ ...hop(t), ...shapes }), hop.duration);
+  }
+
+  // The smile with which a friend answers a greeting, as a still partial pose: the happy face without
+  // its movement. A friend that shows no feelings smiles with the happy face's eyes and mouth alone,
+  // without the blush or the posture that would make it a feeling.
+  function smile(specOrName) {
+    if (showsFeelings(specOrName)) return A.faceOnly(face('happy'));
+    const { eyes, mouth } = FEELINGS.happy.face;
+    return { eyes, mouth };
   }
 
   // The mark a feeling shows ({ text, every }: every is how often a mark that repeats reappears, in
@@ -403,7 +416,7 @@
     };
   }
 
-  const api = { names: NAMES, posture, face, react, hold, feel, greeting, mark, describe, fits, place, markAt, MARK };
+  const api = { names: NAMES, posture, face, react, hold, feel, greeting, smile, mark, describe, fits, place, markAt, MARK };
   A.extend({ face, react, hold, feel });
   PF.emotion = api;
   return api;

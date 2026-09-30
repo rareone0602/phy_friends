@@ -82,30 +82,28 @@
     });
   });
 
-  test('a friend that shows no feelings bounces on every hi, and never goes shy', () => {
+  test('a friend that shows no feelings hops and smiles on every hi, and never goes shy', () => {
     withStage(['claude'], moving, (stage, [claude], said) => {
       for (const t of [0, 1.3, 2.6]) {
         stage.draw(t);
         claude.hi();
       }
       stage.draw(2.9);
-      assert(claude.rig.pose.y < 0 && claude.rig.pose.eyes === 'open', 'in the air, with open eyes');
+      assert(claude.rig.pose.y < 0 && claude.rig.pose.eyes === 'happy', 'in the air, smiling');
       assertEqual(claude.feeling, null);
       assertEqual(said, ['Claude hops twice.', 'Claude hops twice.', 'Claude hops twice.']);
     });
   });
 
-  test('under reduced motion a hi changes only the face, and Claude blinks', () => {
+  test('under reduced motion a hi is a smile, and nothing moves', () => {
     withStage(['howdi', 'claude'], still, (stage, [howdi, claude], said) => {
       stage.draw(0);
       howdi.hi();
       claude.hi();
-      stage.draw(0.05);
+      stage.draw(0.3);
       assertEqual([howdi.rig.pose.eyes, howdi.rig.pose.y, howdi.rig.pose.earL], ['happy', 0, 0]);
-      assertEqual(claude.rig.pose.eyes, 'closed');
-      stage.draw(0.4);
-      assertEqual(claude.rig.pose.eyes, 'open', 'a blink is short');
-      assertEqual(said, ['Howdi smiles.', 'Claude blinks.']);
+      assertEqual([claude.rig.pose.eyes, claude.rig.pose.mouth, claude.rig.pose.y], ['happy', 'w', 0]);
+      assertEqual(said, ['Howdi smiles.', 'Claude smiles.']);
     });
   });
 

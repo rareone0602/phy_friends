@@ -69,12 +69,12 @@
     });
   });
 
-  test('a friend that shows no feelings makes their movements without their faces', () => {
+  test('a friend that shows no feelings makes their movements without their faces, but smiles when it greets', () => {
     withScene({}, scene => {
       const claude = scene.add('claude', { x: 500 }), phy = scene.add('phy', { x: 1100 });
       claude.greet(phy, { at: 1 }).feel('surprised', { at: 3 });
       scene.seek(1.3);
-      assert(claude.rig.pose.eyes !== 'happy' && claude.rig.pose.y < 0, 'in the air, without happy eyes');
+      assert(claude.rig.pose.eyes === 'happy' && claude.rig.pose.y < 0, 'in the air, smiling');
       scene.seek(3.2);
       assert(claude.rig.pose.mouth !== 'o' && claude.rig.pose.y < 0, 'starts, without the surprised mouth');
     });
