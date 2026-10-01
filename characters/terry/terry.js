@@ -30,11 +30,11 @@ PhyFriends.define('terry', {
   // The cheeks and muzzle, in the head's yellow, are drawn in front of the lower half of the ears so that
   // the ears hang behind the face.
   face: { cx: 0, cy: 16, rx: 81, ry: 38 },
-  // The ears are very large and floppy: soft lobes that hang from beside the crown to the jaw, with their
-  // tops slightly above the crown, drawn over the upper sides of the head (over); the face, the blush, the eyes and
-  // the mouth stay on top of them. The ear itself is a stub, and the lobe is an extra on the ears, so it swings about
-  // the stub, which sits high in the lobe. A positive ear rotation flops the lobes in, and a negative one lifts them out.
-  ears: { base: [-60, -86], angle: 180, width: 6, length: 6, over: true },
+  // The ears are very large and floppy: soft lobes that reach from beside the cheek to a little above the crown,
+  // drawn over the upper sides of the head (over); the face, the blush, the eyes and the mouth stay on top of them.
+  // Each lobe grows from a root low beside the cheek, where its dark inside shows, so the ear itself is a stub on that
+  // root and the lobe is an extra on the ears: the lobe turns about its root, below it, as every friend's ear does.
+  ears: { base: [-82, 12], angle: 0, width: 6, length: 6, over: true },
   // As a stuffed toy, Terry has no hair.
   hair: false,
   // The eyes are plain tall pills, set wide and low. Setting arc: 1 draws the happy, closed and squint
@@ -60,14 +60,14 @@ PhyFriends.define('terry', {
     seat: { paw: { cx: 18, cy: 106, rx: 12.5, ry: 25 }, foot: { cx: 53, cy: 114, rx: 21, ry: 17 }, arms: { length: 0 } },
   },
   extras: [
-    // Ear extras are in ear-local space (base on the root, the lobe hanging along -y, +x outward).
+    // Ear extras are in ear-local space (base on the root, the lobe rising along -y, +x toward the center line).
     // The lobe: a large soft oval whose top rises about 10 above the crown (the turnaround's M) and whose
     // inner edge lies just outside the eye.
-    { feature: 'earLobes', on: 'ears', kind: 'ellipse', fill: 'furShade', cx: 16, cy: -45, rx: 35, ry: 71, rot: 6 },
-    // The dark inside of the ear: a crescent beside the cheek, cut by a lobe-colored oval so that it stays a
-    // crescent (never a pill) when a head turn slides the face off it.
-    { feature: 'earInner', on: 'ears', kind: 'ellipse', fill: 'earInner', cx: 22, cy: -92, rx: 10, ry: 17, rot: -10 },
-    { feature: 'earInner', on: 'ears', kind: 'ellipse', fill: 'furShade', cx: 16, cy: -96, rx: 10, ry: 17, rot: -10 },
+    { feature: 'earLobes', on: 'ears', kind: 'ellipse', fill: 'furShade', cx: 6, cy: -53, rx: 35, ry: 71, rot: 6 },
+    // The dark inside of the ear, around its root: a crescent beside the cheek, cut by a lobe-colored oval so that it
+    // stays a crescent (never a pill) when a head turn slides the face off it.
+    { feature: 'earInner', on: 'ears', kind: 'ellipse', fill: 'earInner', cx: 0, cy: -6, rx: 10, ry: 17, rot: -10 },
+    { feature: 'earInner', on: 'ears', kind: 'ellipse', fill: 'furShade', cx: 6, cy: -2, rx: 10, ry: 17, rot: -10 },
     // The bib: a pale patch under the chin, its edge in soft scallops, as narrow as the top of the body. It lies
     // over the tops of the arms, as a scarf does (scarf).
     { feature: 'chest', on: 'scarf', fill: 'cream', cx: 0, cy: 59, rx: 40, ry: 27,

@@ -266,7 +266,12 @@ Shape primitives (`PhyFriends.shapes`):
 - **ear**: a rounded triangle in local space with an inner ear and stripe bands
   (clipped). The right ear mirrors the left unless overridden. With
   `inner.front` the inner ear is drawn in front of the head, so it can run down
-  over the head fur while the rest of the ear stays behind.
+  over the head fur while the rest of the ear stays behind. `base` is the ear's
+  root, where it meets the head: the ear stands on it and turns about it, by
+  `angle` and by a pose's `earL` and `earR`. An ear drawn as an extra keeps its
+  base on the root all the same: Terry's lobes are extras on a stub set low
+  beside the cheek, where the dark inside of the ear shows, so that each lobe
+  turns about its root, below it.
 - **tail**: an optional bushy plume drawn behind the body. In local space it is
   a fluffy ellipse standing on its base (so `fluff` angles run 270 at the tip to
   90 at the base) and bent into a curve. `curl` swings the tip outward (or
@@ -351,11 +356,16 @@ needs to know which friend it is: every movement and feeling poses it in finite
 numbers, sitting and standing; a mounted rig draws each pose as a fresh render
 does; it sits and stands on its ground and keeps a foot there as it walks; its
 limbs show against what lies behind them (by at least the colour difference by
-which phy's warm white, the palest the house allows, stands off the paper); and
-it waves and points with the arm away from its tail. One promise is still open:
-a paw raised in front of the face is lost where its colours are the face's, and
-the test lists the friends for which that is so until phy decides how they
-should show (no outline being the house's rule).
+which phy's warm white, the palest the house allows, stands off the paper); it
+waves and points with the arm away from its tail; and its ears turn about their
+roots, below them, so that a positive ear rotation turns them out. The one ear
+that turns otherwise does so by design: cowosus's folded ear, drawn as the flap
+that hangs from its fold, turns about the fold, above it, so that a positive
+rotation swings it in against the head, and the test names it, so that no other
+ear hangs from a pivot above it by mistake. One promise is still open: a paw
+raised in front of the face is lost where its colours are the face's, and the
+test lists the friends for which that is so until phy decides how they should
+show (no outline being the house's rule).
 
 Claude keeps the shape of Claude Code's mascot, and its spec the names it had
 before the roles (`body`, `eye`). A spec without a role draws its part as one
@@ -456,6 +466,11 @@ is held. `flush` spreads the blush (0.5 makes each cheek half as large again),
 since `blush`, its opacity, can only fade it. `show` lists the extras to draw
 that a spec keeps for a cue (`show: 'laptop'` on an extra), such as a prop;
 reduced motion leaves it out, since it is not the face.
+
+`earL` and `earR` turn the ears about their roots, in degrees: + turns an ear
+out, as it droops or flaps, and − turns it in, as it pricks up. A flap that
+hangs from its fold, as cowosus's folded ear does, turns about the fold
+instead, so + lays it against the head and − lifts it away.
 
 `tail` wags the tail about its base, in degrees: + swings the tip outward and
 − tucks it in behind the body. The clips keep it within about ±12°, and

@@ -324,7 +324,8 @@
   }
   const shapeD = (s, seed) => s.d || (s.polys ? s.polys.map(p => pathD(polyNodes(p, s))).join('') : pathD(shapeNodes(s, seed)));
 
-  // Ear in local space: the base is centered on the origin, and the ear points up (-y).
+  // Ear in local space: the base is centered on the origin, and the ear points up (-y). The base is the ear's root,
+  // where it meets the head, and the ear turns about it (earPlace), so an ear drawn as an extra keeps its base there.
   //   {width, length, lean, tip, b1, b2, inner: {scale, dx, dy}, stripes: [{t, w, a, b, span}]}
   //   Local +x is the side facing the top of the head. The lean moves the tip along
   //   +x, and tip > 0 rounds the tip. Stripes are bands at fraction t of the length,

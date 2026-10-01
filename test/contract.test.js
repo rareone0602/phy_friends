@@ -24,6 +24,11 @@
   // phy's to decide; until then they are listed here, and the test fails if one of them starts to show or a friend not
   // listed stops showing, so that the list only ever shrinks.
   const PAWS_LOST_ON_FACE = ['brian', 'howdi', 'jiaoyue', 'kevin', 'phy', 'raze', 'teni', 'terry', 'yuanyuan', 'yuda'];
+  // The friends with an ear drawn as the flap that hangs from its fold, as cowosus's folded ear is: such a flap turns
+  // about the fold, above it, so that a positive ear rotation swings it in against the head. Every other ear turns
+  // about its root, below it. An ear that hangs from a pivot above it is added here only on purpose, since a lobe hung
+  // that way by mistake turns the same way (Terry's did, until his ears were set on their roots).
+  const EARS_HUNG_FROM_A_FOLD = ['cowosus'];
 
   test('every friend of the house has the parts that a pose moves, under the same names', () => {
     withBoxSync(box => {
@@ -159,5 +164,22 @@
         }
       }
     });
+  });
+
+  test('every friend of the house turns its ears out on a positive rotation, about their roots, but for a flap hung from its fold', () => {
+    const turnedIn = [];
+    withBoxSync(box => {
+      for (const name of houseFriends()) {
+        const rig = PF.mount(box, name, { bitmap: false });
+        const middle = (part, deg) => {
+          rig.setPose({ earL: deg, earR: deg }, true);
+          const r = rig.parts[part].getBoundingClientRect();
+          return r.left + r.width / 2;
+        };
+        const out = S => (S === 'L' ? -1 : 1) * (middle(`ear${S}`, 10) - middle(`ear${S}`, 0));
+        if (['L', 'R'].some(S => out(S) <= 0)) turnedIn.push(name);
+      }
+    }, 400);
+    assertEqual(turnedIn, EARS_HUNG_FROM_A_FOLD, 'the friends with an ear that a positive rotation turns in, which should be the flaps hung from their folds');
   });
 })();
