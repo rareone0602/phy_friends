@@ -71,13 +71,17 @@ PhyFriends.cast.define({
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
       credit: { handle: '@tanyuan_UwU', href: 'https://x.com/tanyuan_UwU' }, agreed: ['gallery'],
     },
+    alfie: {
+      name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
+      credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
+    },
     teni: {
       name: 'Teni', pronoun: 'he', species: 'cyan-haired glaceon',
       credit: { handle: '@foxx_manome', href: 'https://x.com/foxx_manome' }, agreed: ['gallery'],
     },
-    alfie: {
-      name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
-      credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
+    whitedeer: {
+      name: 'WhiteDeer', pronoun: 'he', species: 'ocean deer',
+      credit: { handle: 'fb/bai.lu.149190', href: 'https://www.facebook.com/bai.lu.149190/' }, agreed: ['gallery'],
     },
     jiaoyue: {
       name: 'jiaoyue', pronoun: 'he', species: 'lavender dog',

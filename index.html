@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="seventeen fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="eighteen fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -155,12 +155,12 @@
      last friend to a second row. */
   /* The rows (--abreast) and the page's width, written by `python3 tools/pf.py pages` from the friends' reaches. */
   .troupe { --abreast: 2.384; }
-  main { max-width: 3159px; }
+  main { max-width: 3309px; }
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
   @container (width >= 734px) { .troupe { --abreast: 4.583; } }
   @container (width >= 910px) { .troupe { --abreast: 5.682; } .note .long { display: inline; } }
-  @container (width >= 1456px) { .troupe { --abreast: 9.095; } }
-  @container (width >= 3047px) { .troupe { --abreast: 19.04; } .friends { max-width: none; } }
+  @container (width >= 1441px) { .troupe { --abreast: 9.006; } }
+  @container (width >= 3197px) { .troupe { --abreast: 19.98; } .friends { max-width: none; } }
   /* The end of the rows. */
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
   @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
@@ -311,15 +311,20 @@
           <p id="looks-tanyuan" hidden>a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear</p>
           <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU">@tanyuan_<wbr>UwU</a></span></figcaption>
         </figure></li>
+        <li class="friend" id="alfie" data-friend="alfie"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie" aria-describedby="looks-alfie"></div>
+          <p id="looks-alfie" hidden>a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail</p>
+          <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
+        </figure></li>
         <li class="friend" id="teni" data-friend="teni"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni" aria-describedby="looks-teni"></div>
           <p id="looks-teni" hidden>a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail</p>
           <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome">@foxx_<wbr>manome</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="alfie" data-friend="alfie"><figure>
-          <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie" aria-describedby="looks-alfie"></div>
-          <p id="looks-alfie" hidden>a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail</p>
-          <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
+        <li class="friend" id="whitedeer" data-friend="whitedeer"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to WhiteDeer" aria-describedby="looks-whitedeer"></div>
+          <p id="looks-whitedeer" hidden>a pale blue deer with branched blue antlers and a white face, in a sailor suit with a navy collar and neckerchief and a white sailor hat with a gold anchor</p>
+          <figcaption><span class="name hand">WhiteDeer</span><span class="species">ocean deer</span><span class="credit"><a href="https://www.facebook.com/bai.lu.149190/">fb/<wbr>bai.<wbr>lu.149190</a></span></figcaption>
         </figure></li>
         <li class="friend" id="jiaoyue" data-friend="jiaoyue"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to jiaoyue" aria-describedby="looks-jiaoyue"></div>
@@ -361,8 +366,9 @@
 <script src="characters/cowosus/cowosus.js"></script>
 <script src="characters/raze/raze.js"></script>
 <script src="characters/tanyuan/tanyuan.js"></script>
-<script src="characters/teni/teni.js"></script>
 <script src="characters/alfie/alfie.js"></script>
+<script src="characters/teni/teni.js"></script>
+<script src="characters/whitedeer/whitedeer.js"></script>
 <script src="characters/jiaoyue/jiaoyue.js"></script>
 <script src="characters/claude/claude.js"></script>
 <script src="src/anim.js"></script>

@@ -71,8 +71,9 @@ The page has five parts, in this order:
   stale, so a new fwiend never leaves the rows to be worked out by hand.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
   every width; Fruit stands next to Yuda, Raze between cowosus and
-  tanyuan, and jiaoyue after Alfie; and on a phone Yuda shares a row with
-  Terry, and Brian with mumuyou. A new fwiend, or a change of order,
+  tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue follow tanyuan in that
+  order; and on a phone Yuda shares a row with Terry, and Brian with
+  mumuyou. A new fwiend, or a change of order,
   is checked at every width, since a row that breaks in the wrong place
   parts neighbours.
 - A phone held sideways, if it is at least 390px tall, still shows the
@@ -153,9 +154,10 @@ tests, and the animation and feelings tools) load them in the cast's order;
 
 Names keep their owner's capitalisation: **Howdi**, **Fruit**, **Yuda**,
 **Terry**, **Brian**, **Teni**, **Alfie**, **Raze** and **Claude** are
-capitalised; **YuanYuan** and **BarDell** have two capitals; **phy**,
-**mumuyou**, **cowosus**, **tanyuan** and **jiaoyue** are always lower case,
-even at the start of a line; and **K3V1N** is spelt with a 3 and a 1.
+capitalised; **YuanYuan**, **BarDell** and **WhiteDeer** have two capitals;
+**phy**, **mumuyou**, **cowosus**, **tanyuan** and **jiaoyue** are always
+lower case, even at the start of a line; and **K3V1N** is spelt with a 3 and
+a 1.
 
 **The copy**, against what it isn't:
 
@@ -303,14 +305,16 @@ Follow them when turning someone's picture or design sheet into a friend.
     the head, so every body is in its fur's shade, or in its clothes' shade
     where it is dressed (tanyuan's hoodie, YuanYuan's yukata). A layer of
     the clothes that lies over it takes the clothes' own colour: YuanYuan's
-    top panel, the fronts of tanyuan's and Raze's hoodies.
+    top panel, the fronts of tanyuan's and Raze's hoodies and of WhiteDeer's
+    sailor shirt.
   - Elsewhere the shade goes only on a part behind a neighbour of the same
     colour: Terry's ears behind the face, the back layer of a ruff, locks of
     hair behind the mop, a bandana's band behind its point, the part of
     tanyuan's folded ear under its flap, the inside of his hood past its
     rim (and of Raze's), the hem under his hoodie's front, the under band of YuanYuan's
-    collar, the bow behind his sash and the side of Claude's block, which
-    shows as it turns to its laptop.
+    collar, the bow behind his sash, the cleft of WhiteDeer's hooves, where
+    the far side of the hoof shows between its toes, and the side of
+    Claude's block, which shows as it turns to its laptop.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
@@ -320,11 +324,13 @@ Follow them when turning someone's picture or design sheet into a friend.
   darker far side, no highlights.
 - A pale colour that would vanish on paper takes one slightly deeper tint
   wherever it appears (the white of mumuyou, tanyuan, YuanYuan, Alfie,
-  cowosus, jiaoyue, Yuda and Raze's headphones, `#efeef3`; phy's warm white,
-  `#f5ede6`; Teni's pale teal, `#ace1e0`). The pencil lets the paper
-  through, so judge it on the page, not on a flat render. A dark colour
-  whose shade would read as black takes the lightest tint its pictures
-  give it instead: Fruit's navy, `#283e74`, is the moon picture's.
+  cowosus, jiaoyue, WhiteDeer, Yuda and Raze's headphones, `#efeef3`; phy's
+  warm white, `#f5ede6`; Teni's pale teal, `#ace1e0`; WhiteDeer's pale
+  blue, `#b6def3`, with the pale blues beside it deepened by the same step,
+  so that each stays as far from the fur as in his picture). The pencil lets
+  the paper through, so judge it on the page, not on a flat render. A dark
+  colour whose shade would read as black takes the lightest tint its
+  pictures give it instead: Fruit's navy, `#283e74`, is the moon picture's.
 
 **Proportions, in head space:** a big head on a small body, seated or
 standing.
@@ -377,9 +383,9 @@ standing.
   mumuyou's, K3V1N's, Brian's and Raze's. An eye its
   owner draws in two colours keeps both, flat, the second as a mark clipped
   to the eye (`shine`), so that it glances and blinks with it: the orange
-  lower quarter of cowosus's left eye, and the mint and yellow lower halves
-  of K3V1N's, which keep his colour bar's own tints because the blue and
-  orange above them hold the eye's shape. The palette keeps `eye`, a
+  lower quarter of cowosus's left eye, the mint and yellow lower halves of
+  K3V1N's and the cyan lower three-eighths of WhiteDeer's, which keep their
+  pictures' own tints because the colours above them hold the eye's shape. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,
   `#a9dbf3`);
