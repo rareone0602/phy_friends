@@ -11,7 +11,7 @@ PhyFriends.define('mumuyou', {
     hair: '#faefcf',       // The pale cream of the sheet.
     hairShade: '#efcf8a',  // The hair's one shade, set by hand: the warm gold of the back locks, the partings and the ponytail.
     sky: '#98d4f8',        // The ears, the socks, the diamond on the forehead, the ring of the mark on the shoulder and the dot on the tail.
-    earInner: '#fcacb0',   // The pink of the ears, the left forepaw, the tongue and the end of the crescent on the tail.
+    earInner: '#fcacb0',   // The pink of the ears, the left forearm and forepaw, the tongue and the end of the crescent on the tail.
     eye: '#221d22',        // A soft plum black, used for the open mouth.
     eyeBlue: '#4690e0',    // His right eye is blue.
     eyeGold: '#c98f12',    // His left eye is yellow, as on the sheet, deepened to match the weight of the blue.
@@ -67,12 +67,12 @@ PhyFriends.define('mumuyou', {
   blush: { x: 53, y: 26, rx: 12, ry: 7, tilt: 12 },
   // There is no mouth by default; when open, it shows one fang.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small, round and seated, in the house shade; the white chest is an extra.
-  // Shoulder tufts sit under the cheeks, and hip tufts below them.
+  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // base; the white chest is an extra. Shoulder tufts sit under the cheeks, and hip tufts below them.
   body: {
-    cx: 0, cy: 86, rx: 62, ry: 46, color: 'furShade',
+    cx: 0, cy: 86, rx: 62, ry: 46, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy white brush rising behind his right hip (the viewer's left), its white
   // set against the shaded body. The salmon tip is cut into flame-shaped tufts. The standing pictures
@@ -83,6 +83,18 @@ PhyFriends.define('mumuyou', {
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 195, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.7, color: 'tailTip', fluff: [{ from: 50, to: 130, n: 3, len: 16, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+  },
+  // The limbs, on the house template. Seated, the forepaws rest on the ground between the hind feet, which
+  // are in sky-blue socks and turned out slightly, as in sitting.png. Standing, as on the sheet and in uniform.png,
+  // the white arms end in his paws: his right one white under a sky-blue patch at the wrist (the sheet, scarf.png and
+  // blond.png), and his left one pink, the pink running up the forearm in tufts.
+  stand: {
+    seat: { paw: { cx: 14, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 45, cy: 122, rx: 19, ry: 9.5, rot: -8 } },
+    arms: {
+      paw: { color: 'fur' }, bands: [{ from: 0.6, to: 1, color: 'sky', teeth: 2, depth: 3 }],
+      right: { paw: { color: 'earInner' }, bands: [{ from: 0.5, to: 1, color: 'earInner', teeth: 3, depth: 3 }] },
+    },
+    legs: { foot: { color: 'sky' } },
   },
   extras: [
     // The cheek ruff under the head, in the house shade. Its tufts reach past the white cheeks, and
@@ -110,26 +122,20 @@ PhyFriends.define('mumuyou', {
     // The ponytail, showing behind the neck on the right, and its band.
     { on: 'body', under: true, fill: 'hairShade', nodes: [[58, 40, 1, -10], [72, 42, 1, -30], [94, 116, 1, 16], [64, 72, 1, 0]] },
     { on: 'body', under: true, fill: 'tailTip', nodes: [[58, 66, 1], [81, 57, 1], [84, 64, 1], [61, 73, 1]], round: 0.3 },
-    // The white fluffy chest, below the shade under the chin, with its tufts hanging over the belly.
-    { on: 'body', clip: true, fill: 'fur', cx: 0, cy: 84, rx: 50, ry: 27,
-      fluff: [{ from: 20, to: 160, n: 4, len: 9, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
-    // The mark on his left shoulder, which every picture draws and the sheet shows on its own: a blue
-    // ring between two yellow arcs. Seated, it lies on the front of his left foreleg, above the pink
-    // forepaw, as in sitting.png.
-    { on: 'body', kind: 'ellipse', fill: 'sky', cx: 30, cy: 92, rx: 7.5, ry: 7.5 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 30, cy: 92, rx: 4.5, ry: 4.5 },
-    { on: 'body', fill: 'yellow', round: 0.5, nodes: [[19.8, 84.9, 1], [22.6, 82.1], [26.1, 80.2], [30, 79.6], [33.9, 80.2], [37.4, 82.1],
+    // The white fluffy chest, below the shade under the chin, with its tufts hanging over the belly, as narrow as the
+    // body and ending above the forepaws. It is fur round the neck, so it lies over the tops of the arms, as a scarf
+    // does (scarf).
+    { on: 'scarf', clip: true, fill: 'fur', cx: 0, cy: 81, rx: 35, ry: 23,
+      fluff: [{ from: 20, to: 160, n: 4, len: 8, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
+    // The mark on his left shoulder, which every picture draws and the sheet shows on its own: a blue ring between two
+    // yellow arcs. Seated, it lies on the front of his left foreleg, above the pink forepaw, as in sitting.png. It
+    // lies over the scarf and over the top of his left arm.
+    { on: 'scarf', kind: 'ellipse', fill: 'sky', cx: 30, cy: 92, rx: 7.5, ry: 7.5 },
+    { on: 'scarf', kind: 'ellipse', fill: 'fur', cx: 30, cy: 92, rx: 4.5, ry: 4.5 },
+    { on: 'scarf', fill: 'yellow', round: 0.5, nodes: [[19.8, 84.9, 1], [22.6, 82.1], [26.1, 80.2], [30, 79.6], [33.9, 80.2], [37.4, 82.1],
       [40.2, 84.9, 1], [38.2, 86.3, 1], [36, 84], [33.1, 82.5], [30, 82], [26.9, 82.5], [24, 84], [21.8, 86.3, 1]] },
-    { on: 'body', fill: 'yellow', round: 0.5, nodes: [[40.2, 99.1, 1], [37.4, 101.9], [33.9, 103.8], [30, 104.4], [26.1, 103.8], [22.6, 101.9],
+    { on: 'scarf', fill: 'yellow', round: 0.5, nodes: [[40.2, 99.1, 1], [37.4, 101.9], [33.9, 103.8], [30, 104.4], [26.1, 103.8], [22.6, 101.9],
       [19.8, 99.1, 1], [21.8, 97.7, 1], [24, 100], [26.9, 101.5], [30, 102], [33.1, 101.5], [36, 100], [38.2, 97.7, 1]] },
-    // The hind feet in sky-blue socks, turned out slightly, with white fluffy trim at the top.
-    { on: 'body', kind: 'ellipse', fill: 'sky', cx: -45, cy: 122, rx: 19, ry: 9.5, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'sky', cx: 45, cy: 122, rx: 19, ry: 9.5, rot: 8 },
-    { on: 'body', fill: 'fur', cx: -46, cy: 113, rx: 15, ry: 5, fluff: [{ from: 20, to: 160, n: 4, len: 4, depth: 0.05, b1: -20, b2: 20, jit: 0 }] },
-    { on: 'body', fill: 'fur', cx: 46, cy: 113, rx: 15, ry: 5, fluff: [{ from: 20, to: 160, n: 4, len: 4, depth: 0.05, b1: -20, b2: 20, jit: 0 }] },
-    // The forepaws on the ground between the hind feet: his right one is white and his left one pink.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -14, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'earInner', cx: 14, cy: 121, rx: 12.5, ry: 10 },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -146,
     // +x away from the body); the library bends them onto the curve.
     // The end of the white brush, cut into pointed tufts that reach up into the salmon tip.
@@ -145,6 +151,9 @@ PhyFriends.define('mumuyou', {
       [-2.1, -75.4], [-8.1, -75.6, 1]] },
     { on: 'tail', kind: 'ellipse', fill: 'sky', cx: -12.2, cy: -73.1, rx: 3.5, ry: 3.5 },
     { on: 'tail', kind: 'ellipse', fill: 'tailTip', cx: -12.8, cy: -79.2, rx: 1.8, ry: 1.8 },
+    // Feet extras are in the seated foot's space: the white fluffy trim at the top of each sock, its tufts hanging over
+    // the blue.
+    { on: 'feet', fill: 'fur', cx: -1, cy: -9, rx: 15, ry: 5, fluff: [{ from: 20, to: 160, n: 4, len: 4, depth: 0.05, b1: -20, b2: 20, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

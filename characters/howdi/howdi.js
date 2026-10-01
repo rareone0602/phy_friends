@@ -73,12 +73,12 @@ PhyFriends.define('howdi', {
   // There is no mouth by default, and the pictures' nose is left out. The greeting's 'w' mouth stands for the
   // small mouth the pictures draw.
   mouth: { y: 21, size: 3.8 },
-  // The body is seated and round. It sits under the head, so it takes the house shade. Shoulder tufts sit
-  // under the cheeks, and small hip tufts below them.
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
+  // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 68, ry: 50, color: 'furShade',
+    cx: 0, cy: 82, rx: 68, ry: 50, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a bushy wolf tail that sweeps out from behind Howdi's right hip (the viewer's left), as in the
   // crayon drawing, and curls up. The sheet and IMG_9372.png put it on the other side; it stays on this side
@@ -91,6 +91,14 @@ PhyFriends.define('howdi', {
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.65, color: 'face', fluff: [{ from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
   },
+  // The limbs, on the house template. Seated, the pale forepaws rest on the ground between the pale hind feet, which
+  // are turned out slightly. Standing, as in IMG_3308.png, the sky-blue arms end in pale paws, and the legs in pale
+  // lower legs and feet, the pale meeting the blue in a jagged edge.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 46, cy: 121, rx: 18, ry: 10, rot: -8 } },
+    arms: { paw: { color: 'face' }, bands: [{ from: 0.72, to: 1, color: 'face', teeth: 2, depth: 4 }] },
+    legs: { bands: [{ from: 0.55, to: 1, color: 'face', teeth: 3, depth: 5 }], foot: { color: 'face' } },
+  },
   extras: [
     // Cheek fluff under the head: a fur ruff whose tufts reach past the pale cheeks. An n: 1 range with
     // len < 0 tucks the bottom in under the chin.
@@ -98,19 +106,13 @@ PhyFriends.define('howdi', {
       fluff: [{ from: -42, to: 21, n: 3, len: 15, lean: -2, depth: 0.1, b1: -35, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
     // The mid-blue belly, under the ruff.
-    { on: 'body', clip: true, fill: 'belly', cx: 0, cy: 104, rx: 44, ry: 36 },
+    { on: 'body', clip: true, fill: 'belly', cx: 0, cy: 106, rx: 34, ry: 34 },
     // The ruff: a back layer in the house shade, which shows as a collar under the chin, and the pale ruff in
-    // front of it, whose spiky tufts hang over the belly.
-    { on: 'body', clip: true, fill: 'faceShade', cx: 0, cy: 52, rx: 66, ry: 24 },
-    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 72, rx: 52, ry: 20,
+    // front of it, whose spiky tufts hang over the belly. It lies over the tops of the arms, as a scarf does (scarf).
+    { on: 'scarf', clip: true, fill: 'faceShade', cx: 0, cy: 52, rx: 66, ry: 24 },
+    { on: 'scarf', fill: 'face', cx: 0, cy: 70, rx: 36, ry: 19,
       fluff: [{ from: 20, to: 160, n: 5, len: 13, depth: 0.1, b1: -25, b2: 5, jit: 0 },
         { from: 215, to: 325, n: 4, len: 5, depth: 0.05, b1: -20, b2: 10, jit: 0 }] },
-    // The hind feet, pale as in the pictures, turned out slightly.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -46, cy: 121, rx: 18, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 46, cy: 121, rx: 18, ry: 10, rot: 8 },
-    // The forepaws on the ground between them.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 15, cy: 121, rx: 12.5, ry: 10 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

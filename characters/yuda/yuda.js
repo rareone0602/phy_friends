@@ -5,7 +5,7 @@ PhyFriends.define('yuda', {
   palette: {
     bg: '#1c1d21',
     fur: '#6c7ba7',        // The slate blue of the icon. Its house shade (furShade) fills the body, which sits under the head.
-    face: '#f9f7f6',       // The muzzle, cheeks, eyebrow spots, chest and forepaws.
+    face: '#f9f7f6',       // The muzzle, cheeks, eyebrow spots, chest, forearms and forepaws, and the lower legs and feet.
     earInner: '#88d5dd',   // Cyan, also used for the inside of the open mouth.
     eye: '#23263d',        // A deep slate navy, for the open mouth.
     eyeBlue: '#4e7ec0',    // The blue of the eyes in waving.png and card.png.
@@ -59,12 +59,12 @@ PhyFriends.define('yuda', {
   blush: { x: 53, y: 24.5, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default; when open, it shows one fang and the cyan inside from waving.png.
   mouth: { y: 20, size: 3.8, fang: true },
-  // The body is seated and round. It sits under the head, so it takes the house shade. Shoulder tufts
-  // sit under the cheeks, and small hip tufts below them.
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
+  // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 70, ry: 50, color: 'furShade',
+    cx: 0, cy: 82, rx: 70, ry: 50, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy plume rising behind the right hip, its tip curling in. It is slate,
   // then a periwinkle band, then a pale lavender tip, markings that both artists draw.
@@ -75,6 +75,14 @@ PhyFriends.define('yuda', {
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 1, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.34, n: 3, len: 8, color: 'tailMid' },
+  },
+  // The limbs, on the house template. Seated, the white forepaws rest on the ground under the bib (paw) and the hind
+  // feet are tucked under the body. Standing, as in waving.png and card.png, the slate arms end in white forearms and
+  // paws, and the slate legs in white lower legs and feet, the white meeting the slate in a jagged edge.
+  stand: {
+    seat: { paw: { cx: 21, cy: 121, rx: 14, ry: 10 } },
+    arms: { paw: { color: 'face' }, bands: [{ from: 0.5, to: 1, color: 'face', teeth: 2, depth: 4 }] },
+    legs: { bands: [{ from: 0.5, to: 1, color: 'face', teeth: 3, depth: 5 }], foot: { color: 'face' } },
   },
   extras: [
     // Cheek fluff under the head: a fur ruff whose tufts sit behind the white ones and reach past
@@ -98,15 +106,13 @@ PhyFriends.define('yuda', {
       fluff: [{ from: -40, to: 60, n: 3, len: 6, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
     // The bandana: the band around the neck (in the house shade, because it lies behind the point),
     // the point hanging on the chest, and two ends sticking out from the knot at the side of the
-    // neck. The knot lies behind the ends, so it is shaded too.
-    { on: 'body', fill: 'scarfShade', nodes: [[-54, 40, 1, 0], [54, 42, 1, 0], [52, 58, 1, -10], [-50, 56, 1, 0]], round: 0.3 },
-    { on: 'body', fill: 'scarf', nodes: [[-52, 48, 1, 8], [48, 50, 1, -4], [-6, 100, 1, -4]], round: 0.2 },
-    { on: 'body', fill: 'scarf', nodes: [[52, 56, 1, -20], [90, 84, 1, -20], [50, 74, 1, 0]], round: 0.2 },
-    { on: 'body', fill: 'scarf', nodes: [[46, 52, 1, -20], [96, 44, 1, -20], [60, 66, 1, 0]], round: 0.2 },
-    { on: 'body', kind: 'ellipse', fill: 'scarfShade', cx: 52, cy: 59, rx: 8, ry: 7.5 },
-    // White forepaws on the ground, under the bib.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -21, cy: 121, rx: 14, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 21, cy: 121, rx: 14, ry: 10 },
+    // neck. The knot lies behind the ends, so it is shaded too. It is as narrow as the top of the body, and lies
+    // over the tops of the arms, as the ends lie over his left arm in card.png (scarf).
+    { on: 'scarf', fill: 'scarfShade', nodes: [[-44, 40, 1, 0], [44, 42, 1, 0], [42, 58, 1, -10], [-40, 56, 1, 0]], round: 0.3 },
+    { on: 'scarf', fill: 'scarf', nodes: [[-42, 48, 1, 8], [38, 50, 1, -4], [-6, 100, 1, -4]], round: 0.2 },
+    { on: 'scarf', fill: 'scarf', nodes: [[42, 56, 1, -20], [80, 84, 1, -20], [40, 74, 1, 0]], round: 0.2 },
+    { on: 'scarf', fill: 'scarf', nodes: [[36, 52, 1, -20], [86, 44, 1, -20], [50, 66, 1, 0]], round: 0.2 },
+    { on: 'scarf', kind: 'ellipse', fill: 'scarfShade', cx: 42, cy: 59, rx: 8, ry: 7.5 },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -142,
     // +x away from the body); the library bends them onto the curve.
     // The pale lavender tip, its edge a row of tufts pointing back toward the base.

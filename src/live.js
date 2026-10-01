@@ -3,7 +3,8 @@
  *
  * A stage (stage()) keeps one clock and one frame loop for every friend on a page. Each friend is
  * mounted in a box of its own, standing on the box's bottom edge (PhyFriends.standingView), and lives
- * there. It breathes and blinks with the library's idle clip, as in a scene. It follows the pointer
+ * there, seated unless it is added standing (stance: 'stand'), when its ears reach higher above the
+ * box. It breathes and blinks with the library's idle clip, as in a scene. It follows the pointer
  * with its eyes and, half as far, its head, and without a pointer it watches the friend the keyboard is
  * on; it perks up while hovered or focused; and it answers a hi
  * (a click, a tap, Enter or Space) with the emotion library's greeting (src/emotion.js).
@@ -218,9 +219,10 @@
     return self;
 
     // Mounts a friend in box and returns it. label is its name as the page writes it; bg the mount's
-    // background (false by default: the page's paper); index its place, which offsets its idle cycles.
-    function add(box, name, { label = name, bg = false, index = records.length, interactive = true } = {}) {
-      const record = createFriend(box, name, { label, bg, phase: index * PHASE_STEP, interactive });
+    // background (false by default: the page's paper); index its place, which offsets its idle cycles;
+    // stance 'stand' stands it up, as a clip may for a while.
+    function add(box, name, { label = name, bg = false, index = records.length, interactive = true, stance = 'sit' } = {}) {
+      const record = createFriend(box, name, { label, bg, phase: index * PHASE_STEP, interactive, stance });
       records.push(record);
       byFriend.set(record.friend, record);
       return record.friend;
@@ -458,10 +460,10 @@
 
     // ---- A friend
 
-    function createFriend(box, name, { label, bg, phase, interactive }) {
+    function createFriend(box, name, { label, bg, phase, interactive, stance }) {
       const spec = PF.get(name), view = PF.standingView(spec), fits = E.fits(spec);
       box.classList.add('pf-live');
-      const rig = PF.mount(box, spec, { bg, view });
+      const rig = PF.mount(box, spec, { bg, view, pose: { stance } });
       rig.svg.setAttribute('aria-hidden', 'true');  // The box's label says who the friend is.
       const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS });
       const greeting = E.greeting(spec), layers = A.stack(), marks = [], strokes = strokeDetector();
@@ -698,7 +700,7 @@
         lookY += (toY - lookY) * gazeEase;
         glance += ((target || inward || travel ? 0 : 1) - glance) * gazeEase;
         perk += (((hovered || focused) && !reduced ? 1 : 0) - perk) * perkEase;
-        const acc = {};
+        const acc = { stance };  // The stance it was added in, which a clip may change for a while.
         if (moving) {
           const idlePose = idle(t + phase), glances = {};
           for (const key of GLANCES) {
@@ -720,7 +722,12 @@
       // The on-screen position of the friend's eyes (the origin of head space), and its width.
       function eyes() {
         const rect = rig.svg.getBoundingClientRect();
-        return { x: rect.left + rect.width * view.x / view.w, y: rect.top + rect.height * view.y / view.h, width: rect.width };
+        return { x: rect.left + rect.width * view.x / view.w, y: rect.top + rect.height * (view.y - lift()) / view.h, width: rect.width };
+      }
+
+      // How far the pose raises the friend's eyes above where they are while it sits, in head units.
+      function lift() {
+        return PF.riseOf(spec, rig.pose);
       }
 
       // Adds a mark to show from `at` for `lasting` seconds. It is a drawing, not words, so screen
@@ -732,7 +739,7 @@
         node.setAttribute('aria-hidden', 'true');
         const unit = `100cqw / ${view.w}`;
         Object.assign(node.style, {
-          left: `calc(${view.x + place.x} * ${unit})`, top: `calc(${view.y + place.y} * ${unit})`, fontSize: `calc(${MARK.size} * ${unit})`,
+          left: `calc(${view.x + place.x} * ${unit})`, top: `calc(${view.y - lift() + place.y} * ${unit})`, fontSize: `calc(${MARK.size} * ${unit})`,
           display: 'none',
         });
         box.appendChild(node);

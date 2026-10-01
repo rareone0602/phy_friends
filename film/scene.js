@@ -8,9 +8,11 @@
  * the current time as it runs.
  *
  * Each friend is drawn on a cut-out of paper: its pencil texture stays put while it breathes, turns
- * or hops in place, and travels with it when it moves about the sheet. Friends get around by hopping,
- * since they sit, and they turn with turnX, never with a mirror image, which would swap two-colored
- * eyes and reverse markings.
+ * or hops in place, and travels with it when it moves about the sheet. A friend sits unless it is added
+ * standing or stands up (stand()), rising through every height between (the pose's rise); seated, it gets around
+ * by hopping, and standing, by walking (A.walking).
+ * Friends turn with turnX, never with a mirror image, which would swap two-colored eyes and reverse
+ * markings.
  *
  * The cast rules (src/cast.js) are checked where friends meet: a friend without a voice may only use
  * marks, words aimed at another friend need the two to know each other, and friends never stand
@@ -41,6 +43,9 @@
   const HOP = A.HOP;
   const GAZE = { seconds: 0.3, depth: 180, turn: 0.5 };      // As in the gallery: the head turns half as far as the eyes.
   const TRAVEL = { look: 0.5, turn: 0.6, weight: 0.7 };      // A traveling friend looks where it is going.
+  // How far a standing friend goes in a step, in head units: twice A.WALK.length, so that it shuffles, its feet
+  // taking the walk's small steps while it glides on, at about half the speed of a hop.
+  const STRIDE = 2 * A.WALK.length;
   const MARK = { size: 64, x: 70, y: -200 };                 // A mark's size and place; its timing is the emotion library's.
   const WORDS = { size: 34, perSecond: 14, fade: 0.25, x: 115, y: -130 };
   const BOIL_VARIANTS = PF.pencil.settings.variants;  // Texture variants a boiling scene cycles through.
@@ -98,6 +103,7 @@
       const actor = createActor(scene, dom, name, {
         x: a.x ?? o.width / 2, y: a.y ?? ground, z: a.z ?? 0, at: a.at ?? -Infinity,
         phase: a.phase ?? actors.length * PHASE_STEP, energy: a.energy ?? 1, look: a.look ?? 'around',
+        stance: a.stance ?? 'sit',
       });
       actors.push(actor);
       updateDraftStamp();
@@ -545,6 +551,11 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS, energy: a.energy });
     const home = { x: a.x, y: a.y };
     const moves = [], layers = A.stack(), gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
+    // The friend's stance over time, as its cues change it: the stance from each `at` on, under the clips that ease it
+    // up or down (rise). A friend that never stands (stand: false) keeps its one shape: it sits, and is never lifted.
+    // `changes` holds each change of stance as cued: when its clip starts and ends, and the stance it ends in.
+    const lift = PF.standLift(spec), legRest = restingLeg(spec), stances = [{ at: -Infinity, stance: lift ? a.stance : 'sit' }];
+    const changes = [{ at: -Infinity, end: -Infinity, stance: stances[0].stance }];
     // Entrances and exits, in time order: the friend is shown after an entrance until the next exit.
     const showings = [{ at: a.at, shown: true, placed: true }];
     let extent = null;
@@ -623,12 +634,25 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return actor;
       },
 
-      // Hops to x. A move that starts while another is under way cuts it short where it has reached, but
-      // a move that starts mid-leap waits for the landing. glide: true or false overrides reduced motion.
+      // Hops to x, or walks there while standing (hop: true hops all the same). A move that starts while another
+      // is under way cuts it short where it has reached, but a move that starts mid-leap waits for the landing.
+      // glide: true or false overrides reduced motion.
       moveTo(x, options = {}) {
         addMove(x, options);
         return actor;
       },
+
+      // Stands up where it sits, or sits down where it stands (src/anim.js standUp and sitDown); from then on it
+      // walks rather than hops. A friend already in that stance, or one that never stands, does nothing.
+      stand({ at = scene.time } = {}) {
+        return changeStance('stand', at);
+      },
+      sit({ at = scene.time } = {}) {
+        return changeStance('sit', at);
+      },
+
+      // The friend's stance at t: 'sit' or 'stand'.
+      stanceAt,
 
       // Jumps in place, the whole cut-out leaving the floor (for games). A leap is the player's own
       // motion, so it leaves the floor under reduced motion too.
@@ -737,14 +761,14 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         const s = actor.state(t);
         node.style.transform = `translate(${s.x - BOX / 2}px, ${s.y - BOX - s.lift}px)`;
         rig.setPose(poseAt(t, s), true);
-        const eyes = { x: s.x, y: s.y - rigGround - s.lift };
+        const eyes = actor.eyesAt(t);
         for (const m of marks) drawMark(m, t, eyes);
         for (const w of words) drawWords(w, t, eyes);
       },
     };
 
     function poseAt(t, s) {
-      const reduced = scene.reduced, acc = {};
+      const reduced = scene.reduced, acc = { stance: stanceAt(t) };  // Under the layers, whose rise eases it up or down.
       if (!reduced) {
         const idlePose = idle(t + a.phase), glances = {};
         for (const key of ['lookX', 'lookY', 'turnX', 'turnY']) {
@@ -758,19 +782,26 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       const turn = reduced ? 0 : GAZE.turn;
       A.combine(acc, { lookX, lookY, turnX: lookX * turn, turnY: lookY * turn });
       if (s.moving && !reduced) {
-        A.combine(acc, { squash: s.squash, tilt: s.lean, turnX: s.dir * TRAVEL.turn * TRAVEL.weight });
+        A.combine(acc, s.walk || { squash: s.squash, tilt: s.lean });
+        A.combine(acc, { turnX: s.dir * TRAVEL.turn * TRAVEL.weight });
       }
       return A.sample(acc);
     }
 
 
-    function addMove(x, { at = scene.time, duration, hops, height = HOP.height, from, glide = null, leap = false } = {}) {
+    function addMove(x, { at = scene.time, duration, hops, height = HOP.height, from, glide = null, leap = false, hop = false } = {}) {
       const landing = moves.find(m => m.leap && m.at <= at && at < moveEnd(m));
       if (landing) at = moveEnd(landing);
       const start = from ?? actor.state(at).x;
-      const n = hops ?? Math.max(1, Math.round(Math.abs(x - start) / HOP.length));
+      // A standing friend walks, in steps of STRIDE; a seated one hops, in hops of HOP.length.
+      const walk = !leap && !hop && hops == null && stanceAt(at) === 'stand';
+      const n = walk ? Math.max(2, Math.ceil(Math.abs(x - start) / STRIDE))
+        : hops ?? Math.max(1, Math.round(Math.abs(x - start) / HOP.length));
       for (const m of moves) if (m.at + m.duration > at && m.at <= at) m.cut = at;
-      const move = { at, from: start, to: x, hops: n, height, duration: duration ?? n * HOP.seconds, cut: Infinity, glide, leap };
+      const move = {
+        at, from: start, to: x, hops: n, height, duration: duration ?? n * (walk ? A.WALK.seconds : HOP.seconds), cut: Infinity, glide, leap,
+        walk: walk && { leg: legRest },
+      };
       moves.push(move);
       moves.sort((p, q) => p.at - q.at);
       return move;
@@ -784,6 +815,42 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     function addShowing(at, shown) {
       showings.push({ at, shown });
       showings.sort((p, q) => p.at - q.at);
+    }
+
+    function stanceAt(t) {
+      let stance = stances[0].stance;
+      for (const entry of stances) { if (entry.at <= t) stance = entry.stance; else break; }
+      return stance;
+    }
+
+    // How far the friend's stance and its clips raise its eyes at t, in head units (PhyFriends.riseOf). Only the stance
+    // and the clips count: the gaze, which depends on where the eyes are, does not move them.
+    function liftAt(t) {
+      if (!lift) return 0;
+      const acc = { stance: stanceAt(t) };
+      A.combine(acc, layers.sample(t, { reduced: scene.reduced }));
+      return PF.riseOf(spec, A.sample(acc));
+    }
+
+    // Plays the change of stance from `at`, or, if another change is still under way then, from when it ends. The
+    // stance itself changes once the clip has the friend all the way up (or down): from there the stance gives what
+    // the clip's rise gave, and the rise is held within 0 to 1, so nothing moves. A change to the stance that the last
+    // change cued before `at` ends in does nothing.
+    function changeStance(stance, at) {
+      const last = changes.filter(c => c.at <= at).pop();
+      if (!lift || last.stance === stance) return actor;
+      at = Math.max(at, last.end);
+      const clip = stance === 'stand' ? A.make.standUp() : A.make.sitDown();
+      const target = stance === 'stand' ? 1 : 0, from = last.stance;
+      const up = p => clamp(((p.stance ?? from) === 'stand' ? 1 : 0) + (p.rise || 0), 0, 1);
+      let swap = 0;
+      while (swap < clip.duration && Math.abs(up(clip(swap)) - target) > 1e-3) swap += 0.01;
+      layers.add(clip, { at, fade: 0 });
+      stances.push({ at: at + swap, stance });
+      stances.sort((p, q) => p.at - q.at);
+      changes.push({ at, end: at + clip.duration, stance });
+      changes.sort((p, q) => p.at - q.at);
+      return actor;
     }
 
     // How much of the idle clip's glancing about shows: all of it while the gaze is 'around', none
@@ -818,7 +885,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
 
     actor.eyesAt = t => {
       const s = actor.state(t);
-      return { x: s.x, y: s.y - rigGround - s.lift };
+      return { x: s.x, y: s.y - rigGround - s.lift - liftAt(t) };
     };
 
     // Adds a mark (one of PhyFriends.cast.MARKS) shown from `at` for `seconds`; a drifting one rises as it goes.
@@ -861,17 +928,29 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     return m.cut < m.at + m.duration ? hopAlong(m, (m.cut - m.at) / m.duration, glide).x : m.to;
   }
 
-  // Where a move has reached at u (0 to 1): a row of hops, each a crouch, a flight and a landing; or,
-  // under reduced motion, a plain glide.
+  // Where a move has reached at u (0 to 1): a row of hops, each a crouch, a flight and a landing; for a friend
+  // standing, a walk, whose pose (walk) carries its steps; or, under reduced motion, a plain glide.
   function hopAlong(m, u, glide) {
     const dir = Math.sign(m.to - m.from);
     if (glide) return { x: lerp(m.from, m.to, smooth(u)), lift: 0, squash: 0, lean: 0, dir };
+    if (m.walk) {  // The feet take the walk's own steps (A.WALK.length) while the body covers the distance.
+      const step = A.walking(u, m.hops, { distance: dir * m.hops * A.WALK.length, leg: m.walk.leg });
+      return { x: lerp(m.from, m.to, step.along), lift: 0, squash: 0, lean: 0, dir, walk: step.pose };
+    }
     const hop = A.hopping(u, m.hops);
     return { x: lerp(m.from, m.to, hop.along), lift: m.height * hop.lift, squash: hop.squash, lean: hop.lean * dir, dir };
   }
 
   function mixLook(a, b, u) {
     return [lerp(a[0], b[0], u), lerp(a[1], b[1], u)];
+  }
+
+  // A standing friend's leg at rest, from its hip to its ankle: how far out and how far down it reaches (A.WALK's leg).
+  function restingLeg(spec) {
+    const stand = PF.standFor(spec);
+    if (!stand) return A.WALK.leg;
+    const leg = stand.legs.L, foot = leg.foot, ankle = leg.ankle ?? (foot.cy || 0) + (foot.ry ?? foot.rx ?? 0);
+    return [leg.spread, stand.ground - ankle - leg.hip[1]];
   }
 
   function hideAll(list) {

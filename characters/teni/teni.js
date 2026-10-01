@@ -6,7 +6,7 @@
 PhyFriends.define('teni', {
   palette: {
     bg: '#1c1d21',
-    fur: '#ace1e0',        // The pale teal of the keychain (#c3e5e4), deepened and made a little richer to stay visible on paper: ears, face, chest and tail. Its house shade (furShade) fills the body, which sits under the head.
+    fur: '#ace1e0',        // The pale teal of the keychain (#c3e5e4), deepened and made a little richer to stay visible on paper: ears, face, chest, tail, arms and forepaws. Its house shade (furShade) fills the body, which sits under the head.
     hair: '#34b6d0',       // The cyan of the hair, the curl and the inner ears. Its house shade (hairShade) fills the back of the bob, behind the mop.
     diamond: '#057291',    // The dark teal of the diamonds at the ends of the side locks and the tail, and of the hind feet.
     eye: '#1b2b31',        // A deep teal near-black, for the open mouth.
@@ -57,17 +57,29 @@ PhyFriends.define('teni', {
   // There is no mouth by default (the pictures' nose is left out); when open, it shows one fang for the small
   // fangs that headshot.jpeg and skeb.png draw.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small, round and seated, in the house shade. Short shoulder tufts sit under the cheeks, low enough
-  // not to rise beside the chin like a collar, and small hip tufts below them.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // base. It is in the house shade. Short shoulder tufts sit under the cheeks, low enough not to rise beside the chin
+  // like a collar, and small hip tufts below them.
   body: {
-    cx: 0, cy: 84, rx: 68, ry: 47, color: 'furShade',
+    cx: 0, cy: 84, rx: 68, ry: 47, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 8, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is the flat blade of a Glaceon, rising from behind his left hip (the viewer's right) and bending in,
   // with a large dark-teal diamond at its end (an extra), as on the keychain and in skeb.png.
   tail: {
     base: [56, 104], angle: 56, length: 116, width: 40, bend: -40, taper: 0.6, root: 0.3, color: 'fur', fluff: [],
+  },
+  // The limbs, on the house template; Teni stays bare. Seated, the pale teal forepaws rest on the ground between the
+  // hind feet (paw), and the hind feet, in the dark teal of the keychain's feet, are turned out slightly at either
+  // side (foot). Standing, the pale teal arms hang beside the body, and the dark teal of the feet runs up the lower
+  // leg to a point at the front, as on the keychain. Standing, the tail leaves the hip lower and further out, so that
+  // the pale right paw, hanging beside the body, does not vanish against the pale blade.
+  stand: {
+    seat: { paw: { cx: 15, cy: 122, rx: 12.5, ry: 9.5 }, foot: { cx: 47, cy: 119, rx: 19, ry: 12, rot: -8 } },
+    arms: { paw: { color: 'fur' } },
+    legs: { foot: { color: 'diamond' }, bands: [{ from: 0.6, to: 1, color: 'diamond', teeth: 1, depth: 6 }] },
+    tail: { base: [46, 116], angle: 80 },
   },
   extras: [
     // The back of the bob, in the house shade because it lies behind the mop: it shows beside the jaw and under each
@@ -83,15 +95,11 @@ PhyFriends.define('teni', {
     // the tail's diamond when the head turns.
     { on: 'hair', fill: 'diamond', polys: [[-86, 56, 30, 4, 84, 0.62], [86, 56, 30, 4, 96, 0.62]] },
     // The pale ruff on the chest, from headshot.jpeg, its lower edge in spiky tufts. It starts a little below the chin,
-    // so that a band of the shaded body parts the pale chin from the pale chest.
-    { on: 'body', clip: true, fill: 'fur', cx: 0, cy: 78, rx: 40, ry: 18,
+    // so that a band of the shaded body parts the pale chin from the pale chest. It is a ruff round the neck, so it
+    // lies over the tops of the arms, as a scarf does (scarf). It is no wider than the neck, so that the pale arms hang
+    // beside it on the shaded body rather than vanishing against it.
+    { on: 'scarf', clip: true, fill: 'fur', cx: 0, cy: 78, rx: 26, ry: 17,
       fluff: [{ from: 20, to: 160, n: 5, len: 9, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
-    // The forepaws on the ground between the hind feet, pale teal as in skeb.png.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -15, cy: 122, rx: 12.5, ry: 9.5 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 15, cy: 122, rx: 12.5, ry: 9.5 },
-    // The hind feet in the dark teal of the keychain's feet, turned out slightly.
-    { on: 'body', kind: 'ellipse', fill: 'diamond', cx: -47, cy: 119, rx: 19, ry: 12, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'diamond', cx: 47, cy: 119, rx: 19, ry: 12, rot: 8 },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -116, +x away from the body); the
     // library bends them onto the curve.
     // The diamond at the end of the blade.

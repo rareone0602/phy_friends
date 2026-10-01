@@ -37,6 +37,9 @@ PhyFriends.define('claude', {
   // look down.
   blush: { x: 86, y: 32, rx: 12, ry: 7, tilt: 10 },
   mouth: { y: 30, size: 4.5 },
+  // Claude already stands, on the glyphs' four legs, so it has no standing figure of its own: it keeps its shape
+  // whatever the pose's stance.
+  stand: false,
   extras: [
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head): the arm, a
     // rounded bar 2 units tall from the shoulder to 2 units past the side.

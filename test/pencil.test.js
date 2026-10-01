@@ -46,7 +46,8 @@
     for (const [what, markup] of Object.entries(renders)) {
       const box = document.createElement('div');
       box.innerHTML = markup;  // As mount() puts a render on the page.
-      const masked = box.querySelectorAll('[mask]');
+      // Other masks (an arm under a scarf) lie inside the drawing; the pencil's is the one round all of it.
+      const masked = [...box.querySelectorAll('[mask]')].filter(n => /-pencil\)$/.test(n.getAttribute('mask')));
       assertEqual(masked.length, 1, `masked groups in the ${what}`);
       const held = [...masked[0].children];
       assert(held.length === 1 && /isolation:\s*isolate/.test(held[0].getAttribute('style') || ''),

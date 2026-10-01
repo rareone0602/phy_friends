@@ -44,6 +44,77 @@
     });
   });
 
+  test('a friend stands up and sits down on cue, walking while it stands and hopping while it sits', () => {
+    withScene({}, scene => {
+      const yuda = scene.add('yuda', { x: 600 });
+      yuda.stand({ at: 1 }).moveTo(700, { at: 3 }).sit({ at: 6 }).moveTo(600, { at: 8 });
+      assertEqual([yuda.stanceAt(0.9), yuda.stanceAt(2.5), yuda.stanceAt(7)], ['sit', 'stand', 'sit']);
+      scene.seek(2.5);
+      assertEqual(yuda.rig.pose.stance, 'stand', 'its rig stands');
+      const walking = yuda.state(3.3), hopping = yuda.state(8.15);
+      assert(walking.moving && walking.walk && walking.lift === 0, 'it walks: its feet keep to the floor');
+      assert(hopping.moving && !hopping.walk && hopping.lift > 0, 'seated again, it hops');
+      assertEqual(yuda.state(10).x, 600, 'and ends on its mark');
+    });
+  });
+
+  test('a friend added standing has its eyes raised by its lift', () => {
+    withScene({}, scene => {
+      const phy = scene.add('phy', { x: 500 }), yuda = scene.add('yuda', { x: 1100, stance: 'stand' });
+      const lift = PhyFriends.standLift('yuda');
+      assert(lift > 0, 'standing is taller');
+      assertEqual(yuda.eyesAt(0).y, phy.eyesAt(0).y - lift + (PhyFriends.groundOf('phy') - PhyFriends.groundOf('yuda')));
+      scene.seek(0.5);
+      assertEqual(yuda.rig.pose.stance, 'stand');
+    });
+  });
+
+  test('a friend raises its eyes smoothly as it stands up, and lowers them as it sits', () => {
+    withScene({}, scene => {
+      const terry = scene.add('terry', { x: 600 }), lift = PhyFriends.standLift('terry');
+      terry.stand({ at: 1 }).sit({ at: 4 });
+      const seated = terry.eyesAt(0.5).y;
+      let previous = seated, steepest = 0;
+      for (let t = 0.5; t <= 6; t += 1 / 60) {
+        const y = terry.eyesAt(t).y;
+        steepest = Math.max(steepest, Math.abs(y - previous));
+        previous = y;
+      }
+      assert(steepest < 4, `the eyes never jump (the largest step in a 60th of a second is ${steepest.toFixed(2)})`);
+      assert(Math.abs(terry.eyesAt(3.5).y - (seated - lift)) < 0.5, 'standing, they are raised by its lift');
+      assert(Math.abs(terry.eyesAt(6).y - seated) < 0.5, 'seated again, they are back where they were');
+    });
+  });
+
+  test('a friend that never stands ignores a cue to stand, and hops even when added standing', () => {
+    withScene({}, scene => {
+      const claude = scene.add('claude', { x: 800 });
+      claude.stand({ at: 0 });
+      assertEqual(claude.stanceAt(5), 'sit');
+      assert(!claude.state(0).walk, 'nor does it walk');
+    });
+    withScene({}, scene => {
+      const claude = scene.add('claude', { x: 800, stance: 'stand' });
+      claude.moveTo(1100, { at: 0 });
+      assert(!claude.state(0.3).walk && claude.state(0.3).lift > 0, 'it hops');
+    });
+  });
+
+  test('a change of stance cued while another is under way follows it, and one to the stance cued does nothing', () => {
+    withScene({}, scene => {
+      const terry = scene.add('terry', { x: 600 });
+      terry.stand({ at: 0 }).sit({ at: 0.5 });
+      assertEqual([terry.stanceAt(0.95), terry.stanceAt(5)], ['stand', 'sit'], 'it stands up, then sits down again');
+      assert(Math.abs(terry.eyesAt(5).y - terry.eyesAt(0).y) < 0.5, 'and ends where it sat');
+    });
+    withScene({}, scene => {
+      const terry = scene.add('terry', { x: 600 }), lift = PhyFriends.standLift('terry');
+      terry.stand({ at: 0 }).stand({ at: 0.5 });
+      const seated = terry.eyesAt(0).y;
+      for (let t = 1; t <= 3; t += 0.05) assert(Math.abs(terry.eyesAt(t).y - (seated - lift)) < 3, `standing, it stays up (${t.toFixed(2)} s)`);
+    });
+  });
+
   test('a friend who enters is hidden before its entrance and ends on its mark', () => {
     withScene({}, scene => {
       const yuda = scene.add('yuda', { x: 1100 });

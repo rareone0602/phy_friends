@@ -87,6 +87,33 @@
     assert(low.squash < 0 && E.posture(1, 0).squash > 0, 'a friend slumps when low and holds itself up when pleased');
   });
 
+  test('a standing friend\'s posture carries its arms: up when pleased or alert, in when low, limp when drowsy', () => {
+    const pleased = E.posture(1, 1), low = E.posture(-1, 0), drowsy = E.posture(0, -1), frightened = E.posture(-1, 1);
+    assert(pleased.armL > 0 && low.armL < 0 && drowsy.armL < 0, 'the arms go up and out, or in and low');
+    assert(drowsy.elbowL > 0 && frightened.elbowL < 0, 'the paws hang open when drowsy and are clutched in fright');
+    assert(frightened.crouch > 0, 'a frightened friend cowers');
+  });
+
+  test('every face is a pose the renderer draws on every friend of the house template standing', () => {
+    for (const feeling of E.names) {
+      const pose = A.sample({ ...E.face(feeling), stance: 'stand' });
+      for (const name of HOUSE) {
+        const svg = PF.render(name, { pose, bg: false, view: 'stand' });
+        assert(svg.includes('<svg') && !svg.includes('NaN') && !svg.includes('undefined'), `${feeling} on ${name}, standing`);
+      }
+    }
+  });
+
+  test('a gesture that raises a paw above the chin draws that arm whole in front (over), so that its shoulder does not hide the paw', () => {
+    for (const feeling of E.names) {
+      const pose = A.sample(E.face(feeling));
+      for (const arm of ['armL', 'armR']) {
+        const inFront = String(pose.over).split(' ').includes(arm);
+        assert(pose[arm] <= 110 || inFront, `${feeling} raises ${arm} to ${pose[arm]} with its shoulder tucked`);
+      }
+    }
+  });
+
   test('every mark a feeling shows is one a friend without a voice may use', () => {
     for (const feeling of E.names) {
       const mark = E.mark(feeling);

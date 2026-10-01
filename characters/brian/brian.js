@@ -1,6 +1,7 @@
 // Character spec for Brian, a cream fox in an orange newsboy cap and a green bandana, with dark orange
 // ear backs, two tan dots on the forehead and brown boots.
-// Pictures: examples/sheet.png.
+// Pictures: examples/sheet.png, and two small drawings that show him standing, BRAIN REN ADMIRE.png and
+// smol_BRIAN_REN_hat.png.
 // Colors are taken from the color circles on examples/sheet.png; the pink of the cap band, which the
 // circles do not show, is taken from the front view beside them.
 PhyFriends.define('brian', {
@@ -57,12 +58,12 @@ PhyFriends.define('brian', {
   // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows a pink tongue
   // and no fang.
   mouth: { y: 20, size: 3.8, tongue: 'band' },
-  // The body is seated and round. It sits under the head, so it takes the house shade. Shoulder tufts sit
-  // under the cheeks, and small hip tufts below them.
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the
+  // head, so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 68, ry: 50, color: 'furShade',
+    cx: 0, cy: 82, rx: 68, ry: 50, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy plume rising behind his left hip (the viewer's right), its tip curling in. Its
   // pale end, more than half its length on the sheet, is cut into flame-shaped tufts that reach into the cream.
@@ -72,6 +73,15 @@ PhyFriends.define('brian', {
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 9, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.45, color: 'face', fluff: [{ from: 50, to: 130, n: 4, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+  },
+  // The limbs, on the house template. Seated, the pale forepaws rest on the ground between the hind feet,
+  // whose boots show their soles, as on the sheet. Standing, as on the sheet and in the small drawings, the cream arms
+  // turn pale down the forearm, in tufts, to the pale paws, and the short legs stand in the brown boots, whose shafts
+  // show behind the feet and so take the boot's house shade.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 115, rx: 20, ry: 16 } },
+    arms: { paw: { color: 'face' }, bands: [{ from: 0.55, to: 1, color: 'face', teeth: 3, depth: 3 }] },
+    legs: { foot: { color: 'boot' }, bands: [{ from: 0.3, to: 1, color: 'bootShade', grow: 1 }] },
   },
   extras: [
     // Cheek fluff under the head: a cream ruff whose tufts reach past the pale cheeks. An n: 1 range with
@@ -95,21 +105,16 @@ PhyFriends.define('brian', {
     { on: 'hair', clip: true, fill: 'band', nodes: [[-80, -70, 1, 6], [80, -70, 1, 0], [80, -40, 1, 0], [-80, -40, 1, 0]] },
     { on: 'hair', kind: 'ellipse', fill: 'cap', cx: 0, cy: -115, rx: 7, ry: 5 },
     // The pale chest and belly: a bib under the bandana, its lower edge in soft tufts.
-    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 76, rx: 42, ry: 25,
+    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 76, rx: 32, ry: 25,
       fluff: [{ from: 30, to: 150, n: 4, len: 6, depth: 0.08, b1: -25, b2: 5, jit: 0 }] },
     // The bandana: the band around the neck (in the house shade, because it lies behind the point) and the point
-    // hanging on the chest. The knot is at the back, as on the sheet.
-    { on: 'body', fill: 'scarfShade', nodes: [[-58, 40, 1, 0], [58, 40, 1, 0], [56, 56, 1, -10], [-56, 56, 1, 10]], round: 0.3 },
-    { on: 'body', fill: 'scarf', nodes: [[-58, 47, 1, -4], [58, 47, 1, -4], [0, 104, 1, -4]], round: 0.2 },
-    // The forepaws on the ground between the hind feet, pale as on the sheet.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 15, cy: 121, rx: 12.5, ry: 10 },
-    // The hind feet in brown boots, soles to the front and plain, as in the seated pictures: the cuff showing
-    // behind each foot, then the sole.
-    { on: 'body', kind: 'ellipse', fill: 'bootShade', cx: -50, cy: 106, rx: 18, ry: 15 },
-    { on: 'body', kind: 'ellipse', fill: 'bootShade', cx: 50, cy: 106, rx: 18, ry: 15 },
-    { on: 'body', kind: 'ellipse', fill: 'boot', cx: -50, cy: 115, rx: 20, ry: 16 },
-    { on: 'body', kind: 'ellipse', fill: 'boot', cx: 50, cy: 115, rx: 20, ry: 16 },
+    // hanging on the chest. The knot is at the back, as on the sheet. It lies over the tops of the arms, as a scarf
+    // does (scarf).
+    { on: 'scarf', fill: 'scarfShade', nodes: [[-32, 40, 1, 0], [32, 40, 1, 0], [42, 56, 1, -10], [-42, 56, 1, 10]], round: 0.3 },
+    { on: 'scarf', fill: 'scarf', nodes: [[-38, 47, 1, -4], [38, 47, 1, -4], [0, 104, 1, -4]], round: 0.2 },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The cuff of
+    // each boot shows behind the foot, so it takes the boot's house shade.
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'bootShade', cx: 0, cy: -9, rx: 18, ry: 15 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

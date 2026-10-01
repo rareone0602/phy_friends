@@ -68,12 +68,12 @@ PhyFriends.define('kevin', {
   blush: { x: 55, y: 29, rx: 11.5, ry: 7, tilt: 10 },
   // There is no mouth by default; when open, it shows the pink tongue of the sheet, without a fang.
   mouth: { y: 21, size: 3.8 },
-  // The body is small, round and seated, in the house shade. Shoulder tufts sit under the cheeks, and small
-  // hip tufts below them.
+  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // base. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 87, rx: 64, ry: 45, color: 'furShade',
+    cx: 0, cy: 87, rx: 64, ry: 45, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 7, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy fox-like plume rising behind the left hip (the viewer's right), its tip
   // curling in. Its white end, cut into flame-shaped tufts that reach back toward the base, is its outer
@@ -86,6 +86,14 @@ PhyFriends.define('kevin', {
       { from: 255, to: 290, n: 1, len: 11, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.5, color: 'face', fluff: [{ from: 50, to: 130, n: 3, len: 22, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+  },
+  // The limbs, on the house template. Seated, the white forepaws rest on the ground between the hind feet,
+  // which are turned out slightly, as on the sheet. Standing, as on the sheet and in by_yuda.png, the ice-blue arms end
+  // in the white paws and the short legs in the feet, each under a darker cuff (extras).
+  stand: {
+    seat: { paw: { cx: 16, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 118, rx: 17, ry: 10, rot: -8 } },
+    arms: { paw: { color: 'face' } },
+    legs: { foot: { color: 'band' } },
   },
   extras: [
     // The spiky cheek tufts: a fur ruff under the head whose points reach past the white cheeks. An n: 1
@@ -113,21 +121,17 @@ PhyFriends.define('kevin', {
     // cuffs of the forepaws.
     { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 22, ry: 28,
       fluff: [{ from: 40, to: 140, n: 3, len: 4, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
-    // The yellow crescents on the outer side of each thigh, clipped to the body so that they start at its edge.
-    { on: 'body', clip: true, fill: 'mark', nodes: [[72, 56, 1, 30], [36, 90, 1, -30], [72, 74, 1, 0]] },
-    { on: 'body', clip: true, fill: 'mark', nodes: [[72, 82, 1, 30], [44, 104, 1, -30], [72, 94, 1, 0]] },
-    { on: 'body', clip: true, fill: 'mark', nodes: [[-72, 56, 1, -30], [-36, 90, 1, 30], [-72, 74, 1, 0]] },
-    { on: 'body', clip: true, fill: 'mark', nodes: [[-72, 82, 1, -30], [-44, 104, 1, 30], [-72, 94, 1, 0]] },
-    // The hind feet, turned out slightly: white toes under a darker cuff at the ankle.
-    { on: 'body', kind: 'ellipse', fill: 'band', cx: -50, cy: 118, rx: 17, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'band', cx: 50, cy: 118, rx: 17, ry: 10, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -50, cy: 123, rx: 17, ry: 8, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 50, cy: 123, rx: 17, ry: 8, rot: 8 },
-    // The white forepaws on the ground between them, each under a darker cuff at the wrist.
-    { on: 'body', kind: 'ellipse', fill: 'band', cx: -16, cy: 113, rx: 11.5, ry: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'band', cx: 16, cy: 113, rx: 11.5, ry: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -16, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 16, cy: 121, rx: 12.5, ry: 10 },
+    // The yellow crescents on the outer side of each thigh, clipped to the body so that they start at its edge, and
+    // set low on its broad base, above the hind feet.
+    { on: 'body', clip: true, fill: 'mark', nodes: [[58, 70, 1, 34], [24, 102, 1, -30], [60, 86, 1, 0]] },
+    { on: 'body', clip: true, fill: 'mark', nodes: [[64, 94, 1, 34], [30, 120, 1, -30], [66, 106, 1, 0]] },
+    { on: 'body', clip: true, fill: 'mark', nodes: [[-58, 70, 1, -34], [-24, 102, 1, 30], [-60, 86, 1, 0]] },
+    { on: 'body', clip: true, fill: 'mark', nodes: [[-64, 94, 1, -34], [-30, 120, 1, 30], [-66, 106, 1, 0]] },
+    // Paw extras are in the seated paw's space (its center on the origin, +x toward the center line): the darker cuff
+    // at the wrist, behind the white paw.
+    { on: 'paws', under: true, kind: 'ellipse', fill: 'band', cx: 0, cy: -8, rx: 11.5, ry: 8 },
+    // Feet extras are in the seated foot's space: the white toes in front of the darker cuff at the ankle.
+    { on: 'feet', kind: 'ellipse', fill: 'face', cx: 0, cy: 5, rx: 17, ry: 8, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

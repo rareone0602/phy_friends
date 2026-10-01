@@ -12,9 +12,10 @@
  * leaves the field to lower layers, and null selects the spec default.
  * Afterward, sample() clamps blink and lid to 0..1 and look/turn to -1..1.
  *
- * The clips here are movements (idle, hop, bounce, nod, ...). Feelings, which
- * add a face and a posture to a movement, are in src/emotion.js, which adds
- * its react(), hold() and feel() to what parse() understands (extend()).
+ * The clips here are movements (idle, hop, bounce, nod, ...), and the movements
+ * of a friend standing (walk, wave, cheer, jump, standUp, sitDown, dance, ...).
+ * Feelings, which add a face and a posture to a movement, are in src/emotion.js,
+ * which adds its react(), hold() and feel() to what parse() understands (extend()).
  *
  * Example:
  *
@@ -35,6 +36,7 @@
   'use strict';
 
   const TAU = Math.PI * 2;
+  const DEG = Math.PI / 180;
   const _ = undefined; // Marks "no value" in string tracks, so lower layers decide.
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, u) => a + (b - a) * u;
@@ -72,6 +74,11 @@
   const RANGE = {
     blink: [0, 1], lid: [0, 1], lidTilt: [-30, 30], widen: [-0.8, 1], flush: [0, 1],
     lookX: [-1, 1], lookY: [-1, 1], turnX: [-1, 1], turnY: [-1, 1], tail: [-45, 45],
+    // The standing figure: a crouch drops the hips at most as far as sitting does (the rig holds it there), and a
+    // negative one beyond the legs' stretch lifts the feet; rise moves at most a whole stance; an arm reaches from
+    // across the chest to straight up; a foot only lifts.
+    crouch: [-4, 30], rise: [-1, 1], lean: [-30, 30], armL: [-90, 180], armR: [-90, 180], elbowL: [-150, 150], elbowR: [-150, 150],
+    legL: [-30, 60], legR: [-30, 60], stepL: [0, 24], stepR: [0, 24],
   };
 
   // Stacks partial pose `p` onto `acc` (in place) with weight k; strings apply only when k >= 0.5.
@@ -102,11 +109,16 @@
     return p;
   }
 
-  // Blends two full poses: numbers interpolate linearly, and strings switch halfway.
+  // Blends two full poses: numbers interpolate linearly, and strings switch halfway. A change of stance, which would
+  // switch at once, is blended as a rise from the first pose's stance instead, so that the friend rises or sinks.
   function mix(a, b, u) {
     const p = { ...a };
     for (const f in b) {
       p[f] = typeof a[f] === 'number' && typeof b[f] === 'number' ? lerp(a[f], b[f], u) : u < 0.5 && f in a ? a[f] : b[f];
+    }
+    if (a.stance !== b.stance) {
+      const up = q => (q.stance === 'stand' ? 1 : 0) + (q.rise || 0);
+      Object.assign(p, { stance: a.stance, rise: lerp(up(a), up(b), u) - up({ stance: a.stance }) });
     }
     return p;
   }
@@ -267,6 +279,10 @@
         earR: 2 * energy * Math.sin(b - 0.9) + flick[1](t),
         tail: energy * (2.5 * Math.sin(a + 1) + Math.sin(b - 2)) + swish(t), // Slow sway that lags the breath
         blink: blink(t),
+        // A standing friend's arms lift a little with each breath, and its weight shifts slowly from foot to foot.
+        armL: 2.5 * energy * Math.sin(b - 0.4), armR: 2.5 * energy * Math.sin(b - 0.6),
+        elbowL: 3 * energy * Math.sin(b - 1.3), elbowR: 3 * energy * Math.sin(b - 1.5),
+        lean: 0.8 * energy * Math.sin(a + 1.6),
       };
     }, duration, true));
   };
@@ -315,10 +331,12 @@
   }, { duration: 1.4 });
 
   // Bounces on the spot, ears flapping and tail wagging: the motion of a hop for joy (the emotion
-  // library's happy reaction, which adds the face, and the gallery's hi).
+  // library's happy reaction, which adds the face, and the gallery's hi). A standing friend throws its
+  // arms up beside its head, tucks its feet up in the air and bends its knees as it lands.
   make.bounce = ({ duration = 1.1, bounces = 2, height = 10, wags = 3 } = {}) => clip(t => {
     const T = duration / bounces, u = mod(t, T) / T, a = (TAU * t) / duration;
     const air = 4 * u * (1 - u), contact = Math.exp(-((Math.min(u, 1 - u) / 0.09) ** 2));
+    const arms = 80 + 20 * air, elbows = 25 + 10 * Math.sin(TAU * u);
     return {
       y: -height * air,
       squash: -0.07 * contact + 0.05 * Math.abs(1 - 2 * u) * (1 - contact),
@@ -328,6 +346,8 @@
       headY: 2.5 * contact,
       earL: -7 + 12 * contact, earR: -7 + 12 * contact,
       tail: -2 + 9 * Math.sin(wags * a + 0.6), // Brisk wag, held slightly high
+      armL: arms, armR: arms, elbowL: elbows, elbowR: elbows,
+      stepL: 4 * air, stepR: 4 * air, crouch: 6 * contact,
     };
   }, duration, true);
 
@@ -361,8 +381,188 @@
       clip(t => ({ tilt: 2 * Math.sin((TAU * t) / (n / rate)), tail: 2 * Math.sin((TAU * t) / (n / rate) + 1.5) }), n / rate, true));
   };
 
+  // ------------------------------------------------------------ Standing
+  // Movements of a friend's standing figure (spec.stand). A seated friend has its limbs folded, so it shows only
+  // what they do with the head, ears and tail: lay them over a standing pose ("layer(still({ stance: 'stand' }), walk)");
+  // standUp and sitDown ease rise over the stance laid under them, and a scene changes its stance once they end. The
+  // arms are drawn in front of the scarf and the head, but for the shoulder, which tucks under them; `over` draws an
+  // arm whole in front, shoulder too.
+
+  // A standing friend's walk: seconds a step, how far a step carries it (length, in head units: legs this short
+  // take small steps), how high a foot lifts, how far the arms swing (degrees), the lean onto the planted foot
+  // (degrees), the stretch as the body passes over that foot, and a leg at rest, from the hip to the ankle: how
+  // far out and how far down it reaches (the template's, PhyFriends.STAND_DEFAULT and STAND_FIT; a friend's own
+  // follows from its spec.stand), with which walking() keeps a planted foot still.
+  const WALK = Object.freeze({ seconds: 0.25, length: 12, height: 7, swing: 14, lean: 3, squash: 0.02, leg: [0, 22] });
+
+  // The walk at p steps in (p = 1 ends the first step). The right foot lifts in the even steps and the left in
+  // the odd ones, or the other way round when first is -1; the weight shifts onto the planted foot, the arms
+  // swing against the legs, and the body stretches as it passes over the planted foot. follow scales what
+  // follows the body a little late (by the phase given, in radians): the head, the ears, the hair and the tail.
+  function stepping(p, { height, swing, lean, squash } = WALK, { first = 1, follow = 1 } = {}) {
+    const a = Math.PI * p, q = first * Math.sin(a);
+    const sway = late => follow * first * Math.sin(a - late), bob = late => follow * Math.cos(2 * a - late);
+    return {
+      stepL: height * Math.max(0, -q), stepR: height * Math.max(0, q),
+      lean: -lean * q,
+      armL: swing * q, armR: -swing * q, elbowL: 0.5 * swing * q, elbowR: -0.5 * swing * q,
+      squash: squash * q * q,
+      tilt: -1.5 * sway(0.6), hair: -1.2 * sway(0.9), tail: 5 * sway(1.1),
+      headY: 0.8 * bob(0.5), earL: 3 * bob(0.8), earR: 3 * bob(1),
+    };
+  }
+
+  // Walks on the spot, two steps a loop. walking() is the same walk going somewhere.
+  make.walk = ({ duration = 2 * WALK.seconds, ...gait } = {}) =>
+    clip(t => stepping((2 * t) / duration, { ...WALK, ...gait }), duration, true);
+
+  // The side ('L' or 'R', the viewer's) away from a friend's tail, where a raised arm shows best: 'R' for a
+  // friend without a tail, or without a spec.
+  function freeSide(spec) {
+    if (spec == null) return 'R';
+    const s = PF.get(spec), stand = PF.standFor(s), tail = (stand && stand.tail) || s.tail;
+    return tail && tail.base && tail.base[0] > 0 ? 'L' : 'R';
+  }
+
+  // Waves hello with one arm (side 'L' or 'R', the viewer's; by default the one away from the tail of the
+  // friend whose spec is given), held out low to the side with the paw beside the cheek and the elbow
+  // rocking; the head tips toward the paw and the body leans a little away.
+  make.wave = ({ spec, side = freeSide(spec), waves = 3, rate = 0.36 } = {}) => {
+    const rise = 0.3, fall = 0.35, duration = rise + waves * rate + fall, d = side === 'L' ? -1 : 1;
+    return clip(t => {
+      const up = t < rise ? ease.back(t / rise) : t > duration - fall ? 1 - ease.smooth((t - duration + fall) / fall) : 1;
+      const rock = Math.sin((TAU * Math.max(0, t - rise)) / rate);
+      return {
+        [`arm${side}`]: 70 * up, [`elbow${side}`]: up * (55 + 32 * rock),
+        tilt: 5 * d * up, lean: -2 * d * up, earL: -5 * up, earR: -5 * up,
+        tail: up * 6 * Math.sin((TAU * t) / 0.6), hair: -1.5 * d * up,
+      };
+    }, duration);
+  };
+
+  // Throws both arms up beside the head with a little hop, and shakes them for joy.
+  make.cheer = ({ height = 12 } = {}) => track({
+    crouch: [[0, 0], [0.14, 7], [0.26, -2, 'out'], [0.42, 0], [0.5, 6, 'out'], [0.8, 0]],
+    y: [[0, 0], [0.2, 0], [0.33, -height, 'out'], [0.46, 0, 'in']],
+    squash: [[0, 0], [0.14, -0.04], [0.24, 0.05, 'out'], [0.4, 0.01], [0.48, -0.05, 'out'], [0.8, 0]],
+    armL: [[0, 0], [0.14, -8], [0.32, 100, 'back'], [0.95, 100], [1.4, 0]],
+    armR: [[0, 0], [0.14, -8], [0.32, 100, 'back'], [0.95, 100], [1.4, 0]],
+    elbowL: [[0, 0], [0.32, 25, 'back'], [0.47, 45], [0.62, 15], [0.77, 45], [0.95, 25], [1.4, 0]],
+    elbowR: [[0, 0], [0.32, 25, 'back'], [0.47, 45], [0.62, 15], [0.77, 45], [0.95, 25], [1.4, 0]],
+    stepL: [[0, 0], [0.24, 0], [0.33, 5], [0.45, 0]],
+    stepR: [[0, 0], [0.24, 0], [0.33, 5], [0.45, 0]],
+    earL: [[0, 0], [0.14, 5], [0.3, -12, 'out'], [0.48, -4], [0.56, 6, 'out'], [0.8, -6], [1.4, 0]],
+    earR: [[0, 0], [0.14, 5], [0.3, -12, 'out'], [0.48, -4], [0.56, 6, 'out'], [0.8, -6], [1.4, 0]],
+    tail: [[0, 0], [0.3, -8, 'out'], [0.6, 6], [0.9, -6], [1.2, 2], [1.4, 0]],
+    tilt: [[0, 0], [0.5, 0], [0.65, 4], [0.85, -4], [1.05, 2], [1.4, 0]],
+    headY: [[0, 0], [0.14, 2], [0.3, -1.5], [0.5, 3, 'out'], [0.7, 0]],
+    hair: [[0, 0], [0.3, -2], [0.5, 2], [0.7, -1], [0.9, 0]],
+    turnY: [[0, 0], [0.3, -0.15], [0.7, 0]],
+  }, { duration: 1.4 });
+
+  // Jumps: crouches, springs up with its arms flung up and its feet tucked under it, and lands in a crouch.
+  make.jump = ({ height = 32 } = {}) => track({
+    crouch: [[0, 0], [0.24, 14], [0.32, -3, 'in'], [0.42, 0], [0.72, 0], [0.78, 13, 'out'], [1.15, 0]],
+    y: [[0, 0], [0.3, 0], [0.52, -height, 'out'], [0.74, 0, 'in']],
+    squash: [[0, 0], [0.24, -0.05], [0.32, 0.07, 'out'], [0.5, 0], [0.73, 0.03], [0.78, -0.08, 'out'], [1.1, 0]],
+    stepL: [[0, 0], [0.32, 0], [0.46, 12, 'out'], [0.62, 9], [0.73, 0, 'in']],
+    stepR: [[0, 0], [0.32, 0], [0.46, 12, 'out'], [0.62, 9], [0.73, 0, 'in']],
+    legL: [[0, 0], [0.32, 0], [0.46, 8], [0.73, 0]],
+    legR: [[0, 0], [0.32, 0], [0.46, 8], [0.73, 0]],
+    armL: [[0, 0], [0.24, -15], [0.36, 95, 'out'], [0.55, 80], [0.74, 30], [0.84, 45], [1.15, 0]],
+    armR: [[0, 0], [0.24, -15], [0.36, 95, 'out'], [0.55, 80], [0.74, 30], [0.84, 45], [1.15, 0]],
+    elbowL: [[0, 0], [0.24, -10], [0.36, 30, 'out'], [0.74, 10], [1.15, 0]],
+    elbowR: [[0, 0], [0.24, -10], [0.36, 30, 'out'], [0.74, 10], [1.15, 0]],
+    earL: [[0, 0], [0.24, 6], [0.36, 16, 'out'], [0.55, -6], [0.74, -8], [0.8, 14, 'out'], [0.95, -3], [1.15, 0]],
+    earR: [[0, 0], [0.24, 6], [0.38, 17, 'out'], [0.57, -6], [0.74, -7], [0.82, 13, 'out'], [0.97, -3], [1.15, 0]],
+    tail: [[0, 0], [0.24, -3], [0.38, 8, 'out'], [0.58, -5], [0.78, 6], [0.9, -5, 'out'], [1.05, 2], [1.2, 0]], // Lags the body
+    headY: [[0, 0], [0.24, 3], [0.34, -2], [0.55, -1], [0.74, -1.5], [0.8, 5, 'out'], [0.95, -0.5], [1.1, 0]],
+    hair: [[0, 0], [0.32, -3], [0.55, 2.5], [0.78, -2.5], [0.95, 1.5], [1.15, 0]],
+    turnY: [[0, 0], [0.24, 0.15], [0.5, -0.2], [0.75, 0.1], [1, 0]],
+    blink: [[0, 0], [0.74, 0], [0.78, 0.6], [0.88, 0]],
+  }, { duration: 1.2 });
+
+  // A change of stance eases `rise`, which the rig adds to the stance (sit 0, stand 1), so that the friend rises or
+  // sinks through every height between, unfolding or folding its limbs.
+
+  // Stands up from sitting (over a seated stance): squashes down where it sits, rises through every height with
+  // its arms a little out, goes a little past upright, and settles. It ends with rise 1, standing; the scene that
+  // plays it changes the stance itself, which is what reduced motion keeps.
+  make.standUp = () => track({
+    rise: [[0, 0], [0.18, 0], [0.76, 1, 'inOut'], [1, 1]],
+    crouch: [[0, 0], [0.76, 0], [0.86, -2.5, 'out'], [1, 0]],
+    squash: [[0, 0], [0.16, -0.045, 'inOut'], [0.45, 0.02], [0.76, 0], [0.86, 0.025, 'out'], [1, 0]],
+    armL: [[0, 0], [0.3, 0], [0.6, 12], [0.95, 0]],
+    armR: [[0, 0], [0.3, 0], [0.6, 12], [0.95, 0]],
+    headY: [[0, 0], [0.18, 1.5], [0.5, -1], [0.86, 0.5], [1, 0]],
+    earL: [[0, 0], [0.18, 6], [0.5, 10], [0.86, -6, 'out'], [1, 0]],
+    earR: [[0, 0], [0.2, 6], [0.52, 10], [0.88, -5, 'out'], [1, 0]],
+    tail: [[0, 0], [0.2, -3], [0.6, 6, 'out'], [0.86, -3], [1, 0]],
+    hair: [[0, 0], [0.2, 1], [0.55, -2], [0.86, 0.8], [1, 0]],
+  }, { duration: 1 });
+
+  // Sits down from standing (over a standing stance): sinks through every height with its arms a little out,
+  // and plops down onto its seat. It ends with rise -1, sitting.
+  make.sitDown = () => track({
+    rise: [[0, 0], [0.1, 0], [0.7, -1, 'inOut'], [1, -1]],
+    squash: [[0, 0], [0.1, -0.015], [0.5, 0.01], [0.72, -0.06, 'in'], [0.86, 0.015, 'out'], [1, 0]],
+    armL: [[0, 0], [0.15, 0], [0.45, 12], [0.75, 0]],
+    armR: [[0, 0], [0.15, 0], [0.45, 12], [0.75, 0]],
+    headY: [[0, 0], [0.3, 1], [0.74, 3], [1, 0]],
+    earL: [[0, 0], [0.3, 4], [0.76, 11, 'out'], [0.9, -3], [1, 0]],
+    earR: [[0, 0], [0.32, 4], [0.78, 10, 'out'], [0.92, -3], [1, 0]],
+    tail: [[0, 0], [0.3, -3], [0.76, 7, 'out'], [0.9, -2], [1, 0]],
+    hair: [[0, 0], [0.3, -1], [0.76, 2], [0.92, -0.5], [1, 0]],
+  }, { duration: 1 });
+
+  // Dances on the spot: sways from side to side, tapping the free foot out and back in on each beat, with
+  // both arms swinging the way it sways and a bob on every beat. One loop is four beats.
+  make.dance = ({ duration = 2 } = {}) => clip(t => {
+    const a = (TAU * t) / duration, s = Math.sin(a), tap = Math.abs(Math.sin(2 * a)), beat = Math.cos(2 * a) ** 2;
+    return {
+      lean: 5 * s,
+      stepL: s > 0 ? 6 * tap : 0, stepR: s < 0 ? 6 * tap : 0,
+      legL: 14 * Math.max(0, s), legR: 14 * Math.max(0, -s),
+      armL: 70 - 35 * s, armR: 70 + 35 * s,
+      elbowL: 30 + 15 * Math.sin(2 * a), elbowR: 30 - 15 * Math.sin(2 * a),
+      crouch: 3 * beat, squash: -0.015 * beat,
+      tilt: 6 * Math.sin(a - 0.4), headY: 1.2 * Math.cos(4 * a - 1),
+      earL: 4 * Math.cos(4 * a - 1.2), earR: 4 * Math.cos(4 * a - 1.4),
+      hair: -2 * Math.sin(a - 0.8), tail: 8 * Math.sin(a - 1) + 2 * Math.sin(4 * a - 1.5),
+    };
+  }, duration, true);
+
+  // Stretches: rises with its arms thrown up and out and its head back, leans one way and the other, and
+  // settles again.
+  make.stretch = () => track({
+    squash: [[0, 0], [0.3, -0.02], [0.7, 0.05], [1.7, 0.05], [2, -0.02], [2.4, 0]],
+    crouch: [[0, 0], [0.3, 3], [0.7, -3], [1.7, -3], [2, 2], [2.4, 0]],
+    armL: [[0, 0], [0.3, -10], [0.75, 100, 'out'], [1.7, 105], [2.1, 0]],
+    armR: [[0, 0], [0.3, -10], [0.75, 100, 'out'], [1.7, 105], [2.1, 0]],
+    elbowL: [[0, 0], [0.75, 15], [1.7, 10], [2.1, 0]],
+    elbowR: [[0, 0], [0.75, 15], [1.7, 10], [2.1, 0]],
+    lean: [[0, 0], [0.8, 0], [1.1, -5], [1.45, 5], [1.75, 0]],
+    turnY: [[0, 0], [0.7, -0.3], [1.7, -0.3], [2.1, 0]],
+    headY: [[0, 0], [0.7, -1.5], [1.7, -1.5], [2, 1.5], [2.4, 0]],
+    earL: [[0, 0], [0.7, 10], [1.7, 10], [2, -3], [2.4, 0]],
+    earR: [[0, 0], [0.7, 10], [1.7, 10], [2.05, -3], [2.4, 0]],
+    tail: [[0, 0], [0.7, -6], [1.7, -6], [2, 4], [2.4, 0]],
+  }, { duration: 2.4 });
+
+  // Points with one arm (side and spec as for wave) held out straight to the side for `hold` seconds, the
+  // head tipping and the body leaning toward it. Where the friend looks is the scene's to say.
+  make.point = ({ spec, side = freeSide(spec), hold = 1.2 } = {}) => {
+    const out = 0.3, back = 0.4, end = out + hold + back, d = side === 'L' ? -1 : 1;
+    const held = v => [[0, 0], [out, v, 'back'], [out + hold, v], [end, 0]];
+    return track({ [`arm${side}`]: held(80), lean: held(2 * d), tilt: held(3 * d), earL: held(-3), earR: held(-3) }, { duration: end });
+  };
+
   const clips = {};
   for (const k in make) clips[k] = make[k]();
+  // In an expression, a library clip's name is that clip, and called with options (or none) it makes one, as make
+  // does: "wave" is the clip, and "wave({ spec: 'terry' })" is make.wave({ spec: 'terry' }).
+  const callable = {};
+  for (const k in clips) callable[k] = tag(arg => (typeof arg === 'number' ? clips[k](arg) : make[k](arg)), clips[k].duration, clips[k].loop);
 
   // Names that other modules add to what parse() understands (see extend()).
   const vocabulary = {};
@@ -383,7 +583,7 @@
   function parse(expr) {
     if (typeof expr !== 'string') return toClip(expr);
     if (clips[expr]) return clips[expr];
-    const scope = { ...api, ...clips, ...vocabulary };
+    const scope = { ...api, ...callable, ...vocabulary };
     return toClip(Function(...Object.keys(scope), `'use strict'; return (${expr});`)(...Object.values(scope)));
   }
 
@@ -443,14 +643,17 @@
   }
 
   // The fields that change a face without moving anything: besides the eye and mouth shapes (the
-  // strings), the lids and the blush. A prop brought out on cue (show) is not the face.
+  // strings), the lids and the blush. A prop brought out on cue (show) is not the face, and nor are
+  // arms drawn whole in front of everything (over), which only a raised arm needs. A stance is the story, not a
+  // movement, so a friend that a scene stands up stays standing.
   const FACE = ['lid', 'lidTilt', 'flush', 'blush'];
+  const CUES = ['show', 'over'];
 
-  // The face of a partial pose alone, as reduced motion shows it.
+  // The face of a partial pose alone, as reduced motion shows it, with its stance.
   function faceOnly(partial) {
     const out = {};
     for (const key in partial) {
-      if ((typeof partial[key] !== 'number' && key !== 'show') || FACE.includes(key)) out[key] = partial[key];
+      if ((typeof partial[key] !== 'number' && !CUES.includes(key)) || FACE.includes(key)) out[key] = partial[key];
     }
     return out;
   }
@@ -557,7 +760,7 @@
 
   // ------------------------------------------------------------ Travel
 
-  // A friend sits, so it gets about by hopping (FWIENDS.md): each hop is a crouch, a flight and a
+  // A friend seated gets about by hopping (FWIENDS.md): each hop is a crouch, a flight and a
   // landing crouch. length is a hop's usual reach in head units, height its usual height, crouch the
   // share of a hop spent crouching at each end, and lean the tilt in flight toward the way it goes.
   const HOP = Object.freeze({ length: 80, seconds: 0.34, height: 26, crouch: 0.15, squash: 0.08, lean: 4 });
@@ -574,6 +777,32 @@
     return { along: (i + ease.smooth(air)) / hops, lift: Math.sin(Math.PI * air), squash, lean: HOP.lean * Math.sin(Math.PI * air) };
   }
 
+  // A friend standing walks instead (WALK). Facing us, it goes sideways: the foot on the side it goes to
+  // steps out and the other one closes up to it, so the steps come in pairs (an odd number of steps gets one
+  // more). How far through `steps` steps a friend is at u (0 to 1), going `distance` head units (negative: to
+  // the viewer's left): along, the share of the distance covered, which eases in over the first step and out
+  // over the last; and pose, the partial pose of the walk there (a standing one: the feet, the arms, the lean).
+  // Each leg (at rest, `leg` out and down from its hip; see WALK) swings so that its foot stays where it was
+  // planted while the body moves on over it; the body drops by as much as that swing lifts a planted foot (y).
+  function walking(u, steps, { distance = 0, leg = WALK.leg } = {}) {
+    const n = 2 * Math.max(1, Math.ceil(steps / 2)), p = clamp(u, 0, 1) * n, k = Math.min(n - 1, Math.floor(p)), v = p - k;
+    const dir = distance < 0 ? -1 : 1, stride = (2 * Math.abs(distance)) / n;  // How far a foot moves in a step
+    const start = w => w * w * (2 - w);  // Eases from rest into the walk's pace over a step
+    const progress = k === 0 ? start(v) : k === n - 1 ? n - start(1 - v) : k + v;  // In steps
+    const body = (progress * stride) / 2, from = Math.floor(k / 2) * stride;
+    const lead = dir > 0 ? 'R' : 'L', trail = dir > 0 ? 'L' : 'R', [moving, planted] = k % 2 ? [trail, lead] : [lead, trail];
+    const offset = {  // How far each foot is ahead of where it rests under the body, in head units.
+      [moving]: from + stride * ease.smooth(v) - body,
+      [planted]: from + (k % 2) * stride - body,
+    };
+    const [out, down] = leg, reach = Math.hypot(out, down), slant = Math.atan2(out, down);
+    const swing = side => Math.asin(clamp((out + (side === 'R' ? 1 : -1) * dir * offset[side]) / reach, -0.95, 0.95)) - slant;
+    const lift = a => down * (1 - Math.cos(a)) + out * Math.sin(a);
+    const pose = stepping(p, WALK, { first: dir, follow: ease.smooth(clamp(Math.min(p, n - p), 0, 1)) });
+    Object.assign(pose, { legL: swing('L') / DEG, legR: swing('R') / DEG, y: lift(swing(planted)) });
+    return { along: progress / n, pose };
+  }
+
   // Maps a pointer position (client px) to {lookX, lookY, turnX, turnY} for a mounted
   // rig: the direction from between its eyes to the pointer, as if the pointer hovered
   // `depth` head units in front of the screen. The `turn` option is the share of that
@@ -587,7 +816,7 @@
 
   const api = {
     ease, clip, still, rest, track, layer, seq, loop, repeat, speed, delay, remap, pingpong, weight,
-    combine, mix, sample, frames, pulses, blinks, parse, extend, play, lookAt, make, clips, HOP, hopping,
+    combine, mix, sample, frames, pulses, blinks, parse, extend, play, lookAt, make, clips, HOP, hopping, WALK, walking,
     stack, faceOnly, blinkShape, flickShape, swishShape,
   };
   PF.anim = api;

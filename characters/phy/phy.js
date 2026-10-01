@@ -48,12 +48,12 @@ PhyFriends.define('phy', {
   blush: { x: 48.1, y: 21.3, rx: 9.6, ry: 5.5, tilt: 20 },
   // There is no mouth by default; when open (as in the icon), it shows one fang.
   mouth: { y: 18.6, size: 3.8, fang: true },
-  // The body is seated and broad. It sits under the head, so it takes the house shade. Shoulder tufts
-  // sit under the cheeks, and hip tufts below the ruff.
+  // The body is broad, and an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits
+  // under the head, so it takes the house shade. Shoulder tufts sit under the cheeks, and hip tufts below the ruff.
   body: {
-    cx: 0, cy: 80, rx: 74, ry: 51, color: 'furShade',
+    cx: 0, cy: 80, rx: 74, ry: 51, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 18, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is an Oreo tail: a large bushy crescent that rises from behind the right hip to above
   // the eyes, with its point hooked over toward the head. It is cream and marbled, on a dark cookie base.
@@ -61,6 +61,14 @@ PhyFriends.define('phy', {
     base: [68, 85], angle: 42, length: 160, width: 108, bend: -110, taper: 0.6, root: 0.2, color: 'tailTip',
     // The curled end sharpens into a point: a tuft that leans inward and is concave underneath.
     fluff: [{ from: 240, to: 300, n: 1, len: 20, lean: -17, jit: 0, depth: 0, b1: 30, b2: -20 }],
+  },
+  // The limbs, on the house template. Seated, the white forepaws rest on the ground under the ruff (paw) and the
+  // hind feet are tucked under the body. Standing, as in examples/walking.png, the dark arms end in the white
+  // forepaws, and the dark legs in white toes, which meet the dark fur in a jagged edge.
+  stand: {
+    seat: { paw: { cx: 22, cy: 121, rx: 14, ry: 10 } },
+    arms: { paw: { color: 'face' } },
+    legs: { bands: [{ from: 0.75, to: 1, color: 'face', teeth: 3, depth: 4 }], foot: { color: 'face' } },
   },
   extras: [
     // Cheek fluff under the head: broad tufts pointing down and outward around the white cheeks. An
@@ -84,21 +92,19 @@ PhyFriends.define('phy', {
     { on: 'hair', clip: true, fill: 'furShade', nodes: [[-48, -72, 1], [-40, -115, 1], [25, -110, 1], [17.5, -73.8, 1, -4], [-23.1, -84.7, 1, -52], [-28.4, -60, 1]] },
     { on: 'hair', kind: 'ellipse', clip: true, fill: 'marble', cx: -49.7, cy: -94.3, rx: 36.1, ry: 8.3, rot: 47.8 },
     { on: 'hair', fill: 'marble', nodes: [[-37, -63, 1, 40], [-53, -42, 1, 0], [-39, -40, 1, -40]] },
-    // The ruff: cream clumps rising to the white chin, modeled on a tuxedo cat's bib, on a marble
-    // layer that shows at its sides.
-    { on: 'body', fill: 'marble', cx: 0, cy: 72, rx: 66, ry: 38,
+    // The ruff: cream clumps rising to the white chin, modeled on a tuxedo cat's bib, on a marble layer that shows at
+    // its sides. Both narrow toward the top, as the body does (onigiri without its square base). The ruff lies over
+    // the tops of the arms, as a scarf does (scarf), as in front.png and walking.png.
+    { on: 'scarf', fill: 'marble', cx: 0, cy: 68, rx: 54, ry: 38, onigiri: { taper: 0.6, square: 0 },
       fluff: [{ from: -25, to: 29, n: 1, len: 9, depth: 0.04, b1: -40, b2: -40, jit: 0, sym: true },
         { from: 30, to: 150, n: 4, len: 9, depth: 0.04, b1: -40, b2: -40, jit: 0 }] },
-    { on: 'body', fill: 'chest', cx: 0, cy: 72, rx: 60, ry: 34,
+    { on: 'scarf', fill: 'chest', cx: 0, cy: 68, rx: 49, ry: 34, onigiri: { taper: 0.6, square: 0 },
       fluff: [{ from: -60, to: 48, n: 3, len: 10, depth: 0.04, b1: -40, b2: -40, jit: 0, sym: true },
         { from: 49, to: 131, n: 3, len: 10, depth: 0.04, b1: -40, b2: -40, jit: 0 },
         { from: 241, to: 299, n: 3, len: 8, depth: 0.04, b1: -40, b2: -40, jit: 0 }] },
-    // White forepaws on the ground, under the ruff.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -22, cy: 121, rx: 14, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 22, cy: 121, rx: 14, ry: 10 },
-    // Cookie crumbs, each [x, y, r, sides, rot, aspect]; the last two sit on the forepaws.
-    { on: 'body', fill: 'crumb', polys: [[-40, 70, 11, 6, 10], [-39, 100, 8, 4, 60, 0.7], [-13, 94, 6, 3, 20], [26, 68, 6.5],
-      [-1, 68, 3.5, 4, 80, 0.7], [37, 50, 4.5, 4, 30, 0.7], [57, 48, 5], [-24, 121, 4, 3, 30], [17, 118, 3.5, 4, 70, 0.7]] },
+    // Cookie crumbs on the ruff, each [x, y, r, sides, rot, aspect], drawn in as the ruff narrows.
+    { on: 'scarf', fill: 'crumb', polys: [[-22, 66, 11, 6, 10], [-29, 96, 8, 4, 60, 0.7], [-9, 90, 6, 3, 20], [14, 64, 6.5],
+      [-1, 64, 3.5, 4, 80, 0.7], [16, 46, 4.5, 4, 30, 0.7]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -160,
     // +x away from the body); the library bends them onto the crescent.
     // The very tip is white.
@@ -114,6 +120,10 @@ PhyFriends.define('phy', {
     // Crumbs, and a cream chip on the dark base.
     { on: 'tail', clip: true, fill: 'crumb', polys: [[45, -100, 11, 6, 15], [-10, -95, 5, 5, 10], [48, -78, 4, 4, 30, 0.7], [-6, -142, 5, 3, 0]] },
     { on: 'tail', clip: true, fill: 'tailTip', polys: [[25, -70, 5, 3, 10]] },
+    // Paw extras are in the seated forepaw's space (its center on the origin, +x toward the center line): a
+    // cookie crumb on each white forepaw.
+    { on: 'pawL', fill: 'crumb', polys: [[-2, 0, 4, 3, 30]] },
+    { on: 'pawR', fill: 'crumb', polys: [[5, -3, 3.5, 4, 110, 0.7]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

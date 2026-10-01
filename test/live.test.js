@@ -82,6 +82,25 @@
     });
   });
 
+  test('a friend added standing stays standing through a hi, and under reduced motion too', () => {
+    for (const options of [moving, still]) {
+      const box = document.createElement('div');
+      Object.assign(box.style, { position: 'relative', width: '160px', height: '160px' });
+      document.body.appendChild(box);
+      try {
+        const stage = L.stage({ announce: () => {}, ...options }), howdi = stage.add(box, 'howdi', { label: 'Howdi', stance: 'stand' });
+        assertEqual(howdi.rig.pose.stance, 'stand', 'standing from the start');
+        stage.draw(0);
+        howdi.hi();
+        stage.draw(0.3);
+        assertEqual(howdi.rig.pose.stance, 'stand', 'through a hi');
+        assert(PhyFriends.riseOf('howdi', howdi.rig.pose) > PhyFriends.standLift('howdi') / 2, 'it is drawn standing');
+      } finally {
+        box.remove();
+      }
+    }
+  });
+
   test('a friend that shows no feelings hops and smiles on a hi, never goes shy, and its third hi plays its routine', () => {
     withStage(['claude'], moving, (stage, [claude], said) => {
       for (const t of [0, 1.3]) {
@@ -304,5 +323,27 @@
   test('a mirrored clip looks, turns and tilts the other way, and swaps its ears', () => {
     const pose = L.mirrored(PF.anim.still({ lookX: 0.5, turnX: 0.2, tilt: 5, earL: 10, earR: -3, flush: 0.4 }))(0);
     assertEqual([pose.lookX, pose.turnX, pose.tilt, pose.earL, pose.earR, pose.flush], [-0.5, -0.2, -5, -3, 10, 0.4]);
+  });
+
+  test('a friend added standing shows its marks higher by its lift', () => {
+    const boxes = [0, 1].map(() => {
+      const box = document.createElement('div');
+      Object.assign(box.style, { position: 'relative', width: '160px', height: '160px', containerType: 'inline-size' });
+      document.body.appendChild(box);
+      return box;
+    });
+    try {
+      const stage = L.stage({ announce: () => {}, reducedMotion: { matches: false } });
+      const [sitting, standing] = ['sit', 'stand'].map((stance, i) => stage.add(boxes[i], 'howdi', { label: 'Howdi', stance, index: 0 }));
+      stage.draw(0);
+      sitting.feel('surprised');
+      standing.feel('surprised');
+      stage.draw(0.2);
+      const [low, high] = boxes.map(box => box.querySelector('.pf-live-mark').getBoundingClientRect().top - box.getBoundingClientRect().top);
+      const unit = boxes[0].getBoundingClientRect().width / standing.view.w;
+      assert(Math.abs(low - high - PF.standLift('howdi') * unit) < 1, `the marks are ${((low - high) / unit).toFixed(1)} units apart`);
+    } finally {
+      boxes.forEach(box => box.remove());
+    }
   });
 })();

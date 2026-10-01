@@ -19,6 +19,11 @@
  * holds itself up and an unhappy one slumps (posture()). Feelings that sit near each other therefore
  * look alike, and a new feeling needs only its place, what its face adds, and its movements.
  *
+ * A friend standing (spec.stand) has arms and legs as well: its posture carries its arms (up and out
+ * when pleased or alert, in and low when unhappy, limp when drowsy), and a feeling may add a gesture
+ * (stand), such as paws on the hips or a paw under the chin. A friend takes less of these fields the lower
+ * it is, and seated it ignores them, so it shows every feeling as before.
+ *
  * A feeling may have a mark, one of the marks in src/cast.js ('!' for surprise, 'z' for sleep),
  * which a scene or a live page shows above the head (markAt() is how it looks over time), and a few
  * words for a screen reader (describe()).
@@ -49,6 +54,7 @@
   const _ = undefined; // Leaves a string field to lower layers, as in src/anim.js.
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const wave = (t, period, phase = 0) => Math.sin((TAU * t) / period + phase);
+  const tapShape = u => Math.abs(Math.sin(3 * Math.PI * u));  // A foot tapped three times, from 0 to 1.
   const HOLD_SECONDS = 8; // A held feeling loops in 8 s, or in a length that divides it, as idle does.
   const HOLD_EASE = 0.5;  // How long a held movement takes to take over from the reaction, in seconds.
 
@@ -56,13 +62,20 @@
 
   // The body's share of a feeling at (valence, arousal), as offsets on the neutral pose. Ears: positive
   // turns them outward (drooping), negative stands them up. Tail: positive swings the tip out and down,
-  // negative raises it or tucks it in behind. turnY: positive tips the head down.
+  // negative raises it or tucks it in behind. turnY: positive tips the head down. Arms (a standing
+  // friend's): positive raises them out to the side; elbows: positive opens the paws out, negative
+  // curls them in.
   function posture(valence, arousal) {
     const good = Math.max(0, valence), bad = Math.max(0, -valence);
     const alert = Math.max(0, arousal), drowsy = Math.max(0, -arousal);
     const ears = -14 * alert * (1 - bad)  // Pricked up with interest,
       + 12 * drowsy + 14 * bad            // drooping when drowsy or unhappy,
       + 10 * bad * alert;                 // and laid back in fright.
+    const arms = 12 * good + 12 * alert * (1 - bad)  // Up and out when pleased or alert,
+      - 10 * bad - 6 * drowsy;                       // in and low when unhappy or drowsy;
+    const elbows = 8 * good + 8 * bad                // the paws open,
+      + 18 * drowsy                                  // hang limp when drowsy,
+      - 12 * bad * alert;                            // and are clutched in fright.
     return {
       earL: ears, earR: ears,
       widen: 0.25 * alert - 0.08 * drowsy,
@@ -73,25 +86,32 @@
       tail: -5 * good + 12 * bad * (1 - alert) - 12 * bad * alert,  // Raised when pleased, limp when low, tucked in fright.
       flush: 0.3 * good,
       blush: 1 - 0.25 * bad,  // Paler when unhappy (blush multiplies).
+      armL: arms, armR: arms, elbowL: elbows, elbowR: elbows,
+      crouch: 4 * bad * alert + 2 * drowsy,  // Cowers in fright, and the knees go slack when drowsy.
     };
   }
 
   // ------------------------------------------------------------ Feelings
 
-  // Each feeling: its place (valence, arousal); what its face adds to the posture (face); how long its
-  // reaction takes (react.seconds) and how long of that the face takes to come on (react.rise); the
-  // reaction's own movement, which starts and ends at rest (react.motion, a clip); the movement while
-  // it is held (hold, a looping clip); its mark ({ text, every } for a mark that
-  // repeats while the feeling lasts), if any; and what a screen reader hears (says).
+  // Each feeling: its place (valence, arousal); what its face adds to the posture (face); what a standing
+  // friend adds to that (stand), if anything; how long its reaction takes (react.seconds) and how long of
+  // that the face takes to come on (react.rise); the reaction's own movement, which starts and ends at
+  // rest (react.motion, a clip); the movement while it is held (hold, a looping clip); its mark
+  // ({ text, every } for a mark that repeats while the feeling lasts), if any; and what a screen reader
+  // hears (says). The arms are drawn in front of the scarf and the head, but for the shoulder, which tucks under
+  // them; a gesture may draw an arm whole in front, shoulder too (over).
   const FEELINGS = {
     happy: {
       valence: 0.8, arousal: 0.5,
       face: { eyes: 'happy', mouth: 'w' },
-      // A hop for joy: two bounces, eased in and out so that it starts and ends at rest.
+      // A hop for joy: two bounces, eased in and out so that it starts and ends at rest. Standing, it
+      // throws its arms up as it goes (src/anim.js, bounce).
       react: { seconds: 1.1, rise: 0.08, motion: () => A.weight(A.make.bounce(), t => Math.min(1, t / 0.08, (1.1 - t) / 0.2)) },
+      // Standing, it sways from foot to foot with its paws swinging.
       hold: () => A.clip(t => ({
         tail: 7 * wave(t, 2 / 3), tilt: 2.5 * wave(t, 4), hair: -1.2 * wave(t, 4, -0.8),
         earL: 2 * wave(t, 2, 0.4), earR: 2 * wave(t, 2, 0.9),
+        lean: 2 * wave(t, 2), armL: 6 * wave(t, 2, 0.5), armR: -6 * wave(t, 2, 0.5),
       }), 4, true),
       says: 'smiles',
     },
@@ -102,8 +122,10 @@
         seconds: 1, rise: 0.6,
         motion: () => A.track({ squash: [[0, 0], [0.35, -0.035], [1, 0]], headY: [[0, 0], [0.35, 1.5], [1, 0]] }),
       },
+      // Standing, it sways gently.
       hold: () => A.clip(t => ({
         tilt: 2 * wave(t, 8), tail: 5 * wave(t, 4, 1), squash: 0.008 * wave(t, 4, 2), hair: 1 * wave(t, 8, -1),
+        lean: 1.5 * wave(t, 8, 0.6),
       }), 8, true),
       mark: { text: '♪' },
       says: 'looks content',
@@ -111,24 +133,34 @@
     shy: {
       valence: 0.3, arousal: 0.2,
       face: { flush: 0.7, lookX: 0.55, lookY: 0.5, turnX: 0.3, turnY: 0.25, tilt: -5, earL: 12, earR: 12, tail: -6 },
+      // Standing, it holds its paws together and turns a foot in.
+      stand: { armL: -55, elbowL: -30, armR: -55, elbowR: -30, legR: -10, stepR: 3, lean: -2 },
       react: {
         seconds: 0.7, rise: 0.25,
-        motion: () => A.track({ squash: [[0, 0], [0.15, -0.06, 'out'], [0.7, 0]], headY: [[0, 0], [0.15, 3, 'out'], [0.7, 0]] }),
+        motion: () => A.track({
+          squash: [[0, 0], [0.15, -0.06, 'out'], [0.7, 0]], headY: [[0, 0], [0.15, 3, 'out'], [0.7, 0]],
+          crouch: [[0, 0], [0.15, 3, 'out'], [0.7, 0]],
+        }),
       },
-      // Steals a glance at whoever it is shy of, then looks away again.
+      // Steals a glance at whoever it is shy of, then looks away again; standing, it scuffs the turned-in foot.
       hold: () => A.track({
         lookX: [[0, 0], [1.6, 0], [1.75, -0.45, 'out'], [2.3, -0.45], [2.5, 0, 'out'], [4, 0]],
         turnX: [[0, 0], [1.6, 0], [1.9, -0.15], [2.3, -0.15], [2.7, 0], [4, 0]],
         tail: [[0, 0], [0.8, 0], [1.1, 4], [1.4, 0], [3.1, 0], [3.4, 3], [3.7, 0], [4, 0]],
+        legR: [[0, 0], [2.7, 0], [3, 5], [3.3, -2], [3.6, 0], [4, 0]],
       }, { duration: 4, loop: true }),
       says: 'goes shy',
     },
     proud: {
       valence: 0.6, arousal: 0.2,
       face: { eyes: 'happy', mouth: 'smile', turnY: -0.35, lookY: -0.2, squash: 0.02, tail: -6 },
+      stand: { armL: 20, elbowL: -95, armR: 20, elbowR: -95 },  // Standing, its paws on its hips.
       react: {
         seconds: 0.8, rise: 0.3,
-        motion: () => A.track({ squash: [[0, 0], [0.25, 0.04, 'out'], [0.8, 0]], y: [[0, 0], [0.25, -1.5, 'out'], [0.8, 0]] }),
+        motion: () => A.track({
+          squash: [[0, 0], [0.25, 0.04, 'out'], [0.8, 0]], y: [[0, 0], [0.25, -1.5, 'out'], [0.8, 0]],
+          crouch: [[0, 0], [0.25, -2, 'out'], [0.8, 0]],
+        }),
       },
       hold: () => A.clip(t => ({ tail: 4 * wave(t, 4), tilt: 1.5 * wave(t, 8) }), 8, true),
       says: 'looks proud',
@@ -136,9 +168,12 @@
     surprised: {
       valence: 0, arousal: 0.9,
       face: { widen: 0.1, lookY: -0.15, turnY: -0.2 },
+      stand: { armL: 65, elbowL: 15, armR: 65, elbowR: 15 },  // Standing, its arms flung out.
       react: {
         seconds: 1.9, rise: 0.1,
         motion: () => A.track({
+          armL: [[0, 0], [0.1, 25, 'out'], [0.4, 0]], armR: [[0, 0], [0.1, 25, 'out'], [0.4, 0]],
+          stepL: [[0, 0], [0.1, 3, 'out'], [0.35, 0, 'in']], stepR: [[0, 0], [0.1, 3, 'out'], [0.35, 0, 'in']],
           squash: [[0, 0], [0.1, 0.05, 'out'], [0.3, -0.03], [0.5, 0.01], [0.7, 0]],
           y: [[0, 0], [0.1, -3, 'out'], [0.35, 0, 'in']],
           headY: [[0, 0], [0.1, -2, 'out'], [0.3, 1], [0.5, 0]],
@@ -158,16 +193,20 @@
     scared: {
       valence: -0.7, arousal: 0.8,
       face: { widen: 0.1, mouth: 'frown', squash: -0.03, headY: 2, turnY: 0.1 },
+      // Standing, it holds its paws up by its face, in front of the head, and its knees in.
+      stand: { armL: 150, elbowL: -30, armR: 150, elbowR: -30, over: 'armL armR', legL: -5, legR: -5 },
       react: {
         seconds: 0.6, rise: 0.12,
         motion: () => A.track({
           squash: [[0, 0], [0.1, -0.07, 'out'], [0.6, 0]], x: [[0, 0], [0.1, -3, 'out'], [0.6, 0]],
-          tilt: [[0, 0], [0.1, -4, 'out'], [0.6, 0]],
+          tilt: [[0, 0], [0.1, -4, 'out'], [0.6, 0]], crouch: [[0, 0], [0.1, 5, 'out'], [0.6, 0]],
         }),
       },
-      // Trembles, and glances from side to side.
+      // Trembles, paws and all, and glances from side to side.
       hold: () => A.layer(
-        A.clip(t => ({ headX: 0.5 * wave(t, 0.1), tail: 1.5 * wave(t, 0.1, 1) }), 4, true),
+        A.clip(t => ({
+          headX: 0.5 * wave(t, 0.1), tail: 1.5 * wave(t, 0.1, 1), elbowL: 2 * wave(t, 0.1, 2), elbowR: 2 * wave(t, 0.1, 2.5),
+        }), 4, true),
         A.track({ lookX: [[0, 0], [0.5, 0], [0.6, -0.4, 'out'], [1.4, -0.4], [1.5, 0.4, 'out'], [2.4, 0.4], [2.5, 0, 'out'], [4, 0]] },
           { duration: 4, loop: true })),
       mark: { text: '!?' },
@@ -176,6 +215,7 @@
     curious: {
       valence: 0.2, arousal: 0.4,
       face: { tilt: 9, headX: 2, turnX: 0.2, lookX: 0.2, lookY: -0.3, earL: 8, earR: -8 },
+      stand: { armR: -60, elbowR: -150, over: 'armR' },  // Standing, a paw raised to its chest, under its chin.
       react: {
         seconds: 1.2, rise: 0.5,
         motion: () => A.track({
@@ -212,6 +252,10 @@
           earL: [[0, 0], [0.45, 12], [1.2, 12], [1.8, 0]],
           earR: [[0, 0], [0.45, 12], [1.2, 12], [1.8, 0]],
           tail: [[0, 0], [0.5, 6], [1.3, 6], [2, 0]],
+          // Standing, it stretches its arms up and out as it yawns.
+          armL: [[0, 0], [0.45, 95], [1.2, 100], [1.8, 0]], armR: [[0, 0], [0.45, 95], [1.2, 100], [1.8, 0]],
+          elbowL: [[0, 0], [0.45, 10], [1.8, 0]], elbowR: [[0, 0], [0.45, 10], [1.8, 0]],
+          crouch: [[0, 0], [0.45, -3], [1.2, -3], [1.8, 0]],
         }),
       },
       // Nods off and starts awake again, once in 8 s.
@@ -227,6 +271,10 @@
         earR: [[0, 0], [5.8, 8], [6.1, -14, 'out'], [6.7, -7], [8, 0]],
         hair: [[0, 0], [5.8, 2], [6.05, -3, 'out'], [6.5, 1], [7.2, 0]],
         tail: [[0, 0], [5.8, -4], [6.05, 10, 'out'], [6.6, 4], [8, 0]],  // Curls in, and flicks on waking.
+        // Standing, its knees sag and its arms hang, and it starts upright with its arms out.
+        crouch: [[0, 0], [3.2, 1], [5.8, 3], [6.05, -1, 'out'], [6.6, 0], [8, 0]],
+        armL: [[0, 0], [5.8, -4], [6.05, 12, 'out'], [6.8, 0], [8, 0]],
+        armR: [[0, 0], [5.8, -4], [6.1, 11, 'out'], [6.9, 0], [8, 0]],
       }, { duration: HOLD_SECONDS, loop: true }),
       says: 'grows sleepy',
     },
@@ -248,6 +296,7 @@
         return {
           squash: 0.022 * wave(t, 4), headY: 1.2 * wave(t, 4, -0.6), tilt: 1 * wave(t, 4, -0.3),
           earL: 2 * wave(t, 4, -0.8) + 10 * twitch, earR: 2 * wave(t, 4, -1),
+          lean: 1.5 * wave(t, 4, -0.4),  // Standing, it sways a little as it sleeps.
         };
       }, 4, true),
       mark: { text: 'z', every: 2 },
@@ -256,13 +305,16 @@
     sad: {
       valence: -0.7, arousal: -0.4,
       face: { lid: 0.15, lidTilt: -16, mouth: 'frown', lookY: 0.45, lookX: -0.1 },
+      stand: { armL: -4, armR: -4, legL: -4, legR: -4 },  // Standing, its arms hang and its feet come together.
       react: {
         seconds: 1.4, rise: 1.2,
         motion: () => A.track({ squash: [[0, 0], [0.6, -0.02], [1.4, 0]] }),
       },
-      // Sighs once in 8 s: breathes in, then sinks.
+      // Sighs once in 8 s: breathes in, then sinks, its arms rising and falling with it when it stands.
       hold: () => A.track({
         squash: [[0, 0], [3, 0], [3.6, 0.025], [4.6, -0.02], [5.6, 0], [8, 0]],
+        armL: [[0, 0], [3, 0], [3.6, 4], [4.6, -3], [5.6, 0], [8, 0]],
+        armR: [[0, 0], [3, 0], [3.6, 4], [4.6, -3], [5.6, 0], [8, 0]],
         headY: [[0, 0], [3, 0], [3.6, -1], [4.6, 1.5], [5.6, 0], [8, 0]],
         earL: [[0, 0], [3.6, -3], [4.8, 3], [6, 0], [8, 0]],
         earR: [[0, 0], [3.6, -3], [4.8, 3], [6, 0], [8, 0]],
@@ -274,17 +326,20 @@
     cross: {
       valence: -0.5, arousal: 0.4,
       face: { lid: 0.3, lidTilt: 18, mouth: 'frown', turnX: -0.15, lookX: 0.25, turnY: 0.1 },
+      stand: { armL: -15, elbowL: -115, armR: -10, elbowR: -123 },  // Standing, its arms folded.
       react: {
         seconds: 0.7, rise: 0.2,
         motion: () => A.track({
           squash: [[0, 0], [0.12, 0.04, 'out'], [0.3, -0.03], [0.7, 0]],
           earL: [[0, 0], [0.12, 8, 'out'], [0.7, 0]], earR: [[0, 0], [0.12, 8, 'out'], [0.7, 0]],
+          stepR: [[0, 0], [0.08, 6, 'out'], [0.18, 0, 'in']],  // Standing, it stamps.
         }),
       },
-      // The tail lashes twice in 4 s, and an ear twitches.
+      // The tail lashes twice in 4 s, and an ear twitches; standing, it taps a foot.
       hold: () => A.clip(t => ({
         tail: 9 * A.swishShape(clamp((t - 0.8) / 0.6, 0, 1)) + 9 * A.swishShape(clamp((t - 2.6) / 0.6, 0, 1)),
         earR: 6 * A.flickShape(clamp((t - 1.9) / 0.4, 0, 1)),
+        stepR: 4 * tapShape(clamp((t - 0.2) / 0.9, 0, 1)) + 4 * tapShape(clamp((t - 2.2) / 0.9, 0, 1)),
       }), 4, true),
       says: 'looks cross',
     },
@@ -311,11 +366,11 @@
   // a reaction alone).
   const showsFeelings = spec => spec === undefined || fits(spec);
 
-  // The feeling held still: its posture and its face.
+  // The feeling held still: its posture, its face and, for a friend standing, its gesture.
   function face(name, { strength = 1, spec } = {}) {
     const f = feeling(name);
     if (!showsFeelings(spec)) return {};
-    const still = A.combine(posture(f.valence, f.arousal), f.face);
+    const still = A.combine(A.combine(posture(f.valence, f.arousal), f.face), f.stand || {});
     return strength === 1 ? still : scaled(still, strength);
   }
 

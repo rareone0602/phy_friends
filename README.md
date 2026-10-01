@@ -43,9 +43,9 @@ out/           generated output (git-ignored)
 | path | what |
 |---|---|
 | `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
-| `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig |
-| `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod), composition, stacks of timed layers, a browser player, and the hop by which a friend gets about |
-| `src/emotion.js` | feelings: happy, content, shy, proud, surprised, scared, curious, sleepy, asleep, sad and cross, each as a face, a reaction and a held loop, for every friend drawn on the house template |
+| `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
+| `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
+| `src/emotion.js` | feelings: happy, content, shy, proud, surprised, scared, curious, sleepy, asleep, sad and cross, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture |
 | `src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
 | `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
 | `src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
@@ -60,8 +60,8 @@ out/           generated output (git-ignored)
 | `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
-| `tools/animate.html` | a page for trying clips and feelings on every friend, live |
-| `tools/feelings.html` | a review sheet of every friend in every feeling, still or playing |
+| `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
+| `tools/feelings.html` | a review sheet of every friend in every feeling, still or playing, seated or standing (`?stand`) |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
 | `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
@@ -115,7 +115,83 @@ camera: `{w, h, x, y, scale, rotate}`) maps head space to pixels. `portrait`
 (512², whole character) is the default, and a spec can add its own views, e.g.
 Howdi's `ref`, which matches the reference crop. A view may also carry a
 `pose`, the one its reference was drawn in (Howdi's `ref` has the ears relaxed
-outwards); a render's own pose overrides it field by field.
+outwards); a render's own pose overrides it field by field. The view `stand`,
+built in unless a spec has its own, is the portrait of the friend standing,
+drawn a little smaller so that its ears stay in the square.
+
+## Standing
+
+A friend sits unless its pose says `stance: 'stand'`. Standing, it keeps its
+seated body, with every marking and garment on it, and stands that body on two
+short legs, with two short arms hanging from its sides. The limbs are a stuffed
+toy's: soft, straight hoses with round ends, bent along an arc when a pose bends
+them, so that they never show a joint. An arm keeps its length; a leg squashes
+or stretches a little, as stuffing does. Unless a spec places them, the limbs
+are fitted to its body (`PhyFriends.STAND_FIT`): the legs show 22 units below
+the body's bottom, from hips tucked under it, and each arm hangs from high on
+the body's side, just inside it, and well out from the side below it, so that
+its paw shows past the body (phy's pick until the final numbers arrive). The
+feet touch the figure's own ground (`stand.ground`, the body's bottom plus 22,
+about 153 for most friends), and the rig lifts the friend by the difference
+(`PhyFriends.standLift(spec)`), so that its feet stand where its seated paws
+did: the floor stays put. Any part a spec leaves out comes from
+`PhyFriends.STAND_DEFAULT`, and a spec may tune the fit for itself
+(`stand.fit`, any of `STAND_FIT`'s numbers), so most give only their seated
+paws and feet (`stand.seat`) and their limbs' colours and bands.
+`PhyFriends.standFor(spec)` returns a spec's figure with all of this filled in.
+
+A friend is one figure, which sits and stands on the same limbs. Sitting is
+the bottom of its crouch: its hips drop by the lift and its limbs fold.
+Standing is the same figure with its limbs unfolded, and every height between
+is a pose: the pose's `rise` is added to its stance (0 for `sit`, 1 for
+`stand`) and the sum held between 0 and 1, so an animation eases `rise` to
+stand a friend up or sit it down, and can catch it halfway. Nothing appears or
+vanishes on the way, and `PhyFriends.riseOf(spec, pose)` says how far a pose
+has raised its head.
+
+The seat (`stand.seat`) is the friend's own seated drawing: `seat.paw` and
+`seat.foot` are the forepaw and the hind foot it sits with, the left ones, as
+ellipses in head space (`{ cx, cy, rx, ry, rot }`, with `cx` measured outwards
+from the centre line), and `seat.right` holds overrides for the right ones.
+Seated, each paw and foot is exactly that ellipse, with the arm's hose shrunk
+inside it and the leg's hidden behind the body; as the friend rises, the
+ellipse moves, turns and stretches into the standing paw or foot, and the limb
+unfolds out of it. A foot that the seated drawing does not show is left out of
+`seat`, and tucks under the body. Extras on `paws` and `feet` (or `pawL`,
+`footR`…) are drawn in the seated paw's or foot's own space, with its centre on
+the origin and +x towards the centre line, so they move and scale with it; one
+marked `sole: true`, such as a pad on a sole that faces us only while the
+friend sits, flattens towards the foot's lower edge as it rises, to nothing
+standing. Seated feet lie in front of the body, with any band that reaches
+them, and the leg hoses behind it. Without `seat.paw` the limbs fold instead
+towards `STAND_FIT`'s places (the feet beside the base, the paws reaching for
+the ground in front), and `seat.arms` and `seat.legs` override the folded
+limbs' numbers. So a seated drawing's paws and feet on the ground belong in
+`seat`, not in the body's extras, and their markings in extras on `paws` and
+`feet`. A body drawn as an onigiri (`body.onigiri`, see the shapes below),
+narrow under the chin and broad and flat at the base, reads as a seated friend
+does and stands just as well.
+
+An arm is posed by its angles; a leg reaches from its hip to its foot, which
+stays planted while the hips drop (`crouch`), lean (`lean`) or the foot steps
+up (`stepL`). A plush leg (the default, `knees: false`) squashes to take up the
+slack, where one with knees (`knees: true`) bows out; a leg that cannot reach
+stretches a little before its foot leaves the ground.
+
+From the back, a friend is drawn as its body with its clothes, its scarf, its
+head, whose chin lies over the scarf and the collar, and then its arms, in
+front of all of them, so that a paw raised to the face or held at the chest
+shows. A ruff or bib of fur round the neck, or a scarf, goes in the extras on
+`scarf`; other clothes, a hood lying round the neck included, stay on the body,
+under the arms, and a sleeve takes its cloth's house shade, so that it shows
+against the garment's front. Only the shoulder end of each arm
+(`STAND_FIT.tuck`, 0.6 of its length) tucks under the scarf and the head, so
+the arms come out from under the fur; the paws never do, as they never do while
+the friend sits. The pose's `over` draws an arm whole in front of everything,
+shoulder too. Claude stands already, on the glyphs' four legs, so its spec sets
+`stand: false` and it keeps its shape in either stance, as does any spec
+without a body, or with one that is not an ellipse, on which the limbs could not
+be fitted.
 
 ## Spec
 
@@ -129,10 +205,19 @@ PhyFriends.define('name', {
   eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { color, shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own color
   blush: { x, y, rx, ry, tilt },                                      // tilt > 0 raises the outer ends
   mouth: { x, y, size, shape, fang, tongue },                         // shape: the default mouth
-  body:  { ...fluffy ellipse... },
+  body:  { ...fluffy ellipse..., onigiri },                            // onigiri: a rice ball rather than an ellipse (0..1, or { taper, square })
   tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
-  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // Markings and the shade layer; on: 'ears' means both ears
+  stand: {                                                             // The standing figure: the seated body on two legs (false: never stands); any part left out takes the default, fitted to the body
+    seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, into which the limbs fold (left out: the fitted fold); arms and legs override the folded limbs' numbers
+    fit,                                                               // Any of STAND_FIT's numbers, for this friend
+    ground, hips,                                                      // Where the feet touch, and the pivot of a lean
+    arms:  { shoulder, angle, bend, length, width, taper, color, paw: { cx, cy, rx, ry, color }, bands: [{ from, to, color, grow, teeth, depth }], right: {...overrides} },
+    legs:  { hip, spread, ankle, bow, knees, width, taper, color, foot: { cx, cy, rx, ry, color }, bands, right },  // A paw or foot the seat leaves out may be any shape
+    tail:  { base, angle },                                            // The tail's place while standing
+  },
+  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // Markings and the shade layer; on: 'ears' means both ears, 'paws' and 'feet' both of those
   // An extra with show: 'name' is drawn only while the pose's show lists that name (a prop); one on 'ground' stays put as the friend hops
+  // An extra on 'paws' or 'feet' with sole: true faces us only while the friend sits, and flattens as it rises
   order: ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   emotions: false,                                                     // Only off the house template (Claude): no feelings
@@ -145,7 +230,7 @@ PhyFriends.define('name', {
 Every character file is laid out the same way, so two specs read side by side:
 - a one-line header comment naming the character and its reference pictures;
 - the keys in the order above;
-- extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `tail`, `ground`), each with a short comment saying what it depicts;
+- extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `scarf`, `tail`, `paws`, `feet`, `ground`), each with a short comment saying what it depicts;
 - `views` last, with `ref` first.
 
 Fwiends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
@@ -164,7 +249,15 @@ Shape primitives (`PhyFriends.shapes`):
   rather than growing bumps out: `len` ~0, `depth` ~0.1, a `lean` that puts
   each tip next to a valley, a convex long side (`b1` or `b2` ~ -15) and a
   straight notch (~0). A negative `len` pulls a tip inward, so an `n: 1`
-  range can flatten an arc. Ranges must not overlap.
+  range can flatten an arc. Ranges must not overlap. With `onigiri` (0 to 1)
+  the ellipse becomes a rice ball by that much: it narrows towards its top
+  and squares off into a broad, flat base with round corners, resting where
+  the ellipse's bottom did, and its tufts keep their angles. `onigiri: 1` is
+  `PhyFriends.ONIGIRI`'s rice ball (`{ taper: 0.6, square: 2 }`), and
+  `onigiri: { taper, square }` gives a rice ball its own: how much narrower
+  its top is, and how far its base squares off. `outlineOf`
+  gives the outline a fluffy grows its tufts on, and `reachAt` how far it
+  reaches either side at a given height.
 - **star**: a hair mop. Absolute tip points; valleys sit on a scaled base
   ellipse between tips, and each edge can bend concave (`b > 0`) or convex (`b < 0`).
 - **ear**: a rounded triangle in local space with an inner ear and stripe bands
@@ -187,6 +280,20 @@ Shape primitives (`PhyFriends.shapes`):
   left out unless the spec has a `tail`, and `tail: {}` gives the default plume.
 - **nodes**: raw `[x, y, corner, bend]` escape hatch. `round: 0.2` on the shape
   softens every corner into an arc (cut at that fraction of the shorter edge).
+- **limb**: an arm or a leg of the standing figure: a hose that leaves its
+  shoulder or hip at an angle and turns steadily along an arc
+  (`limbArc`), as wide as `width` at the root and narrower by `taper` at the
+  end, which is round. Points are given on one side of the centre line
+  (`hip: [27, 117]` is 27 either side), and the right limb mirrors the left
+  unless `right` overrides it. `bands` colour stretches of the limb, between
+  fractions `from` and `to` of its length: a sleeve, a cuff, a sock, a stripe.
+  A band's `grow` makes it stand that far proud of the limb on each side, as
+  cloth does, and its upper edge may be cut into `teeth` points `depth` deep.
+  The standing paw and foot are ellipses in their own space, with the origin at
+  the end of the limb, +y carrying on along it (down, for a foot) and +x towards
+  the centre line, into which the seated ones (`seat`) rise; one that the seat
+  leaves out may be any shape there. Extras on `paws` or `feet` are drawn in the
+  seated paw's or foot's space, on both (see [Standing](#standing)).
 - **polys**: several rounded polygons in one shape, for crumbs and spots:
   `polys: [[x, y, r, sides, rot, aspect], ...]`. `r` reaches the corners, `rot`
   turns it (degrees), and `aspect` < 1 squashes it across its first corner (a
@@ -228,7 +335,14 @@ if (!scene.film({ duration: 4 })) scene.play();   // Filmed by pf.py film; playe
 
 Friends hop, look, show marks and feelings (`yuda.feel('surprised', { at: 2 })`,
 from `src/emotion.js`, with its mark) and play clips; phy, the host, may also
-speak.
+speak. A friend sits unless it is added standing (`scene.add('yuda', { stance:
+'stand' })`) or stands up on cue (`yuda.stand({ at: 1 })`, and `sit()` to sit
+down again). It rises through every height in between (the pose's `rise`), and
+its eyes, and the marks and words above them, rise with it. While it stands it
+walks where a seated friend hops: its feet take the walk's small steps
+(`PhyFriends.anim.WALK` and `walking`) while its body glides on up to twice as
+far, at a little under half a hop's speed. `moveTo(x, { hop: true })` hops all
+the same.
 `src/cast.js` holds the rules for friends together (FWIENDS.md, "scenes"), and
 the scene enforces them: two friends are strangers unless `characters/cast.js`
 says their owners know each other, strangers keep a strip of paper between them
@@ -257,8 +371,20 @@ Every field is optional:
 ```js
 { x, y, squash, tilt, headX, headY, turnX, turnY, lookX, lookY, blink, widen, lid, lidTilt, earL, earR, hair, tail,
   blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint', eyeL, eyeR,
-  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open', show: 'laptop side' }
+  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open', show: 'laptop side',
+  stance: 'sit' | 'stand', rise, crouch, lean, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR' }
 ```
+
+`rise` adds to the stance (0 for `sit`, 1 for `stand`), the sum held between 0
+and 1, and the friend is caught at that height. The rest of the last line moves
+the limbs (see [Standing](#standing)): a friend takes less of it the lower it
+is, and none seated. `armL` raises the left arm (the viewer's left) in
+degrees, 0 hanging and 90 held out level, and `elbowL` bends it further along:
++ carries on the way it raises, as in a wave, and − curls the paw in towards
+the chest. `legL` swings a leg out at the hip, `stepL` lifts its foot (head
+units), `crouch` drops the hips with the feet planted, and `lean` tips the upper
+body about the hips (+ to the viewer's right, as `tilt` tips the head). `over`
+names the arms drawn whole in front of everything, shoulder too.
 
 `lid` brings a lid down over the open eyes, cut straight across (0 up, 1 shut),
 and `lidTilt` slants it: + lowers its inner end, for a cross look, − raises it,
@@ -304,7 +430,13 @@ circumplex of affect: alert ears stand up and drowsy or unhappy ones droop, a
 pleased friend holds itself up and an unhappy one slumps (`E.posture`). The face
 adds what the axes cannot say: the eye and mouth shapes, the lids and where the
 eyes look. So feelings that sit close look alike, and a new feeling needs only
-its place, its face and its movements. Some have a mark (`!` for surprise, `z`,
+its place, its face and its movements. A friend standing has arms, so its
+posture carries them too (raised and out when pleased or alert, in and low when
+unhappy, limp when drowsy), and most feelings add a gesture of their own: paws
+together when shy, on the hips when proud, up by the face when scared, a paw
+raised under the chin when curious, arms folded when cross. A friend takes
+less of them the lower it is, and seated it ignores them.
+Some have a mark (`!` for surprise, `z`,
 repeating, for sleep), which a scene shows with `feel()`, and `E.describe(name,
 'Howdi')` gives a screen reader "Howdi looks surprised." `anim`'s `parse`
 understands the four forms, so `pf.py anim howdi --clip "layer(idle,
@@ -328,8 +460,10 @@ stage.add(document.querySelector('.portrait'), 'phy', { label: 'phy' });
 stage.start();
 ```
 
-Each friend stands on the bottom edge of its box, breathes and blinks with the
-idle clip, follows the pointer, answers a hi (a click, a tap, Enter or Space),
+Each friend rests on the bottom edge of its box, seated unless it is added
+with `stance: 'stand'`; then it stays standing through a hi or a feeling, and
+its ears reach further above the box. It breathes and blinks with the idle
+clip, follows the pointer, answers a hi (a click, a tap, Enter or Space),
 and feels what a visitor does to it (FWIENDS.md, "Saying hi"); the stage says
 what happened in the page's live region (`.announcer`, in `site/pencil.css`).
 A box that is a button takes `role="button"`, `tabindex="0"`, a short
@@ -358,6 +492,7 @@ python3 tools/pf.py render howdi --flat                     # The flat shapes, w
 python3 tools/pf.py compare howdi                           # Every example: out/howdi/compare/ref.png + ref-diff.png
 python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example, metrics and a zoomed crop for a box
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
+python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}), wave({spec:'howdi'}))"  # A clip's name, given options, makes one
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it

@@ -5,7 +5,8 @@
 // Pictures: examples/icon.jpg (a close-up in the house template, the color standard), sheet.png (his owner's design,
 // standing) and sticker.jpg (of which only the sticker itself serves).
 // Colors are taken from examples/icon.jpg; those it does not show (the eyes, the cream of the body and the markings
-// on it) are taken from sheet.png, which fills its markings with the icon's colors.
+// on it) are taken from sheet.png, which fills its markings with the icon's colors. He is one figure, which sits and
+// stands on the same limbs.
 PhyFriends.define('bardell', {
   palette: {
     bg: '#1c1d21',
@@ -69,12 +70,13 @@ PhyFriends.define('bardell', {
   // There is no mouth by default (the sheet's nose and mouth are omitted); when open, it shows the pink tongue of
   // the sheet's inset, without a fang.
   mouth: { y: 22, size: 3.8, tongue: 'blush' },
-  // The body is small, round and seated, in the house shade of the body's cream. Shoulder tufts sit under the
-  // cheeks, and small hip tufts below them.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // the base. It is in the house shade of the body's cream. Shoulder tufts sit under the cheeks, and small hip tufts
+  // below them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade',
+    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a big bushy plume in the body's cream, rising behind his left hip (the viewer's right), as on the
   // sheet and the sticker, its tip curling in. The crimson and orange on the side of its tip are extras.
@@ -83,6 +85,16 @@ PhyFriends.define('bardell', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 16, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template. Seated, his chocolate forepaws rest on the ground between his hind feet, which
+  // are booted in chocolate under the crimson bands of the lower legs (extras on the feet). Standing, as on the sheet,
+  // the arms are the body's cream and carry its markings as bands: the orange shoulder, two chocolate stripes on the
+  // upper arm, and the orange band above the chocolate forepaw, its edge cut into flames.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 116, rx: 20, ry: 15 } },
+    arms: { paw: { color: 'brown' }, bands: [{ from: 0, to: 0.12, color: 'orange' }, { from: 0.21, to: 0.29, color: 'brown' },
+      { from: 0.36, to: 0.44, color: 'brown' }, { from: 0.54, to: 1, color: 'orange', teeth: 3, depth: 3 }] },
+    legs: { foot: { color: 'brown' } },
   },
   extras: [
     // The cheek tufts: a cream ruff under the head whose spiky tufts stick out sideways past the cheeks, as on the
@@ -112,28 +124,17 @@ PhyFriends.define('bardell', {
     // hooks over to the right into a point, as on the icon.
     { on: 'hair', fill: 'hair', nodes: [[-30, -96, 1, 0], [-36, -112], [-30, -126], [-16, -134], [2, -133, 1, 0],
       [-10, -126], [-16, -116], [-14, -104], [-6, -96, 1, 0]] },
-    // The orange patches on the shoulders, under the cheek tufts, as on the sheet.
-    { on: 'body', clip: true, fill: 'orange', cx: -62, cy: 55, rx: 24, ry: 20, rot: -20 },
-    { on: 'body', clip: true, fill: 'orange', cx: 62, cy: 55, rx: 24, ry: 20, rot: 20 },
-    // The chocolate stripes on the upper arms, which hang at the body's sides: two narrow bands on each side,
-    // running in from the edge and tapering to a round end, clipped to the body so that they start at its edge.
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[74, 64, 1, -8], [38, 73, 1, 0], [74, 76, 1, 0]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[74, 80, 1, -8], [42, 88, 1, 0], [74, 92, 1, 0]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-74, 64, 1, 0], [-74, 76, 1, 0], [-38, 73, 1, 8]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-74, 80, 1, 0], [-74, 92, 1, 0], [-42, 88, 1, 8]] },
-    // The hind feet: chocolate fur, as far as an edge cut into points, under the crimson bands of the lower legs, as
-    // on the sheet, which draws them like boots. They are as large as Brian's boots, so that they read as feet beside
-    // the forepaws rather than as four beads in a row.
-    { on: 'body', kind: 'ellipse', fill: 'hair', cx: -50, cy: 106, rx: 18, ry: 14 },
-    { on: 'body', kind: 'ellipse', fill: 'hair', cx: 50, cy: 106, rx: 18, ry: 14 },
-    { on: 'body', fill: 'brown', cx: -50, cy: 116, rx: 20, ry: 15,
-      fluff: [{ from: 215, to: 325, n: 3, len: 4, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
-    { on: 'body', fill: 'brown', cx: 50, cy: 116, rx: 20, ry: 15,
-      fluff: [{ from: 215, to: 325, n: 3, len: 4, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
-    // The chocolate forepaws on the ground between them. The orange bands that the sheet draws above them are left
-    // out: without the arms they would sit on the paws as caps, like the crimson bands on the hind feet.
-    { on: 'body', kind: 'ellipse', fill: 'brown', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'brown', cx: 15, cy: 121, rx: 12.5, ry: 10 },
+    // The orange patches on the shoulders, under the cheek tufts, as on the sheet, moved in with the onigiri's
+    // narrower top.
+    { on: 'body', clip: true, fill: 'orange', cx: -45, cy: 55, rx: 24, ry: 20, rot: -20 },
+    { on: 'body', clip: true, fill: 'orange', cx: 45, cy: 55, rx: 24, ry: 20, rot: 20 },
+    // The chocolate stripes on the upper arms, which hang at the body's sides while he sits: two narrow bands on each
+    // side, running in from the edge and tapering to a round end, clipped to the body so that they start at its edge.
+    // Standing, the arms hang over them.
+    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[56, 62, 1, -8], [21, 72, 1, 0], [56, 78, 1, 0]] },
+    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[60, 79, 1, -8], [26, 88, 1, 0], [60, 94, 1, 0]] },
+    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-56, 62, 1, 0], [-56, 78, 1, 0], [-21, 72, 1, 8]] },
+    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-60, 79, 1, 0], [-60, 94, 1, 0], [-26, 88, 1, 8]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The orange and the crimson over it run down the side of the tip toward the
     // body, as on the sheet, each edge cut into flame-shaped tufts that reach back toward the base; the other side
@@ -143,6 +144,13 @@ PhyFriends.define('bardell', {
       fluff: [{ from: 40, to: 110, n: 2, len: 14, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
     { on: 'tail', clip: true, fill: 'hair', cx: -50, cy: -126, rx: 46, ry: 40,
       fluff: [{ from: 40, to: 110, n: 2, len: 12, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The hind feet
+    // are chocolate fur, as far as an edge cut into points, under the crimson bands of the lower legs, as on the
+    // sheet, which draws them like boots. They are as large as Brian's boots, so that they read as feet beside the
+    // forepaws rather than as four beads in a row.
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'hair', cx: 0, cy: -10, rx: 18, ry: 14 },
+    { on: 'feet', fill: 'brown', cx: 0, cy: 0, rx: 20, ry: 15,
+      fluff: [{ from: 215, to: 325, n: 3, len: 4, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

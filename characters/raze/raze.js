@@ -16,7 +16,7 @@ PhyFriends.define('raze', {
     lavender: '#a87cf7',   // The lavender of the color bar: his left eye.
     eye: '#0b1f29',        // A teal near-black, for the mouth. It is faint on the dark teal (1.5:1), but a lighter mouth (the teal, 2.4:1) reads as a marking rather than an opening.
     blush: '#d88fb4',      // The sheet draws no blush; this dusky pink is chosen to read on the dark teal.
-    hoodie: '#0e516b',     // The teal of the hoodie in IMG_2575.jpg, a step lighter than his fur: its front and hood. Its house shade (hoodieShade) fills the inside of the hood, which lies behind its rim.
+    hoodie: '#0e516b',     // The teal of the hoodie in IMG_2575.jpg, a step lighter than his fur: its front and hood. Its house shade (hoodieShade) fills the inside of the hood, which lies behind its rim, and the short sleeves, so that they show against the front.
     string: '#536a72',     // The gray of the drawstrings, also used for the hem, whose gray is the same.
     phones: '#efeef3',     // The white of the headphones, deepened to mumuyou's depth to stay visible on paper.
   },
@@ -63,12 +63,12 @@ PhyFriends.define('raze', {
   // There is no mouth by default (the sheet's grin is omitted); when open, it shows the cyan tongue and the fang of
   // the sheet.
   mouth: { y: 22, size: 3.8, fang: true, tongue: 'hair' },
-  // The body is small, round and seated, and wears the hoodie down to the hips, so only the small hip tufts show. Below
-  // the hoodie's hem it is his legs, in the house shade of his fur. The hoodie's short sleeves and its pocket are not
-  // drawn: as with every friend, the arms are not drawn, and the pocket is only line work on the sheet.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // the base. It wears the hoodie down to the hips, so only the small hip tufts show; below the hoodie's hem it is his
+  // legs, in the house shade of his fur. The hoodie's pocket is only line work on the sheet, so it is left out.
   body: {
-    cx: 0, cy: 85, rx: 64, ry: 46, color: 'furShade',
-    fluff: [{ from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+    cx: 0, cy: 85, rx: 64, ry: 46, color: 'furShade', onigiri: 1,
+    fluff: [{ from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a slim dragon's tail rising behind his right hip (the viewer's left), as on the sheet, its tip curling
   // in; its outer part is the teal tuft, cut into flame-shaped tufts that reach back toward the base. It is shorter
@@ -79,6 +79,15 @@ PhyFriends.define('raze', {
       { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 10, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.56, color: 'teal', fluff: [{ from: 50, to: 130, n: 3, len: 20, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+  },
+  // The limbs, on the house template. Seated, his forepaws rest on the ground between his hind feet, which are turned
+  // out slightly; the claws are too small to keep. Standing, as on the sheets, the short sleeves of IMG_2575.jpg are
+  // bands on the upper arms that stand proud of them, in the hoodie's house shade so that they show against its front,
+  // which is in its own color; the forearms, paws, legs and feet are his fur, the legs in its house shade.
+  stand: {
+    seat: { paw: { cx: 16, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 121, rx: 19, ry: 10, rot: -8 } },
+    arms: { paw: { color: 'fur' }, bands: [{ from: 0, to: 0.46, color: 'hoodieShade', grow: 2.5 }] },
+    legs: { foot: { color: 'fur' } },
   },
   extras: [
     // Cheek fluff under the head: a ruff whose spiky tufts reach past the cheeks, as on the sheet. An n: 1 range with
@@ -109,42 +118,36 @@ PhyFriends.define('raze', {
     { on: 'tail', clip: true, kind: 'ellipse', fill: 'hair', cx: 11, cy: -77, rx: 3.5, ry: 12, rot: -6 },
     // The gray hem of the hoodie, a band round the hips that stands a few units proud of the body at each side; its
     // top lies under the front.
-    { on: 'body', fill: 'string', nodes: [[-64, 90, 1], [64, 90, 1], [66.5, 100], [64, 106], [40, 108.5], [0, 109.5],
-      [-40, 108.5], [-64, 106], [-66.5, 100]] },
+    { on: 'body', fill: 'string', nodes: [[-48, 90, 1], [48, 90, 1], [54.5, 100], [55.5, 106], [36, 108.5], [0, 109.5],
+      [-36, 108.5], [-55.5, 106], [-54.5, 100]] },
     // The front of the hoodie, in its own color. It blouses over the hem: its sides fall a little past the body, and its
     // lower edge overhangs the hem, which shows as a band of cloth under a lip. Its top lies under the head.
-    { on: 'body', fill: 'hoodie', nodes: [[-50, 34, 1], [50, 34, 1], [60, 58], [63, 70], [67, 82], [68.5, 92], [66, 98],
-      [44, 101.5], [0, 103], [-44, 101.5], [-66, 98], [-68.5, 92], [-67, 82], [-63, 70], [-60, 58]] },
-    // The inside of the hood, in its house shade: it lies behind the rim, which is the same teal, and shows where the
-    // rim's two sides part under the chin.
-    { on: 'body', fill: 'hoodieShade', nodes: [[-34, 44, 1], [34, 44, 1], [0, 84, 1]] },
-    // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
-    // under the chin; his left side (the viewer's right) lies over the other. Its ends rest on the shoulders and stand
-    // out past them, so that the roll reads as cloth lying on the hoodie rather than printed on it.
-    { on: 'body', fill: 'hoodie', nodes: [[-28, 50, 1, -8], [1, 80, 1], [1, 87, 1], [-24, 79], [-52, 72], [-68.5, 64], [-70, 53],
-      [-58, 44], [-44, 36, 1]] },
-    { on: 'body', fill: 'hoodie', nodes: [[28, 50, 1], [44, 36, 1], [58, 44], [70, 53], [68.5, 64], [52, 72], [24, 79],
-      [0, 87, 1], [0, 81, 1, -8]] },
+    { on: 'body', fill: 'hoodie', nodes: [[-30, 36, 1], [30, 36, 1], [36, 58], [41, 70], [47, 82], [52, 92], [53.5, 98],
+      [38, 101.5], [0, 103], [-38, 101.5], [-53.5, 98], [-52, 92], [-47, 82], [-41, 70], [-36, 58]] },
     // The two gray drawstrings, coming out of the hood's edge on either side of the point and hanging apart, over the
     // lip of the front, as long as the sheet draws them.
     { on: 'body', fill: 'string', round: 0.5, nodes: [[-15, 78, 1], [-10, 78, 1], [-13, 104, 1], [-18, 104, 1]] },
     { on: 'body', fill: 'string', round: 0.5, nodes: [[10, 78, 1], [15, 78, 1], [18, 104, 1], [13, 104, 1]] },
+    // The inside of the hood, in its house shade: it lies behind the rim, which is the same teal, and shows where the
+    // rim's two sides part under the chin. The hood and the headphones on it are clothing, so they lie under the arms,
+    // which show over them.
+    { on: 'body', fill: 'hoodieShade', nodes: [[-28, 44, 1], [28, 44, 1], [0, 82, 1]] },
+    // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
+    // under the chin; his left side (the viewer's right) lies over the other. Its ends rest on the narrow shoulders and
+    // stand out past them, so that the roll reads as cloth lying on the hoodie rather than printed on it.
+    { on: 'body', fill: 'hoodie', nodes: [[-24, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-18, 79], [-34, 71], [-41, 63], [-40, 53],
+      [-33, 45], [-28, 40, 1]] },
+    { on: 'body', fill: 'hoodie', nodes: [[24, 50, 1], [28, 40, 1], [33, 45], [40, 53], [41, 63], [34, 71], [18, 79],
+      [0, 86, 1], [0, 80, 1, -8]] },
     // The headphones round his neck, over the hood, as on the sheet: the cup on his right (the viewer's left) faces
     // forward, a white ring round its pad, which is in the hoodie's teal. The cup on his left is turned away, and the
     // sheet draws its face in the hoodie's teal, so only a thin crescent of its white rim shows on its outer side; a
     // second white cup would read as a second pair of eyes. The tops of the cups lie under the chin, so that they hang
     // from the neck rather than sit on the chest, and the band behind the neck is hidden by the head.
-    { on: 'body', kind: 'ellipse', fill: 'phones', cx: -30, cy: 58, rx: 11.5, ry: 11.5 },
-    { on: 'body', kind: 'ellipse', fill: 'hoodie', cx: -30, cy: 58, rx: 5, ry: 5 },
-    { on: 'body', kind: 'ellipse', fill: 'phones', cx: 32.5, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
-    { on: 'body', kind: 'ellipse', fill: 'hoodie', cx: 30, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
-    // The hind feet, turned out slightly.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -48, cy: 121, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 48, cy: 121, rx: 19, ry: 10, rot: 8 },
-    // The forepaws on the ground between them. As with every friend, the arms are not drawn, and the claws are too
-    // small to keep.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -16, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 16, cy: 121, rx: 12.5, ry: 10 },
+    { on: 'body', kind: 'ellipse', fill: 'phones', cx: -27, cy: 58, rx: 11.5, ry: 11.5 },
+    { on: 'body', kind: 'ellipse', fill: 'hoodie', cx: -27, cy: 58, rx: 5, ry: 5 },
+    { on: 'body', kind: 'ellipse', fill: 'phones', cx: 29.5, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
+    { on: 'body', kind: 'ellipse', fill: 'hoodie', cx: 27, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

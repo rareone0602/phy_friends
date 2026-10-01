@@ -4,7 +4,8 @@
 // blue sash tied in a bow at his back.
 // Pictures: examples/icon.png (his head, drawn by his owner) and sixteen of his owner's works in examples/EVE HP/.
 // Colors and shapes are taken from examples/icon.png; colors it does not show are taken from EVE HP/2507.png, and
-// the yukata's from EVE HP/2508.png. The works serve for colors, markings and fur shapes only.
+// the yukata's from EVE HP/2508.png. The works serve for colors, markings and fur shapes only. YuanYuan is one figure,
+// which sits and stands on the same limbs.
 PhyFriends.define('yuanyuan', {
   palette: {
     bg: '#1c1d21',
@@ -69,9 +70,9 @@ PhyFriends.define('yuanyuan', {
   // left out (backup/cat-mouth.js keeps that mouth); the greeting's 'w' mouth stands for it. When open, the mouth shows
   // his pink tongue and one fang for the small fangs of EVE HP/2502.png.
   mouth: { y: 22, size: 3.8, fang: true },
-  // The body is small, round and seated, and wears the yukata, so it has no fur tufts. It sits under the head, so it
-  // takes the yukata's house shade. As with every friend, the arms are not drawn, so neither are the wide sleeves.
-  body: { cx: 0, cy: 84, rx: 64, ry: 47, color: 'yukataShade' },
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // base. It wears the yukata, so it has no fur tufts. It sits under the head, so it takes the yukata's house shade.
+  body: { cx: 0, cy: 84, rx: 64, ry: 47, color: 'yukataShade', onigiri: 1 },
   // The tail is a slim white cat's tail, as in every work before 2026. It leaves his left hip (the viewer's right) above
   // the hind foot, so that it does not read as a leg, and curls up in a C, as a sitting cat's does, beside the body
   // rather than behind the head.
@@ -79,6 +80,19 @@ PhyFriends.define('yuanyuan', {
     base: [56, 104], angle: 78, length: 120, width: 34, bend: -150, taper: 0.3, root: 0.2, color: 'fur',
     fluff: [{ from: 320, to: 350, n: 1, len: 5, lean: 4, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 190, to: 225, n: 1, len: 4, lean: 4, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template. Seated, the white forepaws rest on the ground between the hind feet (paw), and
+  // the hind feet show their soles, as in EVE HP/2507.png (foot). Standing, the arms are bare and white, as the robe in
+  // EVE HP/2508.png has no sleeves, and come out of its armholes. The robe's edge covers the top third of each arm, as
+  // its shoulder does in that picture, and stands proud of the arm in the robe's color. The robe hangs on over the tops of the white legs to mid-thigh, as cloth standing proud of them; it lies
+  // behind the body, so it takes the yukata's house shade. The legs are white fur behind the body, so they take the
+  // fur's house shade. Standing, the tail lies out low to the side and curls up at its end, so that the white right
+  // paw, hanging beside the body, does not vanish against it.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 114, rx: 19, ry: 16 } },
+    arms: { paw: { color: 'fur' }, bands: [{ from: 0, to: 0.35, color: 'yukata', grow: 2.5 }] },
+    legs: { color: 'furShade', foot: { color: 'fur' }, bands: [{ from: 0, to: 0.75, color: 'yukataShade', grow: 3 }] },
+    tail: { base: [44, 120], angle: 108 },
   },
   extras: [
     // The two dots on the forehead, either side of the middle lock, where eyebrows would be. The icon draws them as
@@ -131,43 +145,39 @@ PhyFriends.define('yuanyuan', {
     // Eight of the yukata's pale blue dots, scattered over both panels and kept clear of the collar, the sash and the
     // cord, so that they read as a print on the cloth. Four dots, two of them beside the collar, read as a jacket's
     // buttons.
-    { on: 'body', clip: true, fill: 'pattern', round: 0.5, polys: [[-40, 52, 3.4, 12], [38, 56, 3.4, 12],
-      [-50, 62, 3.4, 12], [6, 93, 3.4, 12], [34, 95, 3.4, 12], [58, 88, 3.4, 12], [20, 104, 3.4, 12],
+    { on: 'body', clip: true, fill: 'pattern', round: 0.5, polys: [[-27, 60, 3.4, 12], [27, 61, 3.4, 12],
+      [-38, 66, 3.4, 12], [6, 93, 3.4, 12], [34, 95, 3.4, 12], [41, 87, 3.4, 12], [20, 104, 3.4, 12],
       [0, 106, 3.4, 12]] },
     // The sash round the waist, in the pale blue of the dots, bowed down a little in the middle as it follows the
-    // round body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands
-    // 6 to 10 units proud of the body where it turns out of sight, which shows its thickness. Its ends are upright
+    // body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands
+    // about 7 units proud of the body where it turns out of sight, which shows its thickness. Its ends are upright
     // and bow outward, as a band's do round a waist; ends that stand less proud, or follow the body's curve, leave
     // the outline a ball at gallery size. The robe in EVE HP/2508.png is tied at the front instead; without a sash,
     // a crossed robe reads as a dressing gown.
     { on: 'body', fill: 'pattern', round: 0.3,
-      nodes: [[-70, 68, 1, 4], [70, 68, 1, -8], [70, 83, 1, -4], [-70, 83, 1, -8]] },
+      nodes: [[-45, 68, 1, 4], [45, 68, 1, -8], [51, 83, 1, -4], [-51, 83, 1, -8]] },
     // The sash is tied in a bow at his back, a little to his right, so that the bow peeks out beside the body on the
     // viewer's left, where the tail does not reach. Its two loops splay, one up and one down, so that it reads as a
     // bow rather than a paw or an arm. It is drawn under the body and lies behind the sash, so it takes the pale
     // blue's house shade, which parts it from the sash's end.
-    { on: 'body', under: true, fill: 'patternShade', nodes: [[-58, 71, 1], [-72, 60], [-84, 54], [-91, 60], [-86, 70],
-      [-60, 78, 1]] },
-    { on: 'body', under: true, fill: 'patternShade', nodes: [[-60, 76, 1], [-76, 82], [-86, 92], [-82, 100], [-72, 94],
-      [-58, 82, 1]] },
-    // The forepaws on the ground between the hind feet.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 15, cy: 121, rx: 12.5, ry: 10 },
-    // The hind feet, soles to the front, as in EVE HP/2507.png: a pink pad under three pink toe beans on each.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -48, cy: 114, rx: 19, ry: 16 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 48, cy: 114, rx: 19, ry: 16 },
-    { on: 'body', kind: 'ellipse', fill: 'blush', cx: -48, cy: 119, rx: 8.5, ry: 6.5 },
-    { on: 'body', kind: 'ellipse', fill: 'blush', cx: 48, cy: 119, rx: 8.5, ry: 6.5 },
-    { on: 'body', fill: 'blush', round: 0.5, polys: [[-58, 108, 3.4, 8], [-48, 105, 3.4, 8], [-38, 108, 3.4, 8],
-      [38, 108, 3.4, 8], [48, 105, 3.4, 8], [58, 108, 3.4, 8]] },
+    { on: 'body', under: true, fill: 'patternShade', nodes: [[-44, 71, 1], [-58, 60], [-70, 54], [-77, 60], [-72, 70],
+      [-46, 78, 1]] },
+    { on: 'body', under: true, fill: 'patternShade', nodes: [[-46, 76, 1], [-62, 82], [-72, 92], [-68, 100], [-58, 94],
+      [-44, 82, 1]] },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line).
+    // The soles of the hind feet, as in EVE HP/2507.png: a pink pad under three pink toe beans on each. They face the
+    // viewer only while he sits, so they flatten as the foot tips down (sole).
+    { on: 'feet', sole: true, kind: 'ellipse', fill: 'blush', cx: 0, cy: 5, rx: 8.5, ry: 6.5 },
+    { on: 'feet', sole: true, fill: 'blush', round: 0.5,
+      polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
     // The twisted red-and-white cord that almost every work showing his feet ties around one ankle, here his right
-    // (the viewer's left), just below the hem where the foot meets the leg: a red band, bowed around the ankle and
-    // clipped to the body, crossed by two slanted white twists. The red carries the band's shape, since a white band
-    // would leave only red slashes, which read as scratches.
-    { on: 'body', clip: true, fill: 'cord', round: 0.5,
-      nodes: [[-64, 89, 1, 12], [-33, 89, 1, 0], [-33, 100, 1, -12], [-64, 100, 1, 0]] },
-    { on: 'body', fill: 'fur', nodes: [[-53, 89.8, 1], [-48.5, 89.8, 1], [-52.5, 100.6, 1], [-57, 100.6, 1]] },
-    { on: 'body', fill: 'fur', nodes: [[-43, 90.2, 1], [-38.5, 90.2, 1], [-42.5, 100.8, 1], [-47, 100.8, 1]] },
+    // (the viewer's left), where the foot meets the leg: a red band just above the foot, bowed around the ankle,
+    // crossed by two slanted white twists. Seated, it lies just below the hem, as it did before he stood; standing,
+    // it rides on the top of the foot, round the ankle. The red carries the band's shape, since a white band would
+    // leave only red slashes, which read as scratches.
+    { on: 'footL', fill: 'cord', round: 0.5, nodes: [[-16, -25, 1, 12], [15, -25, 1, 0], [15, -14, 1, -12], [-16, -14, 1, 0]] },
+    { on: 'footL', fill: 'fur', nodes: [[-5, -24.2, 1], [-0.5, -24.2, 1], [-4.5, -13.4, 1], [-9, -13.4, 1]] },
+    { on: 'footL', fill: 'fur', nodes: [[5, -23.8, 1], [9.5, -23.8, 1], [5.5, -13.2, 1], [1, -13.2, 1]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

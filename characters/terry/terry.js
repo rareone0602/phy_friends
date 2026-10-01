@@ -2,7 +2,8 @@
 // Pictures: examples/front.png, turnaround.gif, sitting.png, standing.png, paws.png, soles.png.
 // Colors are taken from the pictures: one butter yellow throughout. The ears sit behind the face,
 // so they take its house shade (furShade).
-// As a stuffed toy, Terry is drawn with soft round shapes, without fur tufts or seams.
+// As a stuffed toy, Terry is drawn with soft round shapes, without fur tufts or seams. Terry is one figure, which sits
+// and stands on the same limbs.
 PhyFriends.define('terry', {
   palette: {
     bg: '#1c1d21',
@@ -31,12 +32,20 @@ PhyFriends.define('terry', {
   // There is no mouth by default (the nose and small mouth in the pictures are omitted); when open, it is
   // a soft mouth without a fang.
   mouth: { y: 22, size: 3.8, tongue: 'blush' },
-  // The body is seated, small and round under the large head. It sits behind the legs and feet, which
-  // share its yellow, so it takes the house shade.
-  body: { cx: 0, cy: 80, rx: 63, ry: 40, color: 'furShade' },
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // the base. It sits behind the limbs, which share its yellow, so it takes the house shade.
+  body: { cx: 0, cy: 80, rx: 63, ry: 40, color: 'furShade', onigiri: 1 },
   // The tail is small and curly, behind the right hip: a thin plume bent all the way around into a
   // spiral. Setting step: 4 keeps it smooth.
   tail: { base: [56, 100], angle: 10, length: 70, width: 16, bend: 330, taper: 0.3, root: 0, step: 4, color: 'cream', fluff: [] },
+  // The limbs, on the house template. Seated, as in sitting.png, the forelegs are straight columns side by side in
+  // front, their round ends on the ground (paw), and the large round hind feet point at us at either side (foot),
+  // their dark felt soles showing (extras). Standing, as in standing.png, they are short round arms and straight
+  // round legs. The feet keep the head's yellow, as seated.
+  stand: {
+    seat: { paw: { cx: 18, cy: 106, rx: 12.5, ry: 25 }, foot: { cx: 53, cy: 114, rx: 21, ry: 17 } },
+    legs: { foot: { color: 'fur' } },
+  },
   extras: [
     // Ear extras are in ear-local space (base on the root, the lobe hanging along -y, +x outward).
     // The lobe: a large soft oval whose top rises about 10 above the crown (the turnaround's M) and whose
@@ -46,17 +55,13 @@ PhyFriends.define('terry', {
     // crescent (never a pill) when a head turn slides the face off it.
     { on: 'ears', kind: 'ellipse', fill: 'earInner', cx: 22, cy: -92, rx: 10, ry: 17, rot: -10 },
     { on: 'ears', kind: 'ellipse', fill: 'furShade', cx: 16, cy: -96, rx: 10, ry: 17, rot: -10 },
-    // The bib: a pale patch under the chin, its edge in soft scallops.
-    { on: 'body', fill: 'cream', cx: 0, cy: 58, rx: 47, ry: 28,
+    // The bib: a pale patch under the chin, its edge in soft scallops, as narrow as the top of the body. It lies
+    // over the tops of the arms, as a scarf does (scarf).
+    { on: 'scarf', fill: 'cream', cx: 0, cy: 59, rx: 40, ry: 27,
       fluff: [{ from: 10, to: 170, n: 6, len: 6, depth: 0.04, b1: -40, b2: -40, jit: 0 }] },
-    // Straight forelegs with round paws on the ground.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -18, cy: 106, rx: 12.5, ry: 25 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 18, cy: 106, rx: 12.5, ry: 25 },
-    // Large round hind feet pointing forward, their round felt soles facing the viewer.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -53, cy: 114, rx: 21, ry: 17 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 53, cy: 114, rx: 21, ry: 17 },
-    { on: 'body', kind: 'ellipse', fill: 'pad', cx: -55, cy: 115, rx: 12, ry: 12.5 },
-    { on: 'body', kind: 'ellipse', fill: 'pad', cx: 55, cy: 115, rx: 12, ry: 12.5 },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The round
+    // felt sole faces the viewer only while Terry sits, so it flattens as the foot tips down (sole).
+    { on: 'feet', sole: true, kind: 'ellipse', fill: 'pad', cx: -2, cy: 1, rx: 12, ry: 12.5 },
   ],
   // The ears lie over the upper sides of the head; the eyes, blush and mouth stay on top of them.
   order: ['base', 'earL', 'earR', 'face', 'blush', 'eyes', 'mouth'],

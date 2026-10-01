@@ -313,12 +313,28 @@ Follow them when turning someone's picture or design sheet into a friend.
   whose shade would read as black takes the lightest tint its pictures
   give it instead: Fruit's navy, `#283e74`, is the moon picture's.
 
-**Proportions, in head space:** a big head on a small, seated body.
+**Proportions, in head space:** a big head on a small body, seated or
+standing.
 - The origin sits between the eyes. The head is widest around eye level,
   about 140–190 units across the cheeks.
 - Ear tips reach about −155 (floppy ears less), and the paws reach
   `rig.ground`, about +131. A tail may curl out to one side.
 - The eyes are about 13 × 32 units, centred 31–35 either side of the origin.
+- Standing, a friend keeps its seated body and stands it on two short plush
+  legs, which show 22 units below it, with two short arms hung high on its
+  sides and well out from them. From the back: the body with its clothes, the
+  scarf (a ruff or bib of fur round the neck, or a scarf, extras on `scarf`),
+  the head, whose chin lies over the scarf and the collar, then the arms, in
+  front of all of them, except at the shoulder, which tucks under the scarf
+  and the head (the paws never do). A hood is clothing, so it lies under the arms, and a sleeve
+  takes its cloth's house shade, so that it shows against the garment's front,
+  which is in the cloth's own colour. Its feet touch `stand.ground`, the
+  body's bottom plus 22 (about +153 in its own space), and the rig lifts it by
+  the difference, so that its feet stand where its seated paws did. Every
+  friend is one figure, which sits on the same limbs, folded into the paws and
+  feet of its own seated drawing (`stand.seat`), so that it stands up and sits
+  down through every height between, with nothing appearing or vanishing; a
+  sole that faces us while it sits flattens as it rises.
 - A reference in the house template (a 1254px close-up, head tipped 20°,
   as in the Grokbot Icon prompt's examples; reviewers should know them) is
   matched at `scale: 5.5` with the view `{w: 1254, h: 1254, x: 450, y: 835,
@@ -361,7 +377,8 @@ Bangs may cross the face.
 house template has: the eye shapes (`happy`, `closed`, `squint`), a lid held
 over the open eyes (`lid`, slanted by `lidTilt` for a sad or a cross look),
 the blush spreading (`flush`), a mouth (`w`, `smile`, `frown`, `o`, `open`),
-the ears, the tail and the posture. So a spec needs nothing for its
+the ears, the tail and the posture, and, standing, the arms and a gesture
+(paws on the hips when proud). So a spec needs nothing for its
 feelings, and a new fwiend has them all. A feeling's body language follows
 from how pleasant and how alert it is, so feelings that sit close look
 alike. `eyes.arc` and `eyes.stroke` set how wide and thick the happy and
@@ -391,7 +408,8 @@ its body, in its one house shade. Its eyes look a whole unit aside (16 head
 units, where the house's move 6), as the glyphs move the notches, and its
 blush is a soft rose, since a pale pink on terracotta reads as a highlight.
 Having no tail, it does not sway. It is short, so its legs meet the ground
-at 112 rather than about 131. Its laptop, which it brings out in its
+at 112 rather than about 131. Standing already on its four legs, it never
+stands up (`stand: false`) and keeps its shape in either stance. Its laptop, which it brings out in its
 routine, is a gray base and screen drawn only on cue (an extra's `show`),
 on its arm while held and on the ground (`on: 'ground'`) once set down,
 where it stays while Claude hops; set down, it reaches a little past
@@ -407,10 +425,11 @@ Anthropic's.
 - Idle underneath, the library's idle clip, as in a scene: breathing,
   blinks at irregular intervals, a slow sway of the head and tail, a glance
   about now and then and an occasional ear flick, on an 8-second loop that
-  each fwiend starts at a different point. The glances give way whenever
-  there is something to look at. The pencil "boils": its texture is redrawn
-  8 times a second, cycling through three versions, as in hand-drawn
-  animation.
+  each fwiend starts at a different point. A fwiend added standing also
+  breathes with its arms and shifts its weight slowly from foot to foot. The glances
+  give way whenever there is something to look at. The pencil "boils": its
+  texture is redrawn 8 times a second, cycling through three versions, as in
+  hand-drawn animation.
 - When the pointer leaves the window, or sits still for a while, the fwiends
   drift back to centre or glance around, unless one has been tabbed to: then
   the others look at it. A pen is followed like a mouse. On
@@ -421,7 +440,9 @@ Anthropic's.
   with it, so everything picks up where it left off.
 - With `prefers-reduced-motion`, or "keep still" ticked: eyes only, no idle
   motion, a still pencil, and a hi or a feeling changes just the face (the
-  eye and mouth shapes, the lids and the blush). Marks neither pop nor
+  eye and mouth shapes, the lids and the blush). A fwiend added standing
+  stays standing, since its stance belongs to the story rather than the
+  motion. Marks neither pop nor
   drift, and the stage draws only as often as the pencil would boil.
 
 ## scenes: films and games
@@ -429,7 +450,7 @@ Anthropic's.
 Beyond the gallery, the fwiends appear in scenes built with
 `film/scene.js`: short films, listed in `demo/index.html`, and in time
 games. A scene is a sheet of ruled paper measured in head units, a rule
-every 54, so a fwiend stands five rules tall, as in the gallery.
+every 54, so a seated fwiend is five rules tall, as in the gallery.
 Everything in it happens at a time on the scene's clock, so a film plays
 in a page and is filmed frame by frame (`pf.py film`) from the same
 script.
@@ -474,7 +495,12 @@ them.
   corner, and `pf.py film` refuses to film it without `--draft`.
 
 **Motion in a scene:**
-- Fwiends get about by hopping, since they sit. They turn with `turnX`,
+- Seated fwiends get about by hopping. Standing ones walk: facing us, the
+  foot on the side they go to steps out and the other closes up, and the
+  body glides on up to twice as far as the feet, at a little under half a
+  hop's speed. A fwiend stands up and sits down through every height
+  between, its legs unfolding or folding under it, so that the change never
+  pops. They turn with `turnX`,
   never with a mirror image, which would swap two-coloured eyes and reverse
   K3V1N's mark.
 - Each fwiend is drawn on its own piece of paper, cut to its outline: its
@@ -484,7 +510,9 @@ them.
   keep still under reduced motion.
 - Under `prefers-reduced-motion` a scene plays no idle motion, travel
   becomes a glide and a greeting or a feeling changes only the face; a film
-  shows its last frame and waits to be played.
+  shows its last frame and waits to be played. A fwiend that stands keeps
+  standing, since its stance belongs to the story rather than the motion,
+  but it stands up or sits down in a cut.
 
 ---
 

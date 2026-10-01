@@ -14,7 +14,7 @@ PhyFriends.define('cowosus', {
     fur: '#efeef3',        // The white of the palette bar (#fdffff), deepened to mumuyou's depth to stay visible on paper. Its house shade (furShade) fills the body, which sits under the head, and the neck under the chin.
     lime: '#b8dc79',       // The lime green of the palette bar: the patch over his right eye, the ears, the tips of the ruff and the tip of the tail.
     green: '#81a34d',      // The dark green of the palette bar: the tips of the ears.
-    peach: '#fdd0a1',      // The peach of the palette bar (#ffdaae), deepened slightly so that the eyebrow dot on the white holds on paper: the cheeks, the cheek tufts and the eyebrow dots.
+    peach: '#fdd0a1',      // The peach of the palette bar (#ffdaae), deepened slightly so that the eyebrow dot on the white holds on paper: the cheeks, the cheek tufts, the eyebrow dots and the ragged edges on the arms and legs.
     mint: '#8eebbd',       // The mint of the swatch beside the head: the band across his muzzle, which every view draws.
     gold: '#ffcb4f',       // The golden yellow of the palette bar: the thighs and the star on the belly. Its house shade (goldShade) fills the gold of the tail, which lies behind the gold thigh.
     orange: '#dc7808',     // The darker orange of the diamond swatch, at the heart of the pineapple's scales: the diamonds on the thighs.
@@ -77,12 +77,13 @@ PhyFriends.define('cowosus', {
   // There is no mouth by default (the sheet's nose and grin are omitted). It sits on the white muzzle; when open, it
   // shows his yellow tongue and one fang for the sheet's two.
   mouth: { y: 44, size: 3.8, fang: true, tongue: 'yellow' },
-  // The body is small, round and seated, in the house shade of the white. Shoulder tufts sit under the cheeks, and
-  // small hip tufts below them.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // the base. It is in the house shade of the white. Shoulder tufts sit under the cheeks, and small hip tufts below
+  // them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade',
+    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a bushy plume rising behind his left hip (the viewer's right), as in the front and back views, curling
   // in a little and ending in three long lime points. It is shorter than the sheet's, which is as long as his body, so
@@ -93,6 +94,18 @@ PhyFriends.define('cowosus', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 238, to: 302, n: 3, len: 19, lean: 0, depth: 0.05, b1: 22, b2: -22, jit: 0 },
       { from: 200, to: 232, n: 1, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template. Seated, his white forepaws rest on the ground between his white hind feet, whose
+  // soles face us (extras on the feet). Standing, as in the sheet's three views, the arms are his white: the upper arm
+  // is a tuft of fur that stands a little proud and ends in the sheet's ragged peach edge. The legs are gold to the
+  // knee, where the gold stands proud and ends in the same ragged peach edge, and his white below, in its house shade;
+  // on the template's short legs the gold and its edge lie under the body, and only the white shows.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 115, rx: 19, ry: 16 } },
+    arms: { paw: { color: 'fur' }, bands: [{ from: 0, to: 0.42, color: 'fur', grow: 1.5 },
+      { from: 0.34, to: 0.46, color: 'peach', grow: 1.5, teeth: 3, depth: 3 }] },
+    legs: { foot: { color: 'fur' }, bands: [{ from: 0, to: 0.52, color: 'gold', grow: 2 },
+      { from: 0.46, to: 0.6, color: 'peach', grow: 2, teeth: 3, depth: 3 }] },
   },
   extras: [
     // The neck under the chin, in the house shade of the white: it lies behind the white muzzle and parts it from the
@@ -129,28 +142,18 @@ PhyFriends.define('cowosus', {
     // side, clipped to the body so that the outer one turns out of sight.
     { on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: -48, cy: 98, rx: 36, ry: 40 },
     { on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: 48, cy: 98, rx: 36, ry: 40 },
-    { on: 'body', clip: true, fill: 'orange', polys: [[-45, 88, 14, 4, 90, 0.72], [45, 88, 14, 4, 90, 0.72],
-      [-27, 102, 6, 4, 90, 0.75], [27, 102, 6, 4, 90, 0.75], [-63, 99, 6, 4, 90, 0.75], [63, 99, 6, 4, 90, 0.75]] },
-    // The ruff at the neck: white fur whose tufts end in long lime points, like the leaves of the pineapple's crown. The
-    // lime lies under the white and its tufts are longer, so that it shows only as the points below the white ones.
-    { on: 'body', clip: true, fill: 'lime', cx: 0, cy: 50, rx: 58, ry: 28,
-      fluff: [{ from: 15, to: 165, n: 7, len: 17, depth: 0.05, b1: -12, b2: 12, jit: 0 }] },
-    { on: 'body', clip: true, fill: 'fur', cx: 0, cy: 46, rx: 55, ry: 26,
-      fluff: [{ from: 15, to: 165, n: 7, len: 5, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
+    { on: 'body', clip: true, fill: 'orange', polys: [[-38, 89, 13, 4, 90, 0.72], [38, 89, 13, 4, 90, 0.72],
+      [-22, 103, 6, 4, 90, 0.75], [22, 103, 6, 4, 90, 0.75], [-53, 101, 6, 4, 90, 0.75], [53, 101, 6, 4, 90, 0.75]] },
     // The gold star on the belly, between the thighs, as on the sheet.
     { on: 'body', fill: 'gold', cx: 0, cy: 93, rx: 8, ry: 8, valley: 0.45,
       tips: [[0, 84.4], [8.2, 90.3], [5.1, 100], [-5.1, 100], [-8.2, 90.3]] },
-    // The white hind feet, soles to the front: a yellow pad under three yellow toe beans on each, as the sheet's pad
-    // swatches draw them. A lone pad on a white foot reads as an egg.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -48, cy: 115, rx: 19, ry: 16 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 48, cy: 115, rx: 19, ry: 16 },
-    { on: 'body', kind: 'ellipse', fill: 'yellow', cx: -48, cy: 120, rx: 8.5, ry: 6.5 },
-    { on: 'body', kind: 'ellipse', fill: 'yellow', cx: 48, cy: 120, rx: 8.5, ry: 6.5 },
-    { on: 'body', fill: 'yellow', round: 0.5, polys: [[-58, 109, 3.4, 8], [-48, 106, 3.4, 8], [-38, 109, 3.4, 8],
-      [38, 109, 3.4, 8], [48, 106, 3.4, 8], [58, 109, 3.4, 8]] },
-    // The white forepaws on the ground between them.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 15, cy: 121, rx: 12.5, ry: 10 },
+    // The ruff at the neck, a scarf of fur that lies over the tops of the arms: white fur whose tufts end in long lime
+    // points, like the leaves of the pineapple's crown. The lime lies under the white and its tufts are longer, so that
+    // it shows only as the points below the white ones. It is as narrow as the top of the body.
+    { on: 'scarf', clip: true, fill: 'lime', cx: 0, cy: 52, rx: 44, ry: 26,
+      fluff: [{ from: 20, to: 160, n: 6, len: 16, depth: 0.05, b1: -12, b2: 12, jit: 0 }] },
+    { on: 'scarf', clip: true, fill: 'fur', cx: 0, cy: 48, rx: 42, ry: 24,
+      fluff: [{ from: 20, to: 160, n: 6, len: 5, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -130, +x away from the body); the
     // library bends them onto the curve. The white band and, over it, the lime tip, each edge cut into flame-shaped
     // tufts that reach back toward the base, as on the sheet; they stay inside the plume, so as not to widen its reach.
@@ -158,6 +161,11 @@ PhyFriends.define('cowosus', {
       fluff: [{ from: 50, to: 130, n: 3, len: 12, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
     { on: 'tail', clip: true, fill: 'lime', cx: 0, cy: -130, rx: 50, ry: 30,
       fluff: [{ from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 20, b2: 14, jit: 0.2 }] },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The soles face
+    // us only while he sits, so they flatten as the feet tip down (sole): a yellow pad under three yellow toe beans on
+    // each, as the sheet's pad swatches draw them. A lone pad on a white foot reads as an egg.
+    { on: 'feet', sole: true, kind: 'ellipse', fill: 'yellow', cx: 0, cy: 5, rx: 8.5, ry: 6.5 },
+    { on: 'feet', sole: true, fill: 'yellow', round: 0.5, polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
   ],
   // The folded ear lies over the upper side of the head, as on the sheet, so it is drawn after the head; the face, the
   // eyes and the mop stay on top of it.

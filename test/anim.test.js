@@ -51,6 +51,14 @@
     assertEqual(timing(A.parse('layer(idle, lookAround)')), { duration: 8, loop: true });
   });
 
+  test('in an expression, a clip\'s name called with options makes that clip, as make does', () => {
+    const made = A.parse("wave({ spec: 'terry' })"), byMake = A.make.wave({ spec: 'terry' });
+    assertEqual(timing(made), timing(byMake));
+    assertEqual(made(0.5), byMake(0.5), 'the same wave');
+    assertEqual(A.parse('layer(still({ stance: "stand" }), point({ spec: "terry", hold: 2 }))')(0.5), A.layer(A.still({ stance: 'stand' }), A.make.point({ spec: 'terry', hold: 2 }))(0.5));
+    assertEqual(timing(A.parse('walk()')), timing(A.clips.walk), 'and with none, the library clip');
+  });
+
   test('extend adds names to what parse understands, but never replaces one', () => {
     assertEqual(timing(A.parse("layer(idle, hold('curious'))")), { duration: 8, loop: true }, 'src/emotion.js adds hold');
     assertThrows(() => A.extend({ idle: A.rest(1) }), 'already a name');
@@ -85,5 +93,112 @@
 
   test('an unknown ease is an error', () => {
     assertThrows(() => A.sample(A.track({ tilt: [[0, 0], [1, 1, 'wobbly']] }), 0.5), 'unknown ease "wobbly"');
+  });
+
+  // ---- The standing figure
+
+  const STANDING = ['walk', 'wave', 'cheer', 'jump', 'standUp', 'sitDown', 'dance', 'stretch', 'point'];
+  const NEUTRAL = A.sample({});
+  // The numbers of a pose that are not at rest.
+  const restless = pose => Object.keys(pose).filter(key => typeof pose[key] === 'number' && Math.abs(pose[key] - NEUTRAL[key]) > 1e-3);
+  const span = (seconds, fps = 60) => Array.from({ length: Math.round(seconds * fps) + 1 }, (_, i) => i / fps);
+  const sampled = (clip, fps = 60) => span(clip.duration, fps);
+  const standers = () => PhyFriends.list().filter(name => PhyFriends.standFor(PhyFriends.get(name)));
+
+  test('the standing movements start and end at rest, or loop in a length that divides 8 s', () => {
+    const risen = { standUp: 1, sitDown: -1 };  // How far a change of stance has risen by its end.
+    for (const name of STANDING) {
+      const clip = A.clips[name];
+      if (clip.loop) {
+        assert(8 % clip.duration === 0, `${name} loops in ${clip.duration} s`);
+        for (const t of TIMES) assertEqual(A.sample(clip, t + clip.duration), A.sample(clip, t), `${name} at ${t} s, a loop later`);
+      } else {
+        const end = A.sample(clip, clip.duration);
+        assertEqual(restless(A.sample(clip, 0)), [], `${name} starts at rest`);
+        assertEqual(end.rise, risen[name] || 0, `${name} ends risen by ${risen[name] || 0}`);
+        assertEqual(restless({ ...end, rise: 0 }), [], `${name} ends at rest`);
+      }
+      assertEqual(A.sample(A.make[name](), 0.3), A.sample(clip, 0.3), `${name} is a deterministic function of time`);
+    }
+  });
+
+  test('no movement lifts a foot by less than nothing, and sample keeps the figure within what it can take', () => {
+    const steps = [...STANDING, 'bounce', 'idle'].flatMap(name => sampled(A.clips[name]).map(t => A.clips[name](t)));
+    steps.push(...span(1).map(u => A.walking(u, 6, { distance: -70 }).pose));
+    for (const pose of steps) assert(!(pose.stepL < -1e-9) && !(pose.stepR < -1e-9), `a step of ${pose.stepL} or ${pose.stepR}`);
+    const pose = A.sample({ crouch: 40, stepL: -3, armL: 300, elbowR: -400, legR: -80, lean: 90 });
+    assertEqual([pose.crouch, pose.stepL, pose.armL, pose.elbowR, pose.legR, pose.lean], [30, 0, 180, -150, -30, 30]);
+    assertEqual([A.sample({ rise: 2 }).rise, A.sample({ rise: -2 }).rise], [1, -1], 'rise moves at most a whole stance');
+  });
+
+  test('idle breathes with a standing friend\'s arms, a little', () => {
+    const arms = sampled(A.clips.idle, 10).map(t => A.sample(A.clips.idle, t).armL);
+    const low = Math.min(...arms), high = Math.max(...arms);
+    assert(high > 1 && Math.max(high, -low) < 4, `the arms move between ${low} and ${high}`);
+  });
+
+  test('standUp and sitDown raise and lower the head smoothly', () => {
+    const el = document.createElement('div');
+    el.style.width = el.style.height = '512px';
+    document.body.appendChild(el);
+    try {
+      for (const name of standers()) {
+        const rig = PhyFriends.mount(el, name, { bitmap: false, view: 'stand' }), lift = PhyFriends.riseOf(name, { stance: 'stand' });
+        const moves = [['standUp', 'sit', 0, lift], ['sitDown', 'stand', lift, 0]];
+        for (const [move, stance, from, to] of moves) {
+          const clip = A.layer(A.still({ stance }), A.make[move]()), pose = t => A.sample(clip, t);
+          assertEqual([PhyFriends.riseOf(name, pose(0)), PhyFriends.riseOf(name, pose(clip.duration))], [from, to], `${name}: ${move}`);
+          // The eyes move a little each frame; the rig draws a squash to the hundredth, so a frame may add a step of a
+          // unit or two, but never the whole rise at once.
+          const eyes = t => { rig.setPose(pose(t), true); return rig.parts.eyeL.getScreenCTM().f; };
+          let last = eyes(0), largest = 0;
+          for (const t of span(clip.duration, 120).slice(1)) { const y = eyes(t); largest = Math.max(largest, Math.abs(y - last)); last = y; }
+          assert(largest < 6, `${name}: the head jumps ${largest.toFixed(1)} px in one frame of ${move}`);
+        }
+        el.textContent = '';
+      }
+    } finally {
+      el.remove();
+    }
+  });
+
+  test('walking steps off with the foot on the side it goes to and keeps a planted foot where it was', () => {
+    // A spec with the house's body and the template's limbs, whose legs WALK.leg describes.
+    const house = { rig: { ground: 131 }, body: { cx: 0, cy: 83, rx: 68, ry: 48 } };
+    for (const distance of [96, -96]) {
+      const first = A.walking(0.5 / 8, 8, { distance }).pose;
+      const [lead, trail] = distance > 0 ? ['stepR', 'stepL'] : ['stepL', 'stepR'];
+      assert(first[lead] > 0 && first[trail] === 0, `the first step going ${distance}`);
+      let last = null;
+      for (let i = 0; i <= 64; i++) {
+        const walk = A.walking(i / 64, 8, { distance });
+        const pose = A.sample({ ...walk.pose, x: walk.along * distance, stance: 'stand' });
+        const st = PhyFriends.poseState(house, pose), feet = {};
+        for (const side of ['L', 'R']) {
+          const [, x, y] = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(st.transform[`foot${side}`]).map(Number);
+          feet[side] = { x: pose.x + (1 - pose.squash / 2) * x, y: y + pose.y, planted: pose[`step${side}`] === 0 };
+        }
+        for (const side of ['L', 'R']) {
+          if (!last || !feet[side].planted || !last[side].planted) continue;
+          assert(Math.abs(feet[side].x - last[side].x) < 0.5, `foot ${side} slides from ${last[side].x} to ${feet[side].x}`);
+          assert(Math.abs(feet[side].y - last[side].y) < 0.5, `foot ${side} lifts from ${last[side].y} to ${feet[side].y}`);
+        }
+        last = feet;
+      }
+      assertEqual(A.walking(1, 8, { distance }).along, 1);
+      assertEqual(restless(A.sample(A.walking(1, 8, { distance }).pose)), [], 'it ends at rest');
+    }
+    assertEqual(A.walking(0.5, 3).along, 0.5, 'steps come in pairs, so three steps are four');
+  });
+
+  test('a friend waves and points with the arm away from its tail', () => {
+    // Howdi's tail is on the viewer's left, and YuanYuan's lies out to the viewer's right while he stands.
+    for (const [name, arm] of [['howdi', 'armR'], ['yuanyuan', 'armL']]) {
+      for (const move of ['wave', 'point']) assert(A.make[move]({ spec: name })(0.6)[arm] > 45, `${name} ${move}s with ${arm}`);
+    }
+  });
+
+  test('under reduced motion a standing friend keeps its stance, and drops the arm movements and over, which are not the face', () => {
+    assertEqual(A.faceOnly({ stance: 'stand', over: 'armL', armL: 150, eyes: 'happy' }), { stance: 'stand', eyes: 'happy' });
   });
 })();

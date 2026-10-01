@@ -55,12 +55,12 @@ PhyFriends.define('alfie', {
   // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows the pink tongue
   // of the sheet's head study, without a fang.
   mouth: { y: 22, size: 3.8, tongue: 'blush' },
-  // The body is small, round and seated, in the house shade. Shoulder tufts sit under the cheeks, and small hip
-  // tufts below them.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // base. It is in the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 87, rx: 64, ry: 45, color: 'furShade',
+    cx: 0, cy: 87, rx: 64, ry: 45, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 8, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy plume rising behind Alfie's left hip (the viewer's right) and curling in low. It is all
   // coral, as the sheet's tip is: a white end vanishes into the paper and meets the white cheek as the tail sways in,
@@ -70,6 +70,15 @@ PhyFriends.define('alfie', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template, in the sheet's markings. Seated, the white forepaws rest on the ground between
+  // the hind feet (paw), and the white hind feet point at us at either side, under the red of the lower legs (foot).
+  // Standing, the coral arms end in white forearms and paws, whose white edge is tufted, and the red of the lower
+  // legs runs down to the white feet, its upper edge tufted too, as on the sheet.
+  stand: {
+    seat: { paw: { cx: 16, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 120, rx: 19, ry: 11, rot: -8 } },
+    arms: { paw: { color: 'face' }, bands: [{ from: 0.5, to: 1, color: 'face', teeth: 3, depth: 4 }] },
+    legs: { foot: { color: 'face' }, bands: [{ from: 0.6, to: 1, color: 'stripe', teeth: 3, depth: 4 }] },
   },
   extras: [
     // The spiky cheek tufts: a fur ruff under the head whose points reach past the white cheeks, as on the sheet. An
@@ -102,28 +111,26 @@ PhyFriends.define('alfie', {
     // The eyebrow spots: a white oval above each lens, as in every picture.
     { on: 'hair', kind: 'ellipse', fill: 'face', cx: -32, cy: -38, rx: 8.5, ry: 5.5, rot: -8 },
     { on: 'hair', kind: 'ellipse', fill: 'face', cx: 32, cy: -38, rx: 8.5, ry: 5.5, rot: 8 },
+    // The tabby stripes on the outer side of each hip: two narrow bands running in from the body's edge and tapering
+    // to a round end, as the sheet's thigh stripes do, clipped to the body so that they start at its edge. They are
+    // as short as the narrow top of the body allows, clear of the white chest.
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[50, 70, 1, -8], [29, 79, 1, 0], [50, 83, 1, 0]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[57, 88, 1, -8], [29, 98, 1, 0], [57, 101, 1, 0]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-50, 70, 1, 0], [-50, 83, 1, 0], [-29, 79, 1, 8]] },
+    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-57, 88, 1, 0], [-57, 101, 1, 0], [-29, 98, 1, 8]] },
     // The white chest and belly, an oval from under the chin whose tufts hang over the belly. The gray of the color
     // bar, which the sheet draws down the chest and where the white meets the coral at the wrists and ankles, is
-    // left out: at gallery size it would read as a shadow.
-    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 28, ry: 30,
+    // left out: at gallery size it would read as a shadow. It is a little narrower than the sheet's, as the top of the
+    // body is narrow. Its top is the ruff under the chin, so it lies over the tops of the arms, as a scarf does
+    // (scarf).
+    { on: 'scarf', clip: true, fill: 'face', cx: 0, cy: 80, rx: 25, ry: 30,
       fluff: [{ from: 40, to: 140, n: 3, len: 5, depth: 0.1, b1: -25, b2: 5, jit: 0 }] },
-    // The tabby stripes on the outer side of each hip: two narrow bands running in from the body's edge and tapering
-    // to a round end, as the sheet's thigh stripes do, clipped to the body so that they start at its edge.
-    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[74, 65, 1, -8], [36, 75, 1, 0], [74, 78, 1, 0]] },
-    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[74, 85, 1, -8], [40, 94, 1, 0], [74, 97, 1, 0]] },
-    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-74, 65, 1, 0], [-74, 78, 1, 0], [-36, 75, 1, 8]] },
-    { on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-74, 85, 1, 0], [-74, 97, 1, 0], [-40, 94, 1, 8]] },
-    // The hind feet, turned out slightly: white, under the red of the lower legs, each with its big pink pad
-    // turned to the front.
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -50, cy: 112, rx: 17, ry: 11, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 50, cy: 112, rx: 17, ry: 11, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -50, cy: 120, rx: 19, ry: 11, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 50, cy: 120, rx: 19, ry: 11, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'blush', cx: -51, cy: 121, rx: 8, ry: 6, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'blush', cx: 51, cy: 121, rx: 8, ry: 6, rot: 8 },
-    // The white forepaws on the ground between them.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -16, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 16, cy: 121, rx: 12.5, ry: 10 },
+    // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line).
+    // The red of the lower leg above each white foot, behind it.
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'stripe', cx: 0, cy: -8, rx: 17, ry: 11, rot: -8 },
+    // The big pink pad on each sole, which faces the viewer only while Alfie sits, so it flattens as the foot tips
+    // down (sole).
+    { on: 'feet', sole: true, kind: 'ellipse', fill: 'blush', cx: -1, cy: 1, rx: 8, ry: 6, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

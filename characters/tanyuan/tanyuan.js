@@ -15,7 +15,7 @@ PhyFriends.define('tanyuan', {
     eye: '#2b2220',        // A warm near-black, as the pictures draw the nose, used for the open mouth.
     eyeRed: '#c84033',     // The red of the eyes in ramen.jpg (#da6655), one house step deeper so that it holds its weight on the tan.
     blush: '#f4ad9e',      // The coral of the hatched blush in ramen.jpg, as one flat soft tint.
-    hoodie: '#698296',     // The blue-gray of the hoodie in hoodie.jpg (poster.jpg's is the same). Its house shade (hoodieShade) fills the body, which sits under the head; only the front, which lies over the ribbed hem, takes this color.
+    hoodie: '#698296',     // The blue-gray of the hoodie in hoodie.jpg (poster.jpg's is the same). Its house shade (hoodieShade) fills the body, which sits under the head; only the front, which lies over the ribbed hem, takes this color, and the sleeves take the shade, so that they show against it.
     hood: '#dcdcdc',       // The pale gray of the hood in hoodie.jpg and bust.jpg (poster.jpg draws it in the hoodie's blue). Its house shade (hoodShade) fills the inside of the hood, which lies behind its rim.
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
@@ -69,11 +69,11 @@ PhyFriends.define('tanyuan', {
   // There is no mouth by default (the pictures' nose and mouth are omitted). It sits on the white, below the tan
   // between the eyes; when open, it shows a pink tongue and no fang, as the pictures show none.
   mouth: { y: 27, size: 3.8, tongue: 'blush' },
-  // The body is seated and round, and wears the hoodie, so it has no fur tufts. It sits under the head, so it takes
-  // the hoodie's house shade. Below the front of the hoodie (an extra) it shows as the ribbed hem of hoodie.jpg,
-  // which lies under the front where the front blouses over it. The ribbed cuffs of hoodie.jpg and the paw on the
-  // chest in poster.jpg are too small to keep.
-  body: { cx: 0, cy: 84, rx: 66, ry: 48, color: 'hoodieShade' },
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // the base. It wears the hoodie, so it has no fur tufts. It sits under the head, so it takes the hoodie's house
+  // shade. Below the front of the hoodie (an extra) it shows as the ribbed hem of hoodie.jpg, which lies under the
+  // front where the front blouses over it. The paw print on the chest in poster.jpg is too small to keep.
+  body: { cx: 0, cy: 84, rx: 66, ry: 48, color: 'hoodieShade', onigiri: 1 },
   // The tail is a bushy tan plume rising behind his left hip (the viewer's right), its tip curling in. Its
   // underside is white (an extra); no picture gives it a white end.
   tail: {
@@ -81,6 +81,17 @@ PhyFriends.define('tanyuan', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 16, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template. Seated, his tan forepaws rest on the ground between his white hind feet, which
+  // are turned out slightly. Standing, the arms are the hoodie's long sleeves, which stand proud of them and blouse
+  // over the ribbed cuffs of hoodie.jpg. They take the hoodie's house shade, as its sides and hem do, so that they show
+  // against its front, which is in its own color; the forepaws are tan. The legs are his tan fur, in its house shade,
+  // and white from the shin down to the white hind feet, as badminton.jpg draws them.
+  stand: {
+    seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 120, rx: 19, ry: 10, rot: -8 } },
+    arms: { color: 'hoodieShade', paw: { color: 'fur' },
+      bands: [{ from: 0.34, to: 0.74, color: 'hoodieShade', grow: 1.5 }, { from: 0, to: 0.4, color: 'hoodieShade', grow: 2.5 }] },
+    legs: { color: 'furShade', foot: { color: 'face' }, bands: [{ from: 0.5, to: 0.95, color: 'face' }] },
   },
   extras: [
     // The tan band across the eyes: it covers the top of the white face down to just under the eyes, far enough
@@ -108,32 +119,26 @@ PhyFriends.define('tanyuan', {
     // The front of the hoodie, in its own color. It blouses over the ribbed hem, as in hoodie.jpg: its sides tuck in
     // under the ends of the hood and fall a little past the body, and its lower edge overhangs the hem at the hips, so
     // that the hem shows as a band of cloth under a lip. Its top lies under the hood.
-    { on: 'body', fill: 'hoodie', nodes: [[-50, 34, 1], [50, 34, 1], [60, 58], [62, 67], [66, 78], [69, 88], [67.5, 94],
-      [58, 98], [30, 100.5], [0, 101.5], [-30, 100.5], [-58, 98], [-67.5, 94], [-69, 88], [-66, 78], [-62, 67], [-60, 58]] },
-    // The inside of the hood, in its house shade: it lies behind the rim, which is the same gray, and shows where the
-    // rim's two sides part under the chin, as the inside of the hood does beside the chest in hoodie.jpg. The white
-    // chest that the pictures show there is left out: right under the white chin it would merge with the chin, and in
-    // its own house shade it would merge with the rim.
-    { on: 'body', fill: 'hoodShade', nodes: [[-34, 44, 1], [34, 44, 1], [0, 84, 1]] },
-    // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
-    // under the chin; his left side (the viewer's right) lies over the other, as in hoodie.jpg. Its ends rest on the
-    // shoulders and stand out past them, so that the roll overhangs the hoodie below and reads as cloth lying on the
-    // body rather than printed on it. Its top lies under the head.
-    { on: 'body', fill: 'hood', nodes: [[-28, 50, 1, -8], [1, 80, 1], [1, 87, 1], [-24, 79], [-52, 72], [-68.5, 64], [-70, 53],
-      [-58, 44], [-44, 36, 1]] },
-    { on: 'body', fill: 'hood', nodes: [[28, 50, 1], [44, 36, 1], [58, 44], [70, 53], [68.5, 64], [52, 72], [24, 79],
-      [0, 87, 1], [0, 81, 1, -8]] },
+    { on: 'body', fill: 'hoodie', nodes: [[-32, 36, 1], [32, 36, 1], [38, 58], [41.5, 67], [46.5, 78], [51, 88], [53, 94],
+      [48, 98], [26, 100.5], [0, 101.5], [-26, 100.5], [-48, 98], [-53, 94], [-51, 88], [-46.5, 78], [-41.5, 67], [-38, 58]] },
     // The two white drawstrings, coming out of the hood's edge on either side of the point and hanging a little apart,
     // over the lip of the front.
     { on: 'body', fill: 'face', round: 0.5, nodes: [[-14, 78, 1], [-9, 78, 1], [-12, 105, 1], [-17, 105, 1]] },
     { on: 'body', fill: 'face', round: 0.5, nodes: [[9, 78, 1], [14, 78, 1], [17, 105, 1], [12, 105, 1]] },
-    // The white hind feet, turned out slightly, as badminton.jpg draws the lower legs.
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: -48, cy: 120, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'face', cx: 48, cy: 120, rx: 19, ry: 10, rot: 8 },
-    // The tan forepaws on the ground between them. As with every friend, the arms are not drawn, so neither are the
-    // sleeves.
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: -15, cy: 121, rx: 12.5, ry: 10 },
-    { on: 'body', kind: 'ellipse', fill: 'fur', cx: 15, cy: 121, rx: 12.5, ry: 10 },
+    // The hood is clothing, so it lies under the arms, and the sleeves show against its pale gray where they cross its
+    // ends. The inside of the hood, in its house shade: it lies behind the rim, which is the
+    // same gray, and shows where the rim's two sides part under the chin, as the inside of the hood does beside the
+    // chest in hoodie.jpg. The white chest that the pictures show there is left out: right under the white chin it
+    // would merge with the chin, and in its own house shade it would merge with the rim.
+    { on: 'body', fill: 'hoodShade', nodes: [[-28, 44, 1], [28, 44, 1], [0, 82, 1]] },
+    // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
+    // under the chin; his left side (the viewer's right) lies over the other, as in hoodie.jpg. Its ends rest on the
+    // narrow shoulders and stand out past them, so that the roll overhangs the hoodie below and reads as cloth lying
+    // on the body rather than printed on it. Its top lies under the head.
+    { on: 'body', fill: 'hood', nodes: [[-24, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-18, 79], [-34, 71], [-41, 63], [-40, 53],
+      [-33, 45], [-28, 40, 1]] },
+    { on: 'body', fill: 'hood', nodes: [[24, 50, 1], [28, 40, 1], [33, 45], [40, 53], [41, 63], [34, 71], [18, 79],
+      [0, 86, 1], [0, 80, 1, -8]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -136, +x away from the body); the
     // library bends them onto the curve. The white underside, on the side toward the body, as in hoodie.jpg and
     // badminton.jpg.

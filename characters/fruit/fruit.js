@@ -76,12 +76,12 @@ PhyFriends.define('fruit', {
   // There is no mouth by default (the pictures' nose and mouth are omitted); when open, it shows the cyan tongue and
   // the one fang of sitting.png.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small, round and seated, in the house shade. Shoulder tufts sit under the cheeks, and small hip tufts
-  // below them.
+  // The body is small, and an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It is in the
+  // house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 84, rx: 66, ry: 48, color: 'furShade',
+    cx: 0, cy: 84, rx: 66, ry: 48, color: 'furShade', onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
-      { from: 20, to: 60, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
+      { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a big bushy navy plume rising behind his left hip (the viewer's right), as in sitting.png, its tip
   // curling in. Its lighter blue end is an extra.
@@ -90,6 +90,15 @@ PhyFriends.define('fruit', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 16, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
+  },
+  // The limbs, on the house template. Seated, as in sitting.png, the steel-blue forepaws rest on the ground between
+  // the steel-blue hind feet, which are turned out slightly. Standing, as in spoon.png, the navy arms end in the
+  // steel-blue paws under the bright-blue zigzag, and the navy legs in the steel-blue feet under the two bright-blue
+  // stripes (extras).
+  stand: {
+    seat: { paw: { cx: 15, cy: 119, rx: 12.5, ry: 12 }, foot: { cx: 48, cy: 121, rx: 19, ry: 10, rot: -8 } },
+    arms: { paw: { color: 'paw' } },
+    legs: { foot: { color: 'paw' } },
   },
   extras: [
     // Cheek fluff under the head: a navy ruff whose spiky tufts reach past the blue-gray cheeks, as in sitting.png. An
@@ -108,12 +117,12 @@ PhyFriends.define('fruit', {
     { on: 'hair', kind: 'ellipse', fill: 'hair', cx: 26, cy: -30, rx: 7, ry: 6 },
     // The small bat wings of sitting.png, spoon.png and moon.png, behind the body: each peeks out from behind a
     // shoulder, under the cheek fluff, its leading edge rising to a point and its trailing edge cut into scallops
-    // between the fingers. Only the teal membrane is drawn; the pictures draw the frame as line work, in the outline's
+    // between the fingers, its root tucked behind the narrow top of the body. Only the teal membrane is drawn; the pictures draw the frame as line work, in the outline's
     // color or in dark red.
     { on: 'body', under: true, fill: 'wing',
-      nodes: [[44, 52, 1, -6], [112, 20, 1, 0], [110, 46, 1, 30], [96, 54, 1, 30], [82, 64, 1, 30], [60, 80, 1, 0]] },
+      nodes: [[36, 54, 1, -6], [112, 20, 1, 0], [110, 46, 1, 30], [96, 54, 1, 30], [80, 62, 1, 30], [46, 68, 1, 0]] },
     { on: 'body', under: true, fill: 'wing',
-      nodes: [[-44, 52, 1, 0], [-60, 80, 1, 30], [-82, 64, 1, 30], [-96, 54, 1, 30], [-110, 46, 1, 0], [-112, 20, 1, -6]] },
+      nodes: [[-36, 54, 1, 0], [-46, 68, 1, 30], [-80, 62, 1, 30], [-96, 54, 1, 30], [-110, 46, 1, 0], [-112, 20, 1, -6]] },
     // The blue-gray chest and belly: a V whose sides zigzag like a lightning bolt, as in sitting.png, narrowing to a
     // point between the forepaws. It starts a little below the chin, so that a band of the shaded body parts the
     // blue-gray chin from the blue-gray chest, as for Teni. The lavender at the top of the chest in icon.png is
@@ -128,34 +137,26 @@ PhyFriends.define('fruit', {
         [-16, 88, 1], [-28, 80, 1], [-20, 72, 1]] },
     // A bright-blue diamond on each hip, for the small diamonds that the pictures scatter over the flanks. The diamond
     // with a dark-red center that spoon.png and moon.png draw on the upper arm lies under the cheek fluff in this pose.
-    { on: 'body', fill: 'stripe', polys: [[-50, 88, 9, 4, 90, 0.6], [50, 88, 9, 4, 90, 0.6]] },
-    // The hind feet in the steel blue of the lower legs, turned out slightly, under the two bright-blue stripes that
-    // the pictures draw around the lower leg, parted by a band of the shaded body.
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 106, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 106, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: -48, cy: 110, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'furShade', cx: 48, cy: 110, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: -48, cy: 114, rx: 19, ry: 9, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'stripe', cx: 48, cy: 114, rx: 19, ry: 9, rot: 8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: -48, cy: 121, rx: 19, ry: 10, rot: -8 },
-    { on: 'body', kind: 'ellipse', fill: 'paw', cx: 48, cy: 121, rx: 19, ry: 10, rot: 8 },
-    // The steel-blue forepaws on the ground between them, each topped by the bright-blue zigzag where the navy of the
-    // arm meets the steel blue of the forearm in every picture: two shapes with the same sawtooth top, the steel blue a
-    // little lower. As with every friend, the arms are not drawn, and the claws and pads are too small to keep.
-    { on: 'body', fill: 'stripe', cx: -15, cy: 115, rx: 12.5, ry: 14,
-      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
-    { on: 'body', fill: 'stripe', cx: 15, cy: 115, rx: 12.5, ry: 14,
-      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
-    { on: 'body', fill: 'paw', cx: -15, cy: 119, rx: 12.5, ry: 12,
-      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
-    { on: 'body', fill: 'paw', cx: 15, cy: 119, rx: 12.5, ry: 12,
-      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    { on: 'body', fill: 'stripe', polys: [[-40, 88, 9, 4, 90, 0.6], [40, 88, 9, 4, 90, 0.6]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The lighter blue end, which every picture draws, its edge cut into
     // flame-shaped tufts that reach back toward the base. It is an extra no wider than the plume rather than the tail's
     // tip, whose ellipse would widen the gallery's measure of the tail's reach, as for BarDell.
     { on: 'tail', clip: true, fill: 'tailTip', cx: 0, cy: -118, rx: 48, ry: 64,
       fluff: [{ from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    // Paw extras are in the seated forepaw's space (its center on the origin, +x toward the center line). The
+    // bright-blue zigzag where the navy of the arm meets the steel blue of the forearm in every picture: a bright-blue
+    // shape under the paw and the paw's own sawtooth top, which share their teeth, the steel blue a little lower. The
+    // claws and pads are too small to keep.
+    { on: 'paws', under: true, fill: 'stripe', cx: 0, cy: -4, rx: 12.5, ry: 14,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    { on: 'paws', fill: 'paw', cx: 0, cy: 0, rx: 12.5, ry: 12,
+      fluff: [{ from: 210, to: 330, n: 3, len: 4, depth: 0.12, jit: 0 }] },
+    // Feet extras are in the seated hind foot's space: the two bright-blue stripes that the pictures draw around the
+    // lower leg, above the steel-blue foot, parted by a band of the shaded body.
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'stripe', cx: 0, cy: -15, rx: 19, ry: 9, rot: -8 },
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'furShade', cx: 0, cy: -11, rx: 19, ry: 9, rot: -8 },
+    { on: 'feet', under: true, kind: 'ellipse', fill: 'stripe', cx: 0, cy: -7, rx: 19, ry: 9, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

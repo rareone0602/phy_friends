@@ -43,8 +43,9 @@
     <label>Speed <select id="speed"><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option></select></label>
     <label><input id="loop" type="checkbox" checked> Loop</label>
     <label><input id="look" type="checkbox" checked> Look at pointer</label>
+    <label><input id="stand" type="checkbox"> Stand</label>
   </div>
-  <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim, and face, react, hold and feel from PhyFriends.emotion.</p>
+  <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim, and face, react, hold and feel from PhyFriends.emotion. Tick Stand to play them standing, as walk, wave, point and the other standing movements need.</p>
 </main>
 
 <script src="../src/phyfriends.js"></script>
@@ -81,18 +82,28 @@
   };
   group('movements', Object.keys(A.clips).map(n => [n, n]));
   group('feelings', E.names.map(n => [n, `layer(idle, feel('${n}'))`]));
+  // Movements made for the friend shown, on the side away from its tail.
+  const BY_SPEC = ['wave', 'point'];
+  // The stance a change of stance starts from, whatever Stand says.
+  const FROM = { standUp: 'sit', sitDown: 'stand' };
 
-  // Portrait zoomed out about the bottom edge, so hops stay in frame.
+  // The portrait, or standing the standing one, zoomed out about the bottom edge, so hops stay in frame.
   function stageView(spec, k = 0.85) {
-    const v = PF.resolveView(spec, 'portrait');
+    const v = PF.resolveView(spec, $('stand').checked ? 'stand' : 'portrait');
     return { ...v, x: v.w / 2 + (v.x - v.w / 2) * k, y: v.h + (v.y - v.h) * k, scale: v.scale * k };
   }
 
   function say(text, err = false) { $('msg').textContent = text; $('msg').className = err ? 'err' : ''; }
 
+  // The clip chosen, over a standing pose while Stand is ticked; standUp plays over a seated one and sitDown over a
+  // standing one.
   function currentClip() {
     const src = $('expr').value.trim() || $('clip').value;
-    try { return A.parse(src); } catch (e) { say(String(e.message || e), true); return null; }
+    try {
+      const clip = BY_SPEC.includes(src) ? A.make[src]({ spec: $('char').value }) : A.parse(src);
+      const stance = FROM[src] || ($('stand').checked ? 'stand' : null);
+      return stance ? A.layer(A.still({ stance }), clip) : clip;
+    } catch (e) { say(String(e.message || e), true); return null; }
   }
 
   function sync(p = player) { // Also the player's onFrame, which can fire before `player` is assigned; hence p.
@@ -105,7 +116,7 @@
 
   function mountCharacter() {
     const spec = PF.get($('char').value);
-    const clip = player ? player.clip : currentClip() || A.clips.idle, start = player ? player.time : 0;
+    const clip = currentClip() || A.clips.idle, start = player ? player.time : 0;
     const wasPlaying = player ? player.playing : true;
     if (player) player.destroy();
     rig = PF.mount($('stage'), spec, { view: stageView(spec) });
@@ -137,6 +148,7 @@
   $('speed').addEventListener('change', e => { player.speed = +e.target.value; });
   $('loop').addEventListener('change', e => { player.loop = e.target.checked; });
   $('look').addEventListener('change', e => { if (!e.target.checked) player.override(LOOK_OFF); });
+  $('stand').addEventListener('change', mountCharacter);
   window.addEventListener('pointermove', lookAtPointer);
   window.addEventListener('pointerdown', lookAtPointer);
   document.documentElement.addEventListener('pointerleave', () => player.override(LOOK_OFF));
