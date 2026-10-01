@@ -66,11 +66,25 @@
     for (let i = 0; i < 30 && rgb.some(c => c < -0.002 || c > 1.002); i++) rgb = toRGB(c2 *= 0.95);
     return '#' + rgb.map(c => Math.max(0, Math.min(255, Math.round(c * 255))).toString(16).padStart(2, '0')).join('');
   }
+  const isHex = v => typeof v === 'string' && /^#[0-9a-f]{3,6}$/i.test(v);
+  // A palette role is a color, or the name of another role (paw: 'face') or of its house shade (body: 'furShade'),
+  // whose color it takes; its own house shade is then that color's.
   function withShades(palette) {
+    const hexOf = (k, seen = new Set()) => {
+      const v = palette[k];
+      if (isHex(v)) return v;
+      if (typeof v !== 'string' || seen.has(k)) return undefined;
+      seen.add(k);
+      if (v in palette) return hexOf(v, seen);
+      const base = v.endsWith('Shade') && v.slice(0, -5);
+      const hex = base && base in palette ? hexOf(base, seen) : undefined;
+      return hex && shadeOf(hex);
+    };
     const P = {}; // Insert each derived shade directly after its base color.
-    for (const [k, v] of Object.entries(palette)) {
+    for (const k of Object.keys(palette)) {
+      const v = hexOf(k) ?? palette[k];
       P[k] = v;
-      if (typeof v === 'string' && /^#[0-9a-f]{3,6}$/i.test(v) && !(`${k}Shade` in palette)) P[`${k}Shade`] = shadeOf(v);
+      if (isHex(v) && !(`${k}Shade` in palette)) P[`${k}Shade`] = shadeOf(v);
     }
     return P;
   }
@@ -408,6 +422,151 @@
     if (!r) throw new Error(`phy_friends: unknown character "${s}"`);
     return r;
   }
+  // The palette role that colors a part (ANATOMY.roles): the role itself where the spec's palette gives it, else
+  // `legacy`, the color that the part takes in a spec without the role (Claude's, and specs written before the roles).
+  const roleOr = (spec, name, legacy) => (spec.palette && name in spec.palette ? name : legacy);
+
+  // ---------------------------------------------------------------- Anatomy
+
+  // Every friend drawn to the house template is made of the same parts, named the same way, so that one friend's spec
+  // reads line for line against another's, and a part that a friend lacks is a decision rather than an oversight.
+  // Claude, which keeps the shape of Claude Code's mascot, is the one friend outside it. check(spec) lists where a
+  // spec departs from it.
+  //   sections: a spec's sections, in order; each one marked true must be given, or be false where the friend has no
+  //             such part (Terry has no hair). A friend that stands gives its seated paw and foot (stand.seat), or
+  //             false for one that its seated drawing hides.
+  //   roles:    the palette's roles, in order, each with the part that needs it ('' for every friend; null for a role
+  //             that a friend may leave out). Each part takes its color from its role (the head from `head`, a hind
+  //             foot from `foot`), never from a color of its own, so that the palette is the one table of a friend's
+  //             colors; a role may name another role (paw: 'face') or its house shade (body: 'furShade'). The
+  //             friend's other colors follow the roles.
+  //   features: what an extra draws (its `feature`), grouped by where it sits, so that what friends share has one
+  //             name: one friend's eyebrow dots are `brows` as much as another's.
+  const ANATOMY = {
+    sections: {
+      palette: true, head: true, face: true, ears: true, hair: true, eyes: true, blush: true, mouth: true, body: true,
+      tail: true, stand: true, extras: true, rig: true, views: false,
+    },
+    roles: {
+      bg: '', fur: '', head: 'head', face: 'face', hair: 'hair', ear: 'ears', earRight: null, earInner: 'ears.inner',
+      iris: 'eyes', irisRight: null, ink: 'mouth', blush: 'blush', tongue: 'mouth', body: 'body', tail: 'tail',
+      arm: 'stand', paw: 'stand', pawRight: null, leg: 'stand', foot: 'stand',
+    },
+    features: {
+      head: ['cheekRuff', 'neck', 'backHair', 'horns', 'blaze', 'brows', 'forehead', 'cheekMarks', 'eyePatch', 'mask',
+        'muzzle', 'noseBand', 'glasses', 'cap'],
+      ears: ['earInner', 'earTufts', 'earFold', 'earTips', 'earLobes', 'earFront'],
+      hair: ['locks', 'curl', 'crest', 'partings', 'streaks', 'lockTips', 'ponytail'],
+      body: ['chest', 'belly', 'shoulders', 'armStripes', 'thighs', 'wings', 'crumbs'],
+      clothes: ['bandana', 'hoodie', 'hem', 'hood', 'drawstrings', 'headphones', 'yukata', 'collar', 'print', 'sash',
+        'bow', 'anklet', 'boots'],
+      tail: ['tailTip', 'tailMarks', 'tailBase', 'tailUnderside', 'marbling'],
+      limbs: ['cuffs', 'socks', 'toes', 'soles'],
+    },
+    // The layers an extra may lie on (its `on`); 'ears', 'paws' and 'feet' mean both.
+    layers: ['base', 'face', 'ears', 'earL', 'earR', 'hair', 'blush', 'body', 'scarf', 'tail', 'paws', 'pawL', 'pawR',
+      'feet', 'footL', 'footR', 'ground'],
+    // The parts of every friend's drawing that a pose moves, by the names that a mounted rig gives them (rig.parts):
+    // what the code that animates a friend may rely on, whichever friend it is.
+    parts: ['root', 'upper', 'head', 'base', 'face', 'earL', 'earR', 'hair', 'eyes', 'eyeL', 'eyeR', 'mouth', 'blush',
+      'cheekL', 'cheekR', 'body', 'tail', 'legL', 'legR', 'footL', 'footR', 'armL', 'armR', 'pawL', 'pawR'],
+    // The keys of the standing figure (stand) and of its seat, arms and legs.
+    stand: {
+      stand: ['seat', 'fit', 'ground', 'hips', 'arms', 'legs', 'tail'],
+      seat: ['paw', 'foot', 'right', 'arms', 'legs'],
+      arms: ['shoulder', 'angle', 'bend', 'length', 'width', 'taper', 'bands', 'paw', 'right'],
+      legs: ['hip', 'spread', 'ankle', 'bow', 'knees', 'width', 'taper', 'bands', 'foot', 'right'],
+    },
+  };
+  // The parts whose color is a role's, by the path of their own `color` (or tongue) in a spec. The right one of a pair
+  // (`right`) takes the pair's role, or its own where the palette gives one (earRight, irisRight, pawRight).
+  const ROLE_COLORS = {
+    'head.color': 'head', 'face.color': 'face', 'ears.color': 'ear', 'ears.right.color': 'earRight',
+    'ears.inner.color': 'earInner', 'hair.color': 'hair', 'eyes.color': 'iris', 'eyes.right.color': 'irisRight',
+    'mouth.color': 'ink', 'mouth.tongue': 'tongue', 'blush.color': 'blush', 'body.color': 'body', 'tail.color': 'tail',
+    'stand.arms.color': 'arm', 'stand.arms.right.color': 'arm', 'stand.arms.paw.color': 'paw',
+    'stand.arms.right.paw.color': 'pawRight', 'stand.legs.color': 'leg', 'stand.legs.right.color': 'leg',
+    'stand.legs.foot.color': 'foot', 'stand.legs.right.foot.color': 'foot',
+  };
+
+  // Where a spec departs from the house anatomy (ANATOMY), as a list of plain sentences; empty when it keeps to it.
+  function check(specOrName) {
+    const spec = resolve(specOrName);
+    return [checkSections, checkPalette, checkColors, checkStand, checkExtras].flatMap(departures => departures(spec));
+  }
+  const valueAt = (o, path) => path.split('.').reduce((v, k) => (v == null ? v : v[k]), o);
+
+  // The sections: each one the house knows, the required ones given, in the house order.
+  function checkSections(spec) {
+    const out = [], { sections } = ANATOMY, order = Object.keys(sections), given = Object.keys(spec).filter(k => k !== 'name');
+    for (const k of given) if (!(k in sections)) out.push(`"${k}" is not a section of the house anatomy`);
+    for (const k of order) if (sections[k] && spec[k] === undefined) out.push(`no ${k}: give it, or false if the friend has none`);
+    const known = given.filter(k => k in sections);
+    if (known.join() !== order.filter(k => known.includes(k)).join()) out.push(`the sections are not in the house order (${order.join(', ')})`);
+    return out;
+  }
+
+  // The palette: every role a part needs, in the house order before the friend's other colors, each naming a color.
+  function checkPalette(spec) {
+    const out = [], { roles } = ANATOMY, palette = spec.palette || {}, P = withShades(palette), names = Object.keys(palette);
+    const needed = Object.entries(roles).filter(([, need]) => need === '' || (need && valueAt(spec, need)));
+    for (const [role] of needed) if (!(role in palette)) out.push(`the palette has no ${role}`);
+    const rolesGiven = names.filter(k => k in roles), others = names.filter(k => !(k in roles));
+    if (names.join() !== [...Object.keys(roles).filter(k => rolesGiven.includes(k)), ...others].join()) {
+      out.push(`the palette's roles do not come first, in the house order (${Object.keys(roles).join(', ')})`);
+    }
+    for (const k of names) if (!isHex(P[k])) out.push(`palette.${k} names no color ("${palette[k]}")`);
+    return out;
+  }
+
+  // Every color the spec names is the palette's, a house shade of it, or a color written out; and each part takes its
+  // role's color, not one of its own.
+  function checkColors(spec) {
+    const out = [], P = withShades(spec.palette || {});
+    const named = (v, path) => {
+      if (typeof v === 'string' && v !== 'none' && !isHex(v) && !isHex(P[v])) out.push(`${path} names no color of the palette ("${v}")`);
+    };
+    const walk = (o, path) => {
+      if (Array.isArray(o)) o.forEach((v, i) => walk(v, `${path}[${i}]`));
+      else if (isObj(o)) {
+        for (const [k, v] of Object.entries(o)) {
+          const p = path ? `${path}.${k}` : k;
+          if (['fill', 'color', 'tongue', 'stripeColor'].includes(k)) named(v, p);
+          else if (k !== 'palette' && k !== 'views') walk(v, p);
+        }
+      }
+    };
+    walk(spec, '');
+    for (const [path, role] of Object.entries(ROLE_COLORS)) {
+      if (valueAt(spec, path) !== undefined) out.push(`${path} is set: give the palette's ${role} instead`);
+    }
+    return out;
+  }
+
+  // The standing figure's keys, and the seated paw and foot that it folds into.
+  function checkStand(spec) {
+    const out = [], s = spec.stand, keys = ANATOMY.stand;
+    if (!s || !isObj(s)) return out;
+    const only = (o, list, path) => o && Object.keys(o).forEach(k => list.includes(k) || out.push(`${path}.${k} is not a key of the standing figure`));
+    only(s, keys.stand, 'stand');
+    only(s.seat, keys.seat, 'stand.seat');
+    only(s.arms, keys.arms, 'stand.arms');
+    only(s.legs, keys.legs, 'stand.legs');
+    for (const end of ['paw', 'foot']) {
+      if (!s.seat || s.seat[end] === undefined) out.push(`stand.seat has no ${end}: give the seated ${end}, or false if the seated drawing hides it`);
+    }
+    return out;
+  }
+
+  // Each extra names a feature of the house's list, and lies on a layer of the figure.
+  function checkExtras(spec) {
+    const out = [], { features, layers } = ANATOMY, all = Object.values(features).flat();
+    (spec.extras || []).forEach((x, i) => {
+      if (!all.includes(x.feature)) out.push(`extras[${i}] (on ${x.on}) names no feature of the house's list ("${x.feature}")`);
+      if (!layers.includes(x.on)) out.push(`extras[${i}] lies on "${x.on}", which is not a layer of the figure`);
+    });
+    return out;
+  }
 
   // ------------------------------------------------------------------- Rig
 
@@ -485,8 +644,9 @@
   // standing `grow` proud of it on each side, whose upper edge may be cut into `teeth` points `depth` deep. A paw
   // or a foot is an ellipse in its own space: the origin at the end of the limb, +y carrying on along the arm
   // (down, for a foot) and +x toward the center line; the seated one (seat) rises into it. One that the seat leaves
-  // out may be any shape. `right` holds overrides for the right side, as the ears' does. The arms take the fur's
-  // color and the legs the body's (its house shade).
+  // out may be any shape. `right` holds overrides for the right side, as the ears' does. The arms, paws, legs and
+  // feet take the palette's arm, paw, leg and foot (ANATOMY.roles); in a spec without those roles, the arms and paws
+  // take the fur's color and the legs and feet the body's.
   // STAND_DEFAULT is the template: plush limbs, straight and round-ended, with legs that squash rather than bend.
   const STAND_DEFAULT = {
     arms: { bend: 0, length: 30, width: 22, taper: 0, paw: { cx: 0, cy: 0, rx: 11.5, ry: 11.5 } },
@@ -510,47 +670,60 @@
   function standFor(specOrName) {
     const spec = resolve(specOrName), b = spec.body;
     if (spec.stand === false || !b || b.nodes || b.tips || b.d || b.polys) return null;
-    if (standCache.has(spec)) return standCache.get(spec);
-    const s = spec.stand || {}, D = STAND_DEFAULT, { cx, cy, rx, ry } = ellipse(b), body = { ...b, cx, cy, rx, ry };
-    // The limbs and the ground are fitted to the body (STAND_FIT) where the spec does not place them. The arm's
-    // slope is measured down the outline over most of the arm's length.
-    const F = { ...STAND_FIT, ...(s.fit || {}) }, bottom = body.cy + body.ry, arm = { ...D.arms, ...(s.arms || {}) };
-    const sy = arm.shoulder ? arm.shoulder[1] : body.cy + F.shoulder, below = sy + arm.length * 0.9;
-    const slope = Math.atan2(reachAt(body, below) - reachAt(body, sy), below - sy) / DEG;
-    const fitted = {
-      arms: { shoulder: [reachAt(body, sy) - arm.width * F.inset, sy], angle: Math.max(0, slope) + F.out },
-      legs: { hip: [body.rx * F.hip, bottom - F.hipUp] },
-    };
-    const limbs = (kind, color, end) => {
-      const given = s[kind] || {}, base = { ...D[kind], ...fitted[kind], color, ...given };
-      base[end] = { ...D[kind][end], color: given.color || color, ...(given[end] || {}) };
-      const right = given.right || {};
-      return {
-        L: base,
-        R: { ...base, ...right, [end]: { ...base[end], ...(right.color ? { color: right.color } : {}), ...(right[end] || {}) } },
-      };
-    };
+    if (!standCache.has(spec)) standCache.set(spec, standingFigure(spec));
+    return standCache.get(spec);
+  }
+  function standingFigure(spec) {
+    const s = spec.stand || {}, { cx, cy, rx, ry } = ellipse(spec.body), body = { ...spec.body, cx, cy, rx, ry };
+    const F = { ...STAND_FIT, ...(s.fit || {}) }, bottom = body.cy + body.ry, fitted = fittedLimbs(body, s, F);
     const stand = {
       ground: s.ground ?? bottom + F.legs, tail: s.tail || null,
-      arms: limbs('arms', 'fur', 'paw'),
-      legs: limbs('legs', body.color || 'chest', 'foot'),
+      arms: limbPair(spec, s, fitted, 'arms', roleOr(spec, 'arm', 'fur'), 'paw'),
+      legs: limbPair(spec, s, fitted, 'legs', roleOr(spec, 'leg', body.color || roleOr(spec, 'body', 'chest')), 'foot'),
     };
     stand.hips = s.hips || [0, stand.legs.L.hip[1]];
     stand.tuck = F.tuck;
     stand.lift = stand.ground - ((spec.rig && spec.rig.ground) ?? DEFAULT_GROUND);
-    // The figure folds its limbs as it sits. The seat gives the forepaw and the hind foot of the friend's seated
-    // drawing (paw, foot): ellipses { cx, cy, rx, ry, rot } in head space, the left one's, with cx measured from the
-    // center line, and right: { paw, foot } holding overrides for the right one. Each limb folds until its paw or
-    // foot is that ellipse: the arm hangs down in front of the body to its paw, and the leg reaches its foot from
-    // behind the body. A foot left out tucks under the body. Without a paw, the limbs fold toward their places in
-    // STAND_FIT instead: the feet out beside the base and the paws reaching for the ground in front. `arms` and
-    // `legs` override the folded limbs' numbers.
-    const given = s.seat || {}, fold = { arms: {}, legs: {}, paw: {}, foot: {} };
+    stand.seat = seatFold(stand, body, s.seat || {}, F);
+    return stand;
+  }
+  // The limbs and the ground are fitted to the body (STAND_FIT) where the spec does not place them. The arm's slope is
+  // measured down the outline over most of the arm's length.
+  function fittedLimbs(body, s, F) {
+    const arm = { ...STAND_DEFAULT.arms, ...(s.arms || {}) }, bottom = body.cy + body.ry;
+    const sy = arm.shoulder ? arm.shoulder[1] : body.cy + F.shoulder, below = sy + arm.length * 0.9;
+    const slope = Math.atan2(reachAt(body, below) - reachAt(body, sy), below - sy) / DEG;
+    return {
+      arms: { shoulder: [reachAt(body, sy) - arm.width * F.inset, sy], angle: Math.max(0, slope) + F.out },
+      legs: { hip: [body.rx * F.hip, bottom - F.hipUp] },
+    };
+  }
+  // A pair of limbs (kind 'arms' or 'legs') with their paws or feet (end): the template's, fitted to the body, then
+  // the spec's own, each part in its role's color; the right one takes its `right` overrides, and the end's own role
+  // (pawRight) where the palette gives one.
+  function limbPair(spec, s, fitted, kind, color, end) {
+    const D = STAND_DEFAULT, given = s[kind] || {}, base = { ...D[kind], ...fitted[kind], color, ...given };
+    base[end] = { ...D[kind][end], color: roleOr(spec, end, given.color || color), ...(given[end] || {}) };
+    // The right paw or foot takes its own role (pawRight) where the palette gives one; otherwise, like the left, its
+    // pair's role (paw), and only without that the right limb's own color.
+    const right = given.right || {}, own = roleOr(spec, `${end}Right`, null) || (end in (spec.palette || {}) ? null : right.color);
+    const rightEnd = { ...base[end], ...(own ? { color: own } : {}), ...(right[end] || {}) };
+    return { L: base, R: { ...base, ...right, [end]: rightEnd } };
+  }
+  // The figure folds its limbs as it sits. The seat gives the forepaw and the hind foot of the friend's seated
+  // drawing (paw, foot): ellipses { cx, cy, rx, ry, rot } in head space, the left one's, with cx measured from the
+  // center line, and right: { paw, foot } holding overrides for the right one. Each limb folds until its paw or
+  // foot is that ellipse: the arm hangs down in front of the body to its paw, and the leg reaches its foot from
+  // behind the body. A foot left out tucks under the body. Without a paw, the limbs fold toward their places in
+  // STAND_FIT instead: the feet out beside the base and the paws reaching for the ground in front. `arms` and
+  // `legs` override the folded limbs' numbers.
+  function seatFold(stand, body, given, F) {
+    const fold = { arms: {}, legs: {}, paw: {}, foot: {} };
     const floor = stand.ground - stand.lift;  // Where the seated paws touch (rig.ground)
+    // A seated paw or foot with its defaults filled in, as ellipse() fills them, but with rot in degrees.
+    const full = e => e && { ...e, ...ellipse(e), rot: e.rot || 0 };
     for (const S of ['L', 'R']) {
       const leg = stand.legs[S], arm = stand.arms[S], [sx, sy] = arm.shoulder, right = S === 'R' ? given.right || {} : {};
-      // A seated paw or foot with its defaults filled in, as ellipse() fills them, but with rot in degrees.
-      const full = e => e && { ...e, ...ellipse(e), rot: e.rot || 0 };
       const paw = full(given.paw && { ...given.paw, ...(right.paw || {}) }), foot = full(given.foot && { ...given.foot, ...(right.foot || {}) });
       if (paw) {
         // Seated, the arm hangs straight down in front of the body to its paw, from `forelegs` of the body's
@@ -571,9 +744,15 @@
       Object.assign(fold.legs[S], given.legs || {});
     }
     fold.front = !!(fold.foot.L || fold.foot.R);  // Seated feet lie on the body, so the feet are drawn in front of it
-    stand.seat = fold;
-    standCache.set(spec, stand);
-    return stand;
+    return fold;
+  }
+  // The side ('L' or 'R', the viewer's) away from a friend's tail while it stands, where a raised arm shows best: 'R'
+  // for a friend without a tail.
+  function freeSide(specOrName) {
+    const spec = resolve(specOrName), stand = standFor(spec);
+    if (!spec.tail) return 'R';
+    const tail = { ...tailFor(spec), ...((stand && stand.tail) || {}) };
+    return tail.base[0] > 0 ? 'L' : 'R';
   }
   // How far the rig lifts a standing friend so that its feet stand where its seated paws do.
   function standLift(specOrName) {
@@ -761,52 +940,20 @@
   // outlines (paths).
   function poseState(spec, pose) {
     const p = { ...POSE, ...(pose || {}) }, rig = spec.rig || {};
-    const stand = standFor(spec), at = stanceFor(stand, p);
-    // A figure folded toward sitting takes only part of the pose's lean and limb movements, and none while it sits.
-    const q = at.fold ? { ...p } : p;
-    if (q !== p) for (const f of ['lean', 'armL', 'armR', 'elbowL', 'elbowR', 'legL', 'legR', 'stepL', 'stepR']) q[f] = (p[f] || 0) * (1 - at.fold);
+    const stand = standFor(spec), at = stanceFor(stand, p), q = foldedPose(p, at);
     const turn = rig.turn ?? 14;
     const tx = p.turnX * turn, ty = p.turnY * turn * 0.7;
     const par = z => `translate(${num(tx * z)} ${num(ty * z)})`;
-    const ground = rig.ground ?? DEFAULT_GROUND, neck = rig.neck || [0, 50];
-    const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
-    const lx = p.lookX * eye.range, ly = p.lookY * eye.range * 0.8;
-    const k = Math.max(0.2, 1 + p.widen), eyeOpen = `scale(${num(k)} ${num(k * Math.max(0.06, 1 - p.blink))})`;
-    const hc = spec.hair ? [spec.hair.cx || 0, spec.hair.cy || 0] : [0, 0];
+    const ground = rig.ground ?? DEFAULT_GROUND;
     const t = {
       root: `translate(${num(p.x)} ${num(p.y)}) translate(0 ${ground}) scale(${num(1 - p.squash * 0.5)} ${num(1 + p.squash)}) translate(0 ${-ground})` +
         (stand ? ` translate(0 ${num(-stand.lift)})` : ''),
       // The upper body of a friend with limbs (its body, arms, head and tail) drops with crouch, all the way down while
       // it sits, and leans about the hips.
       upper: stand ? `translate(0 ${num(at.crouch)}) rotate(${num(q.lean)} ${stand.hips[0]} ${stand.hips[1]})` : '',
-      head: `${p.headX || p.headY ? `translate(${num(p.headX)} ${num(p.headY)}) ` : ''}rotate(${num(p.tilt)} ${neck[0]} ${neck[1]})`,
-      earL: `${par(DEPTH.earL)} ${earPlace(earFor(spec, 'L'), 'L', p.earL)}`,
-      earR: `${par(DEPTH.earR)} ${earPlace(earFor(spec, 'R'), 'R', p.earR)}`,
-      eyeL: `translate(${num(-eye.x + lx)} ${num(eye.y + ly)})`,
-      eyeR: `translate(${num(eye.x + lx)} ${num(eye.y + ly)})`,
-      eyeLopen: eyeOpen,
-      eyeRopen: eyeOpen,
-      lidL: lidPlace(eye, p, 1),
-      lidR: lidPlace(eye, p, -1),
-      hair: `${par(DEPTH.hair)} rotate(${num(p.hair)} ${hc[0]} ${hc[1]})`,
+      ...headTransforms(spec, p, par),
     };
-    for (const k of ['body', 'face', 'blush', 'eyes', 'mouth']) t[k] = par(DEPTH[k]);
-    t.scarf = t.body;
-    if (spec.blush) {
-      const { x, y } = spec.blush, k = num(Math.max(0, 1 + p.flush));
-      t.cheekL = `translate(${num(-x)} ${num(y)}) scale(${k}) translate(${num(x)} ${num(-y)})`;
-      t.cheekR = `translate(${num(x)} ${num(y)}) scale(${k}) translate(${num(-x)} ${num(-y)})`;
-    }
-    if (spec.tail) {
-      // A tail with a standing place of its own (stand.tail) moves toward it as the friend rises.
-      const seated = tailFor(spec), tail = stand && stand.tail ? { ...seated, ...stand.tail } : seated;
-      if (tail !== seated && at.up < 1) {
-        const mix = (a, b) => a + (b - a) * at.up;
-        tail.base = seated.base.map((v, i) => mix(v, tail.base[i]));
-        tail.angle = mix(seated.angle || 0, tail.angle || 0);
-      }
-      t.tail = `${t.upper} ${par(DEPTH.tail)} ${tailPlace(tail, p.tail)}`.trim();
-    }
+    if (spec.tail) t.tail = `${t.upper} ${par(DEPTH.tail)} ${tailPlace(tailAt(spec, stand, at), p.tail)}`.trim();
     for (const s of ['L', 'R']) if (earFor(spec, s).inner?.front) t[`ear${s}front`] = t[`ear${s}`];
     const paths = {};
     if (stand) {
@@ -828,6 +975,55 @@
       state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth, show: shownBy(p.show), over: shownBy(p.over), tucked: at.up > 0 },
       paths,
     };
+  }
+
+  // A figure folded toward sitting takes only part of the pose's lean and limb movements, and none while it sits.
+  function foldedPose(p, at) {
+    if (!at.fold) return p;
+    const q = { ...p };
+    for (const f of LIMB_FIELDS) q[f] = (p[f] || 0) * (1 - at.fold);
+    return q;
+  }
+
+  // The head's transforms: its tilt and nod, and each of its layers, which slide by their depth (par) as it turns.
+  function headTransforms(spec, p, par) {
+    const neck = (spec.rig || {}).neck || [0, 50];
+    const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
+    const lx = p.lookX * eye.range, ly = p.lookY * eye.range * 0.8;
+    const k = Math.max(0.2, 1 + p.widen), eyeOpen = `scale(${num(k)} ${num(k * Math.max(0.06, 1 - p.blink))})`;
+    const hc = spec.hair ? [spec.hair.cx || 0, spec.hair.cy || 0] : [0, 0];
+    const t = {
+      head: `${p.headX || p.headY ? `translate(${num(p.headX)} ${num(p.headY)}) ` : ''}rotate(${num(p.tilt)} ${neck[0]} ${neck[1]})`,
+      earL: `${par(DEPTH.earL)} ${earPlace(earFor(spec, 'L'), 'L', p.earL)}`,
+      earR: `${par(DEPTH.earR)} ${earPlace(earFor(spec, 'R'), 'R', p.earR)}`,
+      eyeL: `translate(${num(-eye.x + lx)} ${num(eye.y + ly)})`,
+      eyeR: `translate(${num(eye.x + lx)} ${num(eye.y + ly)})`,
+      eyeLopen: eyeOpen,
+      eyeRopen: eyeOpen,
+      lidL: lidPlace(eye, p, 1),
+      lidR: lidPlace(eye, p, -1),
+      hair: `${par(DEPTH.hair)} rotate(${num(p.hair)} ${hc[0]} ${hc[1]})`,
+    };
+    for (const k of ['body', 'face', 'blush', 'eyes', 'mouth']) t[k] = par(DEPTH[k]);
+    t.scarf = t.body;
+    if (spec.blush) {
+      const { x, y } = spec.blush, k = num(Math.max(0, 1 + p.flush));
+      t.cheekL = `translate(${num(-x)} ${num(y)}) scale(${k}) translate(${num(x)} ${num(-y)})`;
+      t.cheekR = `translate(${num(x)} ${num(y)}) scale(${k}) translate(${num(-x)} ${num(-y)})`;
+    }
+    return t;
+  }
+
+  // Where the tail is: where the seated drawing has it, or, for a tail with a standing place of its own (stand.tail),
+  // part of the way toward that place as the friend rises.
+  function tailAt(spec, stand, at) {
+    const seated = tailFor(spec), tail = stand && stand.tail ? { ...seated, ...stand.tail } : seated;
+    if (tail !== seated && at.up < 1) {
+      const mix = (a, b) => a + (b - a) * at.up;
+      tail.base = seated.base.map((v, i) => mix(v, tail.base[i]));
+      tail.angle = mix(seated.angle || 0, tail.angle || 0);
+    }
+    return tail;
   }
 
   // The names in a pose's `show`, as a set.
@@ -1175,8 +1371,23 @@
     o: s => `M0 ${-s * 0.5}a${s * 0.45} ${s * 0.55} 0 1 0 0.01 0Z`,
   };
 
+  // A render draws the friend part by part, from the back: the tail, the legs, then the upper body (the body, the feet
+  // that lie in front of it, the scarf, the head and the arms), then the props on the ground. Each part has a drawer
+  // of its own, and the drawers share a context (renderContext); each one adds what it defines (clips, masks, filters)
+  // to the context's defs, in the order in which render calls it.
   function render(specOrName, opts = {}) {
-    const spec = resolve(specOrName);
+    const ctx = renderContext(resolve(specOrName), opts), { spec, g, part } = ctx;
+    const eye = eyeDrawer(ctx), mouth = drawMouth(ctx), blush = drawBlush(ctx);
+    const head = drawHead(ctx, { eye, mouth, blush });
+    const body = g('body', part('body', spec.body, roleOr(spec, 'body', 'chest')));
+    const limbs = drawLimbs(ctx);
+    const upper = drawUpper(ctx, { body, head, limbs });
+    return drawSheet(ctx, opts, drawTail(ctx) + limbs.legs + upper);
+  }
+
+  // What every drawer of one render shares: the spec, its view and the state of its pose, the palette with its shades,
+  // the defs, and the helpers that draw a named part, a shape in a color, and a part's extras.
+  function renderContext(spec, opts) {
     const uid = opts.uid || `pf${(++UID).toString(36)}`;
     const view = resolveView(spec, opts.view, opts.size);
     // A view may carry the pose its reference was drawn in; opts.pose overrides that pose.
@@ -1230,36 +1441,66 @@
       const clip = clipUrl(name, d);
       return extras(name, clip, true) + fill(d, shape.color || color) + extras(name, clip, false);
     };
+    return { spec, uid, view, st, P, col, seed, defs, attrs, g, when, fill, clipUrl, extraShape, cue, extras, part };
+  }
 
-    // Ears. The inner ear goes in its own layer when it sits in front of the head.
-    const innerEar = e => {
-      const k = e.inner.scale ?? 0.6, dx = e.inner.dx || 0, dy = e.inner.dy || 0;
-      return fill(pathD(earNodes({ ...e, ...e.inner }).map(n => ({ ...n, x: n.x * k + dx, y: n.y * k + dy }))), e.inner.color || 'earInner');
+  // The head: its layers from the back (the ears, the head, the inner ears that lie in front of it, any ear drawn over
+  // it, then the face and what lies on it), in a group that the body's tuck mask can refer to.
+  function drawHead(ctx, { eye, mouth, blush }) {
+    const { spec, g, part } = ctx;
+    const layers = {
+      earL: () => drawEar(ctx, 'L'),
+      earR: () => drawEar(ctx, 'R'),
+      earLfront: () => drawEarFront(ctx, 'L'),
+      earRfront: () => drawEarFront(ctx, 'R'),
+      base: () => g('base', part('base', spec.head, roleOr(spec, 'head', 'fur'))),
+      face: () => g('face', part('face', spec.face, 'face')),
+      blush: () => g('blush', blush + ctx.extras('blush', null, false)),
+      eyes: () => g('eyes', eye('L') + eye('R')),
+      mouth: () => g('mouth', mouth),
+      hair: () => g('hair', part('hair', spec.hair, 'hair')),
     };
-    const earFront = side => {
-      const e = earFor(spec, side);
-      return e.inner && e.inner.front ? g(`ear${side}front`, innerEar(e)) : '';
-    };
-    const ear = side => {
-      const e = earFor(spec, side), outer = earNodes(e), d = pathD(outer);
-      const clip = clipUrl(`ear${side}`, d);
-      const inner = e.inner && !e.inner.front ? innerEar(e) : '';
-      const stripes = (e.stripes || []).map(s => {
-        const [X0, X1] = s.span || [-e.width * 1.5, e.width * 1.5];
-        const h = (s.w || 6) / 2, cy = -(s.t ?? 0.5) * e.length, b = s.b || 0;
-        const nodes = [[X0, -h], [X1, -h], [X1, h], [X0, h]].map(([x, y], i) => {
-          const [rx, ry] = rot(x, y, (s.a || 0) * DEG);
-          return { x: rx, y: ry + cy, c: true, b: i === 0 ? b : i === 2 ? -b : 0 };
-        });
-        return fill(pathD(nodes), s.color || e.stripeColor || 'stripe');
-      }).join('');
-      return g(`ear${side}`, extras(`ear${side}`, null, true) + fill(d, e.color || 'fur') + (stripes && `<g clip-path="${clip}">${stripes}</g>`) +
-        inner + extras(`ear${side}`, clip, false));
-    };
+    const earsOver = over => ['earL', 'earR'].filter(k => !!earFor(spec, k.slice(-1)).over === over);
+    const order = [...earsOver(false), 'base', 'earLfront', 'earRfront', ...earsOver(true), 'face', 'blush', 'eyes', 'mouth', 'hair'];
+    return g('head', order.map(k => layers[k]()).join(''), 'head');
+  }
 
-    // Eyes. `shine` is one highlight or a list of marks drawn in order and
-    // clipped to the eye, each a circle (r) or an ellipse (rx, ry): e.g., an
-    // iris, then a lighter crescent visible at the bottom, then a white highlight.
+  // Ears. The inner ear goes in its own layer when it sits in front of the head.
+  function drawInnerEar(ctx, e) {
+    const k = e.inner.scale ?? 0.6, dx = e.inner.dx || 0, dy = e.inner.dy || 0;
+    return ctx.fill(pathD(earNodes({ ...e, ...e.inner }).map(n => ({ ...n, x: n.x * k + dx, y: n.y * k + dy }))), e.inner.color || 'earInner');
+  }
+  function drawEarFront(ctx, side) {
+    const e = earFor(ctx.spec, side);
+    return e.inner && e.inner.front ? ctx.g(`ear${side}front`, drawInnerEar(ctx, e)) : '';
+  }
+  function drawEar(ctx, side) {
+    const { spec, fill, g, clipUrl, extras } = ctx;
+    const e = earFor(spec, side), outer = earNodes(e), d = pathD(outer);
+    const clip = clipUrl(`ear${side}`, d);
+    const inner = e.inner && !e.inner.front ? drawInnerEar(ctx, e) : '';
+    const stripes = (e.stripes || []).map(s => {
+      const [X0, X1] = s.span || [-e.width * 1.5, e.width * 1.5];
+      const h = (s.w || 6) / 2, cy = -(s.t ?? 0.5) * e.length, b = s.b || 0;
+      const nodes = [[X0, -h], [X1, -h], [X1, h], [X0, h]].map(([x, y], i) => {
+        const [rx, ry] = rot(x, y, (s.a || 0) * DEG);
+        return { x: rx, y: ry + cy, c: true, b: i === 0 ? b : i === 2 ? -b : 0 };
+      });
+      return fill(pathD(nodes), s.color || e.stripeColor || 'stripe');
+    }).join('');
+    // The right ear takes its own color, then its role (earRight), before the pair's, as the right eye and paw do.
+    const ears = spec.ears || {}, pair = ears.color || roleOr(spec, 'ear', 'fur');
+    const color = side === 'R' ? (ears.right && ears.right.color) || roleOr(spec, 'earRight', pair) : pair;
+    return g(`ear${side}`, extras(`ear${side}`, null, true) + fill(d, color) + (stripes && `<g clip-path="${clip}">${stripes}</g>`) +
+      inner + extras(`ear${side}`, clip, false));
+  }
+
+  // Eyes. `shine` is one highlight or a list of marks drawn in order and
+  // clipped to the eye, each a circle (r) or an ellipse (rx, ry): e.g., an
+  // iris, then a lighter crescent visible at the bottom, then a white highlight.
+  // The drawer defines the clip that the shine shares, and returns the drawer of either eye.
+  function eyeDrawer(ctx) {
+    const { spec, uid, st, col, g, when, clipUrl, defs } = ctx;
     const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
     let eyeClip = '';
     if (eye.shine || (eye.right && eye.right.shine)) {
@@ -1270,9 +1511,11 @@
           `A${num(r)} ${num(r)} 0 0 1 ${num(-w / 2)} ${num(h / 2 - r)}Z`);
     }
     // The eyes.right entry overrides the right eye's color and shine (for eyes of two colors).
-    const eyeShape = side => {
+    return side => {
       const e = side === 'R' && eye.right ? { ...eye, ...eye.right } : eye;
-      const { w, h } = eye, c = col(e.color || 'eye'), tilt = (eye.tilt || 0) * (side === 'L' ? 1 : -1);
+      const iris = eye.color || roleOr(spec, 'iris', 'eye');
+      const c = col(side === 'R' ? (eye.right && eye.right.color) || roleOr(spec, 'irisRight', iris) : iris);
+      const { w, h } = eye, tilt = (eye.tilt || 0) * (side === 'L' ? 1 : -1);
       let open;
       if (eye.shape === 'dot' || eye.shape === 'round') open = `<ellipse rx="${w / 2}" ry="${h / 2}" fill="${c}"/>`;
       else open = `<rect x="${-w / 2}" y="${-h / 2}" width="${w}" height="${h}" rx="${w / 2}" fill="${c}"/>`;
@@ -1296,100 +1539,93 @@
         ` x="${num(-reach)}" y="${num(top)}" width="${num(reach * 2)}" height="${num(reach * 2)}"/></clipPath>`);
       open = `<g clip-path="url(#${uid}-lid${side})">${open}</g>`;
       return g(key, when(key, 'open', g(`${key}open`, open)) +
-        ['happy', 'closed', 'squint'].map(k => when(key, k, stroke(k))).join(''));
+        Object.keys(EYE_STROKES).map(k => when(key, k, stroke(k))).join(''));
     };
+  }
 
-    // Mouth
-    const m = spec.mouth || {};
-    const mouthSvg = Object.keys(MOUTHS).map(k => {
+  // The mouth: every shape it takes, each shown while the pose names it.
+  function drawMouth(ctx) {
+    const { spec, P, col, when, fill, clipUrl } = ctx;
+    const m = spec.mouth || {}, ink = m.color || roleOr(spec, 'ink', 'eye');
+    return Object.keys(MOUTHS).map(k => {
       const s = m.size || 5;
-      return when('mouth', k, `<path transform="translate(${m.x || 0} ${m.y ?? 22})" d="${MOUTHS[k](s)}" fill="${k === 'o' ? col(m.color || 'eye') : 'none'}" stroke="${col(m.color || 'eye')}" stroke-width="${num(s * 0.35)}" stroke-linecap="round" stroke-linejoin="round"/>`);
+      return when('mouth', k, `<path transform="translate(${m.x || 0} ${m.y ?? 22})" d="${MOUTHS[k](s)}" fill="${k === 'o' ? col(ink) : 'none'}" stroke="${col(ink)}" stroke-width="${num(s * 0.35)}" stroke-linecap="round" stroke-linejoin="round"/>`);
     }).join('') + when('mouth', 'open', (() => {
       // Open 'D' mouth: a flat-topped opening with a tongue (m.tongue, else the palette's
       // tongue or earInner) and, when m.fang is set, one small fang on the right.
       const s = (m.size || 5) * 1.8, D = `M${num(-s)} ${num(-0.35 * s)}Q0 ${num(-0.1 * s)} ${num(s)} ${num(-0.35 * s)}` +
         `C${num(s)} ${num(0.6 * s)} ${num(0.5 * s)} ${num(1.2 * s)} 0 ${num(1.2 * s)}C${num(-0.5 * s)} ${num(1.2 * s)} ${num(-s)} ${num(0.6 * s)} ${num(-s)} ${num(-0.35 * s)}Z`;
       const fang = m.fang ? `<path d="M${num(0.28 * s)} ${num(-0.26 * s)}L${num(0.64 * s)} ${num(-0.29 * s)}L${num(0.47 * s)} ${num(0.14 * s)}Z" fill="#fff"/>` : '';
-      return `<g transform="translate(${m.x || 0} ${m.y ?? 22})">${fill(D, m.color || 'eye')}<g clip-path="${clipUrl('mouth', D)}">` +
+      return `<g transform="translate(${m.x || 0} ${m.y ?? 22})">${fill(D, ink)}<g clip-path="${clipUrl('mouth', D)}">` +
         `<ellipse cx="0" cy="${num(0.9 * s)}" rx="${num(0.62 * s)}" ry="${num(0.42 * s)}" fill="${col(m.tongue || (P.tongue ? 'tongue' : 'earInner'))}"/></g>${fang}</g>`;
     })());
+  }
 
-    // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt).
-    const bl = spec.blush;
-    const blushSvg = bl ? [-1, 1].map(sx => g(sx < 0 ? 'cheekL' : 'cheekR',
+  // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt).
+  function drawBlush(ctx) {
+    const { spec, col, g } = ctx, bl = spec.blush;
+    return bl ? [-1, 1].map(sx => g(sx < 0 ? 'cheekL' : 'cheekR',
       `<ellipse cx="${num(sx * bl.x)}" cy="${num(bl.y)}" rx="${bl.rx}" ry="${bl.ry}"` +
       `${bl.tilt ? ` transform="rotate(${num(-sx * bl.tilt)} ${num(sx * bl.x)} ${num(bl.y)})"` : ''} fill="${col(bl.color || 'blush')}"/>`)).join('') : '';
+  }
 
-    const layers = {
-      earL: () => ear('L'),
-      earR: () => ear('R'),
-      earLfront: () => earFront('L'),
-      earRfront: () => earFront('R'),
-      base: () => g('base', part('base', spec.head, 'fur')),
-      face: () => g('face', part('face', spec.face, 'face')),
-      blush: () => g('blush', blushSvg + extras('blush', null, false)),
-      eyes: () => g('eyes', eyeShape('L') + eyeShape('R')),
-      mouth: () => g('mouth', mouthSvg),
-      hair: () => g('hair', part('hair', spec.hair, 'hair')),
+  // The limbs (standFor), on which the friend sits and stands: the legs behind the upper body, and the arms in front
+  // of the head (see drawUpper). A limb is its hose, its bands, then its paw or foot, whose transform carries it to the
+  // end. Gives the legs, the feet that lie in front of the body, and the arms: those under the head, bare (under),
+  // then their paws, which never tuck (paws); then those that `over` names, each with its paw (over).
+  function drawLimbs(ctx) {
+    const { spec, st, col, g, fill, clipUrl, extras, part } = ctx, stand = standFor(spec);
+    const out = { legs: '', feet: '', under: '', paws: '', over: '' };
+    if (!stand) return out;
+    // A paw or a foot: its shape and extras, or, where the seat gives its seated ellipse, that ellipse in its seated
+    // frame (which the pose moves and stretches), with the extras that face us only while it sits (sole) in a frame
+    // of their own, which flattens them as it rises.
+    const tipOf = (tip, end, S, l) => {
+      const seated = stand.seat[end][S];
+      if (!seated) return g(tip, part(tip, l[end], l[end].color));
+      const d = ellipseD({ rx: seated.rx, ry: seated.ry, rot: seated.rot }), clip = clipUrl(tip, d), plain = under => extras(tip, clip, under, x => !x.sole);
+      const soles = extras(tip, clip, true, x => x.sole) + extras(tip, clip, false, x => x.sole);
+      return g(tip, g(`${tip}seat`, plain(true) + fill(d, l[end].color) + plain(false) + g(`${tip}sole`, soles)));
     };
-    let order = spec.order || ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'];
-    if (!order.includes('earLfront')) order = order.flatMap(k => (k === 'base' ? [k, 'earLfront', 'earRfront'] : [k]));
-    const head = g('head', order.map(k => layers[k]()).join(''), 'head');
-    const body = g('body', part('body', spec.body, 'chest'));
+    // A limb is its hose, its bands, then its paw or foot. Its `hose` alone is the hose and the bands that stop
+    // short of the end, and its `end` the rest; its `bare` is the hose and all its bands, and its `tip` the paw or
+    // foot alone.
+    const limb = (name, end, only) => {
+      const S = name.slice(-1), l = (end === 'paw' ? stand.arms : stand.legs)[S], tip = `${end}${S}`;
+      const bands = keep => (l.bands || []).map((b, i) => (keep(b) ? `<path data-pf-d="${name}:${i}" d="${st.paths[`${name}:${i}`]}" fill="${col(b.color || l.color)}"/>` : '')).join('');
+      const reaches = b => (b.to ?? 1) >= 1, hose = `<path data-pf-d="${name}" d="${st.paths[name]}" fill="${col(l.color)}"/>`;
+      if (only === 'hose') return g(name, hose + bands(b => !reaches(b)));
+      if (only === 'end') return bands(reaches) + tipOf(tip, end, S, l);
+      if (only === 'tip') return tipOf(tip, end, S, l);
+      return g(name, hose + bands(() => true) + (only === 'bare' ? '' : tipOf(tip, end, S, l)));
+    };
+    // Where the seated feet lie on the body, the feet (and the bands that reach them) are drawn in front of the body
+    // and the leg hoses behind it.
+    const front = stand.seat.front;
+    out.legs = g('legs', front ? limb('legL', 'foot', 'hose') + limb('legR', 'foot', 'hose') : limb('legL', 'foot') + limb('legR', 'foot'));
+    if (front) out.feet = g('feet', limb('legL', 'foot', 'end') + limb('legR', 'foot', 'end'));
+    const [over, under] = [true, false].map(o => ['armL', 'armR'].filter(n => st.state.over.has(n) === o));
+    out.under = g('armsUnder', under.map(n => limb(n, 'paw', 'bare')).join(''));
+    out.paws = g('pawsUnder', under.map(n => limb(n, 'paw', 'tip')).join(''));
+    out.over = g('armsOver', over.map(n => limb(n, 'paw', 'bare') + limb(n, 'paw', 'tip')).join(''));
+    return out;
+  }
 
-    // The limbs (standFor), on which the friend sits and stands: the legs behind the upper body, and the arms in front
-    // of the head (see the scarf, below). A limb is its hose, its bands, then its paw or foot, whose transform carries
-    // it to the end.
-    const stand = standFor(spec);
-    let legs = '', feet = '', arms = { under: '', paws: '', over: '' };
-    if (stand) {
-      // A paw or a foot: its shape and extras, or, where the seat gives its seated ellipse, that ellipse in its seated
-      // frame (which the pose moves and stretches), with the extras that face us only while it sits (sole) in a frame
-      // of their own, which flattens them as it rises.
-      const tipOf = (tip, end, S, l) => {
-        const seated = stand.seat[end][S];
-        if (!seated) return g(tip, part(tip, l[end], l[end].color));
-        const d = ellipseD({ rx: seated.rx, ry: seated.ry, rot: seated.rot }), clip = clipUrl(tip, d), plain = under => extras(tip, clip, under, x => !x.sole);
-        const soles = extras(tip, clip, true, x => x.sole) + extras(tip, clip, false, x => x.sole);
-        return g(tip, g(`${tip}seat`, plain(true) + fill(d, l[end].color) + plain(false) + g(`${tip}sole`, soles)));
-      };
-      // A limb is its hose, its bands, then its paw or foot. Its `hose` alone is the hose and the bands that stop
-      // short of the end, and its `end` the rest; its `bare` is the hose and all its bands, and its `tip` the paw or
-      // foot alone.
-      const limb = (name, end, only) => {
-        const S = name.slice(-1), l = (end === 'paw' ? stand.arms : stand.legs)[S], tip = `${end}${S}`;
-        const bands = keep => (l.bands || []).map((b, i) => (keep(b) ? `<path data-pf-d="${name}:${i}" d="${st.paths[`${name}:${i}`]}" fill="${col(b.color || l.color)}"/>` : '')).join('');
-        const reaches = b => (b.to ?? 1) >= 1, hose = `<path data-pf-d="${name}" d="${st.paths[name]}" fill="${col(l.color)}"/>`;
-        if (only === 'hose') return g(name, hose + bands(b => !reaches(b)));
-        if (only === 'end') return bands(reaches) + tipOf(tip, end, S, l);
-        if (only === 'tip') return tipOf(tip, end, S, l);
-        return g(name, hose + bands(() => true) + (only === 'bare' ? '' : tipOf(tip, end, S, l)));
-      };
-      // Where the seated feet lie on the body, the feet (and the bands that reach them) are drawn in front of the body
-      // and the leg hoses behind it.
-      const front = stand.seat.front;
-      legs = g('legs', front ? limb('legL', 'foot', 'hose') + limb('legR', 'foot', 'hose') : limb('legL', 'foot') + limb('legR', 'foot'));
-      if (front) feet = g('feet', limb('legL', 'foot', 'end') + limb('legR', 'foot', 'end'));
-      // The arms (see below): those under the head, bare, then their paws, which never tuck; then those that `over`
-      // names, each with its paw.
-      const [over, under] = [true, false].map(o => ['armL', 'armR'].filter(n => st.state.over.has(n) === o));
-      arms.under = g('armsUnder', under.map(n => limb(n, 'paw', 'bare')).join(''));
-      arms.paws = g('pawsUnder', under.map(n => limb(n, 'paw', 'tip')).join(''));
-      arms.over = g('armsOver', over.map(n => limb(n, 'paw', 'bare') + limb(n, 'paw', 'tip')).join(''));
-    }
-    // From the back: the body with its clothes (its extras), the scarf (extras on 'scarf': a ruff or a bib of fur, or a
-    // scarf, round the neck, which `clip: true` clips to the body), the head, whose chin lies over the scarf and the
-    // collar, then the arms in front of all of them, as a paw raised to the face comes forward of it, except at the
-    // shoulder, which tucks under the scarf and the head. Those three overlap in a ring, so the arms are masked within
-    // STAND_FIT.tuck of their length of each shoulder (tuckL, tuckR) wherever the scarf or the head is drawn: the mask
-    // holds their silhouettes. The paws come after the arms, unmasked, as they are while the friend sits, and an arm
-    // that the pose's `over` names is drawn whole in front of everything.
-    let scarf = '', armsFront = arms.under;
+  // The upper body. From the back: the body with its clothes (its extras), the feet that lie in front of it, the scarf
+  // (extras on 'scarf': a ruff or a bib of fur, or a scarf, round the neck, which `clip: true` clips to the body), the
+  // head, whose chin lies over the scarf and the collar, then the arms in front of all of them, as a paw raised to the
+  // face comes forward of it, except at the shoulder, which tucks under the scarf and the head. Those three overlap in
+  // a ring, so the arms are masked within STAND_FIT.tuck of their length of each shoulder (tuckL, tuckR) wherever the
+  // scarf or the head is drawn: the mask holds their silhouettes. The paws come after the arms, unmasked, as they are
+  // while the friend sits, and an arm that the pose's `over` names is drawn whole in front of everything.
+  function drawUpper(ctx, { body, head, limbs }) {
+    const { spec, uid, st, attrs, g, extras, defs } = ctx;
+    let scarf = '', armsFront = limbs.under;
     if ((spec.extras || []).some(x => x.on === 'scarf')) {
       const clip = spec.body ? `url(#${uid}-body)` : null;
       scarf = g('scarf', extras('scarf', clip, true) + extras('scarf', clip, false), 'scarf');
     }
-    if (arms.under) {
+    if (limbs.under) {
       const box = 'x="-1000" y="-1000" width="2000" height="2000"', ink = `filter="url(#${uid}-ink)"`;
       defs.push(`<filter id="${uid}-ink"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"/></filter>` +
         `<clipPath id="${uid}-shoulders">${['L', 'R'].map(S => `<circle${attrs(`tuck${S}`)} r="1"/>`).join('')}</clipPath>` +
@@ -1399,42 +1635,47 @@
       // of all in Safari, so the arms take it only once the friend has risen (mount toggles it). Its ink fades in as
       // the friend rises (tuckInk), so that an arm crossing a bib slides under it rather than vanishing at once.
       const mask = `url(#${uid}-tuck)`;
-      armsFront = `<g data-pf="tuck" data-pf-mask="${mask}"${st.state.tucked ? ` mask="${mask}"` : ''}>${arms.under}</g>`;
+      armsFront = `<g data-pf="tuck" data-pf-mask="${mask}"${st.state.tucked ? ` mask="${mask}"` : ''}>${limbs.under}</g>`;
     }
-    const upper = g('upper', body + feet + scarf + head + armsFront + arms.paws + arms.over);
+    return g('upper', body + limbs.feet + scarf + head + armsFront + limbs.paws + limbs.over);
+  }
 
-    // Tail (optional, drawn behind the body): the plume, then a tip marking whose edge
-    // is a row of tufts pointing back toward the base, bent with the plume and clipped to it.
-    let tail = '';
-    if (spec.tail) {
-      const tl = tailFor(spec), d = pathD(tailNodes(tl, seed('tail'))), clip = clipUrl('tail', d);
-      let tip = '';
-      if (tl.tip) {
-        const k = tl.tip, s = k.span ?? 30;
-        tip = fill(pathD(tailNodes(tl, seed('tail/tip'), {
-          cx: 0, cy: -tl.length, rx: tl.width, ry: tl.length * (1 - (k.at ?? 0.7)),
-          fluff: k.fluff || [{ from: 90 - s, to: 90 + s, n: k.n ?? 2, len: k.len ?? 10, depth: 0.02 }],
-        })), k.color || 'tailTip');
-      }
-      // Extras on 'tail' are drawn in the tail's straight local space. Fluffy extras bend
-      // with the tail; the rest (raw nodes, stars, paths, ellipses) stay rigid and ride
-      // along: each is moved to where the bent tail puts its center (cx, cy, or the mean
-      // of its nodes; each of its polys separately) and turned with the spine at that point.
-      const tx = under => (spec.extras || []).map((x, i) => {
-        if (x.on !== 'tail' || !!x.under !== under) return '';
-        let s;
-        if (x.polys) s = x.polys.map(p => `<g transform="${tailRide(tl, p[0], p[1])}">${fill(pathD(polyNodes(p, x)), x.fill)}</g>`).join('');
-        else if (x.nodes || x.tips || x.d || x.kind === 'ellipse') {
-          const pts = x.nodes && x.cx === undefined ? shapeNodes(x) : null;
-          const cx = pts ? pts.reduce((a, p) => a + p.x, 0) / pts.length : x.cx || 0;
-          const cy = pts ? pts.reduce((a, p) => a + p.y, 0) / pts.length : x.cy || 0;
-          s = `<g transform="${tailRide(tl, cx, cy)}">${extraShape(x, i, 'tail')}</g>`;
-        } else s = fill(pathD(tailNodes(tl, seed(`tail/extra${i}`), x)), x.fill);
-        return cue(x, x.clip ? `<g clip-path="${clip}">${s}</g>` : s);
-      }).join('');
-      tail = g('tail', tx(true) + fill(d, tl.color || 'fur') + (tip && `<g clip-path="${clip}">${tip}</g>`) + tx(false));
+  // Tail (optional, drawn behind the body): the plume, then a tip marking whose edge
+  // is a row of tufts pointing back toward the base, bent with the plume and clipped to it.
+  function drawTail(ctx) {
+    const { spec, seed, g, fill, clipUrl, extraShape, cue } = ctx;
+    if (!spec.tail) return '';
+    const tl = tailFor(spec), d = pathD(tailNodes(tl, seed('tail'))), clip = clipUrl('tail', d);
+    let tip = '';
+    if (tl.tip) {
+      const k = tl.tip, s = k.span ?? 30;
+      tip = fill(pathD(tailNodes(tl, seed('tail/tip'), {
+        cx: 0, cy: -tl.length, rx: tl.width, ry: tl.length * (1 - (k.at ?? 0.7)),
+        fluff: k.fluff || [{ from: 90 - s, to: 90 + s, n: k.n ?? 2, len: k.len ?? 10, depth: 0.02 }],
+      })), k.color || 'tailTip');
     }
+    // Extras on 'tail' are drawn in the tail's straight local space. Fluffy extras bend
+    // with the tail; the rest (raw nodes, stars, paths, ellipses) stay rigid and ride
+    // along: each is moved to where the bent tail puts its center (cx, cy, or the mean
+    // of its nodes; each of its polys separately) and turned with the spine at that point.
+    const tx = under => (spec.extras || []).map((x, i) => {
+      if (x.on !== 'tail' || !!x.under !== under) return '';
+      let s;
+      if (x.polys) s = x.polys.map(p => `<g transform="${tailRide(tl, p[0], p[1])}">${fill(pathD(polyNodes(p, x)), x.fill)}</g>`).join('');
+      else if (x.nodes || x.tips || x.d || x.kind === 'ellipse') {
+        const pts = x.nodes && x.cx === undefined ? shapeNodes(x) : null;
+        const cx = pts ? pts.reduce((a, p) => a + p.x, 0) / pts.length : x.cx || 0;
+        const cy = pts ? pts.reduce((a, p) => a + p.y, 0) / pts.length : x.cy || 0;
+        s = `<g transform="${tailRide(tl, cx, cy)}">${extraShape(x, i, 'tail')}</g>`;
+      } else s = fill(pathD(tailNodes(tl, seed(`tail/extra${i}`), x)), x.fill);
+      return cue(x, x.clip ? `<g clip-path="${clip}">${s}</g>` : s);
+    }).join('');
+    return g('tail', tx(true) + fill(d, tl.color || roleOr(spec, 'tail', 'fur')) + (tip && `<g clip-path="${clip}">${tip}</g>`) + tx(false));
+  }
 
+  // The sheet: the figure seen through the view's camera, the props on the ground, the pencil and the paper.
+  function drawSheet(ctx, opts, figure) {
+    const { uid, view, P, g, extras, defs } = ctx;
     const bg = opts.bg === false ? null : opts.bg || view.bg || P.bg;
     const size = opts.fluid ? '' : ` width="${num(view.w)}" height="${num(view.h)}"`;
     const cam = `translate(${num(view.x)} ${num(view.y)}) rotate(${view.rotate || 0}) scale(${num(view.scale * 1000) / 1000})`;
@@ -1443,7 +1684,7 @@
     // Extras on 'ground' stand on the ground in front of the friend, in head space but outside its
     // pose: a prop it has put down stays where it is while the friend hops, squashes or moves.
     const ground = extras('ground', null, false);
-    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', tail + legs + upper)}${ground && g('ground', ground)}</g>`;
+    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', figure)}${ground && g('ground', ground)}</g>`;
     if (opts.pencil !== false) {
       defs.push(pencilMask(`${uid}-pencil`, view));
       const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
@@ -1465,59 +1706,14 @@
     // same every time, such as a film.
     const bitmap = !!textureWatch && opts.bitmap !== false;
     if (bitmap) textureWatch.observe(svg);
-    const parts = {}, placed = {}, faded = {};  // The parts, and the transform and opacity each was last given.
-    svg.querySelectorAll('[data-pf]').forEach(n => {
-      const name = n.getAttribute('data-pf');
-      parts[name] = n;
-      placed[name] = n.getAttribute('transform');
-      faded[name] = n.getAttribute('opacity');
-    });
-    const toggles = [...svg.querySelectorAll('[data-pf-when]')].map(n => {
-      const [key, val] = n.getAttribute('data-pf-when').split('=');
-      return { n, key, val };
-    });
-    const cues = [...svg.querySelectorAll('[data-pf-show]')].map(n => ({ n, name: n.getAttribute('data-pf-show') }));
-    // The outlines that a pose redraws (the limbs and their bands), and what each was last drawn as, so that a pose
-    // that leaves one as it was does not write it again.
-    const outlines = {}, drawn = {};
-    svg.querySelectorAll('[data-pf-d]').forEach(n => { outlines[n.getAttribute('data-pf-d')] = n; drawn[n.getAttribute('data-pf-d')] = n.getAttribute('d'); });
+    const drawing = indexDrawing(svg);
     let pose = { ...(opts.pose || {}) };
     const rig = {
-      el, svg, spec, parts, view: resolveView(spec, opts.view, opts.size),
+      el, svg, spec, parts: drawing.parts, view: resolveView(spec, opts.view, opts.size),
       get pose() { return pose; },
       setPose(next, replace = false) {
         pose = replace ? { ...next } : { ...pose, ...next };
-        const st = poseState(spec, rig.view.pose ? { ...rig.view.pose, ...pose } : pose);
-        // An attribute is written only when it changes: a browser restyles, and may repaint, for every write.
-        for (const k in st.transform) {
-          if (parts[k] && placed[k] !== st.transform[k]) parts[k].setAttribute('transform', placed[k] = st.transform[k]);
-        }
-        for (const k in st.opacity) if (parts[k] && faded[k] !== st.opacity[k]) parts[k].setAttribute('opacity', faded[k] = st.opacity[k]);
-        for (const t of toggles) {
-          if (st.state[t.key] === t.val) t.n.removeAttribute('display');
-          else t.n.setAttribute('display', 'none');
-        }
-        for (const c of cues) {
-          if (st.state.show.has(c.name)) c.n.removeAttribute('display');
-          else c.n.setAttribute('display', 'none');
-        }
-        for (const k in st.paths) {
-          if (outlines[k] && drawn[k] !== st.paths[k]) outlines[k].setAttribute('d', drawn[k] = st.paths[k]);
-        }
-        if (parts.tuck && st.state.tucked !== parts.tuck.hasAttribute('mask')) {
-          if (st.state.tucked) parts.tuck.setAttribute('mask', parts.tuck.getAttribute('data-pf-mask'));
-          else parts.tuck.removeAttribute('mask');
-        }
-        // Each arm and its paw go where a render would draw them: the left one first, and an arm that `over` names
-        // followed by its paw.
-        for (const S of ['L', 'R']) {
-          const arm = parts[`arm${S}`], paw = parts[`paw${S}`], over = st.state.over.has(`arm${S}`);
-          if (!arm || !paw) continue;
-          const slot = parts[over ? 'armsOver' : 'armsUnder'], pawSlot = over ? slot : parts.pawsUnder;
-          if (arm.parentNode !== slot) slot.insertBefore(arm, S === 'L' ? slot.firstChild : null);
-          const before = over ? arm.nextSibling : S === 'L' ? pawSlot.firstChild : null;
-          if (paw.parentNode !== pawSlot || (over && before !== paw)) pawSlot.insertBefore(paw, before);
-        }
+        redraw(drawing, poseState(spec, rig.view.pose ? { ...rig.view.pose, ...pose } : pose));
         return rig;
       },
       // Shows a variant of the pencil texture (0 is a still's). A boiling page cycles through
@@ -1530,10 +1726,72 @@
     return rig;
   }
 
+  // What a pose changes in a mounted drawing, each with what it was last given, so that a pose writes only what
+  // changes: a browser restyles, and may repaint, for every write. The parts (data-pf) take a transform and an
+  // opacity; the toggles (data-pf-when, data-pf-show) are shown or hidden; and the outlines that a pose redraws (the
+  // limbs and their bands, data-pf-d) take a path.
+  function indexDrawing(svg) {
+    const parts = {}, placed = {}, faded = {}, outlines = {}, drawn = {};
+    svg.querySelectorAll('[data-pf]').forEach(n => {
+      const name = n.getAttribute('data-pf');
+      parts[name] = n;
+      placed[name] = n.getAttribute('transform');
+      faded[name] = n.getAttribute('opacity');
+    });
+    const toggle = (n, shownBy) => ({ n, shownBy, shown: !n.hasAttribute('display') });
+    const toggles = [
+      ...[...svg.querySelectorAll('[data-pf-when]')].map(n => {
+        const [key, val] = n.getAttribute('data-pf-when').split('=');
+        return toggle(n, st => st.state[key] === val);
+      }),
+      ...[...svg.querySelectorAll('[data-pf-show]')].map(n => {
+        const name = n.getAttribute('data-pf-show');
+        return toggle(n, st => st.state.show.has(name));
+      }),
+    ];
+    svg.querySelectorAll('[data-pf-d]').forEach(n => { outlines[n.getAttribute('data-pf-d')] = n; drawn[n.getAttribute('data-pf-d')] = n.getAttribute('d'); });
+    return { parts, placed, faded, toggles, outlines, drawn };
+  }
+
+  // Gives a mounted drawing the state of a new pose (poseState), as a fresh render of that pose would draw it.
+  function redraw({ parts, placed, faded, toggles, outlines, drawn }, st) {
+    for (const k in st.transform) {
+      if (parts[k] && placed[k] !== st.transform[k]) parts[k].setAttribute('transform', placed[k] = st.transform[k]);
+    }
+    for (const k in st.opacity) if (parts[k] && faded[k] !== st.opacity[k]) parts[k].setAttribute('opacity', faded[k] = st.opacity[k]);
+    for (const t of toggles) {
+      const shown = t.shownBy(st);
+      if (shown === t.shown) continue;
+      if ((t.shown = shown)) t.n.removeAttribute('display');
+      else t.n.setAttribute('display', 'none');
+    }
+    for (const k in st.paths) {
+      if (outlines[k] && drawn[k] !== st.paths[k]) outlines[k].setAttribute('d', drawn[k] = st.paths[k]);
+    }
+    if (parts.tuck && st.state.tucked !== parts.tuck.hasAttribute('mask')) {
+      if (st.state.tucked) parts.tuck.setAttribute('mask', parts.tuck.getAttribute('data-pf-mask'));
+      else parts.tuck.removeAttribute('mask');
+    }
+    restackArms(parts, st.state.over);
+  }
+
+  // Puts each arm and its paw where a render would draw them (drawLimbs): the left one first, and an arm that `over`
+  // names followed by its paw.
+  function restackArms(parts, over) {
+    for (const S of ['L', 'R']) {
+      const arm = parts[`arm${S}`], paw = parts[`paw${S}`], isOver = over.has(`arm${S}`);
+      if (!arm || !paw) continue;
+      const slot = parts[isOver ? 'armsOver' : 'armsUnder'], pawSlot = isOver ? slot : parts.pawsUnder;
+      if (arm.parentNode !== slot) slot.insertBefore(arm, S === 'L' ? slot.firstChild : null);
+      const before = isOver ? arm.nextSibling : S === 'L' ? pawSlot.firstChild : null;
+      if (paw.parentNode !== pawSlot || (isOver && before !== paw)) pawSlot.insertBefore(paw, before);
+    }
+  }
+
   return {
     VERSION, POSE, DEPTH,
-    define, get: resolve, list: () => [...registry.keys()], merge,
-    render, mount, poseState, resolveView, standingView, groundOf, STANDING_BOX, standFor, standLift, riseOf, STAND_DEFAULT, STAND_FIT, ONIGIRI,
+    define, get: resolve, list: () => [...registry.keys()], merge, check, ANATOMY,
+    render, mount, poseState, resolveView, standingView, groundOf, STANDING_BOX, standFor, standLift, riseOf, freeSide, STAND_DEFAULT, STAND_FIT, ONIGIRI,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle, limbArc, limbNodes, bendFor, outlineOf, reachAt, ellipseD },
     rng, hash, SHADE, shadeOf,
     // The pencil, for drawing props in the characters' texture and for redrawing it (film/scene.js).

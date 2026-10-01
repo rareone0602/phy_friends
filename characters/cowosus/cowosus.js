@@ -12,6 +12,21 @@ PhyFriends.define('cowosus', {
   palette: {
     bg: '#1c1d21',
     fur: '#efeef3',        // The white of the palette bar (#fdffff), deepened to mumuyou's depth to stay visible on paper. Its house shade (furShade) fills the body, which sits under the head, and the neck under the chin.
+    head: 'fur',
+    face: 'peach',
+    hair: 'fur',
+    ear: 'lime',
+    earInner: 'fur',
+    iris: '#0b9aba',       // The pale blue of the eye swatches (#a8e9ff), three house steps deeper so that it holds its weight on the lime and on the white.
+    ink: '#2b353c',        // The slate of the sheet's lines, used for the open mouth.
+    blush: '#ffec8a',      // Pale yellow, as the owner asked: the sheet's pale yellow (#fff4b0), deepened a little to hold on the peach.
+    tongue: 'yellow',
+    body: 'furShade',
+    tail: 'goldShade',
+    arm: 'fur',
+    paw: 'fur',
+    leg: 'furShade',
+    foot: 'fur',
     lime: '#b8dc79',       // The lime green of the palette bar: the patch over his right eye, the ears, the tips of the ruff and the tip of the tail.
     green: '#81a34d',      // The dark green of the palette bar: the tips of the ears.
     peach: '#fdd0a1',      // The peach of the palette bar (#ffdaae), deepened slightly so that the eyebrow dot on the white holds on paper: the cheeks, the cheek tufts, the eyebrow dots and the ragged edges on the arms and legs.
@@ -20,10 +35,7 @@ PhyFriends.define('cowosus', {
     orange: '#dc7808',     // The darker orange of the diamond swatch, at the heart of the pineapple's scales: the diamonds on the thighs.
     red: '#eb3333',        // The middle one of the three reds beside the back view (the sheet shades the curl from the first to the third): the tip of the curl.
     yellow: '#ffec57',     // The yellow of the paw-pad swatches: the pads and the tongue, since the sheet draws his open mouth yellow inside.
-    eye: '#2b353c',        // The slate of the sheet's lines, used for the open mouth.
-    eyeBlue: '#0b9aba',    // The pale blue of the eye swatches (#a8e9ff), three house steps deeper so that it holds its weight on the lime and on the white.
     eyeOrange: '#e89223',  // The orange of the eye swatch (#ffb059), one house step deeper: the lower quarter of his left eye.
-    blush: '#ffec8a',      // Pale yellow, as the owner asked: the sheet's pale yellow (#fff4b0), deepened a little to hold on the peach.
   },
   // The head is a round white dome with two spiky tufts down each side.
   head: {
@@ -33,7 +45,7 @@ PhyFriends.define('cowosus', {
   // The peach cheeks, from the mint band to the jaw, their sides cut into spiky tufts; the white muzzle between them is
   // an extra. They start low enough that an eye looking down stays clear of the band. Setting len < 0 flattens the top.
   face: {
-    cx: 0, cy: 42, rx: 84, ry: 17, color: 'peach',
+    cx: 0, cy: 42, rx: 84, ry: 17,
     fluff: [
       { from: -24, to: 40, n: 3, len: 11, lean: 3, depth: 0.1, b1: -30, b2: 10, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -41,20 +53,20 @@ PhyFriends.define('cowosus', {
   },
   // His right ear (the viewer's left) stands: a pointed lime ear with a white inner ear set high, so that a lime rim
   // parts it from the white crown. His left ear folds over, as in every view: it is drawn as the flap that hangs from
-  // the fold, in front of the head (see order), its rounded base the fold and its tip hanging beside the head. Each has
-  // the sheet's dark green tip.
+  // the fold, over the upper side of the head (over), as on the sheet, its rounded base the fold and its tip hanging
+  // beside the head; the face, the eyes and the mop stay on top of it. Each has the sheet's dark green tip.
   ears: {
-    base: [-56, -68], angle: 24, width: 88, length: 94, lean: 8, tip: 6, b1: -14, b2: -8, color: 'lime',
-    inner: { scale: 0.46, dx: 6, dy: -28, color: 'fur' },
+    base: [-56, -68], angle: 24, width: 88, length: 94, lean: 8, tip: 6, b1: -14, b2: -8,
+    inner: { scale: 0.46, dx: 6, dy: -28 },
     stripes: [{ t: 0.84, w: 38, a: -14 }], stripeColor: 'green',
     right: { base: [-58, -100], angle: 156, width: 64, length: 82, lean: 0, tip: 14, b1: -20, b2: -20, inner: null,
-      stripes: [{ t: 0.9, w: 44 }] },
+      stripes: [{ t: 0.9, w: 44 }], over: true },
   },
   // The mop is the white fur of the crown: spiky tufts on top and a row of short locks hanging over the top of the lime
   // patch, as on the sheet. On the white side its locks lie on the white and do not show.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -76, rx: 60, ry: 30, color: 'fur',
+    cx: 0, cy: -76, rx: 60, ry: 30,
     tips: [
       [-18, -110, -8, -8, [-4, -102]],
       [12, -118, -8, -8, [28, -104]],
@@ -70,18 +82,18 @@ PhyFriends.define('cowosus', {
   // of his left eye (the viewer's right) is orange, as the owner asked and the eye swatch shows; it is a flat mark
   // clipped to the eye, so it follows every glance and blink. Setting arc: 1 draws the happy, closed and squint strokes
   // at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1, color: 'eyeBlue',
+  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1,
     right: { shine: { x: 0, y: 16, rx: 13, ry: 8, color: 'eyeOrange' } } },
   // The blush sits on the peach under the mint band, beside the muzzle, tipped up to follow the cheek.
   blush: { x: 52, y: 44, rx: 10, ry: 6, tilt: 8 },
   // There is no mouth by default (the sheet's nose and grin are omitted). It sits on the white muzzle; when open, it
   // shows his yellow tongue and one fang for the sheet's two.
-  mouth: { y: 44, size: 3.8, fang: true, tongue: 'yellow' },
+  mouth: { y: 44, size: 3.8, fang: true },
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
   // the base. It is in the house shade of the white. Shoulder tufts sit under the cheeks, and small hip tufts below
   // them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade', onigiri: 1,
+    cx: 0, cy: 86, rx: 64, ry: 46, onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -90,7 +102,7 @@ PhyFriends.define('cowosus', {
   // that it reaches no further past his place than the others' do. Its gold lies behind the gold thigh, so it takes
   // the house shade.
   tail: {
-    base: [56, 106], angle: 42, length: 130, width: 100, bend: -30, taper: 0.72, root: 0.5, color: 'goldShade',
+    base: [56, 106], angle: 42, length: 130, width: 100, bend: -30, taper: 0.72, root: 0.5,
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 238, to: 302, n: 3, len: 19, lean: 0, depth: 0.05, b1: 22, b2: -22, jit: 0 },
       { from: 200, to: 232, n: 1, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
@@ -102,74 +114,71 @@ PhyFriends.define('cowosus', {
   // on the template's short legs the gold and its edge lie under the body, and only the white shows.
   stand: {
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 115, rx: 19, ry: 16 } },
-    arms: { paw: { color: 'fur' }, bands: [{ from: 0, to: 0.42, color: 'fur', grow: 1.5 },
+    arms: { bands: [{ from: 0, to: 0.42, color: 'fur', grow: 1.5 },
       { from: 0.34, to: 0.46, color: 'peach', grow: 1.5, teeth: 3, depth: 3 }] },
-    legs: { foot: { color: 'fur' }, bands: [{ from: 0, to: 0.52, color: 'gold', grow: 2 },
+    legs: { bands: [{ from: 0, to: 0.52, color: 'gold', grow: 2 },
       { from: 0.46, to: 0.6, color: 'peach', grow: 2, teeth: 3, depth: 3 }] },
   },
   extras: [
     // The neck under the chin, in the house shade of the white: it lies behind the white muzzle and parts it from the
     // white ruff, as the shaded ruff under mumuyou's chin does.
-    { on: 'base', under: true, kind: 'ellipse', fill: 'furShade', cx: 0, cy: 43, rx: 32, ry: 23 },
+    { feature: 'neck', on: 'base', under: true, kind: 'ellipse', fill: 'furShade', cx: 0, cy: 43, rx: 32, ry: 23 },
     // The peach cheek tufts: a ruff under the head whose spiky tufts stick out sideways past the cheeks, as on the
     // sheet. An n: 1 range with len < 0 tucks the bottom in under the chin.
-    { on: 'base', under: true, fill: 'peach', cx: 0, cy: 30, rx: 88, ry: 30,
+    { feature: 'cheekRuff', on: 'base', under: true, fill: 'peach', cx: 0, cy: 30, rx: 88, ry: 30,
       fluff: [{ from: -12, to: 26, n: 2, len: 11, lean: -2, depth: 0.1, b1: -38, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
     // The lime patch over his right eye (the viewer's left), from the upright ear down the side of the head to the
     // cheek, as on the sheet, under the white of the crown. Its inner edge bows in round the eye, far enough that an eye
     // looking about stays on the lime, and back out above and below it, so that it reads as a patch, not half the face.
-    { on: 'base', clip: true, fill: 'lime', nodes: [[-130, -150, 1], [-46, -150, 1], [-42, -84, 1], [-26, -52], [-15, -26],
+    { feature: 'eyePatch', on: 'base', clip: true, fill: 'lime', nodes: [[-130, -150, 1], [-46, -150, 1], [-42, -84, 1], [-26, -52], [-15, -26],
       [-11, 2], [-16, 22], [-30, 34, 1], [-130, 34, 1]] },
     // The white muzzle between the cheeks, from the mint band down to the chin.
-    { on: 'face', clip: true, kind: 'ellipse', fill: 'fur', cx: 0, cy: 50, rx: 25, ry: 22 },
+    { feature: 'muzzle', on: 'face', clip: true, kind: 'ellipse', fill: 'fur', cx: 0, cy: 50, rx: 25, ry: 22 },
     // The mint band across the bridge of the muzzle, as in every view, from under one eye to under the other: it covers
     // the seam at the top of the peach and tapers at the ends, as the sheet's stroke does.
-    { on: 'face', kind: 'ellipse', fill: 'mint', cx: 0, cy: 30, rx: 56, ry: 4 },
+    { feature: 'noseBand', on: 'face', kind: 'ellipse', fill: 'mint', cx: 0, cy: 30, rx: 56, ry: 4 },
     // The peach eyebrow dots, one on the lime and one on the white: each shaped like Pac-Man, as on the sheet, a 9 x 7
     // oval with a 76-degree wedge cut from its outer side, a little below the middle.
-    { on: 'hair', fill: 'peach', d: 'M-33.35 -34L-39.95 -37.29A9 7 0 1 1 -38.02 -28.8Z' },
-    { on: 'hair', fill: 'peach', d: 'M33.35 -34L38.02 -28.8A9 7 0 1 1 39.95 -37.29Z' },
+    { feature: 'brows', on: 'hair', fill: 'peach', d: 'M-33.35 -34L-39.95 -37.29A9 7 0 1 1 -38.02 -28.8Z' },
+    { feature: 'brows', on: 'hair', fill: 'peach', d: 'M33.35 -34L38.02 -28.8A9 7 0 1 1 39.95 -37.29Z' },
     // The curl on the crown, which every view draws: a thick white lock that rises left of the middle and hooks over to
     // the right into a point, and its red tip, whose edge is cut into points that reach down into the white.
-    { on: 'hair', fill: 'fur', nodes: [[-28, -100, 1, 0], [-34, -118], [-34, -134], [-26, -146], [-10, -153], [20, -152, 1, 0],
+    { feature: 'curl', on: 'hair', fill: 'fur', nodes: [[-28, -100, 1, 0], [-34, -118], [-34, -134], [-26, -146], [-10, -153], [20, -152, 1, 0],
       [0, -142], [-12, -130], [-14, -116], [-8, -102, 1, 0]] },
-    { on: 'hair', fill: 'red', nodes: [[-32, -128, 1, 0], [-34, -134], [-26, -146], [-10, -153], [20, -152, 1, 0],
+    { feature: 'curl', on: 'hair', fill: 'red', nodes: [[-32, -128, 1, 0], [-34, -134], [-26, -146], [-10, -153], [20, -152, 1, 0],
       [0, -142], [-10, -133, 1], [-14, -126, 1], [-18, -131, 1], [-24, -124, 1], [-28, -130, 1]] },
     // The golden hips and thighs, the fruit of his pineapple: the sheet's gold covers his hips, rising behind the arms
     // to the waist (sheet-b.png), so seated it fills the lower body but for the belly, which shows between the thighs
     // in the body's shade. On each thigh are the sheet's pineapple scales: a big diamond with a small one on either
     // side, clipped to the body so that the outer one turns out of sight.
-    { on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: -48, cy: 98, rx: 36, ry: 40 },
-    { on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: 48, cy: 98, rx: 36, ry: 40 },
-    { on: 'body', clip: true, fill: 'orange', polys: [[-38, 89, 13, 4, 90, 0.72], [38, 89, 13, 4, 90, 0.72],
+    { feature: 'thighs', on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: -48, cy: 98, rx: 36, ry: 40 },
+    { feature: 'thighs', on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: 48, cy: 98, rx: 36, ry: 40 },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'orange', polys: [[-38, 89, 13, 4, 90, 0.72], [38, 89, 13, 4, 90, 0.72],
       [-22, 103, 6, 4, 90, 0.75], [22, 103, 6, 4, 90, 0.75], [-53, 101, 6, 4, 90, 0.75], [53, 101, 6, 4, 90, 0.75]] },
     // The gold star on the belly, between the thighs, as on the sheet.
-    { on: 'body', fill: 'gold', cx: 0, cy: 93, rx: 8, ry: 8, valley: 0.45,
+    { feature: 'belly', on: 'body', fill: 'gold', cx: 0, cy: 93, rx: 8, ry: 8, valley: 0.45,
       tips: [[0, 84.4], [8.2, 90.3], [5.1, 100], [-5.1, 100], [-8.2, 90.3]] },
     // The ruff at the neck, a scarf of fur that lies over the tops of the arms: white fur whose tufts end in long lime
     // points, like the leaves of the pineapple's crown. The lime lies under the white and its tufts are longer, so that
     // it shows only as the points below the white ones. It is as narrow as the top of the body.
-    { on: 'scarf', clip: true, fill: 'lime', cx: 0, cy: 52, rx: 44, ry: 26,
+    { feature: 'chest', on: 'scarf', clip: true, fill: 'lime', cx: 0, cy: 52, rx: 44, ry: 26,
       fluff: [{ from: 20, to: 160, n: 6, len: 16, depth: 0.05, b1: -12, b2: 12, jit: 0 }] },
-    { on: 'scarf', clip: true, fill: 'fur', cx: 0, cy: 48, rx: 42, ry: 24,
+    { feature: 'chest', on: 'scarf', clip: true, fill: 'fur', cx: 0, cy: 48, rx: 42, ry: 24,
       fluff: [{ from: 20, to: 160, n: 6, len: 5, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -130, +x away from the body); the
     // library bends them onto the curve. The white band and, over it, the lime tip, each edge cut into flame-shaped
     // tufts that reach back toward the base, as on the sheet; they stay inside the plume, so as not to widen its reach.
-    { on: 'tail', clip: true, fill: 'fur', cx: 0, cy: -118, rx: 50, ry: 38,
+    { feature: 'tailTip', on: 'tail', clip: true, fill: 'fur', cx: 0, cy: -118, rx: 50, ry: 38,
       fluff: [{ from: 50, to: 130, n: 3, len: 12, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
-    { on: 'tail', clip: true, fill: 'lime', cx: 0, cy: -130, rx: 50, ry: 30,
+    { feature: 'tailTip', on: 'tail', clip: true, fill: 'lime', cx: 0, cy: -130, rx: 50, ry: 30,
       fluff: [{ from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 20, b2: 14, jit: 0.2 }] },
     // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The soles face
     // us only while he sits, so they flatten as the feet tip down (sole): a yellow pad under three yellow toe beans on
     // each, as the sheet's pad swatches draw them. A lone pad on a white foot reads as an egg.
-    { on: 'feet', sole: true, kind: 'ellipse', fill: 'yellow', cx: 0, cy: 5, rx: 8.5, ry: 6.5 },
-    { on: 'feet', sole: true, fill: 'yellow', round: 0.5, polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
+    { feature: 'soles', on: 'feet', sole: true, kind: 'ellipse', fill: 'yellow', cx: 0, cy: 5, rx: 8.5, ry: 6.5 },
+    { feature: 'soles', on: 'feet', sole: true, fill: 'yellow', round: 0.5, polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
   ],
-  // The folded ear lies over the upper side of the head, as on the sheet, so it is drawn after the head; the face, the
-  // eyes and the mop stay on top of it.
-  order: ['earL', 'base', 'earR', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },
   views: {

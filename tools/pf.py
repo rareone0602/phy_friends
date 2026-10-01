@@ -13,7 +13,8 @@
   python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
   python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
-  python3 tools/pf.py test                              # Runs test/index.html headless and checks the gallery's labels; exits non-zero on a failure.
+  python3 tools/pf.py test                              # Runs test/index.html headless and checks the pages against the cast; exits non-zero on a failure.
+  python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows (tools/gallery.py).
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
@@ -22,8 +23,9 @@ view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
 `film` films any page that follows the film contract (see film() below) frame
 by frame, so a scene exports frame-exactly whatever the machine's speed.
 
-`test` also checks the labels that index.html repeats by hand against the
-cast in characters/cast.js (see label_drift() below).
+`test` also checks the pages against the cast in characters/cast.js: the labels
+that index.html repeats by hand, and the script tags and rows that `pages` writes
+(tools/gallery.py).
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
 out/design/ for page mockups, and out/scratch/ for experiments.
@@ -32,8 +34,7 @@ Requires Google Chrome (override the path with $CHROME) and Pillow; video
 output also requires ffmpeg.
 """
 import argparse
-import html
-import html.parser
+import io
 import json
 import math
 import re
@@ -44,11 +45,12 @@ import tempfile
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from string import Template
 
 from PIL import Image
 
-from cdp import CHROME, ChromeError, HeadlessChrome, PageError, kill_process_group
+import gallery
+import style_page
+from cdp import CHROME, ChromeError, HeadlessChrome, PageError, kill_process_group, screenshot_once
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/ and out/scratch/.
@@ -90,40 +92,20 @@ try {{ {body_js} }} catch (e) {{ document.getElementById('err').textContent = St
 
 
 def shoot(html, w, h, out_png, timeout=60):
-    """Screenshot an HTML string at w x h CSS pixels into out_png and return the image."""
+    """Screenshot an HTML string at w x h CSS pixels into out_png, on a transparent background, and return the image."""
     work = Path(tempfile.mkdtemp(prefix='pf-'))
     try:
         src = work / 'page.html'
         src.write_text(html)
-        shot = work / 'shot.png'
-        cmd = [CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
-               '--no-default-browser-check', '--disable-extensions', '--mute-audio',
-               f'--user-data-dir={work / "profile"}', f'--window-size={w},{h}',
-               '--force-device-scale-factor=1', '--default-background-color=00000000',
-               '--allow-file-access-from-files', '--virtual-time-budget=1000',
-               f'--screenshot={shot}', src.as_uri()]
-        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        deadline, last = time.time() + timeout, -1
-        while time.time() < deadline:
-            if shot.exists():
-                size = shot.stat().st_size
-                if size and size == last:
-                    break
-                last = size
-            elif proc.poll() is not None:
-                break
-            time.sleep(0.25)
-        kill_process_group(proc)
-        if not shot.exists():
-            raise RuntimeError('Chrome produced no screenshot (see $CHROME / page errors)')
-        img = Image.open(shot)
-        img.load()
-        img = img.crop((0, 0, w, h))
-        Path(out_png).parent.mkdir(parents=True, exist_ok=True)
-        img.save(out_png)
-        return img
+        png = screenshot_once(src.as_uri(), w, h, transparent=True, timeout=timeout)
     finally:
         shutil.rmtree(work, ignore_errors=True)
+    img = Image.open(io.BytesIO(png))
+    img.load()
+    img = img.crop((0, 0, w, h))
+    Path(out_png).parent.mkdir(parents=True, exist_ok=True)
+    img.save(out_png)
+    return img
 
 
 def render(name, out_png, view='portrait', pose=None, size=None, bg=True, pencil=True):
@@ -308,7 +290,8 @@ def zoom_view(name, view='portrait', k=1.0):
 
 
 def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', size=384, bg=True, sheet=None, zoom=1.0):
-    """Render a PhyFriends.anim clip (a name or an expression such as "layer(idle, hold('curious'))").
+    """Render a PhyFriends.anim clip (a name or an expression such as "layer(idle, hold('curious'))"), made for
+    the friend named: a wave is away from its tail, and a feeling is its own.
 
     sheet: a path for a contact sheet of sampled frames, or True for <out>-sheet.png.
     zoom: a value below 1 zooms out about the bottom edge, for clips that travel upward (hop).
@@ -320,7 +303,7 @@ def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', siz
         sheet = out.with_name(out.stem + '-sheet.png')
     ext = out.suffix.lower()
     pick_encoder(ext)  # Fail before the slow render if no encoder is available.
-    clip_js = f'PhyFriends.anim.parse({json.dumps(clip)})'
+    clip_js = f'PhyFriends.anim.parse({json.dumps(clip)}, {{ spec: {json.dumps(name)} }})'
     if seconds is None:
         seconds = evaluate(f'{clip_js}.duration ?? null')
         if not seconds:
@@ -475,223 +458,6 @@ def compare_one(name, ref_path, out_png, render_png, view, pose=None, region=Non
         zs.save(reg_png)
         print(reg_png)
     return out_png
-
-
-# ---- Style guide page: STYLE.md and FWIENDS.md rendered to style.html -------------
-
-LIST_ITEM = re.compile(r'( *)([-*]|\d+\.) +(.*)')
-
-
-def md_inline(text):
-    """Convert inline Markdown (**bold**, *italic*, `code`, [text](url)) to HTML; escape the rest."""
-    codes = []  # Code spans are held out as \0n\0 so emphasis can wrap them but not match inside.
-
-    def stash(m):
-        codes.append(f'<code>{html.escape(m[1], quote=False)}</code>')
-        return f'\0{len(codes) - 1}\0'
-    text = html.escape(re.sub(r'`([^`]+)`', stash, text), quote=False)
-    text = re.sub(r'\[([^\]]+)\]\(([^)\s]+)\)', lambda m: '<a href="%s">%s</a>' % (m[2].replace('"', '%22'), m[1]), text)
-    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
-    text = re.sub(r'(?<![\w*])\*(?=\S)(.+?)(?<=\S)\*(?![\w*])', r'<em>\1</em>', text)
-    return re.sub(r'\0(\d+)\0', lambda m: codes[int(m[1])], text)
-
-
-def md_blocks(lines, tight=False):
-    """Convert the block-level Markdown that STYLE.md uses to HTML.
-
-    Supported: # headings, ---, paragraphs, - and 1. lists nested by indentation,
-    > quotes, | tables and ``` code blocks. tight: emit paragraphs as bare text
-    (inside a list item). A paragraph that runs straight into a list (no blank
-    line) is marked class="lead".
-    """
-    out, i, n = [], 0, len(lines)
-    while i < n:
-        line = lines[i]
-        m = LIST_ITEM.match(line)
-        if not line.strip():
-            i += 1
-        elif line.lstrip().startswith('```'):
-            j = i + 1
-            while j < n and not lines[j].lstrip().startswith('```'):
-                j += 1
-            code = '\n'.join(lines[i + 1:j])
-            out.append(f'<pre><code>{html.escape(code, quote=False)}</code></pre>')
-            i = j + 1
-        elif line.startswith('|'):
-            j = i
-            while j < n and lines[j].startswith('|'):
-                j += 1
-            rows = [[c.strip() for c in x.strip().strip('|').split('|')] for x in lines[i:j]]
-            head, body = (rows[0], rows[2:]) if len(rows) > 1 and set(''.join(rows[1])) <= set('-: ') else (None, rows)
-            cells = lambda tag, row: ''.join(f'<{tag}>{md_inline(c)}</{tag}>' for c in row)
-            out.append('<table>\n' + (f'<thead><tr>{cells("th", head)}</tr></thead>\n' if head else '')
-                       + '<tbody>\n' + '\n'.join(f'<tr>{cells("td", r)}</tr>' for r in body) + '\n</tbody>\n</table>')
-            i = j
-        elif line.strip() == '---':
-            out.append('<hr>')
-            i += 1
-        elif re.match(r'#{1,6} ', line):
-            hashes, text = line.split(None, 1)
-            out.append(f'<h{len(hashes)} id="{heading_id(text)}">{md_inline(text.strip())}</h{len(hashes)}>')
-            i += 1
-        elif line.startswith('>'):
-            j = i
-            while j < n and lines[j].startswith('>'):
-                j += 1
-            out.append('<blockquote>\n' + md_blocks([re.sub(r'^> ?', '', x) for x in lines[i:j]]) + '\n</blockquote>')
-            i = j
-        elif m:
-            indent, ordered, items = len(m[1]), m[2].endswith('.'), []
-            while i < n and (m := LIST_ITEM.match(lines[i])) and len(m[1]) == indent and m[2].endswith('.') == ordered:
-                w, body = len(m[0]) - len(m[3]), [m[3]]  # The item text starts at column w (indent + marker + space).
-                i += 1
-                while i < n and lines[i].strip() and len(lines[i]) - len(lines[i].lstrip()) > indent:
-                    body.append(lines[i][min(w, len(lines[i]) - len(lines[i].lstrip())):])
-                    i += 1
-                items.append(f'<li>{md_blocks(body, tight=True)}</li>')
-            tag = 'ol' if ordered else 'ul'
-            out.append(f'<{tag}>\n' + '\n'.join(items) + f'\n</{tag}>')
-        else:
-            j = i + 1
-            while j < n and lines[j].strip() and not (LIST_ITEM.match(lines[j]) or re.match(r'#{1,6} |>|---\s*$|\s*```|\|', lines[j])):
-                j += 1
-            text = md_inline(' '.join(x.strip() for x in lines[i:j]))
-            lead = j < n and LIST_ITEM.match(lines[j])
-            out.append(text if tight else f'<p class="lead">{text}</p>' if lead else f'<p>{text}</p>')
-            i = j
-    return '\n'.join(out)
-
-
-def heading_id(text):
-    """Return a heading's id: sN for section N ("3. words" takes s3), which its § references link to; else a slug."""
-    number = re.match(r'(\d+)\. ', text)
-    return f's{number[1]}' if number else re.sub(r'[^a-z0-9]+', '-', text.lower()).strip('-')
-
-
-HEADING = re.compile(r'<h([12]) id="([^"]+)">(.*?)</h\1>')
-# A code block or code span, which is left alone, or a section reference: §N, after the name of the
-# document it points into when that is another one ("`STYLE.md` §5").
-SECTION_REF = re.compile(r'<pre>.*?</pre>|(?:(?:<code>)?([\w-]+\.md)(?:</code>)?,? )?§(\d+)|<code>.*?</code>', re.S)
-
-
-def link_section_refs(part, name, ids):
-    """Link every §N in a part of the page to section N of the document it names, or else of its own.
-
-    name: the part's source file name. ids: {source file name: the ids of its headings}. A reference
-    into a document on the page must name one of its sections; one into any other document stays text.
-    """
-    def link(m):
-        doc, number = m[1] or name, m[2]
-        if number is None or doc not in ids:
-            return m[0]
-        if f's{number}' not in ids[doc]:
-            raise SystemExit(f'{name}: §{number} names no section of {doc}')
-        return m[0][:-len(number) - 1] + f'<a href="#s{number}">§{number}</a>'
-    return SECTION_REF.sub(link, part)
-
-
-def contents_lines(docs):
-    """Return the page's contents: for each document, a line of small print (.meta) listing its headings.
-
-    docs: for each document, its title and its headings' (id, inner HTML) pairs in order. Each line
-    is a block of its own, so a blank rule parts the documents, and a later document's line opens
-    with its part title, which names it.
-    """
-    def line(title, headings):
-        label = html.escape(f'contents of {title}', quote=False).replace('"', '&quot;')
-        items = ''.join(f'<li><a href="#{id_}">{text}</a></li>' for id_, text in headings)
-        return f'<nav aria-label="{label}">\n<ul class="meta">{items}</ul>\n</nav>'
-    return '\n'.join(line(title, headings) for title, headings in docs)
-
-
-# The page is styled only by site/notebook.css (the paper) and site/pencil.css (the .doc
-# column and everything drawn on it). It deliberately has no CSS of its own, so the style
-# guide is rendered with the same stylesheets it documents.
-STYLE_PAGE = Template("""<!doctype html>
-<html lang="en-GB">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
-<title>$title</title>
-<meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
-<meta name="theme-color" content="#fbf9f3">
-<link rel="icon" href="site/icon.svg" type="image/svg+xml">
-<link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="site/apple-touch-icon.png">
-<!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
-<link rel="stylesheet" href="site/notebook.css">
-<link rel="stylesheet" href="site/pencil.css">
-</head>
-<body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Graphite grain and a slight displacement wobble for the title. -->
-  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
-
-<main>
-  <header>
-    <h1>style guide</h1>
-    <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
-    <nav aria-label="pages">
-      <ul>
-        <li><a href="index.html">fwiends</a></li>
-        <li><span aria-current="page">style guide</span></li>
-        <li><a href="specimen.html">specimen</a></li>
-      </ul>
-    </nav>
-  </header>
-
-  <article class="doc">
-$body
-  </article>
-
-  <footer>
-    <ul>
-      <li><a href="index.html">back to the fwiends</a></li>
-      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
-    </ul>
-  </footer>
-</main>
-</body>
-</html>
-""")
-
-
-def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.html'):
-    """Render STYLE.md, then FWIENDS.md, to style.html.
-
-    The first file's # title becomes the <title>; each later file's # title heads
-    its own part of the page. The page's own h1 and intro are written in STYLE_PAGE.
-    The writing opens with a contents line that lists every part title and section,
-    and each §N in the text links to its section.
-    """
-    titles, parts = [], []
-    for k, src in enumerate(srcs):
-        lines = Path(src).read_text(encoding='utf-8').splitlines()
-        head = lines.pop(0)[2:].strip() if lines and lines[0].startswith('# ') else None
-        titles.append(head or ("phy's style guide" if k == 0 else Path(src).stem))
-        if k and head:
-            lines = ['---', '', '# ' + head, ''] + lines
-        parts.append(md_blocks(lines))
-    headings = [[(id_, text) for _, id_, text in HEADING.findall(part)] for part in parts]
-    ids = [id_ for doc in headings for id_, _ in doc]
-    if len(set(ids)) < len(ids):
-        raise SystemExit(f'two headings share an id: {", ".join(sorted({x for x in ids if ids.count(x) > 1}))}')
-    names = [Path(src).name for src in srcs]
-    ids = {name: {id_ for id_, _ in doc} for name, doc in zip(names, headings)}
-    body = [contents_lines(zip(titles, headings))] + [link_section_refs(part, name, ids) for part, name in zip(parts, names)]
-    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(titles[0], quote=False), body='\n'.join(body)), encoding='utf-8')
-    return out
 
 
 # ---- Films: a page that defines window.film, filmed frame by frame ----------------
@@ -893,21 +659,32 @@ TEST_TIMEOUT = 120  # Seconds for the whole run; the harness also stops any sing
 TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testResults) : null'
 
 
+# The checks of the pages against the cast (tools/gallery.py), each a test of its own.
+LABEL_TEST = "the gallery's labels agree with the cast"
+PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows fit the friends' reaches"
+
+
 def run_tests(page=TEST_PAGE):
-    """Run the in-browser tests and the gallery's label check, print each failure and a summary, and
-    return the number of problems."""
+    """Run the in-browser tests and the checks of the pages against the cast, print each failure and a
+    summary, and return the number of problems."""
     with HeadlessChrome(1024, 768) as chrome:
         chrome.open(page)
         results = chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
-        cast = chrome.evaluate(READ_CAST_JS)
         errors = list(chrome.errors)
+        try:
+            cast, measures = gallery.read_cast(chrome), gallery.measure_gallery(chrome)
+        except ValueError as error:
+            cast = measures = None
+            errors.append(str(error))
     if results is None:
         errors.append(f'{page} did not load test/harness.js: window.testsDone is missing')
         results = {'passed': [], 'failed': []}
-    drift = label_drift(cast)
-    results['failed'] += [{'name': LABEL_TEST, 'message': message} for message in drift]
-    if not drift:
-        results['passed'].append(LABEL_TEST)
+    checks = {LABEL_TEST: gallery.label_drift(cast)}
+    checks[PAGES_TEST] = gallery.page_drift(cast, measures) if cast else ['no cast (characters/cast.js) was installed']
+    for name, drift in checks.items():
+        results['failed'] += [{'name': name, 'message': message} for message in drift]
+        if not drift:
+            results['passed'].append(name)
     for failure in results['failed']:
         print(f'failed: {failure["name"]}: {failure["message"]}')
     for error in errors:
@@ -917,131 +694,6 @@ def run_tests(page=TEST_PAGE):
         summary += f', {len(errors)} page error{"" if len(errors) == 1 else "s"}'
     print(summary)
     return len(results['failed']) + len(errors)
-
-
-# ---- The gallery's labels, checked against the cast ----------------------------------
-
-GALLERY = ROOT / 'index.html'
-LABEL_TEST = "the gallery's labels agree with the cast"
-# The cast as the test page installed it (characters/cast.js), or null if it has none.
-READ_CAST_JS = """(() => {
-  try {
-    const cast = PhyFriends.cast;
-    return { host: cast.host, friends: Object.fromEntries(cast.names().map(name => [name, cast.friend(name)])) };
-  } catch (error) {
-    return null;
-  }
-})()"""
-NUMBER_WORDS = ('no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
-                'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty')
-
-
-class GalleryLabels(html.parser.HTMLParser):
-    """Reads the gallery page: for each .friend in page order, its key, whether it is the host, its
-    aria-label and its label (name, species, and the credit link's text and address); and the link
-    preview's alt text (og:image:alt)."""
-
-    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
-    TEXT = ('name', 'species', 'credit')  # The parts of a label whose text is read.
-
-    def __init__(self):
-        super().__init__()
-        self.friends, self.preview_alt = [], None
-        self.open = []  # The open elements, each as (tag, the part of a friend it lies in, or None).
-
-    def handle_starttag(self, tag, attrs):
-        attrs = dict(attrs)
-        classes = (attrs.get('class') or '').split()
-        part = self.open[-1][1] if self.open else None
-        if tag == 'meta' and attrs.get('property') == 'og:image:alt':
-            self.preview_alt = attrs.get('content') or ''
-        elif tag == 'li' and 'friend' in classes:
-            self.friends.append({'key': attrs.get('data-friend'), 'host': 'data-host' in attrs, 'aria-label': '',
-                                 'name': '', 'species': '', 'credit': '', 'credit link': ''})
-            part = 'friend'
-        elif part:
-            friend = self.friends[-1]
-            if 'rig' in classes:
-                friend['aria-label'] = attrs.get('aria-label') or ''
-            if 'credit' in classes:
-                part = 'credit line'  # Its text outside the link, such as phy's "that's me", is not the credit.
-            elif tag == 'a' and part == 'credit line':
-                friend['credit link'], part = attrs.get('href') or '', 'credit'
-            else:
-                part = next((c for c in ('name', 'species') if c in classes), part)
-        if tag not in self.VOID:
-            self.open.append((tag, part))
-
-    def handle_endtag(self, tag):
-        for i in range(len(self.open) - 1, -1, -1):  # Closes the innermost element of this tag, and any left open in it.
-            if self.open[i][0] == tag:
-                del self.open[i:]
-                return
-
-    def handle_data(self, data):
-        part = self.open[-1][1] if self.open else None
-        if part in self.TEXT:  # A <wbr> splits a handle's text, so the pieces are joined.
-            self.friends[-1][part] += data
-
-
-def label_drift(cast, gallery=GALLERY):
-    """Return every way in which the gallery disagrees with the cast, one line per friend and field.
-
-    The cast (characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
-    label (name, species and credit), the name that opens its aria-label, and which friend is the
-    host. A friend is there only with its owner's agreement to the gallery. The link preview's alt
-    text counts the friends and names them in the gallery's order, as the preview pictures them.
-    cast: {host, friends: {key: entry}}, as READ_CAST_JS reads it, or None.
-    """
-    if cast is None:
-        return ['the test page installed no cast (characters/cast.js) to check the labels against']
-    page = GalleryLabels()
-    page.feed(Path(gallery).read_text(encoding='utf-8'))
-    entries, keys = cast['friends'], [friend['key'] for friend in page.friends]
-    problems = [f'{key}: on the gallery {keys.count(key)} times' for key in sorted(set(keys)) if keys.count(key) > 1]
-    problems += [f'{key}: on the gallery but not in the cast' for key in keys if key not in entries]
-    problems += [f'{key}: in the cast but not on the gallery' for key in entries if key not in keys]
-    for friend in page.friends:
-        if friend['key'] in entries:
-            problems += friend_drift(friend, entries[friend['key']], cast['host'])
-    return problems + preview_drift(page.preview_alt, [entries[key]['name'] for key in keys if key in entries])
-
-
-def friend_drift(friend, entry, host):
-    """Return the ways in which one friend on the gallery disagrees with its entry in the cast."""
-    key, problems = friend['key'], []
-    expected = {'name': entry['name'], 'species': entry['species'], 'credit': entry['credit']['handle'],
-                'credit link': entry['credit']['href']}
-    for field, value in expected.items():
-        found = ' '.join(friend[field].split())
-        if found != value:
-            problems.append(f'{key}: the {field} is "{found}" on the gallery but "{value}" in the cast')
-    greeting, label = f'say hi to {entry["name"]}', friend['aria-label']
-    if label != greeting and not label.startswith(greeting + ', '):  # A description may follow the name.
-        problems.append(f'{key}: the aria-label opens "{label.split(",")[0]}", not "{greeting}"')
-    if friend['host'] != (key == host):
-        problems.append(f'{key}: {"marked" if friend["host"] else "not marked"} as the host (data-host), '
-                        f'but the cast\'s host is {host}')
-    if 'gallery' not in entry.get('agreed', []):
-        problems.append(f"{key}: on the gallery without its owner's agreement ('gallery' is not in its agreed media in the cast)")
-    return problems
-
-
-def preview_drift(alt, names):
-    """Return the ways in which the link preview's alt text ("sixteen fwiends ...: Howdi, a sky-blue
-    wolf; ...; and Claude, ...") disagrees with the gallery, whose friends' names are given in order."""
-    if alt is None:
-        return ['og:image:alt: index.html has no alt text for its link preview']
-    match = re.match(r'(\w+) fwiends\b[^:]*: (.+)', alt)
-    if not match:
-        return ['og:image:alt: it should give the number of fwiends, then name each after a colon']
-    problems, count = [], NUMBER_WORDS[len(names)] if len(names) < len(NUMBER_WORDS) else str(len(names))
-    if match[1] != count:
-        problems.append(f'og:image:alt: it counts "{match[1]}" fwiends, but the gallery has {count}')
-    named = [re.sub(r'^and ', '', item).split(',')[0].strip() for item in match[2].split('; ')]
-    if named != names:
-        problems.append(f'og:image:alt: it names {", ".join(named)}; the gallery has {", ".join(names)}, in that order')
-    return problems
 
 
 def frame_size(text):
@@ -1104,7 +756,8 @@ def main(argv=None):
                    help="film even without every owner's agreement; the page marks it as a draft")
     f.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
 
-    sub.add_parser('test', help="run the in-browser tests in test/index.html and check the gallery's labels against the cast")
+    sub.add_parser('test', help="run the in-browser tests in test/index.html and check the pages against the cast")
+    sub.add_parser('pages', help="write the friends' script tags and the gallery's rows from the cast and the friends' reaches")
 
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])
@@ -1124,12 +777,18 @@ def main(argv=None):
         print(anim(a.name, a.clip, a.out, fps=a.fps, seconds=a.seconds, view=view, size=a.size,
                    bg=not a.no_bg, sheet=a.sheet, zoom=a.zoom))
     elif a.cmd == 'style':
-        print(style_page())
+        print(style_page.style_page())
     elif a.cmd == 'film':
         print(film(a.page, a.out, size=a.size, scale=a.scale, fps=a.fps, start=a.start, end=a.end, at=a.at,
                    draft=a.draft, sheet=a.sheet))
     elif a.cmd == 'test':
         raise SystemExit(1 if run_tests() else 0)
+    elif a.cmd == 'pages':
+        with HeadlessChrome(gallery.WIDE, 900) as chrome:
+            cast = gallery.read_cast(chrome)
+            measures = gallery.measure_gallery(chrome)
+        for page in gallery.write_pages(cast, measures):
+            print(page)
 
 
 if __name__ == '__main__':

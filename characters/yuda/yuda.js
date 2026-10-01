@@ -5,11 +5,21 @@ PhyFriends.define('yuda', {
   palette: {
     bg: '#1c1d21',
     fur: '#6c7ba7',        // The slate blue of the icon. Its house shade (furShade) fills the body, which sits under the head.
-    face: '#f9f7f6',       // The muzzle, cheeks, eyebrow spots, chest, forearms and forepaws, and the lower legs and feet.
+    head: 'fur',
+    face: '#efeef3',       // The white, deepened to mumuyou's depth to stay visible on paper: the muzzle, cheeks, eyebrow spots, chest, forearms and forepaws, and the lower legs and feet.
+    hair: 'fur',
+    ear: 'fur',
     earInner: '#88d5dd',   // Cyan, also used for the inside of the open mouth.
-    eye: '#23263d',        // A deep slate navy, for the open mouth.
-    eyeBlue: '#4e7ec0',    // The blue of the eyes in waving.png and card.png.
+    iris: '#4e7ec0',       // The blue of the eyes in waving.png and card.png.
+    ink: '#23263d',        // A deep slate navy, for the open mouth.
     blush: '#a9dbf3',      // A soft sky blue, as his owner set it (the pictures draw it peach or pink).
+    tongue: 'earInner',
+    body: 'furShade',
+    tail: 'fur',
+    arm: 'fur',
+    paw: 'face',
+    leg: 'furShade',
+    foot: 'face',
     scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band and the knot.
     tailMid: '#94a1d9',    // The periwinkle band on the tail, drawn in both waving.png and teacup.png.
     tailTip: '#bfbdf1',    // The pale lavender tip of the tail.
@@ -39,7 +49,7 @@ PhyFriends.define('yuda', {
   // The valleys sit high enough to clear the eyes as they look around.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -58, rx: 72, ry: 40, color: 'fur',
+    cx: 0, cy: -58, rx: 72, ry: 40,
     tips: [
       [-34, -132, 2, 12, [0, -96]],
       [22, -110, -6, -10, [52, -76]],
@@ -53,7 +63,7 @@ PhyFriends.define('yuda', {
   },
   // The eyes are plain tall pills in Yuda's own blue, set wide and low. Setting arc: 1 draws the happy,
   // closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1, color: 'eyeBlue' },
+  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1 },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek. It
   // sits low enough that an eye looking down and outward does not land on it.
   blush: { x: 53, y: 24.5, rx: 11, ry: 6.5, tilt: 10 },
@@ -62,61 +72,62 @@ PhyFriends.define('yuda', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 70, ry: 50, color: 'furShade', onigiri: 1,
+    cx: 0, cy: 82, rx: 70, ry: 50, onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy plume rising behind the right hip, its tip curling in. It is slate,
   // then a periwinkle band, then a pale lavender tip, markings that both artists draw.
   tail: {
-    base: [56, 106], angle: 52, length: 142, width: 96, bend: -70, taper: 0.75, root: 0.5, color: 'fur',
+    base: [56, 106], angle: 52, length: 142, width: 96, bend: -70, taper: 0.75, root: 0.5,
     // Soft tufts down the outer edge and one on the inner edge; the tip is a point hooked inward.
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 1, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
     tip: { at: 0.34, n: 3, len: 8, color: 'tailMid' },
   },
-  // The limbs, on the house template. Seated, the white forepaws rest on the ground under the bib (paw) and the hind
-  // feet are tucked under the body. Standing, as in waving.png and card.png, the slate arms end in white forearms and
-  // paws, and the slate legs in white lower legs and feet, the white meeting the slate in a jagged edge.
+  // The limbs, on the house template. Seated, the white forepaws rest on the ground under the bib (paw), and the large
+  // round white hind feet point at us at either side (foot), as in waving.png and card.png. Standing, as in those
+  // pictures, the slate arms end in white forearms and paws, and the slate legs in white lower legs and feet, the white
+  // meeting the slate in a jagged edge.
   stand: {
-    seat: { paw: { cx: 21, cy: 121, rx: 14, ry: 10 } },
-    arms: { paw: { color: 'face' }, bands: [{ from: 0.5, to: 1, color: 'face', teeth: 2, depth: 4 }] },
-    legs: { bands: [{ from: 0.5, to: 1, color: 'face', teeth: 3, depth: 5 }], foot: { color: 'face' } },
+    seat: { paw: { cx: 21, cy: 121, rx: 14, ry: 10 }, foot: { cx: 50, cy: 116, rx: 20, ry: 15 } },
+    arms: { bands: [{ from: 0.5, to: 1, color: 'face', teeth: 2, depth: 4 }] },
+    legs: { bands: [{ from: 0.5, to: 1, color: 'face', teeth: 3, depth: 5 }] },
   },
   extras: [
     // Cheek fluff under the head: a fur ruff whose tufts sit behind the white ones and reach past
     // them, so that the white points read against fur instead of vanishing into the paper. An n: 1
     // range with len < 0 tucks the bottom in under the chin.
-    { on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
+    { feature: 'cheekRuff', on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -42, to: 21, n: 3, len: 16, lean: -3, depth: 0.1, b1: -33, b2: 10, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
     // The white rises into a tall point between the eyes, up between the eyebrow spots (as in teacup.png and bandana.png).
-    { on: 'face', fill: 'face', nodes: [[0, -42, 1, -12], [13, -12, 1, 0], [-13, -12, 1, -12]] },
+    { feature: 'blaze', on: 'face', fill: 'face', nodes: [[0, -42, 1, -12], [13, -12, 1, 0], [-13, -12, 1, -12]] },
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the
     // head); on: 'ears' puts them on both.
     // The zigzag tuft of fur rising from the base of the inner ear.
-    { on: 'ears', clip: true, fill: 'fur', cx: 5, cy: 0, rx: 24, ry: 19,
+    { feature: 'earTufts', on: 'ears', clip: true, fill: 'fur', cx: 5, cy: 0, rx: 24, ry: 19,
       fluff: [{ from: 200, to: 340, n: 3, len: 9, depth: 0.05, b1: -5, b2: 5, jit: 0 }] },
     // The eyebrow spots: two white ovals above the eyes, their inner ends raised slightly.
-    { on: 'hair', kind: 'ellipse', fill: 'face', cx: -30, cy: -38, rx: 10, ry: 7.5, rot: -10 },
-    { on: 'hair', kind: 'ellipse', fill: 'face', cx: 30, cy: -38, rx: 10, ry: 7.5, rot: 10 },
+    { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'face', cx: -30, cy: -38, rx: 10, ry: 7.5, rot: -10 },
+    { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'face', cx: 30, cy: -38, rx: 10, ry: 7.5, rot: 10 },
     // The white chest and belly: a round bib under the bandana, its sides cut into tufts, ending above the forepaws.
-    { on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 46, ry: 30,
+    { feature: 'chest', on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 46, ry: 30,
       fluff: [{ from: -40, to: 60, n: 3, len: 6, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
     // The bandana: the band around the neck (in the house shade, because it lies behind the point),
     // the point hanging on the chest, and two ends sticking out from the knot at the side of the
     // neck. The knot lies behind the ends, so it is shaded too. It is as narrow as the top of the body, and lies
     // over the tops of the arms, as the ends lie over his left arm in card.png (scarf).
-    { on: 'scarf', fill: 'scarfShade', nodes: [[-44, 40, 1, 0], [44, 42, 1, 0], [42, 58, 1, -10], [-40, 56, 1, 0]], round: 0.3 },
-    { on: 'scarf', fill: 'scarf', nodes: [[-42, 48, 1, 8], [38, 50, 1, -4], [-6, 100, 1, -4]], round: 0.2 },
-    { on: 'scarf', fill: 'scarf', nodes: [[42, 56, 1, -20], [80, 84, 1, -20], [40, 74, 1, 0]], round: 0.2 },
-    { on: 'scarf', fill: 'scarf', nodes: [[36, 52, 1, -20], [86, 44, 1, -20], [50, 66, 1, 0]], round: 0.2 },
-    { on: 'scarf', kind: 'ellipse', fill: 'scarfShade', cx: 42, cy: 59, rx: 8, ry: 7.5 },
+    { feature: 'bandana', on: 'scarf', fill: 'scarfShade', nodes: [[-44, 40, 1, 0], [44, 42, 1, 0], [42, 58, 1, -10], [-40, 56, 1, 0]], round: 0.3 },
+    { feature: 'bandana', on: 'scarf', fill: 'scarf', nodes: [[-42, 48, 1, 8], [38, 50, 1, -4], [-6, 100, 1, -4]], round: 0.2 },
+    { feature: 'bandana', on: 'scarf', fill: 'scarf', nodes: [[42, 56, 1, -20], [80, 84, 1, -20], [40, 74, 1, 0]], round: 0.2 },
+    { feature: 'bandana', on: 'scarf', fill: 'scarf', nodes: [[36, 52, 1, -20], [86, 44, 1, -20], [50, 66, 1, 0]], round: 0.2 },
+    { feature: 'bandana', on: 'scarf', kind: 'ellipse', fill: 'scarfShade', cx: 42, cy: 59, rx: 8, ry: 7.5 },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -142,
     // +x away from the body); the library bends them onto the curve.
     // The pale lavender tip, its edge a row of tufts pointing back toward the base.
-    { on: 'tail', clip: true, fill: 'tailTip', cx: 0, cy: -155, rx: 96, ry: 60,
+    { feature: 'tailTip', on: 'tail', clip: true, fill: 'tailTip', cx: 0, cy: -155, rx: 96, ry: 60,
       fluff: [{ from: 60, to: 120, n: 3, len: 10, depth: 0.04, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.

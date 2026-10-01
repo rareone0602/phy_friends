@@ -11,19 +11,28 @@ PhyFriends.define('bardell', {
   palette: {
     bg: '#1c1d21',
     fur: '#f0d7bf',        // The pinker cream of the body, arms, legs and tail on sheet.png, whose head is the paler cream of the icon's muzzle; the strip under the chin at the foot of the icon is pinker too. Its house shade (furShade) fills the body, which sits under the head.
+    head: '#eeb26c',       // The tan-orange of the icon's upper face: the head above the muzzle.
     face: '#f8e9d4',       // The cream of the icon's muzzle: muzzle, cheeks, cheek tufts and the base of the inner ears.
-    tan: '#eeb26c',        // The tan-orange of the icon's upper face: the head above the muzzle.
     hair: '#c6293c',       // The crimson of the icon's mop, which the sheet also gives the bands on the legs and the tip of the tail.
+    ear: 'brown',
+    earInner: 'orange',
+    iris: '#da8911',       // The amber of the irises on the sheet (#fda223), one house step deeper so that it holds its weight on the cream.
+    ink: '#2b2020',        // A warm near-black, used for the open mouth.
+    blush: '#fac1b8',      // The icon's blush, also used for the tongue.
+    tongue: 'blush',
+    body: 'furShade',
+    tail: 'fur',
+    arm: 'fur',
+    paw: 'brown',
+    leg: 'furShade',
+    foot: 'brown',
     fringe: '#e3573e',     // The orange-red of the icon's lower locks.
     brown: '#684128',      // The chocolate of the icon's ears, which the sheet also gives the stripes on the upper arms, the forepaws and the hind feet.
     orange: '#fbab42',     // The orange of the icon's inner ears, which the sheet also gives the patches on the shoulders and the marking on the tail.
-    eye: '#2b2020',        // A warm near-black, used for the open mouth.
-    eyeAmber: '#da8911',   // The amber of the irises on the sheet (#fda223), one house step deeper so that it holds its weight on the cream.
-    blush: '#fac1b8',      // The icon's blush, also used for the tongue.
   },
   // The head is a round dome in the tan of the upper face, with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68, color: 'tan',
+    cx: 0, cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The cream muzzle and cheeks. On the icon the cream starts halfway down the eyes; here it rises to their tops, as
@@ -39,8 +48,8 @@ PhyFriends.define('bardell', {
   // The ears are big, upright, pointed dog ears in chocolate, with an orange inner ear; the cream tufts at its base
   // are an extra.
   ears: {
-    base: [-56, -70], angle: 26, width: 92, length: 94, lean: 6, tip: 8, b1: -14, b2: -8, color: 'brown',
-    inner: { scale: 0.64, dx: 2, dy: -12, color: 'orange' },
+    base: [-56, -70], angle: 26, width: 92, length: 94, lean: 6, tip: 8, b1: -14, b2: -8,
+    inner: { scale: 0.64, dx: 2, dy: -12 },
   },
   // The mop is a crimson dome that follows the round crown, as on the icon, with a lock pointing out over his right
   // ear (the viewer's left) and one pointing up on the right of the crown. It hangs over the forehead in broad
@@ -48,7 +57,7 @@ PhyFriends.define('bardell', {
   // that the head keeps its round outline. The orange-red lower locks (an extra) show below them.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -62, rx: 80, ry: 40, color: 'hair',
+    cx: 0, cy: -62, rx: 80, ry: 40,
     tips: [
       [92, -30, -20, 20, [80, -52]],
       [70, -20, 24, -28, [52, -54]],
@@ -64,24 +73,24 @@ PhyFriends.define('bardell', {
   },
   // The eyes are plain tall pills in his own amber, which the sheet and the sticker draw (the icon's dark pills are
   // the template's). Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1, color: 'eyeAmber' },
+  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1 },
   // The blush sits on the cream beside the lower half of each eye, as on the icon, tipped up to follow the cheek.
   blush: { x: 54, y: 25, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default (the sheet's nose and mouth are omitted); when open, it shows the pink tongue of
   // the sheet's inset, without a fang.
-  mouth: { y: 22, size: 3.8, tongue: 'blush' },
+  mouth: { y: 22, size: 3.8 },
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
   // the base. It is in the house shade of the body's cream. Shoulder tufts sit under the cheeks, and small hip tufts
   // below them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, color: 'furShade', onigiri: 1,
+    cx: 0, cy: 86, rx: 64, ry: 46, onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a big bushy plume in the body's cream, rising behind his left hip (the viewer's right), as on the
   // sheet and the sticker, its tip curling in. The crimson and orange on the side of its tip are extras.
   tail: {
-    base: [56, 106], angle: 50, length: 132, width: 98, bend: -70, taper: 0.72, root: 0.5, color: 'fur',
+    base: [56, 106], angle: 50, length: 132, width: 98, bend: -70, taper: 0.72, root: 0.5,
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 16, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
@@ -92,25 +101,24 @@ PhyFriends.define('bardell', {
   // upper arm, and the orange band above the chocolate forepaw, its edge cut into flames.
   stand: {
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 116, rx: 20, ry: 15 } },
-    arms: { paw: { color: 'brown' }, bands: [{ from: 0, to: 0.12, color: 'orange' }, { from: 0.21, to: 0.29, color: 'brown' },
+    arms: { bands: [{ from: 0, to: 0.12, color: 'orange' }, { from: 0.21, to: 0.29, color: 'brown' },
       { from: 0.36, to: 0.44, color: 'brown' }, { from: 0.54, to: 1, color: 'orange', teeth: 3, depth: 3 }] },
-    legs: { foot: { color: 'brown' } },
   },
   extras: [
     // The cheek tufts: a cream ruff under the head whose spiky tufts stick out sideways past the cheeks, as on the
     // sheet. An n: 1 range with len < 0 tucks the bottom in under the chin.
-    { on: 'base', under: true, fill: 'face', cx: 0, cy: 12, rx: 92, ry: 48,
+    { feature: 'cheekRuff', on: 'base', under: true, fill: 'face', cx: 0, cy: 12, rx: 92, ry: 48,
       fluff: [{ from: -40, to: 14, n: 3, len: 12, lean: -2, depth: 0.1, b1: -38, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head); on: 'ears' puts
     // them on both. The cream tufts rising from the base of the inner ear, on its side toward the crown, as on the
     // icon.
-    { on: 'ears', clip: true, fill: 'face', cx: 8, cy: 0, rx: 24, ry: 38,
+    { feature: 'earTufts', on: 'ears', clip: true, fill: 'face', cx: 8, cy: 0, rx: 24, ry: 38,
       fluff: [{ from: 225, to: 315, n: 2, len: 12, depth: 0.05, b1: -5, b2: 5, jit: 0 }] },
     // The orange-red lower locks, hanging from under the crimson: a spike out at each side, a lock down each side of
     // the face beside the eye and two short locks between the eyes. The partings above the eyes sit high, so that the
     // tan forehead shows above each eye, as on the icon. The top tip lies hidden under the crown.
-    { on: 'hair', under: true, fill: 'fringe', cx: 0, cy: -62, rx: 80, ry: 40,
+    { feature: 'locks', on: 'hair', under: true, fill: 'fringe', cx: 0, cy: -62, rx: 80, ry: 40,
       tips: [
         [98, -12, -10, 16, [84, -16]],
         [78, 8, 22, -26, [36, -40]],
@@ -122,34 +130,34 @@ PhyFriends.define('bardell', {
       ] },
     // The curled cowlick on the crown, which every picture draws: a thick lock that rises left of the middle and
     // hooks over to the right into a point, as on the icon.
-    { on: 'hair', fill: 'hair', nodes: [[-30, -96, 1, 0], [-36, -112], [-30, -126], [-16, -134], [2, -133, 1, 0],
+    { feature: 'curl', on: 'hair', fill: 'hair', nodes: [[-30, -96, 1, 0], [-36, -112], [-30, -126], [-16, -134], [2, -133, 1, 0],
       [-10, -126], [-16, -116], [-14, -104], [-6, -96, 1, 0]] },
     // The orange patches on the shoulders, under the cheek tufts, as on the sheet, moved in with the onigiri's
     // narrower top.
-    { on: 'body', clip: true, fill: 'orange', cx: -45, cy: 55, rx: 24, ry: 20, rot: -20 },
-    { on: 'body', clip: true, fill: 'orange', cx: 45, cy: 55, rx: 24, ry: 20, rot: 20 },
+    { feature: 'shoulders', on: 'body', clip: true, fill: 'orange', cx: -45, cy: 55, rx: 24, ry: 20, rot: -20 },
+    { feature: 'shoulders', on: 'body', clip: true, fill: 'orange', cx: 45, cy: 55, rx: 24, ry: 20, rot: 20 },
     // The chocolate stripes on the upper arms, which hang at the body's sides while he sits: two narrow bands on each
     // side, running in from the edge and tapering to a round end, clipped to the body so that they start at its edge.
     // Standing, the arms hang over them.
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[56, 62, 1, -8], [21, 72, 1, 0], [56, 78, 1, 0]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[60, 79, 1, -8], [26, 88, 1, 0], [60, 94, 1, 0]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-56, 62, 1, 0], [-56, 78, 1, 0], [-21, 72, 1, 8]] },
-    { on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-60, 79, 1, 0], [-60, 94, 1, 0], [-26, 88, 1, 8]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[56, 62, 1, -8], [21, 72, 1, 0], [56, 78, 1, 0]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[60, 79, 1, -8], [26, 88, 1, 0], [60, 94, 1, 0]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-56, 62, 1, 0], [-56, 78, 1, 0], [-21, 72, 1, 8]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-60, 79, 1, 0], [-60, 94, 1, 0], [-26, 88, 1, 8]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The orange and the crimson over it run down the side of the tip toward the
     // body, as on the sheet, each edge cut into flame-shaped tufts that reach back toward the base; the other side
     // stays cream to the tip. They are drawn as extras rather than as the tail's tip: the gallery measures the tail's
     // reach with clipped shapes whole, and the tip's ellipse, twice as wide as the plume, would widen it.
-    { on: 'tail', clip: true, fill: 'orange', cx: -44, cy: -118, rx: 50, ry: 58,
+    { feature: 'tailTip', on: 'tail', clip: true, fill: 'orange', cx: -44, cy: -118, rx: 50, ry: 58,
       fluff: [{ from: 40, to: 110, n: 2, len: 14, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
-    { on: 'tail', clip: true, fill: 'hair', cx: -50, cy: -126, rx: 46, ry: 40,
+    { feature: 'tailTip', on: 'tail', clip: true, fill: 'hair', cx: -50, cy: -126, rx: 46, ry: 40,
       fluff: [{ from: 40, to: 110, n: 2, len: 12, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
     // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The hind feet
     // are chocolate fur, as far as an edge cut into points, under the crimson bands of the lower legs, as on the
     // sheet, which draws them like boots. They are as large as Brian's boots, so that they read as feet beside the
     // forepaws rather than as four beads in a row.
-    { on: 'feet', under: true, kind: 'ellipse', fill: 'hair', cx: 0, cy: -10, rx: 18, ry: 14 },
-    { on: 'feet', fill: 'brown', cx: 0, cy: 0, rx: 20, ry: 15,
+    { feature: 'socks', on: 'feet', under: true, kind: 'ellipse', fill: 'hair', cx: 0, cy: -10, rx: 18, ry: 14 },
+    { feature: 'socks', on: 'feet', fill: 'brown', cx: 0, cy: 0, rx: 20, ry: 15,
       fluff: [{ from: 215, to: 325, n: 3, len: 4, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.

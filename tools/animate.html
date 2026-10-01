@@ -83,8 +83,6 @@
   };
   group('movements', Object.keys(A.clips).map(n => [n, n]));
   group('feelings', E.names.map(n => [n, `layer(idle, feel('${n}'))`]));
-  // Movements made for the friend shown, on the side away from its tail.
-  const BY_SPEC = ['wave', 'point'];
   // The stance a change of stance starts from, whatever Stand says.
   const FROM = { standUp: 'sit', sitDown: 'stand' };
 
@@ -101,7 +99,7 @@
   function currentClip() {
     const src = $('expr').value.trim() || $('clip').value;
     try {
-      const clip = BY_SPEC.includes(src) ? A.make[src]({ spec: $('char').value }) : A.parse(src);
+      const clip = A.parse(src, { spec: $('char').value });  // Made for the friend shown: a wave away from its tail.
       const stance = FROM[src] || ($('stand').checked ? 'stand' : null);
       return stance ? A.layer(A.still({ stance }), clip) : clip;
     } catch (e) { say(String(e.message || e), true); return null; }

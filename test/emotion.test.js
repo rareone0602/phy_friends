@@ -4,12 +4,12 @@
   'use strict';
 
   const PF = PhyFriends, A = PF.anim, E = PF.emotion;
-  const HOUSE = PF.list().filter(name => E.fits(name));
+  const HOUSE = support.houseFriends();
   const NUMBERS = ['earL', 'earR', 'tail', 'tilt', 'squash', 'lid', 'lidTilt', 'flush', 'widen', 'turnY', 'lookX', 'lookY'];
   const close = (a, b) => Math.abs(a - b) < 1e-3;
 
   test('every friend but Claude fits the emotion library', () => {
-    assertEqual(PF.list().filter(name => !E.fits(name)), ['claude']);
+    assertEqual(PF.list().filter(name => !E.fits(name)), support.EXCEPTIONS);
   });
 
   test('for a friend that shows no feelings, a feeling is its movement alone', () => {
@@ -138,9 +138,7 @@
   });
 
   test('the lids come down over the open eyes, and flush spreads the blush', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
-    try {
+    support.withBoxSync(el => {
       const rig = PF.mount(el, 'howdi', { bitmap: false }), eyeHeight = PF.get('howdi').eyes.h;
       const cheek = rig.parts.cheekL.getBoundingClientRect().width;
       const lidDrop = () => rig.parts.lidL.transform.baseVal.consolidate().matrix.f;
@@ -150,8 +148,6 @@
       rig.setPose({ lid: 0, flush: 0.5 });
       const flushed = rig.parts.cheekL.getBoundingClientRect().width;
       assert(Math.abs(flushed / cheek - 1.5) < 0.05, `the cheek grows ${flushed / cheek} times`);
-    } finally {
-      el.remove();
-    }
+    });
   });
 })();

@@ -201,28 +201,27 @@ is not an ellipse, on which the limbs could not be fitted.
 
 ```js
 PhyFriends.define('name', {
-  palette: { bg, fur, face, hair, earInner, stripe, eye, blush, chest, tailTip },  // Shades such as furShade are derived
+  palette: { bg, fur, head, face, hair, ear, earRight, earInner, iris, irisRight, ink, blush, tongue, body, tail, arm, paw, pawRight, leg, foot, ...others },  // The roles first (see Anatomy); shades such as furShade are derived
   head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // Fluffy ellipse
-  face:  { ... same as head ... },                                     // Pale mask
-  ears:  { base, angle, width, length, lean, tip, inner, stripes, right: {...overrides} },
-  hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // Spiky star
-  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { color, shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own color
+  face:  { ... same as head ... },                                     // Pale mask (false: none)
+  ears:  { base, angle, width, length, lean, tip, inner, stripes, over, right: {...overrides} },  // over: drawn over the head, under the face (Terry's lobes)
+  hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // Spiky star (false: none)
+  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own (its color is irisRight)
   blush: { x, y, rx, ry, tilt },                                      // tilt > 0 raises the outer ends
-  mouth: { x, y, size, shape, fang, tongue },                         // shape: the default mouth
+  mouth: { x, y, size, shape, fang },                                 // shape: the default mouth
   body:  { ...fluffy ellipse..., onigiri },                            // onigiri: a rice ball rather than an ellipse (0..1, or { taper, square })
   tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
   stand: {                                                             // The standing figure: the seated body on two legs (false: never stands); any part left out takes the default, fitted to the body
-    seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, down to which the arms hang and into which the legs fold (left out: the fitted fold); arms and legs override the folded limbs' numbers (arms: { length: 0 } folds an arm into its paw)
+    seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, down to which the arms hang and into which the legs fold (false: one the seated drawing hides, which tucks under the body); arms and legs override the folded limbs' numbers (arms: { length: 0 } folds an arm into its paw)
     fit,                                                               // Any of STAND_FIT's numbers, for this friend
     ground, hips,                                                      // Where the feet touch, and the pivot of a lean
-    arms:  { shoulder, angle, bend, length, width, taper, color, paw: { cx, cy, rx, ry, color }, bands: [{ from, to, color, grow, teeth, depth }], right: {...overrides} },
-    legs:  { hip, spread, ankle, bow, knees, width, taper, color, foot: { cx, cy, rx, ry, color }, bands, right },  // A paw or foot the seat leaves out may be any shape
+    arms:  { shoulder, angle, bend, length, width, taper, paw: { cx, cy, rx, ry }, bands: [{ from, to, color, grow, teeth, depth }], right: {...overrides} },
+    legs:  { hip, spread, ankle, bow, knees, width, taper, foot: { cx, cy, rx, ry }, bands, right },  // A paw or foot the seat leaves out may be any shape
     tail:  { base, angle },                                            // The tail's place while standing
   },
-  extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // Markings and the shade layer; on: 'ears' means both ears, 'paws' and 'feet' both of those
+  extras: [{ feature: 'chest', on: 'body', clip: true, fill: 'face', ...shape }],  // Markings, clothes and props; feature: what it draws (see Anatomy); on: 'ears' means both ears, 'paws' and 'feet' both of those
   // An extra with show: 'name' is drawn only while the pose's show lists that name (a prop); one on 'ground' stays put as the friend hops
   // An extra on 'paws' or 'feet' with sole: true faces us only while the friend sits, and flattens as it rises
-  order: ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   emotions: false,                                                     // Only off the house template (Claude): no feelings
   routine: { says, saysStill, duration, keys: { field: [[t, value, ease]] } },  // Its third hi plays it, if it shows no feelings (Claude's laptop)
@@ -305,6 +304,64 @@ Shape primitives (`PhyFriends.shapes`):
   corners and `bend` (default -6) bows the edges out. On the tail, each polygon
   rides the curve on its own.
 
+## Anatomy
+
+Every friend but Claude is made of the same parts, named the same way
+(`PhyFriends.ANATOMY`), so that one friend's spec reads line for line against
+another's. `PhyFriends.check(spec)` lists where a spec departs from it, and the
+tests hold every friend to it (`test/anatomy.test.js`), so a part that a friend
+lacks is a decision rather than an oversight:
+
+- Each section above from `palette` to `rig` is given, or `false` where the
+  friend has no such part: Terry has no `hair`, and Raze no `face` of another
+  colour. A friend that stands gives its seated forepaw and hind foot
+  (`stand.seat`), or `false` for one that its seated drawing hides.
+- Each part takes its colour from its palette role (`ANATOMY.roles`): the head
+  from `head`, the ears from `ear`, the eyes from `iris`, the mouth's line from
+  `ink`, a forepaw from `paw`, a hind foot from `foot`, and so on, never from a
+  `color` of its own; the right one of a pair that differs takes `earRight`,
+  `irisRight` or `pawRight` (tanyuan's folded right ear, K3V1N's orange eye,
+  mumuyou's pink forepaw). So every
+  friend's palette opens with the same roles in the same order, one table of its
+  colours. A role is a colour, or the name of another role (`paw: 'face'`) or of
+  a house shade (`body: 'furShade'`), whose colour it takes. The friend's other
+  colours follow, named for what they paint (`scarf`, `hoodie`, `stripe`).
+- Each extra names the feature it draws (`feature`), from the house's list
+  (`ANATOMY.features`), grouped by where it sits: the head's (`cheekRuff`,
+  `blaze`, `brows`, `forehead`, `cheekMarks`, …), the ears' (`earTufts`,
+  `earFold`, …), the hair's (`locks`, `curl`, `streaks`, …), the body's
+  (`chest`, `belly`, `shoulders`, `thighs`, …), clothes (`bandana`, `hoodie`,
+  `hood`, `drawstrings`, …), the tail's (`tailTip`, `tailMarks`, …) and the
+  limbs' (`cuffs`, `socks`, `toes`, `soles`). One friend's eyebrow dots are
+  `brows` as much as another's, whatever their colour or layer. A feature that
+  no friend has had yet is added to the list first.
+- The sections, the stand's keys and the extras' layers are checked by name,
+  so `feet` written for `foot` is caught.
+- Every friend's drawing has the same parts, by the names a mounted rig gives
+  them (`ANATOMY.parts`, `rig.parts`): what a pose moves, and all that the code
+  that animates a friend may rely on. The head's layers come in one order for
+  all of them; an ear drawn over the head, as Terry's lobes and cowosus's folded
+  ear are, says so (`ears.over`).
+
+The anatomy makes the friends alike in what they are made of; the house contract
+(`test/contract.test.js`) makes them alike in what they do, which is what the
+clips, the feelings, the gallery and the films rely on. Every friend but Claude
+is held to every promise of it, so that the code that animates a friend never
+needs to know which friend it is: every movement and feeling poses it in finite
+numbers, sitting and standing; a mounted rig draws each pose as a fresh render
+does; it sits and stands on its ground and keeps a foot there as it walks; its
+limbs show against what lies behind them (by at least the colour difference by
+which phy's warm white, the palest the house allows, stands off the paper); and
+it waves and points with the arm away from its tail. One promise is still open:
+a paw raised in front of the face is lost where its colours are the face's, and
+the test lists the friends for which that is so until phy decides how they
+should show (no outline being the house's rule).
+
+Claude keeps the shape of Claude Code's mascot, and its spec the names it had
+before the roles (`body`, `eye`). A spec without a role draws its part as one
+written before them did: the head, ears, arms and tail in `fur`, the eyes and
+the mouth in `eye`, the body in `chest`, and the legs in the body's colour.
+
 ## The pencil
 
 `render` and `mount` colour every character in with coloured pencil (STYLE.md
@@ -338,8 +395,10 @@ if (!scene.film({ duration: 4 })) scene.play();   // Filmed by pf.py film; playe
 ```
 
 Friends hop, look, show marks and feelings (`yuda.feel('surprised', { at: 2 })`,
-from `src/emotion.js`, with its mark) and play clips; phy, the host, may also
-speak. A friend sits unless it is added standing (`scene.add('yuda', { stance:
+from `src/emotion.js`, with its mark) and play clips, each made for the friend
+that plays it (`PhyFriends.anim.parse(clip, { spec })`): `yuda.play('wave')`
+waves with the arm away from his tail, and a feeling in an expression is his
+own; phy, the host, may also speak. A friend sits unless it is added standing (`scene.add('yuda', { stance:
 'stand' })`) or stands up on cue (`yuda.stand({ at: 1 })`, and `sit()` to sit
 down again). It rises through every height in between (the pose's `rise`), and
 its eyes, and the marks and words above them, rise with it. While it stands it
@@ -442,10 +501,16 @@ raised under the chin when curious, arms folded when cross. A friend takes
 less of them the lower it is, and seated it ignores them.
 Some have a mark (`!` for surprise, `z`,
 repeating, for sleep), which a scene shows with `feel()`, and `E.describe(name,
-'Howdi')` gives a screen reader "Howdi looks surprised." `anim`'s `parse`
-understands the four forms, so `pf.py anim howdi --clip "layer(idle,
-hold('content'))"` films one, `tools/animate.html` plays any of them on any
-friend, and `tools/feelings.html` shows every friend in every feeling.
+'Howdi')` gives a screen reader "Howdi looks surprised." What the code that
+shows feelings needs to know of one, it asks the library: whether it turns a
+friend inward, so that it stops following the pointer (`E.inward('shy')`), and
+what a screen reader hears of the greeting (`E.describeGreeting('Howdi')`).
+`anim`'s `parse` understands the four forms, so `pf.py anim howdi --clip
+"layer(idle, hold('content'))"` films one, `tools/animate.html` plays any of
+them on any friend, and `tools/feelings.html` shows every friend in every
+feeling. `PhyFriends.anim.mirror(clip)` plays a clip toward the other side:
+what turns one way turns the other, and each arm, leg, ear and eye changes
+places with its pair.
 
 Claude keeps every rule but the shape, and its ears are arms, so its spec sets
 `emotions: false` (`E.fits('claude')` is false): given its spec, a feeling is
@@ -496,11 +561,12 @@ python3 tools/pf.py render howdi --flat                     # The flat shapes, w
 python3 tools/pf.py compare howdi                           # Every example: out/howdi/compare/ref.png + ref-diff.png
 python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One example, metrics and a zoomed crop for a box
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
-python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}), wave({spec:'howdi'}))"  # A clip's name, given options, makes one
+python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}), wave)"  # Made for howdi: the wave is away from its tail
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
-python3 tools/pf.py test                                    # The in-browser tests, and the gallery's labels against the cast
+python3 tools/pf.py test                                    # The in-browser tests, and the pages against the cast
+python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows, written from the cast
 ```
 
 `compare` snaps every pixel of the reference and the render to the nearest
@@ -520,7 +586,11 @@ non-zero on a failure or a page error. The page also works opened by hand.
 `test` also checks the gallery against the cast, which `index.html` repeats by
 hand: each friend's name, species and credit, the name in its `aria-label`, the
 host, the owner's agreement to the gallery, and the names in the link preview's
-alt text. A mismatch is a failure that names the friend and the field.
+alt text. A mismatch is a failure that names the friend and the field. What
+follows from the cast and the drawings is written, not typed: `pf.py pages`
+(`tools/gallery.py`) writes the script tags of every page that loads all the
+friends, in the cast's order, and the gallery's rows, from the friends' reaches;
+`test` fails while either is stale.
 
 The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
 ffmpeg for video.
@@ -530,7 +600,9 @@ ffmpeg for video.
 1. **Reproduce an image**: make `characters/<name>/`, put the picture in its
    `examples/` as `ref.jpg`, write `<name>.js` with a `views.ref` camera
    matching the crop, and iterate with `pf.py compare <name>`. A new character
-   also needs a `<script>` tag in any page that shows it.
+   joins the cast (`characters/cast.js`) and the gallery's list; `pf.py pages`
+   then loads it in every page that shows them all and lays out the rows, and
+   `pf.py test` holds it to the house contract (`test/contract.test.js`).
 2. **Reproduce a design sheet**: crop each figure into `examples/`, add a view
    per figure, and compare against all of them at once; the portrait view is
    the canonical one.

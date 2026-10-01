@@ -59,6 +59,16 @@
     assertEqual(timing(A.parse('walk()')), timing(A.clips.walk), 'and with none, the library clip');
   });
 
+  test('parse makes every clip and feeling of an expression for the friend given', () => {
+    assertEqual(A.parse('wave', { spec: 'howdi' })(0.6), A.make.wave({ spec: 'howdi' })(0.6), 'a name');
+    assertEqual(A.parse('layer(still({}), wave)', { spec: 'yuanyuan' })(0.6), A.make.wave({ spec: 'yuanyuan' })(0.6), 'a name in an expression');
+    assertEqual(A.parse('point({ hold: 2 })', { spec: 'howdi' })(0.6), A.make.point({ spec: 'howdi', hold: 2 })(0.6), 'a call');
+    assertEqual(A.parse('layer("wave", rest(1))', { spec: 'yuanyuan' })(0.6), A.make.wave({ spec: 'yuanyuan' })(0.6), 'a name in quotes');
+    assertEqual(A.parse('layer("wave", rest(1))')(0.6), A.clips.wave(0.6), 'and in quotes without a spec, the library clip');
+    assertEqual(A.parse("hold('happy')", { spec: 'claude' })(1), {}, 'a feeling, which Claude does not show');
+    assert(Object.keys(A.parse("hold('happy')")(1)).length > 0, 'and without a spec, the house face');
+  });
+
   test('extend adds names to what parse understands, but never replaces one', () => {
     assertEqual(timing(A.parse("layer(idle, hold('curious'))")), { duration: 8, loop: true }, 'src/emotion.js adds hold');
     assertThrows(() => A.extend({ idle: A.rest(1) }), 'already a name');
@@ -138,10 +148,7 @@
   });
 
   test('standUp and sitDown raise and lower the head smoothly', () => {
-    const el = document.createElement('div');
-    el.style.width = el.style.height = '512px';
-    document.body.appendChild(el);
-    try {
+    support.withBoxSync(el => {
       for (const name of standers()) {
         const rig = PhyFriends.mount(el, name, { bitmap: false, view: 'stand' }), lift = PhyFriends.riseOf(name, { stance: 'stand' });
         const moves = [['standUp', 'sit', 0, lift], ['sitDown', 'stand', lift, 0]];
@@ -157,9 +164,7 @@
         }
         el.textContent = '';
       }
-    } finally {
-      el.remove();
-    }
+    }, 512);
   });
 
   test('walking steps off with the foot on the side it goes to and keeps a planted foot where it was', () => {
@@ -191,11 +196,10 @@
     assertEqual(A.walking(0.5, 3).along, 0.5, 'steps come in pairs, so three steps are four');
   });
 
-  test('a friend waves and points with the arm away from its tail', () => {
-    // Howdi's tail is on the viewer's left, and YuanYuan's lies out to the viewer's right while he stands.
-    for (const [name, arm] of [['howdi', 'armR'], ['yuanyuan', 'armL']]) {
-      for (const move of ['wave', 'point']) assert(A.make[move]({ spec: name })(0.6)[arm] > 45, `${name} ${move}s with ${arm}`);
-    }
+  test('a mirrored clip turns the other way and swaps every pair, limbs too, but keeps the tail on its side', () => {
+    const pose = A.mirror(A.still({ lookX: 0.5, turnX: 0.2, tilt: 5, lean: 4, earL: 10, earR: -3, armL: 150, elbowL: -30, stepR: 6, over: 'armL', tail: 8, flush: 0.4 }))(0);
+    assertEqual([pose.lookX, pose.turnX, pose.tilt, pose.lean, pose.earL, pose.earR, pose.flush, pose.tail], [-0.5, -0.2, -5, -4, -3, 10, 0.4, 8]);
+    assertEqual([pose.armR, pose.elbowR, pose.stepL, pose.over, 'armL' in pose], [150, -30, 6, 'armR', false]);
   });
 
   test('under reduced motion a standing friend keeps its stance, and drops the arm movements and over, which are not the face', () => {

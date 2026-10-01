@@ -97,9 +97,11 @@
   // friend adds to that (stand), if anything; how long its reaction takes (react.seconds) and how long of
   // that the face takes to come on (react.rise); the reaction's own movement, which starts and ends at
   // rest (react.motion, a clip); the movement while it is held (hold, a looping clip); its mark
-  // ({ text, every } for a mark that repeats while the feeling lasts), if any; and what a screen reader
-  // hears (says). The arms are drawn in front of the scarf and the head, but for the shoulder, which tucks under
-  // them; a gesture may draw an arm whole in front, shoulder too (over).
+  // ({ text, every } for a mark that repeats while the feeling lasts), if any; whether it turns the friend inward, its
+  // eyes shut or its look turned away, so that it stops following what goes on (inward); and what a screen reader
+  // hears (says), and of the greeting, which is the happy reaction (greets). The arms are drawn in front of the scarf
+  // and the head, but for the shoulder, which tucks under them; a gesture may draw an arm whole in front, shoulder
+  // too (over).
   const FEELINGS = {
     happy: {
       valence: 0.8, arousal: 0.5,
@@ -114,6 +116,7 @@
         lean: 2 * wave(t, 2), armL: 6 * wave(t, 2, 0.5), armR: -6 * wave(t, 2, 0.5),
       }), 4, true),
       says: 'smiles',
+      greets: 'hops twice',
     },
     content: {
       valence: 0.7, arousal: -0.5,
@@ -128,6 +131,7 @@
         lean: 1.5 * wave(t, 8, 0.6),
       }), 8, true),
       mark: { text: '♪' },
+      inward: true,
       says: 'looks content',
     },
     shy: {
@@ -149,6 +153,7 @@
         tail: [[0, 0], [0.8, 0], [1.1, 4], [1.4, 0], [3.1, 0], [3.4, 3], [3.7, 0], [4, 0]],
         legR: [[0, 0], [2.7, 0], [3, 5], [3.3, -2], [3.6, 0], [4, 0]],
       }, { duration: 4, loop: true }),
+      inward: true,
       says: 'goes shy',
     },
     proud: {
@@ -276,6 +281,7 @@
         armL: [[0, 0], [5.8, -4], [6.05, 12, 'out'], [6.8, 0], [8, 0]],
         armR: [[0, 0], [5.8, -4], [6.1, 11, 'out'], [6.9, 0], [8, 0]],
       }, { duration: HOLD_SECONDS, loop: true }),
+      inward: true,
       says: 'grows sleepy',
     },
     asleep: {
@@ -300,6 +306,7 @@
         };
       }, 4, true),
       mark: { text: 'z', every: 2 },
+      inward: true,
       says: 'falls asleep',
     },
     sad: {
@@ -440,6 +447,14 @@
   function describe(name, who) {
     return `${who} ${feeling(name).says}.`;
   }
+  // What a screen reader hears of a friend's greeting (greeting()).
+  function describeGreeting(who) {
+    return `${who} ${FEELINGS.happy.greets}.`;
+  }
+  // Whether a feeling turns a friend inward, so that it stops following what goes on.
+  function inward(name) {
+    return !!feeling(name).inward;
+  }
 
   // Whether the library can show a friend's feelings: every friend drawn on the house template can;
   // a spec that sets `emotions: false`, as Claude's does, cannot.
@@ -471,7 +486,7 @@
     };
   }
 
-  const api = { names: NAMES, posture, face, react, hold, feel, greeting, smile, mark, describe, fits, place, markAt, MARK };
+  const api = { names: NAMES, posture, face, react, hold, feel, greeting, smile, mark, describe, describeGreeting, inward, fits, place, markAt, MARK };
   A.extend({ face, react, hold, feel });
   PF.emotion = api;
   return api;

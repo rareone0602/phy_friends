@@ -320,11 +320,6 @@
     }
   });
 
-  test('a mirrored clip looks, turns and tilts the other way, and swaps its ears', () => {
-    const pose = L.mirrored(PF.anim.still({ lookX: 0.5, turnX: 0.2, tilt: 5, earL: 10, earR: -3, flush: 0.4 }))(0);
-    assertEqual([pose.lookX, pose.turnX, pose.tilt, pose.earL, pose.earR, pose.flush], [-0.5, -0.2, -5, -3, 10, 0.4]);
-  });
-
   test('a friend added standing shows its marks higher by its lift', () => {
     const boxes = [0, 1].map(() => {
       const box = document.createElement('div');

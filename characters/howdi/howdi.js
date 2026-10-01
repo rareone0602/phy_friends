@@ -9,14 +9,22 @@ PhyFriends.define('howdi', {
   palette: {
     bg: '#1c1d21',
     fur: '#6ec7ff',        // The sky blue of the color bar. Its house shade (furShade) fills the body, which sits under the head.
+    head: 'fur',
     face: '#d5f0ff',       // The pale blue of the color bar: muzzle, cheeks, ruff, paws and tail end. Its house shade (faceShade) fills the back layer of the ruff.
     hair: '#223678',       // The navy of the color bar: the mop and the bands on the ears.
+    ear: 'fur',
     earInner: '#eceff3',   // The white of the color bar, deepened to mumuyou's depth to stay visible on paper.
-    eye: '#1d2038',        // A navy near-black, like the pupils, used for the mouth.
-    eyeBlue: '#1f84e5',    // The bright blue of the irises in IMG_3308.png and IMG_9372.png (#539eff), one house step deeper so that it holds its weight.
-    belly: '#a7deff',      // The mid blue of the color bar: the belly in all three newer pictures.
+    iris: '#1f84e5',       // The bright blue of the irises in IMG_3308.png and IMG_9372.png (#539eff), one house step deeper so that it holds its weight.
+    ink: '#1d2038',        // A navy near-black, like the pupils, used for the mouth.
     blush: '#ffc6c8',      // The pink of the color bar, lightened by hand. The pictures mark the blush only with hatching.
     tongue: '#ff9da3',     // The pink of the color bar.
+    body: 'furShade',
+    tail: 'fur',
+    arm: 'fur',
+    paw: 'face',
+    leg: 'furShade',
+    foot: 'face',
+    belly: '#a7deff',      // The mid blue of the color bar: the belly in all three newer pictures.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears.
   head: {
@@ -66,7 +74,7 @@ PhyFriends.define('howdi', {
   // The eyes are plain tall pills in Howdi's own blue, which every newer picture draws (ref.jpg draws them
   // black), without the pictures' darker ring, pupil, mint crescent, highlight or heavy lids. They are set
   // wide and low. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1, color: 'eyeBlue' },
+  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1 },
   // The blush sits on the pale under the outer corner of each eye, tipped up to follow the cheek. It sits low
   // enough that an eye looking down and outward does not land on it.
   blush: { x: 54, y: 26, rx: 11, ry: 6.5, tilt: 10 },
@@ -76,7 +84,7 @@ PhyFriends.define('howdi', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 68, ry: 50, color: 'furShade', onigiri: 1,
+    cx: 0, cy: 82, rx: 68, ry: 50, onigiri: 1,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -85,7 +93,7 @@ PhyFriends.define('howdi', {
   // because the gallery's layout is measured with it here. Its pale end is cut into flame-shaped
   // tufts that reach back into the sky blue.
   tail: {
-    base: [-54, 108], angle: 62, length: 124, width: 82, bend: -50, taper: 0.72, root: 0.5, color: 'fur',
+    base: [-54, 108], angle: 62, length: 124, width: 82, bend: -50, taper: 0.72, root: 0.5,
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
@@ -96,21 +104,21 @@ PhyFriends.define('howdi', {
   // lower legs and feet, the pale meeting the blue in a jagged edge.
   stand: {
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 46, cy: 121, rx: 18, ry: 10, rot: -8 } },
-    arms: { paw: { color: 'face' }, bands: [{ from: 0.72, to: 1, color: 'face', teeth: 2, depth: 4 }] },
-    legs: { bands: [{ from: 0.55, to: 1, color: 'face', teeth: 3, depth: 5 }], foot: { color: 'face' } },
+    arms: { bands: [{ from: 0.72, to: 1, color: 'face', teeth: 2, depth: 4 }] },
+    legs: { bands: [{ from: 0.55, to: 1, color: 'face', teeth: 3, depth: 5 }] },
   },
   extras: [
     // Cheek fluff under the head: a fur ruff whose tufts reach past the pale cheeks. An n: 1 range with
     // len < 0 tucks the bottom in under the chin.
-    { on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
+    { feature: 'cheekRuff', on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -42, to: 21, n: 3, len: 15, lean: -2, depth: 0.1, b1: -35, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
     // The mid-blue belly, under the ruff.
-    { on: 'body', clip: true, fill: 'belly', cx: 0, cy: 106, rx: 34, ry: 34 },
+    { feature: 'belly', on: 'body', clip: true, fill: 'belly', cx: 0, cy: 106, rx: 34, ry: 34 },
     // The ruff: a back layer in the house shade, which shows as a collar under the chin, and the pale ruff in
     // front of it, whose spiky tufts hang over the belly. It lies over the tops of the arms, as a scarf does (scarf).
-    { on: 'scarf', clip: true, fill: 'faceShade', cx: 0, cy: 52, rx: 66, ry: 24 },
-    { on: 'scarf', fill: 'face', cx: 0, cy: 70, rx: 36, ry: 19,
+    { feature: 'chest', on: 'scarf', clip: true, fill: 'faceShade', cx: 0, cy: 52, rx: 66, ry: 24 },
+    { feature: 'chest', on: 'scarf', fill: 'face', cx: 0, cy: 70, rx: 36, ry: 19,
       fluff: [{ from: 20, to: 160, n: 5, len: 13, depth: 0.1, b1: -25, b2: 5, jit: 0 },
         { from: 215, to: 325, n: 4, len: 5, depth: 0.05, b1: -20, b2: 10, jit: 0 }] },
   ],

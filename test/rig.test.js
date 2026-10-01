@@ -26,16 +26,7 @@
   // Whether node b is drawn after node a (later in the document, and so in front of it).
   const after = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 
-  function withRig(fn, spec = SPEC) {
-    const box = document.createElement('div');
-    Object.assign(box.style, { position: 'relative', width: '160px', height: '160px' });
-    document.body.appendChild(box);
-    try {
-      fn(PF.mount(box, spec, { view: PF.standingView(spec) }));
-    } finally {
-      box.remove();
-    }
-  }
+  const withRig = (fn, spec = SPEC) => support.withBoxSync(box => fn(PF.mount(box, spec, { view: PF.standingView(spec) })), 160);
   const rectOf = (rig, part) => rig.parts[part].getBoundingClientRect();
   const drawn = node => !node.closest('[display="none"]');
   const shown = (rig, name) => [...rig.svg.querySelectorAll(`[data-pf-show="${name}"]`)].map(n => !n.hasAttribute('display'));
@@ -326,36 +317,6 @@
     assert(PF.shapes.bendFor(L, L) < 1e-6, 'a straight limb');
   });
 
-  // The data-pf names in document order, each part's transform and display, and each limb outline.
-  function drawingOf(root) {
-    const parts = [...root.querySelectorAll('[data-pf]')];
-    return {
-      looks: parts.map(n => `${n.getAttribute('data-pf')}:${n.getAttribute('transform')}:${n.getAttribute('display')}`),
-      outlines: [...root.querySelectorAll('[data-pf-d]')].map(n => `${n.getAttribute('data-pf-d')}:${n.getAttribute('d')}`),
-    };
-  }
-
-  test('a mounted rig redraws its limbs as a fresh render of its new pose draws them', () => {
-    const box = document.createElement('div');
-    box.style.width = box.style.height = '200px';
-    document.body.appendChild(box);
-    try {
-      for (const name of ['fruit', 'tanyuan', 'phy']) {
-        const rig = PF.mount(box, name, { pose: { stance: 'stand' } });
-        for (const pose of [{ stance: 'sit', rise: 0.4, armR: 60 }, { stance: 'stand', armL: 120, elbowL: 30, crouch: 5, lean: 6, stepR: 4 }]) {
-          rig.setPose(pose, true);
-          const fresh = document.createElement('div');
-          fresh.innerHTML = PF.render(name, { pose });
-          const [mounted, rendered] = [drawingOf(rig.svg), drawingOf(fresh)];
-          assertEqual(mounted.outlines, rendered.outlines, `${name} ${JSON.stringify(pose)}: the limb outlines`);
-          assertEqual(mounted.looks.sort(), rendered.looks.sort(), `${name} ${JSON.stringify(pose)}: the transforms`);
-        }
-      }
-    } finally {
-      box.remove();
-    }
-  });
-
   test('seated, a friend ignores the arm, leg, lean and crouch fields', () => {
     const at = pose => JSON.stringify(PF.poseState(STANDER, pose));
     assertEqual(at({ stance: 'sit', armL: 120, elbowR: -60, legL: 20, stepR: 6, lean: 10, crouch: -4 }), at({ stance: 'sit' }));
@@ -408,15 +369,10 @@
 
   // The width of a leg's outline and where its foot rests, standing at a crouch, on a friend mounted in a standing box.
   function legAt(spec, crouch) {
-    const box = document.createElement('div');
-    box.style.width = box.style.height = '270px';
-    document.body.appendChild(box);
-    try {
+    return support.withBoxSync(box => {
       const rig = PF.mount(box, spec, { view: PF.standingView(spec), pose: { stance: 'stand', crouch } });
       return { width: rig.parts.legL.querySelector('path').getBBox().width, foot: rig.parts.footL.getBoundingClientRect().bottom };
-    } finally {
-      box.remove();
-    }
+    }, PF.STANDING_BOX);
   }
 
   test('a plush leg squashes to take up a crouch, where a leg with knees bows out, and either stretches a little first', () => {

@@ -22,9 +22,7 @@
   });
 
   test('a rig shows the variant of the texture it is set to', () => {
-    const el = document.createElement('div');
-    document.body.appendChild(el);
-    try {
+    support.withBoxSync(el => {
       const rig = PF.mount(el, 'phy', { bitmap: false });
       const image = rig.svg.querySelector('image[data-pf-texture]');
       const sheet = ['x', 'y', 'width', 'height'].map(name => +image.getAttribute(name));
@@ -33,9 +31,7 @@
       assertEqual(image.getAttribute('href'), PF.pencil.texture(...sheet, 2));
       rig.setTexture(0);
       assertEqual(image.getAttribute('href'), PF.pencil.texture(...sheet, 0));
-    } finally {
-      el.remove();
-    }
+    });
   });
 
   // Safari masks each shape of a masked group on its own unless what the mask holds is an isolated

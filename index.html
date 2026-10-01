@@ -69,24 +69,18 @@
      stand close without overlapping a tail. The stage is the one centered thing on the
      page (FWIENDS.md). */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
-  /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 per slot for the overlap. The seventeen reaches add up to 827 head units (Terry's and Claude's are nil),
-     so all seventeen take 19.0430 boxes. In the smaller splits the widest rows are the second eight, K3V1N
-     to jiaoyue, at 9.0978 boxes, the first five at 5.6815, K3V1N to Raze at 4.5822, Brian to K3V1N
-     at 3.5978, and Brian and mumuyou at 2.3837. Each is rounded up so that those friends always fit in
-     one row. The box is five
-     rules, so that the second row stands on its rule 768px down the page: a window at least that tall
-     shows two rows of friends. */
+  /* The box is five rules, so that the second row stands on its rule 768px down the page: a window at
+     least that tall shows two rows of friends. */
   .stage { container-type: inline-size; }
-  .troupe { --abreast: 2.384; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of seventeen; the
-     header and footer keep to the margin line. */
-  main { max-width: 3159px; }
-  /* Friends stand in one row where all seventeen fit. Otherwise they stand eight to a row, with Claude,
-     the last, alone under the rest, over the disclaimer about it, and where eight do not fit, in rows of
-     five, where jiaoyue and Claude share the last. Narrower, they stand four to a row, with Claude alone
-     again, then three, where jiaoyue and Claude share the last, or in pairs, with Claude alone. Each row
-     is grounded on a rule. */
+  .troupe { --size: calc(var(--L) * 5); }
+  /* Friends stand in one row where all of them fit. Otherwise they stand eight to a row, and where eight
+     do not fit, five, then four, then three, or in pairs, so that the same friends always share a row;
+     Claude, the last, stands over the disclaimer about it, whichever row that is. Each row is grounded
+     on a rule. A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
+     less 0.06 per slot for the overlap, and the list is as wide as the widest row of its split, rounded
+     up so that those friends always fit in one row. The page is wider than the kit's column so that the
+     stage has room for a row of every friend; the header and footer keep to the margin line. The rows
+     below the note are written from the friends' reaches by `python3 tools/pf.py pages`. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   /* A link to a friend (#yuda) leaves room above it for its ears. */
@@ -155,26 +149,19 @@
   /* Beside the margin line the stage spans the paper to the page's edge, keeping the 12px
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
   @media (min-width: 721px) { .stage { margin-inline: -16px -28px; } .still { left: 16px; } }
-  /* Three stand in a row once the stage is 3.598 boxes wide, which it is from a 586px window, where a
-     rule is 30px and so a box 150px. Narrower, they stand in pairs, never a mix of pairs and threes,
-     so that the same friends always share a row on a phone. */
+  /* Each split of the friends into rows takes over once the stage is as wide as its widest row; a phone's
+     rules, and so its boxes, are smaller. A row of five leaves room for the whole note. Where every friend
+     fits in one row the page stops growing, and the list's cap is lifted, so that rounding never sends the
+     last friend to a second row. */
+  /* The rows (--abreast) and the page's width, written by `python3 tools/pf.py pages` from the friends' reaches. */
+  .troupe { --abreast: 2.384; }
+  main { max-width: 3159px; }
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
-  /* Four stand in a row once the stage is 4.583 boxes wide, which it is from an 846px window, five
-     once it is 5.682 boxes wide, from a 1022px window, eight once it is 9.098 boxes wide, from a
-     1568px window, and all seventeen once it is 19.043 boxes wide, from a 3159px window, where the
-     page stops growing. */
   @container (width >= 734px) { .troupe { --abreast: 4.583; } }
-  @container (width >= 910px) {
-    .troupe { --abreast: 5.682; }
-    .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
-  }
-  @container (width >= 1456px) { .troupe { --abreast: 9.098; } }
-  /* The seventeen fit the capped row with less than a pixel to spare, so the cap is lifted here:
-     rounding must not send the last friend to a second row. */
-  @container (width >= 3047px) {
-    .troupe { --abreast: 19.043; }
-    .friends { max-width: none; }
-  }
+  @container (width >= 910px) { .troupe { --abreast: 5.682; } .note .long { display: inline; } }
+  @container (width >= 1456px) { .troupe { --abreast: 9.095; } }
+  @container (width >= 3047px) { .troupe { --abreast: 19.04; } .friends { max-width: none; } }
+  /* The end of the rows. */
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
   @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
 

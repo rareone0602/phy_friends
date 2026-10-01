@@ -48,9 +48,7 @@
 
   // ------------------------------------------------------------ Settings
 
-  const IDLE_SECONDS = 8;                // The idle clip's loop, as in a scene (film/scene.js).
   const PHASE_STEP = 1.7;                // Offsets each friend's idle cycles so that they do not move in step.
-  const GLANCES = ['lookX', 'lookY', 'turnX', 'turnY'];  // The idle clip's glances about, which fade while a friend looks at something.
   const POINTER_TIMEOUT_MS = 8000;       // A pointer that stays still this long is treated as gone.
   const GAZE_RATE = 7;                   // How fast the gaze eases toward its target, per second.
   const PERK_RATE = 10;                  // How fast a friend perks up or relaxes, per second.
@@ -89,16 +87,12 @@
   // order seeded by `seed`, and each falls asleep `asleep` seconds (give or take `jitter`) later. Woken
   // by the pointer, the nearest starts first, `wake` seconds sooner for every 100 px nearer.
   const DOZE = { after: 30, spread: 8, asleep: 6, jitter: 0.4, seed: 11, wake: 0.05 };
-  // Feelings in which a friend stops following the pointer: its eyes are shut, or it looks away.
-  const INWARD = ['content', 'shy', 'sleepy', 'asleep'];
   // A mark (src/cast.js MARKS) in the hand, in head units within the friend's box, from its eyes: `size`
   // tall, its bottom at (x, y), just outside the right ear and just above the box, clear of the labels of
   // a row above. A mark that repeats (the z of sleep) starts lower, beside the head, and drifts up without
   // rising above the box. Both stand far enough out to clear every right ear but Howdi's, the widest,
   // which they graze, and near enough to read as their own friend's rather than a neighbor's.
   const MARK = { size: 44, x: 145, y: -108, drifting: { x: 145, y: -50 } };
-  const FIELDS_MIRRORED = ['lookX', 'turnX', 'headX', 'tilt', 'x'];  // What changes sign when a pose is mirrored.
-  const ANNOUNCEMENT = { hop: name => `${name} hops twice.` };  // The greeting (E.greeting) bounces twice.
   // A mark is bold, the pencil pressed harder (STYLE.md §5), so that it reads at a glance at the
   // gallery's size; film/scene.js draws its marks alike.
   const STYLE = [
@@ -465,7 +459,7 @@
       box.classList.add('pf-live');
       const rig = PF.mount(box, spec, { bg, view, pose: { stance } });
       rig.svg.setAttribute('aria-hidden', 'true');  // The box's label says who the friend is.
-      const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS });
+      const idle = A.idleOf(name);
       const greeting = E.greeting(spec), layers = A.stack(), marks = [], strokes = strokeDetector();
       // A friend that shows no feelings may have a routine of its own (spec.routine), which its third hi plays.
       const routine = !fits && spec.routine ? A.track(spec.routine.keys, { duration: spec.routine.duration }) : null;
@@ -575,7 +569,7 @@
         }
         layers.add(greeting, { at: t, fade: HI_FADE });
         record.reaction = { at: t, until: t + greeting.duration, watchedUntil: t + greeting.duration };
-        o.announce(self.reduced ? E.describe('happy', label) : ANNOUNCEMENT.hop(label));
+        o.announce(self.reduced ? E.describe('happy', label) : E.describeGreeting(label));
         return true;
       }
 
@@ -587,7 +581,7 @@
         if (!fits) return false;
         calm(at);
         let clip = react && held ? E.feel(name, { spec }) : react ? E.react(name, { spec }) : E.hold(name, { spec });
-        if (mirror) clip = mirrored(clip);
+        if (mirror) clip = A.mirror(clip);
         const until = at + (lasting ?? (held ? Infinity : clip.duration));
         feeling = feelingOf(name, layers.add(clip, { at, until, fade }), until);
         const shown = mark ? E.mark(name) : null;
@@ -694,21 +688,14 @@
       // every time.
       function pose(t, { target, eyes: own, travel, reduced, moving, gazeEase, perkEase }) {
         const absorbed = !!record.reaction && record.reaction.absorbed && reacting(t);  // In its routine.
-        const inward = (!!feeling && INWARD.includes(feeling.name) && t >= feeling.layer.at) || absorbed;
+        const inward = (!!feeling && E.inward(feeling.name) && t >= feeling.layer.at) || absorbed;
         const [toX, toY] = travel ? [travel.dir * TRAVEL.look, 0] : target && !inward ? gazeToward(own, target) : [0, 0];
         lookX += (toX - lookX) * gazeEase;
         lookY += (toY - lookY) * gazeEase;
         glance += ((target || inward || travel ? 0 : 1) - glance) * gazeEase;
         perk += (((hovered || focused) && !reduced ? 1 : 0) - perk) * perkEase;
         const acc = { stance };  // The stance it was added in, which a clip may change for a while.
-        if (moving) {
-          const idlePose = idle(t + phase), glances = {};
-          for (const key of GLANCES) {
-            if (key in idlePose) { glances[key] = idlePose[key]; delete idlePose[key]; }
-          }
-          A.combine(acc, idlePose);
-          A.combine(acc, glances, glance);
-        }
+        if (moving) A.addIdle(acc, idle, t + phase, glance);
         A.combine(acc, layers.sample(t, { reduced }));
         const turn = reduced ? 0 : HEAD_TURN;
         A.combine(acc, {
@@ -779,17 +766,6 @@
     const touch = event.touches && event.touches[0];
     if (touch) return { x: touch.clientX, y: touch.clientY };
     return 'clientX' in event ? { x: event.clientX, y: event.clientY } : null;
-  }
-
-  // A clip seen in a mirror: looks, turns and tilts change sides, and so do the ears and eyes.
-  function mirrored(clip) {
-    return A.clip(t => {
-      const pose = { ...clip(t) };
-      for (const key of FIELDS_MIRRORED) if (typeof pose[key] === 'number') pose[key] = -pose[key];
-      [pose.earL, pose.earR] = [pose.earR, pose.earL];
-      [pose.eyeL, pose.eyeR] = [pose.eyeR, pose.eyeL];
-      return pose;
-    }, clip.duration, clip.loop);
   }
 
   // Tells a stroke from a pass: it counts the turns the pointer makes along x, each after at least
@@ -865,7 +841,7 @@
   }
 
   const api = {
-    stage, still, keepStill, strokeDetector, dozeSchedule, dozeAnnouncement, wakeAnnouncement, gazeToward, mirrored,
+    stage, still, keepStill, strokeDetector, dozeSchedule, dozeAnnouncement, wakeAnnouncement, gazeToward,
     SHY, STROKE, CURIOUS, DOZE, MARK,
   };
   PF.live = api;

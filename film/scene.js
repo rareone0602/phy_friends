@@ -39,7 +39,6 @@
   const DEFAULT_GROUND = 120; // The ground line for a spec without rig.ground, in head units.
   const OFFSTAGE = 200;       // How far past the frame's edge a friend waits before it enters, in head units.
   const PHASE_STEP = 1.7;     // Offsets each friend's idle cycles so that they do not move in step.
-  const IDLE_SECONDS = 8;
   const HOP = A.HOP;
   const GAZE = { seconds: 0.3, depth: 180, turn: 0.5 };      // As in the gallery: the head turns half as far as the eyes.
   const TRAVEL = { look: 0.5, turn: 0.6, weight: 0.7 };      // A traveling friend looks where it is going.
@@ -548,7 +547,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     const view = { w: BOX, h: BOX, x: BOX / 2, y: BOX - rigGround, scale: 1, rotate: 0 };
     // The scene redraws the textures itself (boil), and a film must come out the same every time.
     const rig = PF.mount(node, spec, { bg: false, view, bitmap: false });
-    const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS, energy: a.energy });
+    const idle = A.idleOf(name, { energy: a.energy });
     const home = { x: a.x, y: a.y };
     const moves = [], layers = A.stack(), gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
     // The friend's stance over time, as its cues change it: the stance from each `at` on, under the clips that ease it
@@ -662,9 +661,10 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return actor;
       },
 
-      // Layers a clip (a name, an expression or a clip) from `at` until it ends, or until `until`.
+      // Layers a clip (a name, an expression or a clip), made for this friend, from `at` until it ends, or until
+      // `until`: 'wave' waves with the arm away from its tail, and a feeling in an expression is its own.
       play(clip, { at = scene.time, until, fade, weight } = {}) {
-        layers.add(A.parse(clip), { at, until, fade, weight });
+        layers.add(A.parse(clip, { spec }), { at, until, fade, weight });
         return actor;
       },
 
@@ -769,14 +769,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
 
     function poseAt(t, s) {
       const reduced = scene.reduced, acc = { stance: stanceAt(t) };  // Under the layers, whose rise eases it up or down.
-      if (!reduced) {
-        const idlePose = idle(t + a.phase), glances = {};
-        for (const key of ['lookX', 'lookY', 'turnX', 'turnY']) {
-          if (key in idlePose) { glances[key] = idlePose[key]; delete idlePose[key]; }
-        }
-        A.combine(acc, idlePose);
-        A.combine(acc, glances, glancingAt(t));
-      }
+      if (!reduced) A.addIdle(acc, idle, t + a.phase, glancingAt(t));
       A.combine(acc, layers.sample(t, { reduced }));
       const [lookX, lookY] = gazeAt(t, s);
       const turn = reduced ? 0 : GAZE.turn;

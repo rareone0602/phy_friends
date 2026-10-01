@@ -45,7 +45,8 @@ The page has five parts, in this order:
 - The stage is the one centred thing on the page, as the subject of a group
   photo stands in the middle of the frame. The rest keeps to the margin line.
   The stage is also the one wide thing: beside the margin line it runs to the
-  paper's edge, and the page stops at 3159px.
+  paper's edge, and the page stops growing where every friend fits in one
+  row.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
   bottom edge is the friend's `rig.ground`. The box is a whole number of
   rules, so the ground stays on a rule: 5 rules. The smallest phones, below
@@ -55,17 +56,19 @@ The page has five parts, in this order:
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
   reaches into the gap beside the pair.
-- All seventeen stand in one row from a 3159px window, where the page stops
-  growing. The seventeen reaches add up to 827 head units and neighbours
-  overlap by 0.06 of a box, so the row is 19.04 boxes wide. Narrower, they
-  stand eight to a row, from a 1568px window, with Claude, the last, alone
-  under the rest, and in rows of five, from a 1022px window, where jiaoyue
-  and Claude share the last. Either way the second row stands on its rule
-  768px down the page, so a window at least that tall shows two rows of
-  friends. Below that they stand four to a row, with Claude alone again,
-  below an 846px window three to a row, where jiaoyue and Claude share the
-  last, and below a 586px window in pairs, never a mix of pairs and threes,
-  with Claude alone.
+- Every friend stands in one row once the window is wide enough for all of
+  them, where the page stops growing. Narrower, they stand eight to a row,
+  then five, four and three, and on a phone in pairs, never a mix of pairs
+  and threes, so that the same friends always share a row; Claude, the last,
+  stands over the disclaimer about it, whichever row that is. In rows of
+  eight or five the second row stands on its rule 768px down the page, so a
+  window at least that tall shows two rows of friends.
+- A row is as wide as its friends' slots, each a box widened by its
+  reaches, less the 0.06 of a box by which neighbours overlap.
+  `python3 tools/pf.py pages` works out from the reaches how wide each split
+  is, the width from which it takes over and where the page stops, and
+  writes them into the page; `python3 tools/pf.py test` fails while they are
+  stale, so a new fwiend never leaves the rows to be worked out by hand.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
   every width; Fruit stands next to Yuda, Raze between cowosus and
   tanyuan, and jiaoyue after Alfie; and on a phone Yuda shares a row with
@@ -144,7 +147,9 @@ repeats them by hand: each label's name, species and credit, the name in
 the `aria-label`, the host, and the names in the link preview's alt text, in
 the gallery's order. `python3 tools/pf.py test` names the friend and the
 field wherever the two disagree, and fails any friend whose owner has not
-agreed to the gallery.
+agreed to the gallery. The pages that load every friend (the gallery, the
+tests, and the animation and feelings tools) load them in the cast's order;
+`python3 tools/pf.py pages` writes their script tags.
 
 Names keep their owner's capitalisation: **Howdi**, **Fruit**, **Yuda**,
 **Terry**, **Brian**, **Teni**, **Alfie**, **Raze** and **Claude** are
@@ -247,9 +252,9 @@ preview show everything in place.
 after any character changes:
 - the favicon is phy's head;
 - the preview (1200×630) is a snapshot of the page with the whole set. The
-  page is photographed at 3159×1659, the same shape, and scaled down, because
-  3159px is the narrowest window where all seventeen stand in one row; narrower,
-  the second row would fall out of the picture.
+  page is photographed in the narrowest window where every friend stands in
+  one row, in the same shape, and scaled down; narrower, the second row would
+  fall out of the picture.
 
 ## drawing a friend
 
@@ -281,8 +286,14 @@ Follow them when turning someone's picture or design sheet into a friend.
 - Every colour is one the character really has: fur, hair, markings,
   accessories. A band the owner counts as a marking (phy's crest) is a
   colour, not shading.
-- A few colours, each with a named role in `palette`: `fur`, `face`, `hair`,
-  `earInner`, `eye`, `blush`, `chest`, … The current seventeen use 3–13
+- A few colours, each with a named role in `palette`. Every fwiend but
+  Claude opens its palette with the same roles in the same order, one for
+  each part of the house figure: `fur`, `head`, `face`, `hair`, `ear`,
+  `earInner`, `iris`, `ink` (the mouth), `blush`, `tongue`, `body`, `tail`,
+  `arm`, `paw`, `leg` and `foot`, and `earRight`, `irisRight` or `pawRight`
+  for the right one of a pair that differs. Each is a colour, or the name of
+  another role whose colour it shares (`paw: 'face'`). Its markings' and clothes'
+  colours follow, named for what they paint. The fwiends have 6–13 colours
   each, plus `bg` (`#1c1d21`, the same for all).
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived by the library from `<name>` with `PhyFriends.shadeOf`: CIELAB L*
@@ -309,7 +320,8 @@ Follow them when turning someone's picture or design sheet into a friend.
   darker far side, no highlights.
 - A pale colour that would vanish on paper takes one slightly deeper tint
   wherever it appears (the white of mumuyou, tanyuan, YuanYuan, Alfie,
-  cowosus, jiaoyue and Raze's headphones, `#efeef3`; Teni's pale teal, `#ace1e0`). The pencil lets the paper
+  cowosus, jiaoyue, Yuda and Raze's headphones, `#efeef3`; phy's warm white,
+  `#f5ede6`; Teni's pale teal, `#ace1e0`). The pencil lets the paper
   through, so judge it on the page, not on a flat render. A dark colour
   whose shade would read as black takes the lightest tint its pictures
   give it instead: Fruit's navy, `#283e74`, is the moon picture's.
@@ -352,9 +364,10 @@ standing.
   character really has them;
 - **pill eyes** in the character's own eye colour: one flat colour per eye,
   with no whites, no highlight and no dark rim round the colour (a rim reads
-  as an outline). The colour comes from the art (`eyes.color`); where the art
-  draws dark eyes, as Terry's does, they are near-black. A colour that would
-  be faint at gallery size goes one house step deeper, as phy's green,
+  as an outline). The colour comes from the art (`iris`, and `irisRight`
+  for a second eye colour); where the art draws dark eyes, as Terry's does,
+  they are near-black. A colour that would be faint at gallery size goes one
+  house step deeper, as phy's green,
   Howdi's blue, tanyuan's red and Alfie's amber do; mumuyou's pale sky and
   lemon go further, to a blue and a gold that hold their own on his white
   face, cowosus's pale blue to a teal, and jiaoyue's to a sky blue. On a dark

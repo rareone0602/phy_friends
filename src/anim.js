@@ -136,9 +136,11 @@
   const still = (pose, duration) => clip(() => pose, duration);
   const rest = duration => still({}, duration);
 
+  // The spec of the friend for which parse() is evaluating an expression, if any.
+  let parsingFor;
   function toClip(c) {
     if (typeof c === 'function') return 'loop' in c ? c : clip(c);
-    if (typeof c === 'string') return parse(c);
+    if (typeof c === 'string') return parse(c, { spec: parsingFor });
     if (c == null) return rest();
     if (typeof c === 'object') return still(c);
     throw new Error(`phy_friends/anim: not a clip: ${c}`);
@@ -416,13 +418,9 @@
   make.walk = ({ duration = 2 * WALK.seconds, ...gait } = {}) =>
     clip(t => stepping((2 * t) / duration, { ...WALK, ...gait }), duration, true);
 
-  // The side ('L' or 'R', the viewer's) away from a friend's tail, where a raised arm shows best: 'R' for a
-  // friend without a tail, or without a spec.
-  function freeSide(spec) {
-    if (spec == null) return 'R';
-    const s = PF.get(spec), stand = PF.standFor(s), tail = (stand && stand.tail) || s.tail;
-    return tail && tail.base && tail.base[0] > 0 ? 'L' : 'R';
-  }
+  // The side ('L' or 'R', the viewer's) away from a friend's tail, where a raised arm shows best (PF.freeSide): 'R'
+  // without a spec. parse() gives a clip the spec of the friend that plays it.
+  const freeSide = spec => (spec == null ? 'R' : PF.freeSide(spec));
 
   // Waves hello with one arm (side 'L' or 'R', the viewer's; by default the one away from the tail of the
   // friend whose spec is given), held out low to the side with the paw beside the cheek and the elbow
@@ -560,15 +558,24 @@
   const clips = {};
   for (const k in make) clips[k] = make[k]();
   // In an expression, a library clip's name is that clip, and called with options (or none) it makes one, as make
-  // does: "wave" is the clip, and "wave({ spec: 'terry' })" is make.wave({ spec: 'terry' }).
-  const callable = {};
-  for (const k in clips) callable[k] = tag(arg => (typeof arg === 'number' ? clips[k](arg) : make[k](arg)), clips[k].duration, clips[k].loop);
+  // does: "wave" is the clip, and "wave({ spec: 'terry' })" is make.wave({ spec: 'terry' }). Given the spec of the
+  // friend that plays it, each is made for that friend: "wave" waves with the arm away from its tail.
+  function callables(spec) {
+    const out = {};
+    for (const k in clips) {
+      const own = spec == null ? clips[k] : make[k]({ spec });
+      out[k] = tag(arg => (typeof arg === 'number' ? own(arg) : make[k]({ spec, ...arg })), own.duration, own.loop);
+    }
+    return out;
+  }
+  const callable = callables();
 
   // Names that other modules add to what parse() understands (see extend()).
   const vocabulary = {};
 
   // Adds functions or clips to parse()'s scope under the given names, as src/emotion.js adds react,
-  // hold and feel, so that an expression such as "layer(idle, hold('content'))" can use them.
+  // hold and feel, so that an expression such as "layer(idle, hold('content'))" can use them. A function takes its
+  // options last, as an object, so that parse() can give it the spec of the friend that plays the expression.
   function extend(names) {
     for (const name in names) {
       if (name in api || name in clips) throw new Error(`phy_friends/anim: "${name}" is already a name in PhyFriends.anim`);
@@ -577,14 +584,32 @@
     return api;
   }
 
+  // The names parse() understands, made for the friend whose spec is given: every factory among them takes the spec
+  // with its own options, so that the friend that plays an expression need not be named in it.
+  function scopeFor(spec) {
+    if (spec == null) return { ...api, ...callable, ...vocabulary };
+    const bound = {};
+    for (const name in vocabulary) {
+      const f = vocabulary[name];
+      bound[name] = typeof f === 'function' && !('loop' in f) ? (first, options = {}) => f(first, { spec, ...options }) : f;
+    }
+    return { ...api, ...callables(spec), ...bound };
+  }
+
   // Accepts a clip name, a JS expression over this API, the clips and the names added by extend()
-  // (e.g., "layer(idle, hold('curious'))"), or a clip. Expressions are evaluated with Function(), so
+  // (e.g., "layer(idle, hold('curious'))"), or a clip; with { spec }, it makes every clip and feeling in it for that
+  // friend, as a scene or a page does for the friend that plays it. Expressions are evaluated with Function(), so
   // never pass untrusted input.
-  function parse(expr) {
+  function parse(expr, { spec } = {}) {
     if (typeof expr !== 'string') return toClip(expr);
-    if (clips[expr]) return clips[expr];
-    const scope = { ...api, ...callable, ...vocabulary };
-    return toClip(Function(...Object.keys(scope), `'use strict'; return (${expr});`)(...Object.values(scope)));
+    if (clips[expr]) return spec == null ? clips[expr] : make[expr]({ spec });
+    const scope = scopeFor(spec), outer = parsingFor;
+    parsingFor = spec;  // So that a clip named in quotes within the expression ("layer('wave', idle)") is the friend's too.
+    try {
+      return toClip(Function(...Object.keys(scope), `'use strict'; return (${expr});`)(...Object.values(scope)));
+    } finally {
+      parsingFor = outer;
+    }
   }
 
   // --------------------------------------------------------------- Stacks
@@ -803,6 +828,45 @@
     return { along: progress / n, pose };
   }
 
+  // A pose seen in a mirror: what turns one way turns the other (MIRROR.turned), and each part of a pair changes
+  // places with the other (MIRROR.paired), so that a reaction toward the viewer's left plays toward the right. The
+  // tail stays on its side of the body, as it would on the friend turned round.
+  const MIRROR = {
+    turned: ['x', 'headX', 'tilt', 'lookX', 'turnX', 'lean', 'hair'],
+    paired: [['earL', 'earR'], ['eyeL', 'eyeR'], ['armL', 'armR'], ['elbowL', 'elbowR'], ['legL', 'legR'], ['stepL', 'stepR']],
+  };
+  function mirror(clip) {
+    clip = toClip(clip);
+    return tag(t => {
+      const pose = { ...clip(t) };
+      for (const key of MIRROR.turned) if (typeof pose[key] === 'number') pose[key] = -pose[key];
+      for (const [a, b] of MIRROR.paired) {
+        const [left, right] = [pose[a], pose[b]];
+        delete pose[a]; delete pose[b];
+        if (right !== undefined) pose[a] = right;
+        if (left !== undefined) pose[b] = left;
+      }
+      if (typeof pose.over === 'string') pose.over = pose.over.replace(/arm([LR])/g, (m, S) => `arm${S === 'L' ? 'R' : 'L'}`);
+      return pose;
+    }, clip.duration, clip.loop);
+  }
+
+  // A friend's own idle: the same every time for that friend, and out of step with every other friend's.
+  const idleOf = (name, options = {}) => make.idle({ seed: PF.hash(name) % 997, ...options });
+
+  // The idle clip's glances about, which fade while a friend looks at something.
+  const GLANCES = ['lookX', 'lookY', 'turnX', 'turnY'];
+  // Stacks an idle clip's pose at t onto acc (in place), its glances about weighted by `glance`: 1 while the friend
+  // looks at nothing in particular, and 0 while it watches something, as a scene or a live page has it.
+  function addIdle(acc, idle, t, glance = 1) {
+    const pose = { ...idle(t) }, glances = {};
+    for (const key of GLANCES) {
+      if (key in pose) { glances[key] = pose[key]; delete pose[key]; }
+    }
+    combine(acc, pose);
+    return combine(acc, glances, glance);
+  }
+
   // Maps a pointer position (client px) to {lookX, lookY, turnX, turnY} for a mounted
   // rig: the direction from between its eyes to the pointer, as if the pointer hovered
   // `depth` head units in front of the screen. The `turn` option is the share of that
@@ -817,7 +881,7 @@
   const api = {
     ease, clip, still, rest, track, layer, seq, loop, repeat, speed, delay, remap, pingpong, weight,
     combine, mix, sample, frames, pulses, blinks, parse, extend, play, lookAt, make, clips, HOP, hopping, WALK, walking,
-    stack, faceOnly, blinkShape, flickShape, swishShape,
+    stack, faceOnly, blinkShape, flickShape, swishShape, mirror, idleOf, addIdle, GLANCES,
   };
   PF.anim = api;
   return api;

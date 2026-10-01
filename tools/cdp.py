@@ -111,6 +111,44 @@ def kill_process_group(process):
     process.wait()
 
 
+SCREENSHOT_POLL = 0.25  # Seconds between looks at a one-shot screenshot's file, which Chrome may still be writing.
+
+
+def screenshot_once(url, width, height, scale=1, budget=1000, transparent=False, timeout=60):
+    """Take one screenshot of a URL with Chrome's own --screenshot, in a window of width x height CSS px, once
+    `budget` ms of virtual time have passed, and return the PNG's bytes. The page runs in virtual time, so its
+    timers settle at once: this is for a still of a page that needs no driving, where HeadlessChrome is for one
+    that does. With transparent, the page's own background is all there is.
+
+    Chrome writes the file and lingers, so the file is taken once its size stops changing, and Chrome is killed.
+    """
+    work = Path(tempfile.mkdtemp(prefix='pf-shot-'))
+    try:
+        shot = work / 'shot.png'
+        cmd = [CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
+               '--no-default-browser-check', '--disable-extensions', '--mute-audio',
+               f'--user-data-dir={work / "profile"}', f'--window-size={width},{height}',
+               f'--force-device-scale-factor={scale:g}', *(['--default-background-color=00000000'] if transparent else []),
+               '--allow-file-access-from-files', f'--virtual-time-budget={budget}', f'--screenshot={shot}', url]
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+        deadline, last = time.time() + timeout, -1
+        while time.time() < deadline:
+            if shot.exists():
+                size = shot.stat().st_size
+                if size and size == last:
+                    break
+                last = size
+            elif proc.poll() is not None:
+                break
+            time.sleep(SCREENSHOT_POLL)
+        kill_process_group(proc)
+        if not shot.exists():
+            raise ChromeError('Chrome produced no screenshot (see $CHROME / page errors)')
+        return shot.read_bytes()
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 class HeadlessChrome:
     """One headless Chrome with a single page, driven over the DevTools protocol."""
 

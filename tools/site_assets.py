@@ -11,15 +11,18 @@ Outputs:
                              flat, because they are too small to hold the pencil texture.
   site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
   site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
-  site/preview.png           1200x630 link preview image: the gallery, photographed at 3159x1659 and scaled down.
+  site/preview.png           1200x630 link preview image: the gallery, photographed in the narrowest window
+                             in which every friend stands in one row, and scaled down.
 """
 import json
+import math
 import subprocess
 import sys
 from pathlib import Path
 
 from PIL import Image
 
+import gallery
 import pf
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,7 +31,12 @@ POSE = {'tail': -75}
 ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 47, 'scale': 0.31}
 TOUCH = {'w': 180, 'h': 180, 'x': 90, 'y': 132, 'scale': 0.75}
 PREVIEW = (1200, 630)        # The link preview's size.
-PREVIEW_SHOT = (3159, 1659)  # The window it is photographed in: the same shape, wide enough for one row.
+
+
+def preview_shot():
+    """The window the link preview is photographed in: the same shape, and just wide enough for one row."""
+    width = gallery.one_row_window()
+    return width, math.ceil(width * PREVIEW[1] / PREVIEW[0])
 
 
 def still(view, out, bg=False):
@@ -44,12 +52,12 @@ def main():
     print(ROOT / 'site/icon.svg')
     still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
     still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-    # The link preview is the gallery itself (STYLE.md §7), photographed at 3159x1659 and scaled to
-    # 1200x630: 3159px is the narrowest window where all seventeen friends stand in one row (FWIENDS.md).
-    # The simulated pointer sits below the middle so that they look out at the viewer.
-    preview = ROOT / 'site/preview.png'
+    # The link preview is the gallery itself (STYLE.md §7), photographed in the narrowest window where every
+    # friend stands in one row (FWIENDS.md) and scaled to 1200x630. The simulated pointer sits below the middle
+    # so that they look out at the viewer.
+    preview, (width, height) = ROOT / 'site/preview.png', preview_shot()
     subprocess.run([sys.executable, str(ROOT / 'tools/shoot.py'), str(ROOT / 'index.html'), str(preview),
-                    '--size', f'{PREVIEW_SHOT[0]}x{PREVIEW_SHOT[1]}', '--query', f'px={PREVIEW_SHOT[0] // 2}&py=880'], check=True)
+                    '--size', f'{width}x{height}', '--query', f'px={width // 2}&py=880'], check=True)
     Image.open(preview).convert('RGB').resize(PREVIEW, Image.LANCZOS).save(preview)
 
 
