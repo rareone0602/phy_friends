@@ -671,10 +671,11 @@ def run_tests(page=TEST_PAGE):
         chrome.open(page)
         results = chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
         errors = list(chrome.errors)
+        cast = measures = None
         try:
-            cast, measures = gallery.read_cast(chrome), gallery.measure_gallery(chrome)
+            cast = gallery.read_cast(chrome)
+            measures = gallery.measure_gallery(chrome)
         except ValueError as error:
-            cast = measures = None
             errors.append(str(error))
     if results is None:
         errors.append(f'{page} did not load test/harness.js: window.testsDone is missing')
@@ -784,10 +785,12 @@ def main(argv=None):
     elif a.cmd == 'test':
         raise SystemExit(1 if run_tests() else 0)
     elif a.cmd == 'pages':
+        # The script tags first, so that the gallery measured for the rows draws every friend of the cast.
         with HeadlessChrome(gallery.WIDE, 900) as chrome:
             cast = gallery.read_cast(chrome)
-            measures = gallery.measure_gallery(chrome)
-        for page in gallery.write_pages(cast, measures):
+            changed = gallery.write_pages(cast)
+            changed += gallery.write_pages(cast, gallery.measure_gallery(chrome))
+        for page in dict.fromkeys(changed):
             print(page)
 
 

@@ -42,9 +42,11 @@ READ_CAST_JS = """(() => {
     return null;
   }
 })()"""
-# Each friend's reach past its box on the gallery (index.html measures them on load), in head units, in page order.
+# Each friend's reach past its box on the gallery (index.html measures them on load), in head units, in page order, and
+# whether the page drew it at all.
 READ_REACHES_JS = """[...document.querySelectorAll('.friend')].map(li => ({
   name: li.dataset.friend,
+  drawn: !!li.querySelector('.rig svg'),
   left: +getComputedStyle(li).getPropertyValue('--reach-left') || 0,
   right: +getComputedStyle(li).getPropertyValue('--reach-right') || 0,
 }))"""
@@ -79,12 +81,18 @@ def read_cast(chrome):
 
 def measure_gallery(chrome):
     """The friends' reaches on the gallery, each the largest over windows of every size, and its box and stage at
-    a phone's window and at a wide one."""
+    a phone's window and at a wide one. A gallery that fails to draw a friend has no reach to give for it, so it is
+    an error rather than a reach of nothing."""
     sizes, reaches = {}, {}
     for width in REACH_WINDOWS:
         chrome.set_viewport(width, 900)
         chrome.open(str(GALLERY))
-        for reach in chrome.evaluate(READ_REACHES_JS):
+        measured = chrome.evaluate(READ_REACHES_JS)
+        undrawn = [reach['name'] for reach in measured if not reach.pop('drawn')]
+        if undrawn:
+            raise ValueError(f'{GALLERY.name} drew no {", ".join(undrawn)}, so its rows cannot be measured: '
+                             'load every friend (python3 tools/pf.py pages) and see the page errors')
+        for reach in measured:
             kept = reaches.setdefault(reach['name'], reach)
             kept['left'], kept['right'] = max(kept['left'], reach['left']), max(kept['right'], reach['right'])
         for label, size in (('narrow', NARROW), ('wide', WIDE)):
@@ -195,12 +203,13 @@ def with_scripts(text, names):
 
 
 def written(cast, measures):
-    """Each page's text as it should be: {path: (text now, text as written)}."""
+    """Each page's text as it should be: {path: (text now, text as written)}. Without measures, only the script
+    tags are written."""
     out = {}
     for page in PAGES:
         text = page.read_text(encoding='utf-8')
         new = with_scripts(text, cast['names']) or text
-        if page == GALLERY:
+        if page == GALLERY and measures:
             block = layout_block(new)
             if not block:
                 raise ValueError(f'{page} has no rows to write: mark them as layout_css() does')
@@ -209,8 +218,9 @@ def written(cast, measures):
     return out
 
 
-def write_pages(cast, measures):
-    """Rewrites every page whose script tags or rows are stale, and returns the pages rewritten."""
+def write_pages(cast, measures=None):
+    """Rewrites every page whose script tags or rows are stale (only the script tags, without measures), and returns
+    the pages rewritten."""
     changed = []
     for page, (text, new) in written(cast, measures).items():
         if new != text:
@@ -220,7 +230,7 @@ def write_pages(cast, measures):
 
 
 def page_drift(cast, measures):
-    """Every page whose script tags or rows are stale, one line each."""
+    """Every page whose script tags or rows are stale, one line each. Without measures, the rows are not checked."""
     problems = []
     for page, (text, new) in written(cast, measures).items():
         if new == text:
