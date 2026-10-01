@@ -82,16 +82,41 @@
     });
   });
 
-  test('a friend that shows no feelings hops and smiles on every hi, and never goes shy', () => {
+  test('a friend that shows no feelings hops and smiles on a hi, never goes shy, and its third hi plays its routine', () => {
     withStage(['claude'], moving, (stage, [claude], said) => {
+      for (const t of [0, 1.3]) {
+        stage.draw(t);
+        claude.hi();
+      }
+      stage.draw(1.6);
+      assert(claude.rig.pose.y < 0 && claude.rig.pose.eyes === 'happy', 'in the air, smiling');
+      stage.draw(2.6);
+      assert(claude.hi(), 'the third hi');
+      assertEqual(claude.feeling, null, 'no feelings');
+      assertEqual(said, ['Claude hops twice.', 'Claude hops twice.', 'Claude gets out its laptop and types.']);
+      stage.draw(3.1);
+      assertEqual(claude.rig.pose.eyeL, 'closed', 'it winks');
+      stage.draw(4.6);
+      assert(/\blaptop\b/.test(claude.rig.pose.show), 'its laptop is out');
+      assert(!claude.hi(), 'a hi while it types is ignored');
+      stage.draw(2.6 + claude.spec.routine.duration + 0.5);
+      assert(!claude.rig.pose.show, 'the laptop is put away');
+      assert(claude.hi(), 'a hi once it is done');
+      assertEqual(said.at(-1), 'Claude hops twice.', 'a new run starts with a hop');
+    });
+  });
+
+  test('under reduced motion the routine is its face alone: Claude winks, and its laptop stays away', () => {
+    withStage(['claude'], still, (stage, [claude], said) => {
       for (const t of [0, 1.3, 2.6]) {
         stage.draw(t);
         claude.hi();
       }
-      stage.draw(2.9);
-      assert(claude.rig.pose.y < 0 && claude.rig.pose.eyes === 'happy', 'in the air, smiling');
-      assertEqual(claude.feeling, null);
-      assertEqual(said, ['Claude hops twice.', 'Claude hops twice.', 'Claude hops twice.']);
+      stage.draw(3.1);
+      assertEqual([claude.rig.pose.eyeL, claude.rig.pose.x, claude.rig.pose.show || ''], ['closed', 0, '']);
+      stage.draw(4.6);
+      assertEqual(claude.rig.pose.show || '', '', 'no laptop');
+      assertEqual(said.at(-1), 'Claude winks.');
     });
   });
 

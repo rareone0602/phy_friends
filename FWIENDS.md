@@ -188,14 +188,21 @@ their feelings come from the emotion library, one rule each:
   pointer first.
 - Claude shows no feelings. It perks up, watches and hops like the others,
   and returns a hi with the same smile, which is manners rather than a
-  feeling; none of the feelings above touch it.
+  feeling; none of the feelings above touch it. Its third hi in a row,
+  where the others go shy, plays the routine of Claude Code's animated
+  mascot instead, timed as the mascot's GIF times it: it winks as it steps
+  aside, swings its laptop up and sets it down open beside it, hops round
+  to sit at it side-on and types, then folds it away and turns back.
+  Meanwhile it ignores a hi and keeps its eyes on the laptop, and the
+  others watch it. Under reduced motion it only winks.
 - A friend in mid-air ignores another hi until it lands, and a key held down
   says hi once. Starting the hop again would drop it to the ground in one
   frame.
 - A hidden status line tells a screen reader what happened, in one flat
   sentence: "Howdi hops twice.", or "Howdi smiles." under reduced motion;
-  "Howdi goes shy.", "Howdi looks content.", "Everyone but Claude falls
-  asleep." and "Everyone wakes up." Names keep their owner's case: "phy
+  "Howdi goes shy.", "Howdi looks content.", "Claude gets out its laptop
+  and types." (or "Claude winks." under reduced motion), "Everyone but
+  Claude falls asleep." and "Everyone wakes up." Names keep their owner's case: "phy
   hops twice." Falling asleep is told once a visit, and a wake is not told
   when the reader only moves about the page (a scroll, or Tab, the arrows
   and the like), so that the line never talks over the screen reader's
@@ -290,7 +297,8 @@ Follow them when turning someone's picture or design sheet into a friend.
     hair behind the mop, a bandana's band behind its point, the part of
     tanyuan's folded ear under its flap, the inside of his hood past its
     rim (and of Raze's), the hem under his hoodie's front, the under band of YuanYuan's
-    collar and the bow behind his sash.
+    collar, the bow behind his sash and the side of Claude's block, which
+    shows as it turns to its laptop.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
@@ -383,7 +391,12 @@ its body, in its one house shade. Its eyes look a whole unit aside (16 head
 units, where the house's move 6), as the glyphs move the notches, and its
 blush is a soft rose, since a pale pink on terracotta reads as a highlight.
 Having no tail, it does not sway. It is short, so its legs meet the ground
-at 112 rather than about 131. Its
+at 112 rather than about 131. Its laptop, which it brings out in its
+routine, is a gray base and screen drawn only on cue (an extra's `show`),
+on its arm while held and on the ground (`on: 'ground'`) once set down,
+where it stays while Claude hops; set down, it reaches a little past
+Claude's box, into the space after the last fwiend of a row, and while it
+is out the page clips sideways, as during the roll call. Its
 species is "language model", its pronoun is "it", and its credit is
 Anthropic's.
 

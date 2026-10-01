@@ -383,6 +383,7 @@
     flush: 0,           // How far the blush spreads: 0 as drawn, 0.5 half as large again
     eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override it)
     mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open'
+    show: null,         // The extras shown on cue: a space-separated list of their names (an extra's `show`)
   };
 
   // Parallax depth per layer: how far each layer slides when the head turns.
@@ -462,8 +463,13 @@
     return {
       transform: t,
       opacity: { blush: num(p.blush) },
-      state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth },
+      state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth, show: shownBy(p.show) },
     };
+  }
+
+  // The names in a pose's `show`, as a set.
+  function shownBy(show) {
+    return new Set(typeof show === 'string' ? show.split(/\s+/).filter(Boolean) : []);
   }
 
   // ---------------------------------------------------------------- Render
@@ -836,6 +842,9 @@
       }
       return fill(shapeD(x, seed(`${part}/extra${i}`)), x.fill);
     };
+    // An extra that names a `show` is drawn only while the pose's show lists that name: a prop, or a
+    // side of the figure that a turn reveals.
+    const cue = (x, s) => (x.show ? `<g data-pf-show="${x.show}"${st.state.show.has(x.show) ? '' : ' display="none"'}>${s}</g>` : s);
     const extras = (part, clip, under) => {
       const out = [];
       (spec.extras || []).forEach((x, i) => {
@@ -843,7 +852,7 @@
         const on = x.on === 'ears' && (part === 'earL' || part === 'earR') ? part : x.on;
         if (on !== part || !!x.under !== under) return;
         const s = extraShape(x, i, part);
-        out.push(x.clip && clip ? `<g clip-path="${clip}">${s}</g>` : s);
+        out.push(cue(x, x.clip && clip ? `<g clip-path="${clip}">${s}</g>` : s));
       });
       return out.join('');
     };
@@ -998,7 +1007,10 @@
     const cam = `translate(${num(view.x)} ${num(view.y)}) rotate(${view.rotate || 0}) scale(${num(view.scale * 1000) / 1000})`;
     // opts.pencil: false draws the flat shapes alone, for an icon too small to hold the texture or
     // for matching a flat reference picture.
-    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', tail + body + head)}</g>`;
+    // Extras on 'ground' stand on the ground in front of the friend, in head space but outside its
+    // pose: a prop it has put down stays where it is while the friend hops, squashes or moves.
+    const ground = extras('ground', null, false);
+    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', tail + body + head)}${ground && g('ground', ground)}</g>`;
     if (opts.pencil !== false) {
       defs.push(pencilMask(`${uid}-pencil`, view));
       const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
@@ -1026,6 +1038,7 @@
       const [key, val] = n.getAttribute('data-pf-when').split('=');
       return { n, key, val };
     });
+    const cues = [...svg.querySelectorAll('[data-pf-show]')].map(n => ({ n, name: n.getAttribute('data-pf-show') }));
     let pose = { ...(opts.pose || {}) };
     const rig = {
       el, svg, spec, parts, view: resolveView(spec, opts.view, opts.size),
@@ -1038,6 +1051,10 @@
         for (const t of toggles) {
           if (st.state[t.key] === t.val) t.n.removeAttribute('display');
           else t.n.setAttribute('display', 'none');
+        }
+        for (const c of cues) {
+          if (st.state.show.has(c.name)) c.n.removeAttribute('display');
+          else c.n.setAttribute('display', 'none');
         }
         return rig;
       },

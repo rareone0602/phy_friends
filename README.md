@@ -132,9 +132,11 @@ PhyFriends.define('name', {
   body:  { ...fluffy ellipse... },
   tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
   extras: [{ on: 'body', clip: true, fill: 'chestShade', ...shape }],  // Markings and the shade layer; on: 'ears' means both ears
+  // An extra with show: 'name' is drawn only while the pose's show lists that name (a prop); one on 'ground' stays put as the friend hops
   order: ['earL', 'earR', 'base', 'face', 'blush', 'eyes', 'mouth', 'hair'],
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   emotions: false,                                                     // Only off the house template (Claude): no feelings
+  routine: { says, saysStill, duration, keys: { field: [[t, value, ease]] } },  // Its third hi plays it, if it shows no feelings (Claude's laptop)
   views: { ref: { w, h, x, y, scale, rotate, pose } },
   extends: 'other-character',                                          // Variants
 });
@@ -143,7 +145,7 @@ PhyFriends.define('name', {
 Every character file is laid out the same way, so two specs read side by side:
 - a one-line header comment naming the character and its reference pictures;
 - the keys in the order above;
-- extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `tail`), each with a short comment saying what it depicts;
+- extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `tail`, `ground`), each with a short comment saying what it depicts;
 - `views` last, with `ref` first.
 
 Fwiends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
@@ -255,14 +257,16 @@ Every field is optional:
 ```js
 { x, y, squash, tilt, headX, headY, turnX, turnY, lookX, lookY, blink, widen, lid, lidTilt, earL, earR, hair, tail,
   blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint', eyeL, eyeR,
-  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open' }
+  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open', show: 'laptop side' }
 ```
 
 `lid` brings a lid down over the open eyes, cut straight across (0 up, 1 shut),
 and `lidTilt` slants it: + lowers its inner end, for a cross look, − raises it,
 for a sad one. Unlike `blink`, which squashes the whole eye for a moment, a lid
 is held. `flush` spreads the blush (0.5 makes each cheek half as large again),
-since `blush`, its opacity, can only fade it.
+since `blush`, its opacity, can only fade it. `show` lists the extras to draw
+that a spec keeps for a cue (`show: 'laptop'` on an extra), such as a prop;
+reduced motion leaves it out, since it is not the face.
 
 `tail` wags the tail about its base, in degrees: + swings the tip outward and
 − tucks it in behind the body. The clips keep it within about ±12°, and

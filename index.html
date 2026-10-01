@@ -110,6 +110,9 @@
      the roll call lasts, the page clips sideways, so that a friend coming from beyond the screen's edge
      does not widen it. */
   html.calling-the-roll { overflow-x: hidden; }
+  /* Claude's laptop (its routine, characters/claude/claude.js) stands beside it, past its box. While a prop like it
+     is out (an extra shown on cue), the page clips sideways too, so that one near the screen's edge never widens it. */
+  html:has(.rig [data-pf-show]:not([display])) { overflow-x: hidden; }
   .friend.waiting .rig { opacity: 0; pointer-events: none; }
   /* While the title writes itself, a copy of it in SVG (src/pen.js) is revealed stroke by stroke over
      the title, which is kept out of sight; the graphite filter textures both. Print shows the title, and keeps the ring and the arrow, which

@@ -73,8 +73,8 @@
 
   test('under reduced motion a stack passes on only the face: eye and mouth shapes, lids and blush', () => {
     const stack = A.stack();
-    stack.add({ eyes: 'happy', mouth: 'w', lid: 0.4, flush: 0.3, y: -10, tilt: 5 }, { at: 0, fade: 0 });
-    assertEqual(stack.sample(1, { reduced: true }), { eyes: 'happy', mouth: 'w', lid: 0.4, flush: 0.3 });
+    stack.add({ eyes: 'happy', mouth: 'w', lid: 0.4, flush: 0.3, y: -10, tilt: 5, show: 'laptop' }, { at: 0, fade: 0 });
+    assertEqual(stack.sample(1, { reduced: true }), { eyes: 'happy', mouth: 'w', lid: 0.4, flush: 0.3 }, 'no prop either');
     assertEqual(stack.sample(1).y, -10);
   });
 

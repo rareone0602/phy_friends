@@ -15,7 +15,8 @@
  *   hovering over it or focusing it for a moment makes it curious;
  *   with no input for a while the friends grow sleepy one by one and fall asleep, and any input
  *   wakes them, those asleep with a start.
- * A friend that shows no feelings (Claude; E.fits()) takes part in none of these, and does the rest.
+ * A friend that shows no feelings (Claude; E.fits()) takes part in none of these, and does the rest;
+ * if its spec has a routine (Claude's laptop), its third hi plays that instead.
  *
  * Under reduced motion only the eyes follow the pointer and only the face changes, so that a hi is a
  * smile. A reader may ask for the same with a page's "keep still" checkbox (keepStill()), a choice
@@ -70,7 +71,8 @@
   const HELD_HI_SECONDS = 0.3;           // How far into its greeting the `hold` option holds a friend.
   const FEEL_FADE = 0.15;                // How long a feeling takes to come on or wear off, in seconds.
   // The third hi to a friend within `within` seconds of the first of the run makes it shy for `seconds`,
-  // during which it ignores another hi.
+  // during which it ignores another hi. A friend that shows no feelings plays its routine instead, if its
+  // spec has one, and ignores a hi until the routine ends.
   const SHY = { his: 3, within: 6, seconds: 2.5 };
   // A stroke: `reversals` turns along x within `within` seconds, each after at least `distance` px one
   // way; the friend stays content until `linger` seconds after the stroking stops. From the keyboard,
@@ -463,6 +465,8 @@
       rig.svg.setAttribute('aria-hidden', 'true');  // The box's label says who the friend is.
       const idle = A.make.idle({ seed: PF.hash(name) % 997, duration: IDLE_SECONDS });
       const greeting = E.greeting(spec), layers = A.stack(), marks = [], strokes = strokeDetector();
+      // A friend that shows no feelings may have a routine of its own (spec.routine), which its third hi plays.
+      const routine = !fits && spec.routine ? A.track(spec.routine.keys, { duration: spec.routine.duration }) : null;
       const keyStrokes = strokeDetector({ within: STROKE.keyWithin });
       let lookX = 0, lookY = 0, glance = 1, perk = 0, hovered = false, focused = false;
       let run = null, feeling = null, attendedSince = null, stroking = null, pendingWake = null;
@@ -550,6 +554,14 @@
         attendedSince = t;  // Curiosity starts afresh after a hi.
         calm(t);
         run = run && t - run.first <= SHY.within ? { first: run.first, count: run.count + 1 } : { first: t, count: 1 };
+        if (routine && run.count >= SHY.his) {
+          run = null;
+          // It keeps its eyes on what it is doing, ignores a hi until it is done, and the others watch it throughout.
+          layers.add(routine, { at: t, fade: HI_FADE });
+          record.reaction = { at: t, until: t + routine.duration, watchedUntil: t + routine.duration, absorbed: true };
+          o.announce(`${label} ${self.reduced ? spec.routine.saysStill : spec.routine.says}.`);
+          return true;
+        }
         if (fits && run.count >= SHY.his) {
           run = null;
           const own = eyes();
@@ -679,7 +691,8 @@
       // changes; with a simulated pointer the idle motion stops, so that a screenshot comes out the same
       // every time.
       function pose(t, { target, eyes: own, travel, reduced, moving, gazeEase, perkEase }) {
-        const inward = !!feeling && INWARD.includes(feeling.name) && t >= feeling.layer.at;
+        const absorbed = !!record.reaction && record.reaction.absorbed && reacting(t);  // In its routine.
+        const inward = (!!feeling && INWARD.includes(feeling.name) && t >= feeling.layer.at) || absorbed;
         const [toX, toY] = travel ? [travel.dir * TRAVEL.look, 0] : target && !inward ? gazeToward(own, target) : [0, 0];
         lookX += (toX - lookX) * gazeEase;
         lookY += (toY - lookY) * gazeEase;

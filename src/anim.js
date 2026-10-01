@@ -8,7 +8,7 @@
  * is seeded (PhyFriends.rng).
  *
  * Partial poses stack like layers: numbers add onto the neutral POSE (blush
- * multiplies), strings (eyes, eyeL, eyeR, mouth) are last-wins, undefined
+ * multiplies), strings (eyes, eyeL, eyeR, mouth, show) are last-wins, undefined
  * leaves the field to lower layers, and null selects the spec default.
  * Afterward, sample() clamps blink and lid to 0..1 and look/turn to -1..1.
  *
@@ -443,13 +443,15 @@
   }
 
   // The fields that change a face without moving anything: besides the eye and mouth shapes (the
-  // strings), the lids and the blush.
+  // strings), the lids and the blush. A prop brought out on cue (show) is not the face.
   const FACE = ['lid', 'lidTilt', 'flush', 'blush'];
 
   // The face of a partial pose alone, as reduced motion shows it.
   function faceOnly(partial) {
     const out = {};
-    for (const key in partial) if (typeof partial[key] !== 'number' || FACE.includes(key)) out[key] = partial[key];
+    for (const key in partial) {
+      if ((typeof partial[key] !== 'number' && key !== 'show') || FACE.includes(key)) out[key] = partial[key];
+    }
     return out;
   }
 

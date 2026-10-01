@@ -4,12 +4,14 @@
 // two tall. A terminal cell is about twice as tall as it is wide, so a quadrant pixel is one unit wide and two units
 // tall; the spec draws one such unit as 16 head units, which makes the eyes as tall as the house's. In those units the
 // body is 13 wide and 8 tall, the eyes are notches one wide and two tall, the arms stand out two from each side, and
-// the legs are one wide and two tall.
+// the legs are one wide and two tall. Its routine (below) follows examples/claude-claude-code.gif, the animated mascot
+// getting out its laptop.
 PhyFriends.define('claude', {
   palette: {
     bg: '#1c1d21',
     body: '#d77757',       // The mascot's one color (clawd_body in Claude Code's themes, rgb(215, 119, 87)).
     eye: '#29231c',        // Near-black, faintly warm: the notches show the terminal's black through the body.
+    laptop: '#888888',     // The gray of the laptop in the animated mascot's GIF.
     blush: '#ee8e8e',      // The mascot has no blush. On the terracotta a pale pink reads as a highlight, so this is a
                            // soft rose, a little lighter than the body and redder.
   },
@@ -39,6 +41,24 @@ PhyFriends.define('claude', {
     // Ear extras are in ear-local space (base on the origin, tip up, +x toward the top of the head): the arm, a
     // rounded bar 2 units tall from the shoulder to 2 units past the side.
     { on: 'ears', fill: 'body', round: 0.3, nodes: [[-16, -96, 1], [16, -96, 1], [16, 0, 1], [-16, 0, 1]] },
+    // Claude's laptop, which it brings out on its third hi (routine, below): a gray base and screen, drawn only while
+    // the pose shows them. In its hand it is drawn on the right arm, in arm-local space, once for each way the arm
+    // holds it, so that it stays level as the arm swings it up and out; set down, it stands open on the ground beside
+    // Claude, where it stays while Claude hops, then folds shut.
+    { on: 'earR', show: 'laptopTilted', fill: 'laptop', round: 0.3, nodes: [[7.8, -95.8, 1], [-33.2, -136.8, 1], [-41, -129, 1], [0, -88, 1]] },
+    { on: 'earR', show: 'laptopTilted', fill: 'laptop', round: 0.3, nodes: [[-25.5, -129, 1], [-33.2, -136.8, 1], [-12.7, -168.6, 1], [-4.9, -160.8, 1]] },
+    { on: 'earR', show: 'laptopUp', fill: 'laptop', round: 0.3, nodes: [[0, -99, 1], [-58, -99, 1], [-58, -88, 1], [0, -88, 1]] },
+    { on: 'earR', show: 'laptopUp', fill: 'laptop', round: 0.3, nodes: [[-47, -99, 1], [-58, -99, 1], [-66, -136, 1], [-55, -136, 1]] },
+    { on: 'earR', show: 'laptopOut', fill: 'laptop', round: 0.3, nodes: [[10.8, -89.9, 1], [0.8, -147, 1], [-10.1, -145.1, 1], [0, -88, 1]] },
+    { on: 'earR', show: 'laptopOut', fill: 'laptop', round: 0.3, nodes: [[2.7, -136.2, 1], [0.8, -147, 1], [35.8, -161.3, 1], [37.7, -150.5, 1]] },
+    { on: 'earR', show: 'laptopShut', fill: 'laptop', round: 0.3, nodes: [[14, -88, 1], [14, -146, 1], [0, -146, 1], [0, -88, 1]] },
+    { on: 'ground', show: 'laptop', fill: 'laptop', round: 0.3, nodes: [[84, 101, 1], [140, 101, 1], [140, 112, 1], [84, 112, 1]] },
+    { on: 'ground', show: 'laptop', fill: 'laptop', round: 0.3, nodes: [[129, 106, 1], [140, 106, 1], [156, 68, 1], [145, 68, 1]] },
+    { on: 'ground', show: 'laptopFolding', fill: 'laptop', round: 0.3, nodes: [[84, 101, 1], [140, 101, 1], [140, 112, 1], [84, 112, 1]] },
+    { on: 'ground', show: 'laptopFolding', fill: 'laptop', round: 0.3, nodes: [[129, 106, 1], [140, 106, 1], [112, 72, 1], [101, 72, 1]] },
+    // The block's side, which shows as Claude turns to its laptop, as the mascot draws it: a band down its right side
+    // (the viewer's left), clipped to the block. It turns away behind the front, so it takes the one shade.
+    { on: 'base', show: 'side', clip: true, fill: 'bodyShade', nodes: [[-130, -70, 1], [-60, -70, 1], [-60, 100, 1], [-130, 100, 1]] },
     // The four legs, two under each end, as the mascot stands: 1 unit wide and 2 tall below the block. They are the
     // body, which sits under the head, so they wear the body's house shade (the one shade layer). Each reaches 24
     // behind the block, so that it stays joined when the block rocks as far as the house's clips tilt a head
@@ -47,6 +67,27 @@ PhyFriends.define('claude', {
       on: 'body', fill: 'bodyShade', round: 0.3, nodes: [[x - 8, 56, 1], [x + 8, 56, 1], [x + 8, 112, 1], [x - 8, 112, 1]],
     })),
   ],
+  // Claude's third hi in a row (where the others go shy, which it does not) plays the routine of Claude Code's animated
+  // mascot, frame for frame as its GIF times them: it winks as it steps aside, swings its laptop up and sets it down
+  // open, hops round to sit at it side-on and types, then folds it away and turns back. Each key is [seconds, value,
+  // ease]; 'hold' steps to a key, as the GIF's frames do. `says` is told to a screen reader, and `saysStill` under
+  // reduced motion, where only the face changes and it only winks.
+  routine: {
+    says: 'gets out its laptop and types', saysStill: 'winks', duration: 3.6,
+    keys: {
+      x: [[0, 0], [0.39, 0], [0.64, -24], [3.19, -24], [3.46, 0]],
+      y: [[0.39, 0], [0.5, -10], [0.64, 0], [1.22, 0], [1.3, -14], [1.39, 0, 'in'], [3.19, 0], [3.3, -10], [3.46, 0, 'in']],
+      headY: [[0.39, 0], [0.46, 6], [0.81, 0], [1.3, 0], [1.39, 16, 'hold'], [3.03, 16], [3.1, 6, 'hold'], [3.19, 6, 'hold'], [3.46, 0]],
+      tilt: [[0.39, 0], [0.46, 6], [0.81, 0], [3.1, 0], [3.19, 6, 'hold'], [3.46, 0]],
+      lookX: [[0.39, 0], [0.46, 0.4], [0.81, 0.3], [1.14, 0.8], [1.3, 1, 'hold'], [3.03, 1], [3.1, 0.4, 'hold'], [3.19, 0, 'hold']],
+      lookY: [[0.39, 0], [0.46, 1], [0.81, 0, 'hold'], [1.14, 0.5, 'hold'], [1.3, 0, 'hold'], [1.39, 0.4, 'hold'], [3.1, 0, 'hold'], [3.19, 1, 'hold'], [3.46, 0]],
+      turnX: [[1.22, 0], [1.3, 0.8, 'hold'], [3.03, 0.8], [3.1, 0.2, 'hold'], [3.19, 0, 'hold']],
+      earL: [[0.39, 0], [0.46, -14, 'hold'], [0.81, 0, 'hold'], [1.3, -90, 'hold'], [1.39, 180, 'hold'], [3.1, -6, 'hold'], [3.19, -14, 'hold'], [3.46, 0, 'hold']],
+      earR: [[0.39, 0], [0.46, 12, 'hold'], [0.81, -45, 'hold'], [0.88, -90, 'hold'], [1.05, -10, 'hold'], [1.14, 0, 'hold'], [1.3, -90, 'hold'], [1.39, -75, 'hold'], [1.48, -8, 'hold'], [1.57, 36, 'hold'], [1.66, 14, 'hold'], [1.75, -8, 'hold'], [1.82, 36, 'hold'], [1.91, 14, 'hold'], [2, -8, 'hold'], [2.09, 36, 'hold'], [2.18, 14, 'hold'], [2.25, -8, 'hold'], [2.34, 36, 'hold'], [2.43, 14, 'hold'], [2.52, -8, 'hold'], [2.61, 36, 'hold'], [2.68, 14, 'hold'], [2.77, -8, 'hold'], [2.86, 36, 'hold'], [2.94, 14, 'hold'], [3.03, -75, 'hold'], [3.1, 0, 'hold'], [3.19, 12, 'hold'], [3.46, 0, 'hold']],
+      eyeL: [[0.39, 'closed'], [0.81, null]],
+      show: [[0.81, 'laptopTilted'], [0.88, 'laptopUp'], [1.05, 'laptopOut'], [1.14, 'laptop'], [1.3, 'laptop side'], [3.03, 'laptopFolding side'], [3.1, 'laptopShut'], [3.19, '']],
+    },
+  },
   // The legs reach y 112, so squash and stretch pivot about that height, and the block turns about the middle of its
   // bottom edge, so that it rocks on its legs.
   rig: { ground: 112, neck: [0, 80] },
