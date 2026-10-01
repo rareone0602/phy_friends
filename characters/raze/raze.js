@@ -83,8 +83,10 @@ PhyFriends.define('raze', {
   // The limbs, on the house template. Seated, his forepaws rest on the ground between his hind feet, which are turned
   // out slightly; the claws are too small to keep. Standing, as on the sheets, the short sleeves of IMG_2575.jpg are
   // bands on the upper arms that stand proud of them, in the hoodie's house shade so that they show against its front,
-  // which is in its own color; the forearms, paws, legs and feet are his fur, the legs in its house shade.
+  // which is in its own color; the forearms, paws, legs and feet are his fur, the legs in its house shade. Seated, the
+  // arms start low on the body (forelegs), so that the drawstrings hang clear of them.
   stand: {
+    fit: { forelegs: 0.4 },
     seat: { paw: { cx: 16, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 121, rx: 19, ry: 10, rot: -8 } },
     arms: { paw: { color: 'fur' }, bands: [{ from: 0, to: 0.46, color: 'hoodieShade', grow: 2.5 }] },
     legs: { foot: { color: 'fur' } },

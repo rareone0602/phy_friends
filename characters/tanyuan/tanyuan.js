@@ -86,8 +86,10 @@ PhyFriends.define('tanyuan', {
   // are turned out slightly. Standing, the arms are the hoodie's long sleeves, which stand proud of them and blouse
   // over the ribbed cuffs of hoodie.jpg. They take the hoodie's house shade, as its sides and hem do, so that they show
   // against its front, which is in its own color; the forepaws are tan. The legs are his tan fur, in its house shade,
-  // and white from the shin down to the white hind feet, as badminton.jpg draws them.
+  // and white from the shin down to the white hind feet, as badminton.jpg draws them. Seated, the arms start low on
+  // the body (forelegs), so that the drawstrings hang clear of them.
   stand: {
+    fit: { forelegs: 0.4 },
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 120, rx: 19, ry: 10, rot: -8 } },
     arms: { color: 'hoodieShade', paw: { color: 'fur' },
       bands: [{ from: 0.34, to: 0.74, color: 'hoodieShade', grow: 1.5 }, { from: 0, to: 0.4, color: 'hoodieShade', grow: 2.5 }] },
