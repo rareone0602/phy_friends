@@ -102,10 +102,9 @@ until its view is written. For a sheet with several figures, crop each one into
 its own file (`sheet-front.png`, `sheet-back.png`), each with its own view.
 
 Git ignores `examples/`: the pictures belong to their artists, so they stay on
-the machine that drew the character (the few committed before that rule are
-still in the repository). Material that should never leave that machine, such
-as photos of the real pet behind a fursona, goes in `characters/<name>/private/`,
-which git ignores too.
+the machine that drew the character. Material that should never leave that
+machine, such as photos of the real pet behind a fursona, goes in
+`characters/<name>/private/`, which git ignores too.
 
 ## Head space
 
