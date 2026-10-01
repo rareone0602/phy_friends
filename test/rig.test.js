@@ -211,6 +211,23 @@
     }
   });
 
+  test('seated, its arms hang straight down in front of its body to its paws, from the body\'s middle, sleeves and all', () => {
+    const NUBBED = {
+      ...STANDER, name: 'test-nubbed',
+      stand: { seat: { paw: { cx: 18, cy: 115, rx: 12, ry: 10 } }, arms: { bands: [{ from: 0, to: 0.4, color: 'fur', grow: 2 }] } },
+    };
+    const arm = PF.standFor(NUBBED).seat.arms.L;
+    assertEqual([arm.shoulder, arm.angle, arm.length, arm.width], [[18, 90], 0, 25, 20],
+      'its round end at the body\'s center (80), and as wide as the paw is tall');
+    assertEqual(placeOf(PF.poseState(NUBBED, { stance: 'sit' }).transform.pawL), [-18, 115], 'its end at the paw');
+    withRig(rig => {
+      const width = name => rig.svg.querySelector(`[data-pf-d="${name}"]`).getBBox().width;
+      assert(Math.abs(width('armL:0') - width('armL') - 4) < 0.5, `seated, its sleeve stands proud of it (${(width('armL:0') - width('armL')).toFixed(2)})`);
+    }, NUBBED);
+    const folded = { ...NUBBED, name: 'test-folded', stand: { ...NUBBED.stand, seat: { ...NUBBED.stand.seat, arms: { length: 0 } } } };
+    assertEqual(PF.standFor(folded).seat.arms.L.shoulder, [18, 115], 'an arm given length 0 folds into its paw');
+  });
+
   // The page box of an ellipse { cx, cy, rx, ry } given in head units, in a rig's standing view.
   const boxOf = (rig, spec, { cx, cy, rx, ry }) => {
     const svg = rig.svg.getBoundingClientRect(), unit = svg.height / PF.STANDING_BOX, view = PF.standingView(spec);
@@ -274,6 +291,10 @@
       assertEqual(order(rig), [['armL', 'armR'], ['pawL', 'pawR'], []]);
       rig.setPose({ stance: 'sit', rise: 0.5 });
       assert(radius() >= arm.width / 2, `on the way up, the tuck takes in the round end of the hose (${radius()})`);
+      const ink = () => rig.parts.tuckInk.getAttribute('opacity');
+      assert(held.contains(rig.parts.tuckInk) && ink() === '1', 'halfway up, the arms tuck fully');
+      rig.setPose({ rise: 0.2 });
+      assertEqual(ink(), '0.4', 'and lower, only partly, so that they slide under the scarf as the friend rises');
       rig.setPose({ stance: 'stand', rise: 0, over: 'armL' });
       assertEqual(rig.parts.armL.parentNode.getAttribute('data-pf'), 'armsOver', 'an arm that over names lies whole over everything');
       assertEqual(order(rig), [['armR'], ['pawR'], ['armL', 'pawL']], 'its paw with it');

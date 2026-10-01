@@ -470,7 +470,8 @@
   // Points given as [x, y] are measured from the center line on either side, as the eyes and blush are.
   // Arms and legs are soft hoses of a fixed length bent along a circular arc (limbArc); an arm is posed by its
   // angles, and a leg reaches for its foot, which stays planted while the hips move.
-  //   seat:  the seated drawing's forepaw and hind foot, { paw, foot, right }, into which the limbs fold (standFor)
+  //   seat:  the seated drawing's forepaw and hind foot, { paw, foot, right }, down to which the arms hang and into
+  //          which the legs fold (standFor)
   //   fit:   any of STAND_FIT's numbers, for this friend
   //   ground, hips: where the feet touch, and the pivot of a lean (default: the hips' height on the center line)
   //   arms:  { shoulder, angle, bend, length, width, taper, color, bands, paw, right }
@@ -495,13 +496,14 @@
   // the body's bottom, from hips `hip` of its half-width out and `hipUp` above its bottom. The shoulders sit
   // `shoulder` below its center, `inset` of an arm's width inside its outline, and each arm hangs `out` degrees
   // out from the outline below the shoulder (or from straight down, where the outline turns in), so that it runs
-  // down the body's side and its paw shows past it. The figure folds its limbs as it sits: without a seated paw and
-  // foot of its own (seat), its feet slide out until they rest `feet` of the body's half-width out, beside its base,
+  // down the body's side and its paw shows past it. The figure folds its limbs as it sits: an arm with a seated paw
+  // of its own (seat) hangs straight down to it from `forelegs` of the body's half-height below its center; without
+  // a seated paw and foot, its feet slide out until they rest `feet` of the body's half-width out, beside its base,
   // and each arm swings in to reach for a paw resting `paws` [of the half-width out, above the ground], in front of
   // the body. A spec may change any of these for itself (stand.fit). The shoulders and the arms' angle are phy's pick
   // for now (variant V10 of the template): the arms hang high on the body and well out from it. Each arm tucks under
   // the scarf and the head for `tuck` of its length from the shoulder (see render).
-  const STAND_FIT = { legs: 22, hip: 0.4, hipUp: 14, shoulder: -12, inset: 0.3, out: 12, feet: 0.7, paws: [0.32, 12], tuck: 0.6 };
+  const STAND_FIT = { legs: 22, hip: 0.4, hipUp: 14, shoulder: -12, inset: 0.3, out: 12, feet: 0.7, paws: [0.32, 12], forelegs: 0, tuck: 0.6 };
   const standCache = new WeakMap();
   // The spec's standing figure with the defaults filled in, or null for a spec that never stands: one with
   // stand: false, or one whose body is not a (fluffy) ellipse, on which the limbs could not be fitted.
@@ -539,9 +541,10 @@
     // The figure folds its limbs as it sits. The seat gives the forepaw and the hind foot of the friend's seated
     // drawing (paw, foot): ellipses { cx, cy, rx, ry, rot } in head space, the left one's, with cx measured from the
     // center line, and right: { paw, foot } holding overrides for the right one. Each limb folds until its paw or
-    // foot is that ellipse, its hose shrunk inside it, and a foot left out tucks under the body. Without a paw, the
-    // limbs fold toward their places in STAND_FIT instead: the feet out beside the base and the paws reaching for
-    // the ground in front. `arms` and `legs` override the folded limbs' numbers.
+    // foot is that ellipse: the arm hangs down in front of the body to its paw, and the leg reaches its foot from
+    // behind the body. A foot left out tucks under the body. Without a paw, the limbs fold toward their places in
+    // STAND_FIT instead: the feet out beside the base and the paws reaching for the ground in front. `arms` and
+    // `legs` override the folded limbs' numbers.
     const given = s.seat || {}, fold = { arms: {}, legs: {}, paw: {}, foot: {} };
     const floor = stand.ground - stand.lift;  // Where the seated paws touch (rig.ground)
     for (const S of ['L', 'R']) {
@@ -550,8 +553,12 @@
       const full = e => e && { ...e, ...ellipse(e), rot: e.rot || 0 };
       const paw = full(given.paw && { ...given.paw, ...(right.paw || {}) }), foot = full(given.foot && { ...given.foot, ...(right.foot || {}) });
       if (paw) {
+        // Seated, the arm hangs straight down in front of the body to its paw, from `forelegs` of the body's
+        // half-height below its center, as a seated animal's forelegs do; one given length 0 folds into its paw.
+        const width = Math.min(arm.width, 2 * Math.min(paw.rx, paw.ry));
+        const length = Math.max(0, (given.arms || {}).length ?? paw.cy - (body.cy + body.ry * F.forelegs) - width / 2);
         fold.paw[S] = paw;
-        fold.arms[S] = { shoulder: [paw.cx, paw.cy], angle: 0, bend: 0, length: 0, width: Math.min(arm.width, 2 * Math.min(paw.rx, paw.ry)) };
+        fold.arms[S] = { shoulder: [paw.cx, paw.cy - length], angle: 0, bend: 0, length, width };
       } else {
         const reach = [sx - body.rx * F.paws[0], stand.ground - F.paws[1] - sy - stand.lift];
         fold.arms[S] = { angle: -Math.atan2(reach[0], reach[1]) / DEG, bend: 0 };
@@ -717,8 +724,9 @@
     const all = limbsFor(stand, q, at.crouch, at.fold), seat = stand.seat, transform = {}, paths = {}, tuck = {};
     for (const name in all) {
       const { at: arc, L, spec: limb, end: [x, y, a], tilt } = all[name], S = name.slice(-1), end = name.startsWith('arm') ? 'paw' : 'foot';
-      // A limb folded into a seated paw or foot keeps its bands inside that, so their cloth thins as it folds.
-      const folded = seat[end][S] ? 1 - at.fold : 1;
+      // A limb folded into a seated paw or foot keeps its bands inside that, so their cloth thins as it folds; an arm
+      // that still shows while seated keeps its sleeves.
+      const folded = seat[end][S] && !(end === 'paw' && seat.arms[S].length) ? 1 - at.fold : 1;
       // The stretch of an arm that tucks under the scarf and the head: a disc about its shoulder (see render). It
       // always takes in the round end of the hose and its sleeves, with a unit to spare, which would otherwise show
       // round its edge as a ring while the arm is short, on the way up or down.
@@ -813,8 +821,10 @@
     const mouth = p.mouth || (spec.mouth && spec.mouth.shape) || 'none';
     return {
       transform: t,
-      opacity: { blush: num(p.blush) },
-      // Whether the arms tuck under the scarf and the head (see render): only once the friend has risen at all.
+      // How strongly the arms tuck under the scarf and the head (see render): not at all while the friend sits, when its
+      // arms hang in front of it, and fully once it is halfway up, so that they slide under as it rises.
+      opacity: { blush: num(p.blush), ...(stand ? { tuckInk: num(Math.min(1, at.up * 2)) } : {}) },
+      // Whether the arms take the tuck at all: only once the friend has risen.
       state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth, show: shownBy(p.show), over: shownBy(p.over), tucked: at.up > 0 },
       paths,
     };
@@ -1383,10 +1393,11 @@
       const box = 'x="-1000" y="-1000" width="2000" height="2000"', ink = `filter="url(#${uid}-ink)"`;
       defs.push(`<filter id="${uid}-ink"><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0"/></filter>` +
         `<clipPath id="${uid}-shoulders">${['L', 'R'].map(S => `<circle${attrs(`tuck${S}`)} r="1"/>`).join('')}</clipPath>` +
-        `<mask id="${uid}-tuck" maskUnits="userSpaceOnUse" ${box}><rect ${box} fill="#fff"/><g clip-path="url(#${uid}-shoulders)">` +
+        `<mask id="${uid}-tuck" maskUnits="userSpaceOnUse" ${box}><rect ${box} fill="#fff"/><g clip-path="url(#${uid}-shoulders)"${attrs('tuckInk')}>` +
         `${scarf ? `<use href="#${uid}-scarf" ${ink}/>` : ''}<use href="#${uid}-head" ${ink}/></g></mask>`);
-      // Seated, the arms are folded into the paws, which never tuck, so the mask would hide nothing; and a mask costs
-      // every frame, most of all in Safari, so the arms take it only once the friend has risen (mount toggles it).
+      // Seated, the arms hang in front of the scarf, so the mask would hide nothing; and a mask costs every frame, most
+      // of all in Safari, so the arms take it only once the friend has risen (mount toggles it). Its ink fades in as
+      // the friend rises (tuckInk), so that an arm crossing a bib slides under it rather than vanishing at once.
       const mask = `url(#${uid}-tuck)`;
       armsFront = `<g data-pf="tuck" data-pf-mask="${mask}"${st.state.tucked ? ` mask="${mask}"` : ''}>${arms.under}</g>`;
     }

@@ -153,21 +153,25 @@ The seat (`stand.seat`) is the friend's own seated drawing: `seat.paw` and
 `seat.foot` are the forepaw and the hind foot it sits with, the left ones, as
 ellipses in head space (`{ cx, cy, rx, ry, rot }`, with `cx` measured outwards
 from the centre line), and `seat.right` holds overrides for the right ones.
-Seated, each paw and foot is exactly that ellipse, with the arm's hose shrunk
-inside it and the leg's hidden behind the body; as the friend rises, the
-ellipse moves, turns and stretches into the standing paw or foot, and the limb
-unfolds out of it. A foot that the seated drawing does not show is left out of
-`seat`, and tucks under the body. Extras on `paws` and `feet` (or `pawL`,
-`footR`…) are drawn in the seated paw's or foot's own space, with its centre on
-the origin and +x towards the centre line, so they move and scale with it; one
-marked `sole: true`, such as a pad on a sole that faces us only while the
-friend sits, flattens towards the foot's lower edge as it rises, to nothing
-standing. Seated feet lie in front of the body, with any band that reaches
-them, and the leg hoses behind it. Without `seat.paw` the limbs fold instead
-towards `STAND_FIT`'s places (the feet beside the base, the paws reaching for
-the ground in front), and `seat.arms` and `seat.legs` override the folded
-limbs' numbers. So a seated drawing's paws and feet on the ground belong in
-`seat`, not in the body's extras, and their markings in extras on `paws` and
+Seated, each paw and foot is exactly that ellipse. Each arm hangs straight down
+to its paw in front of the body, sleeves and all, from the middle of the body's
+height (`STAND_FIT.forelegs`), as a seated animal's forelegs do, and each leg's
+hose is hidden behind the body; as the friend rises, the ellipse moves, turns
+and stretches into the standing paw or foot, the arm swings up to its shoulder
+and the leg unfolds out of the foot. A seated paw tall enough to be a foreleg
+itself, as Terry's is, takes `seat.arms: { length: 0 }`, which folds the arm
+into it. A foot that the seated drawing does not show is left out of `seat`,
+and tucks under the body. Extras on `paws` and `feet` (or `pawL`, `footR`…) are
+drawn in the seated paw's or foot's own space, with its centre on the origin
+and +x towards the centre line, so they move and scale with it; one marked
+`sole: true`, such as a pad on a sole that faces us only while the friend sits,
+flattens towards the foot's lower edge as it rises, to nothing standing. Seated
+feet lie in front of the body, with any band that reaches them, and the leg
+hoses behind it. Without `seat.paw` the limbs fold instead towards
+`STAND_FIT`'s places (the feet beside the base, the paws reaching for the
+ground in front), and `seat.arms` and `seat.legs` override the folded limbs'
+numbers. So a seated drawing's paws and feet on the ground belong in `seat`,
+not in the body's extras, and their markings in extras on `paws` and
 `feet`. A body drawn as an onigiri (`body.onigiri`, see the shapes below),
 narrow under the chin and broad and flat at the base, reads as a seated friend
 does and stands just as well.
@@ -186,12 +190,13 @@ shows. A ruff or bib of fur round the neck, or a scarf, goes in the extras on
 under the arms, and a sleeve takes its cloth's house shade, so that it shows
 against the garment's front. Only the shoulder end of each arm
 (`STAND_FIT.tuck`, 0.6 of its length) tucks under the scarf and the head, so
-the arms come out from under the fur; the paws never do, as they never do while
-the friend sits. The pose's `over` draws an arm whole in front of everything,
-shoulder too. Claude stands already, on the glyphs' four legs, so its spec sets
-`stand: false` and it keeps its shape in either stance, as does any spec
-without a body, or with one that is not an ellipse, on which the limbs could not
-be fitted.
+the arms come out from under the fur; the paws never do. Seated, the arms hang
+in front of the scarf, a bib of fur included, and the tuck fades in as the
+friend rises, fully by halfway, so that they slide under it. The pose's
+`over` draws an arm whole in front of everything, shoulder too. Claude stands
+already, on the glyphs' four legs, so its spec sets `stand: false` and it keeps
+its shape in either stance, as does any spec without a body, or with one that
+is not an ellipse, on which the limbs could not be fitted.
 
 ## Spec
 
@@ -208,7 +213,7 @@ PhyFriends.define('name', {
   body:  { ...fluffy ellipse..., onigiri },                            // onigiri: a rice ball rather than an ellipse (0..1, or { taper, square })
   tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
   stand: {                                                             // The standing figure: the seated body on two legs (false: never stands); any part left out takes the default, fitted to the body
-    seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, into which the limbs fold (left out: the fitted fold); arms and legs override the folded limbs' numbers
+    seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, down to which the arms hang and into which the legs fold (left out: the fitted fold); arms and legs override the folded limbs' numbers (arms: { length: 0 } folds an arm into its paw)
     fit,                                                               // Any of STAND_FIT's numbers, for this friend
     ground, hips,                                                      // Where the feet touch, and the pivot of a lean
     arms:  { shoulder, angle, bend, length, width, taper, color, paw: { cx, cy, rx, ry, color }, bands: [{ from, to, color, grow, teeth, depth }], right: {...overrides} },

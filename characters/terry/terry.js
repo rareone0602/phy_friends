@@ -39,11 +39,12 @@ PhyFriends.define('terry', {
   // spiral. Setting step: 4 keeps it smooth.
   tail: { base: [56, 100], angle: 10, length: 70, width: 16, bend: 330, taper: 0.3, root: 0, step: 4, color: 'cream', fluff: [] },
   // The limbs, on the house template. Seated, as in sitting.png, the forelegs are straight columns side by side in
-  // front, their round ends on the ground (paw), and the large round hind feet point at us at either side (foot),
-  // their dark felt soles showing (extras). Standing, as in standing.png, they are short round arms and straight
-  // round legs. The feet keep the head's yellow, as seated.
+  // front, their round ends on the ground (paw), so the arms fold into them (length 0) rather than hang down to
+  // them, and the large round hind feet point at us at either side (foot), their dark felt soles showing (extras).
+  // Standing, as in standing.png, they are short round arms and straight round legs. The feet keep the head's
+  // yellow, as seated.
   stand: {
-    seat: { paw: { cx: 18, cy: 106, rx: 12.5, ry: 25 }, foot: { cx: 53, cy: 114, rx: 21, ry: 17 } },
+    seat: { paw: { cx: 18, cy: 106, rx: 12.5, ry: 25 }, foot: { cx: 53, cy: 114, rx: 21, ry: 17 }, arms: { length: 0 } },
     legs: { foot: { color: 'fur' } },
   },
   extras: [

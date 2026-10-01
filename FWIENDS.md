@@ -326,15 +326,17 @@ standing.
   scarf (a ruff or bib of fur round the neck, or a scarf, extras on `scarf`),
   the head, whose chin lies over the scarf and the collar, then the arms, in
   front of all of them, except at the shoulder, which tucks under the scarf
-  and the head (the paws never do). A hood is clothing, so it lies under the arms, and a sleeve
-  takes its cloth's house shade, so that it shows against the garment's front,
-  which is in the cloth's own colour. Its feet touch `stand.ground`, the
-  body's bottom plus 22 (about +153 in its own space), and the rig lifts it by
-  the difference, so that its feet stand where its seated paws did. Every
-  friend is one figure, which sits on the same limbs, folded into the paws and
-  feet of its own seated drawing (`stand.seat`), so that it stands up and sits
-  down through every height between, with nothing appearing or vanishing; a
-  sole that faces us while it sits flattens as it rises.
+  and the head (the paws never do). A hood is clothing, so it lies under the
+  arms, and a sleeve takes its cloth's house shade, so that it shows against
+  the garment's front, which is in the cloth's own colour. Its feet touch
+  `stand.ground`, the body's bottom plus 22 (about +153 in its own space), and
+  the rig lifts it by the difference, so that its feet stand where its seated
+  paws did. Every friend is one figure, which sits on the same limbs: its arms
+  hang straight down in front of it, as forelegs, from the middle of its body
+  to the paws of its own seated drawing (`stand.seat`), and its legs fold into
+  that drawing's feet. So it stands up and sits down through every height
+  between, with nothing appearing or vanishing: the arms slide under the scarf
+  as it rises, and a sole that faces us while it sits flattens.
 - A reference in the house template (a 1254px close-up, head tipped 20°,
   as in the Grokbot Icon prompt's examples; reviewers should know them) is
   matched at `scale: 5.5` with the view `{w: 1254, h: 1254, x: 450, y: 835,
