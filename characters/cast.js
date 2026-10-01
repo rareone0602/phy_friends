@@ -79,6 +79,10 @@ PhyFriends.cast.define({
       name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
       credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
     },
+    jiaoyue: {
+      name: 'jiaoyue', pronoun: 'he', species: 'lavender dog',
+      credit: { handle: 'github/Louis0325', href: 'https://github.com/Louis0325' }, agreed: ['gallery'],
+    },
     claude: {
       name: 'Claude', pronoun: 'it', species: 'language model',
       credit: { handle: '@AnthropicAI', href: 'https://x.com/AnthropicAI' }, agreed: ['gallery'],

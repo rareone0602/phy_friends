@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="sixteen fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="seventeen fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,21 +60,21 @@
      page, as the subject of a group photo stands in the middle of the frame. */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 for the overlap. The sixteen reaches add up to 753 head units (Terry's and Claude's are nil), so
-     all sixteen take 17.8289 boxes. In the smaller splits the widest rows are the first eight, Howdi
-     to mumuyou, at 9.0052 boxes, the first five at 5.6815, K3V1N to Raze at 4.5822, Brian to K3V1N
+     less 0.06 for the overlap. The seventeen reaches add up to 827 head units (Terry's and Claude's are nil), so
+     all seventeen take 19.0430 boxes. In the smaller splits the widest rows are the second eight, K3V1N
+     to jiaoyue, at 9.0978 boxes, the first five at 5.6815, K3V1N to Raze at 4.5822, Brian to K3V1N
      at 3.5978, and Brian and mumuyou at 2.3837. Each is rounded up so that those friends always fit in
      one row. The box is five rules, so that two
      rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 2.384; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of sixteen; the
+  /* The page is wider than the kit's column so that the stage has room for a row of seventeen; the
      header and footer keep to the margin line. */
-  main { max-width: 2965px; }
-  /* Friends stand in one row where all sixteen fit. Otherwise they split eight and eight, and where
-     eight do not fit, into rows of five, with Claude, the last, alone under the rest. Narrower, they
-     stand four to a row, then three, with Claude alone again, or in pairs, where Alfie and Claude share
-     the last. Each row is grounded on a rule. */
+  main { max-width: 3159px; }
+  /* Friends stand in one row where all seventeen fit. Otherwise they stand eight to a row, with Claude,
+     the last, alone under the rest, and where eight do not fit, in rows of five, where jiaoyue and Claude
+     share the last. Narrower, they stand four to a row, with Claude alone again, then three, where
+     jiaoyue and Claude share the last, or in pairs, with Claude alone. Each row is grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   .friend {
@@ -128,17 +128,17 @@
      so that the same friends always share a row on a phone. */
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
   /* Four stand in a row once the stage is 4.583 boxes wide, which it is from an 846px window, five
-     once it is 5.682 boxes wide, from a 1022px window, eight once it is 9.006 boxes wide, from a
-     1553px window, and all sixteen once it is 17.829 boxes wide, from a 2965px window, where the
+     once it is 5.682 boxes wide, from a 1022px window, eight once it is 9.098 boxes wide, from a
+     1568px window, and all seventeen once it is 19.043 boxes wide, from a 3159px window, where the
      page stops growing. */
   @container (width >= 734px) { .troupe { --abreast: 4.583; } }
   @container (width >= 910px) {
     .troupe { --abreast: 5.682; }
     .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
   }
-  @container (width >= 1441px) { .troupe { --abreast: 9.006; } }
-  @container (width >= 2853px) {
-    .troupe { --abreast: 17.829; }
+  @container (width >= 1456px) { .troupe { --abreast: 9.098; } }
+  @container (width >= 3047px) {
+    .troupe { --abreast: 19.043; }
     .friends { max-width: none; }
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
@@ -271,6 +271,10 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie, a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail"></div>
           <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="jiaoyue"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to jiaoyue, a lavender dog with a white face and chest, pale blue eyes, white paws and a big purple tail with a white end"></div>
+          <figcaption><span class="name hand">jiaoyue</span><span class="species">lavender dog</span><span class="credit"><a href="https://github.com/Louis0325">github/Louis0325</a></span></figcaption>
+        </figure></li>
         <li class="friend" data-friend="claude"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Claude, the machine that drew this page, as it appears in Claude Code: a small terracotta block with two tall eyes, a stub of an arm on each side and four short legs"></div>
           <figcaption><span class="name hand">Claude</span><span class="species">language model</span><span class="credit"><a href="https://x.com/AnthropicAI">@AnthropicAI</a></span></figcaption>
@@ -307,6 +311,7 @@
 <script src="../../characters/tanyuan/tanyuan.js"></script>
 <script src="../../characters/teni/teni.js"></script>
 <script src="../../characters/alfie/alfie.js"></script>
+<script src="../../characters/jiaoyue/jiaoyue.js"></script>
 <script src="../../characters/claude/claude.js"></script>
 <script src="../../src/anim.js"></script>
 <script src="../../src/pen.js"></script>
