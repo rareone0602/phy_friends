@@ -40,7 +40,7 @@ PhyFriends.cast.define({
       credit: { handle: '@YuDa_Hay', href: 'https://x.com/YuDa_Hay' }, agreed: ['gallery'],
     },
     terry: {
-      name: 'Terry', pronoun: 'they', species: 'yellow plush toy',
+      name: 'Terry', pronoun: 'he', species: 'yellow plush toy',
       credit: { handle: '@FreshSnails_x_6', href: 'https://x.com/FreshSnails_x_6' }, agreed: ['gallery'],
     },
     brian: {
