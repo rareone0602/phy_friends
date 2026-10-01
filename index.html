@@ -18,7 +18,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="fifteen fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="sixteen fwiends in coloured pencil on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Teni, a Glaceon with a cyan bob; Alfie, a coral tabby cat in round glasses; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -70,22 +70,22 @@
      page (FWIENDS.md). */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 per slot for the overlap. The fifteen reaches add up to 697 head units (Terry's and Claude's are nil), so
-     all fifteen take 16.6815 boxes. In the smaller splits the widest rows are the first eight, Howdi
-     to mumuyou, at 9.0052 boxes, the first five at 5.6815, K3V1N to tanyuan at 4.5378, Brian to K3V1N
+     less 0.06 per slot for the overlap. The sixteen reaches add up to 753 head units (Terry's and Claude's are nil), so
+     all sixteen take 17.8289 boxes. In the smaller splits the widest rows are the first eight, Howdi
+     to mumuyou, at 9.0052 boxes, the first five at 5.6815, K3V1N to Raze at 4.5822, Brian to K3V1N
      at 3.5978, and Brian and mumuyou at 2.3837. Each is rounded up so that those friends always fit in
      one row. The box is five
      rules, so that the second row stands on its rule 768px down the page: a window at least that tall
      shows two rows of friends. */
   .stage { container-type: inline-size; }
   .troupe { --abreast: 2.384; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of fifteen; the
+  /* The page is wider than the kit's column so that the stage has room for a row of sixteen; the
      header and footer keep to the margin line. */
-  main { max-width: 2782px; }
-  /* Friends stand in one row where all fifteen fit. Otherwise they split eight and seven, and where
-     eight do not fit, into three rows of five. Narrower, they stand four or three to a row, or in
-     pairs, where Claude, the last, stands alone under the rest, over the disclaimer about it. Each row
-     is grounded on a rule. */
+  main { max-width: 2965px; }
+  /* Friends stand in one row where all sixteen fit. Otherwise they split eight and eight, and where
+     eight do not fit, into rows of five, with Claude, the last, alone under the rest, over the
+     disclaimer about it. Narrower, they stand four to a row, then three, with Claude alone again, or in
+     pairs, where Alfie and Claude share the last. Each row is grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   /* A link to a friend (#yuda) leaves room above it for its ears. */
@@ -155,20 +155,20 @@
      rule is 30px and so a box 150px. Narrower, they stand in pairs, never a mix of pairs and threes,
      so that the same friends always share a row on a phone. */
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
-  /* Four stand in a row once the stage is 4.538 boxes wide, which it is from an 839px window, five
+  /* Four stand in a row once the stage is 4.583 boxes wide, which it is from an 846px window, five
      once it is 5.682 boxes wide, from a 1022px window, eight once it is 9.006 boxes wide, from a
-     1553px window, and all fifteen once it is 16.682 boxes wide, from a 2782px window, where the
+     1553px window, and all sixteen once it is 17.829 boxes wide, from a 2965px window, where the
      page stops growing. */
-  @container (width >= 727px) { .troupe { --abreast: 4.538; } }
+  @container (width >= 734px) { .troupe { --abreast: 4.583; } }
   @container (width >= 910px) {
     .troupe { --abreast: 5.682; }
     .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
   }
   @container (width >= 1441px) { .troupe { --abreast: 9.006; } }
-  /* The fifteen fit the capped row with less than a pixel to spare, so the cap is lifted here:
+  /* The sixteen fit the capped row with less than a pixel to spare, so the cap is lifted here:
      rounding must not send the last friend to a second row. */
-  @container (width >= 2670px) {
-    .troupe { --abreast: 16.682; }
+  @container (width >= 2853px) {
+    .troupe { --abreast: 17.829; }
     .friends { max-width: none; }
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
@@ -310,6 +310,11 @@
           <p id="looks-cowosus" hidden>a white Australian Shepherd like a pineapple, with golden thighs scaled in orange diamonds, a ruff and tail tipped with green leaves, a lime patch round one eye, one folded ear, a red-tipped curl, a mint band across his muzzle and blue eyes, the left one orange at the bottom</p>
           <figcaption><span class="name hand">cowosus</span><span class="species">australian shepherd</span><span class="credit"><a href="https://linktr.ee/cowosus">linktr.ee/<wbr>cowosus</a></span></figcaption>
         </figure></li>
+        <li class="friend" id="raze" data-friend="raze"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Raze" aria-describedby="looks-raze"></div>
+          <p id="looks-raze" hidden>a dark-teal dragon in a short-sleeved teal hoodie with white headphones round his neck, with one cyan horn, big ears tipped in teal and purple, a cyan fringe swept over one eye, one eye cyan and the other lavender, and a slim tail ending in a teal tuft</p>
+          <figcaption><span class="name hand">Raze</span><span class="species">dark-teal dragon</span><span class="credit"><a href="https://www.facebook.com/huang.alan.9279/">fb/<wbr>huang.<wbr>alan.9279</a></span></figcaption>
+        </figure></li>
         <li class="friend" id="tanyuan" data-friend="tanyuan"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan" aria-describedby="looks-tanyuan"></div>
           <p id="looks-tanyuan" hidden>a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear</p>
@@ -358,6 +363,7 @@
 <script src="characters/kevin/kevin.js"></script>
 <script src="characters/bardell/bardell.js"></script>
 <script src="characters/cowosus/cowosus.js"></script>
+<script src="characters/raze/raze.js"></script>
 <script src="characters/tanyuan/tanyuan.js"></script>
 <script src="characters/teni/teni.js"></script>
 <script src="characters/alfie/alfie.js"></script>

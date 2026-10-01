@@ -1028,7 +1028,7 @@ def friend_drift(friend, entry, host):
 
 
 def preview_drift(alt, names):
-    """Return the ways in which the link preview's alt text ("fifteen fwiends ...: Howdi, a sky-blue
+    """Return the ways in which the link preview's alt text ("sixteen fwiends ...: Howdi, a sky-blue
     wolf; ...; and Claude, ...") disagrees with the gallery, whose friends' names are given in order."""
     if alt is None:
         return ['og:image:alt: index.html has no alt text for its link preview']

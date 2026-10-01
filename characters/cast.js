@@ -63,6 +63,10 @@ PhyFriends.cast.define({
       name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
       credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery'],
     },
+    raze: {
+      name: 'Raze', pronoun: 'he', species: 'dark-teal dragon',
+      credit: { handle: 'fb/huang.alan.9279', href: 'https://www.facebook.com/huang.alan.9279/' }, agreed: ['gallery'],
+    },
     tanyuan: {
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
       credit: { handle: '@tanyuan_UwU', href: 'https://x.com/tanyuan_UwU' }, agreed: ['gallery'],
