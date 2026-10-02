@@ -69,7 +69,7 @@ PhyFriends.define('yuda', {
   blush: { x: 53, y: 24.5, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default; when open, it shows one fang and the cyan inside from waving.png.
   mouth: { y: 20, size: 3.8, fang: true },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 82, rx: 70, ry: 50, onigiri: 1,
@@ -112,12 +112,13 @@ PhyFriends.define('yuda', {
     // The eyebrow spots: two white ovals above the eyes, their inner ends raised slightly.
     { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'face', cx: -30, cy: -38, rx: 10, ry: 7.5, rot: -10 },
     { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'face', cx: 30, cy: -38, rx: 10, ry: 7.5, rot: 10 },
-    // The white chest and belly: a round bib under the bandana, its sides cut into tufts, ending above the forepaws.
-    { feature: 'chest', on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 46, ry: 30,
+    // The white chest and belly: a round bib under the bandana, its sides cut into tufts, ending above the forepaws. It
+    // narrows toward the top as the body does (onigiri: 0.5), so that the slate still shows at its sides.
+    { feature: 'chest', on: 'body', clip: true, fill: 'face', cx: 0, cy: 80, rx: 45, ry: 30, onigiri: 0.5,
       fluff: [{ from: -40, to: 60, n: 3, len: 6, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true }] },
     // The bandana: the band around the neck (in the house shade, because it lies behind the point),
     // the point hanging on the chest, and two ends sticking out from the knot at the side of the
-    // neck. The knot lies behind the ends, so it is shaded too. It is as narrow as the top of the body, and lies
+    // neck. The knot lies behind the ends, so it is shaded too. It wraps the neck under the chin, and lies
     // over the tops of the arms, as the ends lie over his left arm in card.png (scarf).
     { feature: 'bandana', on: 'scarf', fill: 'scarfShade', nodes: [[-44, 40, 1, 0], [44, 42, 1, 0], [42, 58, 1, -10], [-40, 56, 1, 0]], round: 0.3 },
     { feature: 'bandana', on: 'scarf', fill: 'scarf', nodes: [[-42, 48, 1, 8], [38, 50, 1, -4], [-6, 100, 1, -4]], round: 0.2 },

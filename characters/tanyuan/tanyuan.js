@@ -80,7 +80,7 @@ PhyFriends.define('tanyuan', {
   // There is no mouth by default (the pictures' nose and mouth are omitted). It sits on the white, below the tan
   // between the eyes; when open, it shows a pink tongue and no fang, as the pictures show none.
   mouth: { y: 27, size: 3.8 },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It wears the hoodie, so it has no fur tufts. It sits under the head, so it takes the hoodie's house
   // shade. Below the front of the hoodie (an extra) it shows as the ribbed hem of hoodie.jpg, which lies under the
   // front where the front blouses over it. The paw print on the chest in poster.jpg is too small to keep.
@@ -129,27 +129,28 @@ PhyFriends.define('tanyuan', {
     { feature: 'streaks', on: 'hair', clip: true, fill: 'streak', nodes: [[-89, 16, 1, 8], [-78, -40, 1, 8], [-103, 12, 1]] },
     { feature: 'streaks', on: 'hair', clip: true, fill: 'streak', nodes: [[100, 11, 1, -6], [84, -30, 1, -6], [88, 13, 1]] },
     // The front of the hoodie, in its own color. It blouses over the ribbed hem, as in hoodie.jpg: its sides tuck in
-    // under the ends of the hood and fall a little past the body, and its lower edge overhangs the hem at the hips, so
-    // that the hem shows as a band of cloth under a lip. Its top lies under the hood.
-    { feature: 'hoodie', on: 'body', fill: 'hoodie', nodes: [[-32, 36, 1], [32, 36, 1], [38, 58], [41.5, 67], [46.5, 78], [51, 88], [53, 94],
-      [48, 98], [26, 100.5], [0, 101.5], [-26, 100.5], [-48, 98], [-53, 94], [-51, 88], [-46.5, 78], [-41.5, 67], [-38, 58]] },
+    // under the ends of the hood and fall a little past the body, following it as it narrows toward the neck, so that
+    // the sleeves leave the hoodie at its sides; its lower edge overhangs the hem at the hips, so that the hem shows as
+    // a band of cloth under a lip. Its top lies under the hood.
+    { feature: 'hoodie', on: 'body', fill: 'hoodie', nodes: [[-20, 36, 1], [20, 36, 1], [21, 58], [28, 67], [36.5, 78], [43, 88], [45, 94],
+      [41, 98], [22, 100.5], [0, 101.5], [-22, 100.5], [-41, 98], [-45, 94], [-43, 88], [-36.5, 78], [-28, 67], [-21, 58]] },
     // The two white drawstrings, coming out of the hood's edge on either side of the point and hanging a little apart,
     // over the lip of the front.
-    { feature: 'drawstrings', on: 'body', fill: 'face', round: 0.5, nodes: [[-14, 78, 1], [-9, 78, 1], [-12, 105, 1], [-17, 105, 1]] },
-    { feature: 'drawstrings', on: 'body', fill: 'face', round: 0.5, nodes: [[9, 78, 1], [14, 78, 1], [17, 105, 1], [12, 105, 1]] },
+    { feature: 'drawstrings', on: 'body', fill: 'face', round: 0.5, nodes: [[-11, 78, 1], [-7, 78, 1], [-10, 105, 1], [-14, 105, 1]] },
+    { feature: 'drawstrings', on: 'body', fill: 'face', round: 0.5, nodes: [[7, 78, 1], [11, 78, 1], [14, 105, 1], [10, 105, 1]] },
     // The hood is clothing, so it lies under the arms, and the sleeves show against its pale gray where they cross its
     // ends. The inside of the hood, in its house shade: it lies behind the rim, which is the
     // same gray, and shows where the rim's two sides part under the chin, as the inside of the hood does beside the
     // chest in hoodie.jpg. The white chest that the pictures show there is left out: right under the white chin it
     // would merge with the chin, and in its own house shade it would merge with the rim.
-    { feature: 'hood', on: 'body', fill: 'hoodShade', nodes: [[-28, 44, 1], [28, 44, 1], [0, 82, 1]] },
+    { feature: 'hood', on: 'body', fill: 'hoodShade', nodes: [[-9, 44, 1], [9, 44, 1], [0, 82, 1]] },
     // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
     // under the chin; his left side (the viewer's right) lies over the other, as in hoodie.jpg. Its ends rest on the
     // narrow shoulders and stand out past them, so that the roll overhangs the hoodie below and reads as cloth lying
     // on the body rather than printed on it. Its top lies under the head.
-    { feature: 'hood', on: 'body', fill: 'hood', nodes: [[-24, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-18, 79], [-34, 71], [-41, 63], [-40, 53],
-      [-33, 45], [-28, 40, 1]] },
-    { feature: 'hood', on: 'body', fill: 'hood', nodes: [[24, 50, 1], [28, 40, 1], [33, 45], [40, 53], [41, 63], [34, 71], [18, 79],
+    { feature: 'hood', on: 'body', fill: 'hood', nodes: [[-10, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-14, 79], [-24.5, 71], [-25.5, 63], [-19, 53],
+      [-11, 45], [-6.5, 40, 1]] },
+    { feature: 'hood', on: 'body', fill: 'hood', nodes: [[10, 50, 1], [6.5, 40, 1], [11, 45], [19, 53], [25.5, 63], [24.5, 71], [14, 79],
       [0, 86, 1], [0, 80, 1, -8]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -136, +x away from the body); the
     // library bends them onto the curve. The white underside, on the side toward the body, as in hoodie.jpg and

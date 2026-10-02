@@ -81,7 +81,7 @@ PhyFriends.define('howdi', {
   // There is no mouth by default, and the pictures' nose is left out. The greeting's 'w' mouth stands for the
   // small mouth the pictures draw.
   mouth: { y: 21, size: 3.8 },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the head,
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 82, rx: 68, ry: 50, onigiri: 1,
@@ -113,12 +113,13 @@ PhyFriends.define('howdi', {
     { feature: 'cheekRuff', on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -42, to: 21, n: 3, len: 15, lean: -2, depth: 0.1, b1: -35, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -14, b1: 5, b2: 5, jit: 0 }] },
-    // The mid-blue belly, under the ruff.
-    { feature: 'belly', on: 'body', clip: true, fill: 'belly', cx: 0, cy: 106, rx: 34, ry: 34 },
+    // The mid-blue belly, under the ruff, narrower than it is tall, so that the house shade shows at its sides.
+    { feature: 'belly', on: 'body', clip: true, fill: 'belly', cx: 0, cy: 106, rx: 26, ry: 34 },
     // The ruff: a back layer in the house shade, which shows as a collar under the chin, and the pale ruff in
-    // front of it, whose spiky tufts hang over the belly. It lies over the tops of the arms, as a scarf does (scarf).
+    // front of it, whose spiky tufts hang over the belly. The pale ruff narrows toward the top as the body does
+    // (onigiri: 0.5). It lies over the tops of the arms, as a scarf does (scarf).
     { feature: 'chest', on: 'scarf', clip: true, fill: 'faceShade', cx: 0, cy: 52, rx: 66, ry: 24 },
-    { feature: 'chest', on: 'scarf', fill: 'face', cx: 0, cy: 70, rx: 36, ry: 19,
+    { feature: 'chest', on: 'scarf', fill: 'face', cx: 0, cy: 70, rx: 33, ry: 19, onigiri: 0.5,
       fluff: [{ from: 20, to: 160, n: 5, len: 13, depth: 0.1, b1: -25, b2: 5, jit: 0 },
         { from: 215, to: 325, n: 4, len: 5, depth: 0.05, b1: -20, b2: 10, jit: 0 }] },
   ],

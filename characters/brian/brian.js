@@ -67,7 +67,7 @@ PhyFriends.define('brian', {
   // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows a pink tongue
   // and no fang.
   mouth: { y: 20, size: 3.8 },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It sits under the
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the
   // head, so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 82, rx: 68, ry: 50, onigiri: 1,
@@ -113,8 +113,9 @@ PhyFriends.define('brian', {
     { feature: 'cap', on: 'hair', under: true, fill: 'capShade', nodes: [[-66, -62, 1, 2], [66, -62, 1, -28]] },
     { feature: 'cap', on: 'hair', clip: true, fill: 'band', nodes: [[-80, -70, 1, 6], [80, -70, 1, 0], [80, -40, 1, 0], [-80, -40, 1, 0]] },
     { feature: 'cap', on: 'hair', kind: 'ellipse', fill: 'cap', cx: 0, cy: -115, rx: 7, ry: 5 },
-    // The pale chest and belly: a bib under the bandana, its lower edge in soft tufts.
-    { feature: 'chest', on: 'body', clip: true, fill: 'face', cx: 0, cy: 76, rx: 32, ry: 25,
+    // The pale chest and belly: a bib under the bandana, its lower edge in soft tufts. It narrows toward the top as the
+    // body does (onigiri: 0.5), so that the cream still shows at its sides.
+    { feature: 'chest', on: 'body', clip: true, fill: 'face', cx: 0, cy: 76, rx: 31, ry: 25, onigiri: 0.5,
       fluff: [{ from: 30, to: 150, n: 4, len: 6, depth: 0.08, b1: -25, b2: 5, jit: 0 }] },
     // The bandana: the band around the neck (in the house shade, because it lies behind the point) and the point
     // hanging on the chest. The knot is at the back, as on the sheet. It lies over the tops of the arms, as a scarf

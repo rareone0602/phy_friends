@@ -36,7 +36,6 @@
 
   const RULE = 54;            // The paper's rule spacing in head units: a friend stands five rules tall, as in the gallery.
   const BOX = 270;            // A friend's cut-out is this many head units square, with its ground on the bottom edge (FWIENDS.md).
-  const DEFAULT_GROUND = 120; // The ground line for a spec without rig.ground, in head units.
   const OFFSTAGE = 200;       // How far past the frame's edge a friend waits before it enters, in head units.
   const PHASE_STEP = 1.7;     // Offsets each friend's idle cycles so that they do not move in step.
   const HOP = A.HOP;
@@ -538,7 +537,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
   // --------------------------------------------------------------- Actors
 
   function createActor(scene, dom, name, a) {
-    const spec = PF.get(name), rigGround = (spec.rig && spec.rig.ground) ?? DEFAULT_GROUND;
+    const spec = PF.get(name), rigGround = PF.groundOf(spec);
     const node = document.createElement('div');
     node.className = 'pf-actor';
     node.dataset.friend = name;

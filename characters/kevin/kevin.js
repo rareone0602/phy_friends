@@ -78,7 +78,7 @@ PhyFriends.define('kevin', {
   blush: { x: 55, y: 29, rx: 11.5, ry: 7, tilt: 10 },
   // There is no mouth by default; when open, it shows the pink tongue of the sheet, without a fang.
   mouth: { y: 21, size: 3.8 },
-  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 87, rx: 64, ry: 45, onigiri: 1,

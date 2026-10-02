@@ -79,8 +79,9 @@ PhyFriends.define('yuanyuan', {
   // left out (backup/cat-mouth.js keeps that mouth); the greeting's 'w' mouth stands for it. When open, the mouth shows
   // his pink tongue and one fang for the small fangs of EVE HP/2502.png.
   mouth: { y: 22, size: 3.8, fang: true },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
-  // base. It wears the yukata, so it has no fur tufts. It sits under the head, so it takes the yukata's house shade.
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
+  // the base. It wears the yukata, so it has no fur tufts. It sits under the head, so it takes the yukata's house
+  // shade.
   body: { cx: 0, cy: 84, rx: 64, ry: 47, onigiri: 1 },
   // The tail is a slim white cat's tail, as in every work before 2026. It leaves his left hip (the viewer's right) above
   // the hind foot, so that it does not read as a leg, and curls up in a C, as a sitting cat's does, beside the body
@@ -91,15 +92,19 @@ PhyFriends.define('yuanyuan', {
       { from: 190, to: 225, n: 1, len: 4, lean: 4, b1: -25, b2: 5, jit: 0 }],
   },
   // The limbs, on the house template. Seated, the white forepaws rest on the ground between the hind feet (paw), and
-  // the hind feet show their soles, as in EVE HP/2507.png (foot). Standing, the arms are bare and white, as the robe in
-  // EVE HP/2508.png has no sleeves, and come out of its armholes. The robe's edge covers the top third of each arm, as
-  // its shoulder does in that picture, and stands proud of the arm in the robe's color. The robe hangs on over the tops of the white legs to mid-thigh, as cloth standing proud of them; it lies
-  // behind the body, so it takes the yukata's house shade. The legs are white fur behind the body, so they take the
-  // fur's house shade. Standing, the tail lies out low to the side and curls up at its end, so that the white right
-  // paw, hanging beside the body, does not vanish against it.
+  // the hind feet show their soles, as in EVE HP/2507.png (foot). Standing, the arms are bare and white, as the robe
+  // in EVE HP/2508.png has no sleeves, and come out of its armholes at its sides, as in that picture: each shoulder
+  // sits on the body's outline (fit.inset 0) rather than inside it, since the body is narrow under the chin and an
+  // armhole set inside it would lie on the robe's front, over the crossed collar. The robe's edge covers the top
+  // quarter of each arm (about 10 units), as its shoulder does in that picture, and stands proud of the arm in the
+  // robe's color. The robe hangs on over the tops of the white legs to mid-thigh, as cloth standing proud of them; it
+  // lies behind the body, so it takes the yukata's house shade. The legs are white fur behind the body, so they take
+  // the fur's house shade. Standing, the tail lies out low to the side and curls up at its end, so that the white
+  // right paw, hanging beside the body, does not vanish against it.
   stand: {
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 114, rx: 19, ry: 16 } },
-    arms: { bands: [{ from: 0, to: 0.35, color: 'yukata', grow: 2.5 }] },
+    fit: { inset: 0 },
+    arms: { bands: [{ from: 0, to: 0.25, color: 'yukata', grow: 2.5 }] },
     legs: { bands: [{ from: 0, to: 0.75, color: 'yukataShade', grow: 3 }] },
     tail: { base: [44, 120], angle: 108 },
   },
@@ -159,20 +164,21 @@ PhyFriends.define('yuanyuan', {
       [0, 106, 3.4, 12]] },
     // The sash round the waist, in the pale blue of the dots, bowed down a little in the middle as it follows the
     // body. It is a band of cloth wrapped round him, so it is not clipped to the body: at each side it stands
-    // about 7 units proud of the body where it turns out of sight, which shows its thickness. Its ends are upright
-    // and bow outward, as a band's do round a waist; ends that stand less proud, or follow the body's curve, leave
-    // the outline a ball at gallery size. The robe in EVE HP/2508.png is tied at the front instead; without a sash,
+    // about 7 units proud of the body where it turns out of sight, which shows its thickness. Its ends stand a
+    // little more upright than the body's flank and bow outward, as a band's do round a waist; ends that stand less
+    // proud, or follow the body's curve, leave the outline a ball at gallery size; ends that stand much prouder
+    // read as a plank across a narrow waist. The robe in EVE HP/2508.png is tied at the front instead; without a sash,
     // a crossed robe reads as a dressing gown.
     { feature: 'sash', on: 'body', fill: 'pattern', round: 0.3,
-      nodes: [[-45, 68, 1, 4], [45, 68, 1, -8], [51, 83, 1, -4], [-51, 83, 1, -8]] },
+      nodes: [[-34, 68, 1, 4], [34, 68, 1, -8], [42, 83, 1, -4], [-42, 83, 1, -8]] },
     // The sash is tied in a bow at his back, a little to his right, so that the bow peeks out beside the body on the
     // viewer's left, where the tail does not reach. Its two loops splay, one up and one down, so that it reads as a
     // bow rather than a paw or an arm. It is drawn under the body and lies behind the sash, so it takes the pale
     // blue's house shade, which parts it from the sash's end.
-    { feature: 'bow', on: 'body', under: true, fill: 'patternShade', nodes: [[-44, 71, 1], [-58, 60], [-70, 54], [-77, 60], [-72, 70],
-      [-46, 78, 1]] },
-    { feature: 'bow', on: 'body', under: true, fill: 'patternShade', nodes: [[-46, 76, 1], [-62, 82], [-72, 92], [-68, 100], [-58, 94],
-      [-44, 82, 1]] },
+    { feature: 'bow', on: 'body', under: true, fill: 'patternShade', nodes: [[-34, 71, 1], [-48, 60], [-60, 54], [-67, 60], [-62, 70],
+      [-36, 78, 1]] },
+    { feature: 'bow', on: 'body', under: true, fill: 'patternShade', nodes: [[-36, 76, 1], [-52, 82], [-62, 92], [-58, 100], [-48, 94],
+      [-34, 82, 1]] },
     // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line).
     // The soles of the hind feet, as in EVE HP/2507.png: a pink pad under three pink toe beans on each. They face the
     // viewer only while he sits, so they flatten as the foot tips down (sole).

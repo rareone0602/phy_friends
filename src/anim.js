@@ -393,9 +393,14 @@
   // A standing friend's walk: seconds a step, how far a step carries it (length, in head units: legs this short
   // take small steps), how high a foot lifts, how far the arms swing (degrees), the lean onto the planted foot
   // (degrees), the stretch as the body passes over that foot, and a leg at rest, from the hip to the ankle: how
-  // far out and how far down it reaches (the template's, PhyFriends.STAND_DEFAULT and STAND_FIT; a friend's own
-  // follows from its spec.stand), with which walking() keeps a planted foot still.
-  const WALK = Object.freeze({ seconds: 0.25, length: 12, height: 7, swing: 14, lean: 3, squash: 0.02, leg: [0, 22] });
+  // far out and how far down it reaches, with which walking() keeps a planted foot still. The leg is the
+  // template's, worked out from PhyFriends.STAND_DEFAULT and STAND_FIT: from hips hipUp above the body's base, it
+  // shows `legs` below the base, down to an ankle `ankle` above the ground. A friend's own follows from its
+  // spec.stand.
+  const WALK = Object.freeze({
+    seconds: 0.25, length: 12, height: 7, swing: 14, lean: 3, squash: 0.02,
+    leg: Object.freeze([PF.STAND_DEFAULT.legs.spread, PF.STAND_FIT.legs + PF.STAND_FIT.hipUp - PF.STAND_DEFAULT.legs.ankle]),
+  });
 
   // The walk at p steps in (p = 1 ends the first step). The right foot lifts in the even steps and the left in
   // the odd ones, or the other way round when first is -1; the weight shifts onto the planted foot, the arms

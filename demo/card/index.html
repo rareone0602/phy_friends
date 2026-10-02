@@ -182,7 +182,7 @@
   // Everything after phy lands. Returns the film's length in seconds.
   function playBeats(land) {
     const name = friend.displayName, heading = `a cake for ${name}`;
-    const rise = SPEECH.rulesAboveFloor * RULE - phy.spec.rig.ground + PF.scene.WORDS.y;  // From WORDS.y above the eyes to its rule.
+    const rise = SPEECH.rulesAboveFloor * RULE - PF.groundOf(phy.spec) + PF.scene.WORDS.y;  // From WORDS.y above the eyes to its rule.
     friend.look(phy, { at: ENTRY.at + ENTRY.noticed });
     phy.say(`for you, ${name}.`, { to: friend, side: 0, size: SPEECH.size, rise, at: land + BEAT.say, seconds: BEAT.words });
     phy.give(cake, friend, { at: land + BEAT.give, duration: BEAT.handing, height: 0 });  // Handed over along the floor's arc, paw to paw.

@@ -122,22 +122,33 @@ drawn a little smaller so that its ears stay in the square.
 
 A friend sits unless its pose says `stance: 'stand'`. Standing, it keeps its
 seated body, with every marking and garment on it, and stands that body on two
-short legs, with two short arms hanging from its sides. The limbs are a stuffed
+short legs, with two arms hanging from its sides. The limbs are a stuffed
 toy's: soft, straight hoses with round ends, bent along an arc when a pose bends
 them, so that they never show a joint. An arm keeps its length; a leg squashes
 or stretches a little, as stuffing does. Unless a spec places them, the limbs
-are fitted to its body (`PhyFriends.STAND_FIT`): the legs show 22 units below
-the body's bottom, from hips tucked under it, and each arm hangs from high on
-the body's side, just inside it, and well out from the side below it, so that
-its paw shows past the body (phy's pick until the final numbers arrive). The
-feet touch the figure's own ground (`stand.ground`, the body's bottom plus 22,
-about 153 for most friends), and the rig lifts the friend by the difference
+are fitted to its body (`PhyFriends.STAND_FIT`): the legs show 30 units below
+the body's bottom, from hips tucked under it and set close together, and each
+arm, 42 units long, hangs from high on the body's side, just inside it, and
+well out from the side below it, so that its paw shows past the body. These
+numbers, with the rice ball's and the body's height below, were chosen by eye
+on the tuning page. The feet touch the figure's own ground (`stand.ground`,
+the body's bottom plus 30, about 171 for most friends), and the rig lifts the
+friend by the difference
 (`PhyFriends.standLift(spec)`), so that its feet stand where its seated paws
 did: the floor stays put. Any part a spec leaves out comes from
 `PhyFriends.STAND_DEFAULT`, and a spec may tune the fit for itself
 (`stand.fit`, any of `STAND_FIT`'s numbers), so most give only their seated
 paws and feet (`stand.seat`) and their limbs' colours and bands.
 `PhyFriends.standFor(spec)` returns a spec's figure with all of this filled in.
+
+Every friend that stands has a body `PhyFriends.BODY.height` times as tall as
+its spec draws it: 1.1, a tenth taller, about 9 units. A taller body
+keeps its top under the chin and reaches lower: its markings and clothes
+stretch with it, the tail's root moves down with the hip, and the seated paws
+and feet, the props and the ground itself drop as far as its base does, while
+the head stays where it is. `PhyFriends.groundOf(spec)` gives the ground after
+that drop, and every page that stands a friend on a floor asks it, rather than
+reading `rig.ground`.
 
 A friend is one figure, which sits and stands on the same limbs. Sitting is
 the bottom of its crouch: its hips drop by the lift and its limbs fold.
@@ -172,7 +183,7 @@ ground in front), and `seat.arms` and `seat.legs` override the folded limbs'
 numbers. So a seated drawing's paws and feet on the ground belong in `seat`,
 not in the body's extras, and their markings in extras on `paws` and
 `feet`. A body drawn as an onigiri (`body.onigiri`, see the shapes below),
-narrow under the chin and broad and flat at the base, reads as a seated friend
+narrow under the chin and broad at the base, reads as a seated friend
 does and stands just as well.
 
 An arm is posed by its angles; a leg reaches from its hip to its foot, which
@@ -192,10 +203,13 @@ against the garment's front. Only the shoulder end of each arm
 the arms come out from under the fur; the paws never do. Seated, the arms hang
 in front of the scarf, a bib of fur included, and the tuck fades in as the
 friend rises, fully by halfway, so that they slide under it. The pose's
-`over` draws an arm whole in front of everything, shoulder too. Claude stands
-already, on the glyphs' four legs, so its spec sets `stand: false` and it keeps
-its shape in either stance, as does any spec without a body, or with one that
-is not an ellipse, on which the limbs could not be fitted.
+`over` draws an arm whole in front of everything, shoulder too. An arm and its
+paw take their colours' house shades as the paw comes in front of the head or
+the face, fading in over a paw's breadth either side of their edge, so that a
+paw the colour of the face still shows against it without an outline. Claude
+stands already, on the glyphs' four legs, so its spec sets `stand: false` and
+it keeps its shape in either stance, as does any spec without a body, or with
+one that is not an ellipse, on which the limbs could not be fitted.
 
 ## Spec
 
@@ -254,9 +268,10 @@ Shape primitives (`PhyFriends.shapes`):
   straight notch (~0). A negative `len` pulls a tip inward, so an `n: 1`
   range can flatten an arc. Ranges must not overlap. With `onigiri` (0 to 1)
   the ellipse becomes a rice ball by that much: it narrows towards its top
-  and squares off into a broad, flat base with round corners, resting where
-  the ellipse's bottom did, and its tufts keep their angles. `onigiri: 1` is
-  `PhyFriends.ONIGIRI`'s rice ball (`{ taper: 0.6, square: 2 }`), and
+  and may square off into a broad, flat base with round corners, resting
+  where the ellipse's bottom did, and its tufts keep their angles.
+  `onigiri: 1` is `PhyFriends.ONIGIRI`'s rice ball (`{ taper: 0.85,
+  square: 0 }`: a soft rounded triangle, round at the base), and
   `onigiri: { taper, square }` gives a rice ball its own: how much narrower
   its top is, and how far its base squares off. `outlineOf`
   gives the outline a fluffy grows its tufts on, and `reachAt` how far it
@@ -362,10 +377,9 @@ roots, below them, so that a positive ear rotation turns them out. The one ear
 that turns otherwise does so by design: cowosus's folded ear, drawn as the flap
 that hangs from its fold, turns about the fold, above it, so that a positive
 rotation swings it in against the head, and the test names it, so that no other
-ear hangs from a pivot above it by mistake. One promise is still open: a paw
-raised in front of the face is lost where its colours are the face's, and the
-test lists the friends for which that is so until phy decides how they should
-show (no outline being the house's rule).
+ear hangs from a pivot above it by mistake. And a paw raised in front of the
+face shows against it, even where it is the face's colour, since it takes its
+house shade there (no outline being the house's rule).
 
 Claude keeps the shape of Claude Code's mascot, and its spec the names it had
 before the roles (`body`, `eye`). A spec without a role draws its part as one

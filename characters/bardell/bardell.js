@@ -79,7 +79,7 @@ PhyFriends.define('bardell', {
   // There is no mouth by default (the sheet's nose and mouth are omitted); when open, it shows the pink tongue of
   // the sheet's inset, without a fang.
   mouth: { y: 22, size: 3.8 },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It is in the house shade of the body's cream. Shoulder tufts sit under the cheeks, and small hip tufts
   // below them.
   body: {
@@ -139,10 +139,10 @@ PhyFriends.define('bardell', {
     // The chocolate stripes on the upper arms, which hang at the body's sides while he sits: two narrow bands on each
     // side, running in from the edge and tapering to a round end, clipped to the body so that they start at its edge.
     // Standing, the arms hang over them.
-    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[56, 62, 1, -8], [21, 72, 1, 0], [56, 78, 1, 0]] },
-    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[60, 79, 1, -8], [26, 88, 1, 0], [60, 94, 1, 0]] },
-    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-56, 62, 1, 0], [-56, 78, 1, 0], [-21, 72, 1, 8]] },
-    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-60, 79, 1, 0], [-60, 94, 1, 0], [-26, 88, 1, 8]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[31, 62, 1, -8], [14.5, 72, 1, 0], [42.5, 78, 1, 0]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[46, 79, 1, -8], [21.5, 88, 1, 0], [51, 94, 1, 0]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-31, 62, 1, 0], [-42.5, 78, 1, 0], [-14.5, 72, 1, 8]] },
+    { feature: 'armStripes', on: 'body', clip: true, fill: 'brown', round: 0.4, nodes: [[-46, 79, 1, 0], [-51, 94, 1, 0], [-21.5, 88, 1, 8]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The orange and the crimson over it run down the side of the tip toward the
     // body, as on the sheet, each edge cut into flame-shaped tufts that reach back toward the base; the other side

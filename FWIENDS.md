@@ -48,9 +48,9 @@ The page has five parts, in this order:
   paper's edge, and the page stops growing where every friend fits in one
   row.
 - Every friend is drawn at the same scale, in a box 270 head units tall whose
-  bottom edge is the friend's `rig.ground`. The box is a whole number of
-  rules, so the ground stays on a rule: 5 rules. The smallest phones, below
-  360px, take 4, so two fwiends still stand side by side.
+  bottom edge is the friend's ground (`PhyFriends.groundOf`). The box is a
+  whole number of rules, so the ground stays on a rule: 5 rules. The smallest
+  phones, below 360px, take 4, so two fwiends still stand side by side.
 - Ears and tails may reach outside the box, as in a photo. A body or tail
   that sticks out at ground level widens that friend's slot
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
@@ -315,6 +315,10 @@ Follow them when turning someone's picture or design sheet into a friend.
     collar, the bow behind his sash, the cleft of WhiteDeer's hooves, where
     the far side of the hoof shows between its toes, and the side of
     Claude's block, which shows as it turns to its laptop.
+  - One part in front takes it instead: a raised arm and its paw, by as much
+    as the paw has come in front of the head or the face (it fades in as the
+    paw crosses their edge), so that a paw the colour of the face still shows
+    against it, with no outline. The face behind keeps its colours.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment: mumuyou's gold hair.
   - Where a shade lands on a neighbouring colour, the neighbour moves, not the
@@ -336,11 +340,11 @@ Follow them when turning someone's picture or design sheet into a friend.
 standing.
 - The origin sits between the eyes. The head is widest around eye level,
   about 140–190 units across the cheeks.
-- Ear tips reach about −155 (floppy ears less), and the paws reach
-  `rig.ground`, about +131. A tail may curl out to one side.
+- Ear tips reach about −155 (floppy ears less), and the paws reach the
+  ground (`PhyFriends.groundOf`), about +140. A tail may curl out to one side.
 - The eyes are about 13 × 32 units, centred 31–35 either side of the origin.
 - Standing, a friend keeps its seated body and stands it on two short plush
-  legs, which show 22 units below it, with two short arms hung high on its
+  legs, which show 30 units below it, with two arms hung high on its
   sides and well out from them. From the back: the body with its clothes, the
   scarf (a ruff or bib of fur round the neck, or a scarf, extras on `scarf`),
   the head, whose chin lies over the scarf and the collar, then the arms, in
@@ -348,7 +352,7 @@ standing.
   and the head (the paws never do). A hood is clothing, so it lies under the
   arms, and a sleeve takes its cloth's house shade, so that it shows against
   the garment's front, which is in the cloth's own colour. Its feet touch
-  `stand.ground`, the body's bottom plus 22 (about +153 in its own space), and
+  `stand.ground`, the body's bottom plus 30 (about +171 in its own space), and
   the rig lifts it by the difference, so that its feet stand where its seated
   paws did. Every friend is one figure, which sits on the same limbs: its arms
   hang straight down in front of it, as forelegs, from the middle of its body

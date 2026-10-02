@@ -209,12 +209,12 @@
   }
 
   // With everyone in and facing the viewer, the host says so, with a nod. The words' baseline sits
-  // WORDS.y above the eyes, which sit rig.ground above the floor; rise takes it the rest of the way
+  // WORDS.y above the eyes, which sit the friend's ground (PF.groundOf) above the floor; rise takes it the rest of the way
   // to its rule. Returns the film's length in seconds.
   function closeTheRegister(lastLanding) {
     const host = places.find(place => place.actor.name === PF.cast.host).actor;
     const at = lastLanding + CLOSING.delay;
-    const rise = CLOSING.rulesAboveFloor * RULE - host.spec.rig.ground + PF.scene.WORDS.y;
+    const rise = CLOSING.rulesAboveFloor * RULE - PF.groundOf(host.spec) + PF.scene.WORDS.y;
     host.say(CLOSING.words, { at, seconds: CLOSING.seconds, side: 0, size: CLOSING.size, rise }).play('nod', { at });
     return at + CLOSING.seconds + CLOSING.end;
   }

@@ -77,7 +77,7 @@ PhyFriends.define('whitedeer', {
   // There is no mouth by default (the sheet's :3 is omitted); when open, it shows the pink tongue of the dressed
   // figure.
   mouth: { y: 32, size: 4.4 },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It is in the house
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade.
   body: {
     cx: 0, cy: 82, rx: 64, ry: 49, onigiri: 1,
@@ -92,9 +92,12 @@ PhyFriends.define('whitedeer', {
   // The limbs, on the house template. Seated, the blue hands rest on the ground in front, and the blue hooves at
   // either side. Standing, the arms end in the blue hands and the legs in the blue hooves, and the short white sleeves
   // are bands on the upper arms that stand proud of them, in the white's house shade so that they show against the
-  // shirt's front, each with a navy cuff crossed by a white stripe, as in the dressed figure.
+  // shirt's front, each with a navy cuff crossed by a white stripe, as in the dressed figure. The shirt blouses well
+  // past the narrow top of the body, so each shoulder sits a third of an arm's width outside the body's outline
+  // (fit.inset -0.3), at the shirt's armhole; set inside the body, the arms would come out over the sailor collar.
   stand: {
     seat: { paw: { cx: 22, cy: 121, rx: 14, ry: 10 }, foot: { cx: 52, cy: 120, rx: 19, ry: 11, rot: -8 } },
+    fit: { inset: -0.3 },
     arms: { bands: [{ from: 0, to: 0.46, color: 'faceShade', grow: 2.5 }, { from: 0.34, to: 0.46, color: 'navy', grow: 3 },
       { from: 0.38, to: 0.415, color: 'face', grow: 3 }] },
   },
@@ -136,16 +139,16 @@ PhyFriends.define('whitedeer', {
       [-17, -104, 1], [-11, -104, 1]] },
     { feature: 'cap', on: 'hair', fill: 'gold', round: 0.3, nodes: [[-21, -96, 1], [-17, -96, 1], [-15, -91, 1], [-9, -88, 1],
       [-3, -91, 1], [-1, -96, 1], [3, -96, 1], [1, -88, 1], [-9, -84, 1], [-19, -88, 1]] },
-    // The hem of the shirt: a navy band round the base of the body, standing a few units proud of it at each side and
-    // flaring a little, as the dressed figure's does, with a white stripe through it. Seated, it lies behind the hands
-    // and hooves; standing, the legs come out from under it. Its top lies under the front.
+    // The hem of the shirt: a navy band round the foot of the shirt, standing proud of the body's round base at each
+    // side and flaring a little, as the dressed figure's does, with a white stripe through it. Seated, it lies behind
+    // the hands and hooves; standing, the legs come out from under it. Its top lies under the front.
     { feature: 'hem', on: 'body', fill: 'navy', nodes: [[-56, 112, 1], [0, 114, 1], [56, 112, 1], [58.5, 122], [59, 129, 1], [0, 131, 1],
       [-59, 129, 1], [-58.5, 122]] },
     { feature: 'hem', on: 'body', fill: 'face', nodes: [[-58, 117.5, 1], [0, 119.5, 1], [58, 117.5, 1], [58.5, 120.5, 1],
       [0, 122.5, 1], [-58.5, 120.5, 1]] },
-    // The front of the shirt, in the white, with a V for its neckline, in which the body's fur shows. It blouses a
-    // little past the body at the sides, so that it reads as cloth rather than a print on the body, and lies over the
-    // top of the hem; its top lies under the head.
+    // The front of the shirt, in the white, with a V for its neckline, in which the body's fur shows. It blouses
+    // past the body at the sides, most of all past its narrow top, as a smock hangs from the shoulders, so that it
+    // reads as cloth rather than a print on the body, and lies over the top of the hem; its top lies under the head.
     { feature: 'shirt', on: 'body', fill: 'face', nodes: [[-30, 36, 1], [0, 69, 1], [30, 36, 1], [38, 56], [46, 76], [52, 94], [55.5, 106],
       [56.5, 112, 1], [0, 114, 1], [-56.5, 112, 1], [-55.5, 106], [-52, 94], [-46, 76], [-38, 56]] },
     // The sailor collar: a navy lapel from each shoulder down to the neckline's point, each with a white stripe along

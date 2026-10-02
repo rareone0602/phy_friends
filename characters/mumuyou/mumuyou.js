@@ -78,7 +78,7 @@ PhyFriends.define('mumuyou', {
   blush: { x: 53, y: 26, rx: 12, ry: 7, tilt: 12 },
   // There is no mouth by default; when open, it shows one fang.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base; the white chest is an extra. Shoulder tufts sit under the cheeks, and hip tufts below them.
   body: {
     cx: 0, cy: 86, rx: 62, ry: 46, onigiri: 1,

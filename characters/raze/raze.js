@@ -77,7 +77,7 @@ PhyFriends.define('raze', {
   // There is no mouth by default (the sheet's grin is omitted); when open, it shows the cyan tongue and the fang of
   // the sheet.
   mouth: { y: 22, size: 3.8, fang: true },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It wears the hoodie down to the hips, so only the small hip tufts show; below the hoodie's hem it is his
   // legs, in the house shade of his fur. The hoodie's pocket is only line work on the sheet, so it is left out.
   body: {
@@ -133,36 +133,37 @@ PhyFriends.define('raze', {
     { feature: 'tailTip', on: 'tail', clip: true, kind: 'ellipse', fill: 'hair', cx: 11, cy: -77, rx: 3.5, ry: 12, rot: -6 },
     // The gray hem of the hoodie, a band round the hips that stands a few units proud of the body at each side; its
     // top lies under the front.
-    { feature: 'hem', on: 'body', fill: 'string', nodes: [[-48, 90, 1], [48, 90, 1], [54.5, 100], [55.5, 106], [36, 108.5], [0, 109.5],
-      [-36, 108.5], [-55.5, 106], [-54.5, 100]] },
-    // The front of the hoodie, in its own color. It blouses over the hem: its sides fall a little past the body, and its
-    // lower edge overhangs the hem, which shows as a band of cloth under a lip. Its top lies under the head.
-    { feature: 'hoodie', on: 'body', fill: 'hoodie', nodes: [[-30, 36, 1], [30, 36, 1], [36, 58], [41, 70], [47, 82], [52, 92], [53.5, 98],
-      [38, 101.5], [0, 103], [-38, 101.5], [-53.5, 98], [-52, 92], [-47, 82], [-41, 70], [-36, 58]] },
+    { feature: 'hem', on: 'body', fill: 'string', nodes: [[-40.5, 90, 1], [40.5, 90, 1], [46, 100], [46, 106], [29, 108.5], [0, 109.5],
+      [-29, 108.5], [-46, 106], [-46, 100]] },
+    // The front of the hoodie, in its own color. It blouses over the hem: its sides fall a little past the body,
+    // following it as it narrows toward the neck, so that the sleeves leave the hoodie at its sides, and its lower edge
+    // overhangs the hem, which shows as a band of cloth under a lip. Its top lies under the head.
+    { feature: 'hoodie', on: 'body', fill: 'hoodie', nodes: [[-18, 36, 1], [18, 36, 1], [18.5, 58], [28, 70], [37.5, 82], [44, 92], [45.5, 98],
+      [32, 101.5], [0, 103], [-32, 101.5], [-45.5, 98], [-44, 92], [-37.5, 82], [-28, 70], [-18.5, 58]] },
     // The two gray drawstrings, coming out of the hood's edge on either side of the point and hanging apart, over the
     // lip of the front, as long as the sheet draws them.
-    { feature: 'drawstrings', on: 'body', fill: 'string', round: 0.5, nodes: [[-15, 78, 1], [-10, 78, 1], [-13, 104, 1], [-18, 104, 1]] },
-    { feature: 'drawstrings', on: 'body', fill: 'string', round: 0.5, nodes: [[10, 78, 1], [15, 78, 1], [18, 104, 1], [13, 104, 1]] },
+    { feature: 'drawstrings', on: 'body', fill: 'string', round: 0.5, nodes: [[-11.5, 78, 1], [-7.5, 78, 1], [-11, 104, 1], [-15, 104, 1]] },
+    { feature: 'drawstrings', on: 'body', fill: 'string', round: 0.5, nodes: [[7.5, 78, 1], [11.5, 78, 1], [15, 104, 1], [11, 104, 1]] },
     // The inside of the hood, in its house shade: it lies behind the rim, which is the same teal, and shows where the
     // rim's two sides part under the chin. The hood and the headphones on it are clothing, so they lie under the arms,
     // which show over them.
-    { feature: 'hood', on: 'body', fill: 'hoodieShade', nodes: [[-28, 44, 1], [28, 44, 1], [0, 82, 1]] },
+    { feature: 'hood', on: 'body', fill: 'hoodieShade', nodes: [[-7.5, 44, 1], [7.5, 44, 1], [0, 82, 1]] },
     // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
     // under the chin; his left side (the viewer's right) lies over the other. Its ends rest on the narrow shoulders and
     // stand out past them, so that the roll reads as cloth lying on the hoodie rather than printed on it.
-    { feature: 'hood', on: 'body', fill: 'hoodie', nodes: [[-24, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-18, 79], [-34, 71], [-41, 63], [-40, 53],
-      [-33, 45], [-28, 40, 1]] },
-    { feature: 'hood', on: 'body', fill: 'hoodie', nodes: [[24, 50, 1], [28, 40, 1], [33, 45], [40, 53], [41, 63], [34, 71], [18, 79],
+    { feature: 'hood', on: 'body', fill: 'hoodie', nodes: [[-9, 50, 1, -8], [1, 78, 1], [1, 86, 1], [-14, 79], [-24, 71], [-24.5, 63], [-17.5, 53],
+      [-9.5, 45], [-4, 40, 1]] },
+    { feature: 'hood', on: 'body', fill: 'hoodie', nodes: [[9, 50, 1], [4, 40, 1], [9.5, 45], [17.5, 53], [24.5, 63], [24, 71], [14, 79],
       [0, 86, 1], [0, 80, 1, -8]] },
     // The headphones round his neck, over the hood, as on the sheet: the cup on his right (the viewer's left) faces
     // forward, a white ring round its pad, which is in the hoodie's teal. The cup on his left is turned away, and the
     // sheet draws its face in the hoodie's teal, so only a thin crescent of its white rim shows on its outer side; a
     // second white cup would read as a second pair of eyes. The tops of the cups lie under the chin, so that they hang
     // from the neck rather than sit on the chest, and the band behind the neck is hidden by the head.
-    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'phones', cx: -27, cy: 58, rx: 11.5, ry: 11.5 },
-    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'hoodie', cx: -27, cy: 58, rx: 5, ry: 5 },
-    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'phones', cx: 29.5, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
-    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'hoodie', cx: 27, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
+    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'phones', cx: -14, cy: 58, rx: 11.5, ry: 11.5 },
+    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'hoodie', cx: -14, cy: 58, rx: 5, ry: 5 },
+    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'phones', cx: 15, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
+    { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'hoodie', cx: 13.5, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
   rig: { ground: 131 },

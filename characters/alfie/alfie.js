@@ -66,7 +66,7 @@ PhyFriends.define('alfie', {
   // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows the pink tongue
   // of the sheet's head study, without a fang.
   mouth: { y: 22, size: 3.8 },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base. It is in the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 87, rx: 64, ry: 45, onigiri: 1,
@@ -125,10 +125,10 @@ PhyFriends.define('alfie', {
     // The tabby stripes on the outer side of each hip: two narrow bands running in from the body's edge and tapering
     // to a round end, as the sheet's thigh stripes do, clipped to the body so that they start at its edge. They are
     // as short as the narrow top of the body allows, clear of the white chest.
-    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[50, 70, 1, -8], [29, 79, 1, 0], [50, 83, 1, 0]] },
-    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[57, 88, 1, -8], [29, 98, 1, 0], [57, 101, 1, 0]] },
-    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-50, 70, 1, 0], [-50, 83, 1, 0], [-29, 79, 1, 8]] },
-    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-57, 88, 1, 0], [-57, 101, 1, 0], [-29, 98, 1, 8]] },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[33, 70, 1, -8], [26, 79, 1, 0], [39.5, 83, 1, 0]] },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[47.5, 88, 1, -8], [24.5, 98, 1, 0], [48.5, 101, 1, 0]] },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-33, 70, 1, 0], [-39.5, 83, 1, 0], [-26, 79, 1, 8]] },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'stripe', round: 0.4, nodes: [[-47.5, 88, 1, 0], [-48.5, 101, 1, 0], [-24.5, 98, 1, 8]] },
     // The white chest and belly, an oval from under the chin whose tufts hang over the belly. The gray of the color
     // bar, which the sheet draws down the chest and where the white meets the coral at the wrists and ankles, is
     // left out: at gallery size it would read as a shadow. It is a little narrower than the sheet's, as the top of the

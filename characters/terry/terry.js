@@ -45,7 +45,7 @@ PhyFriends.define('terry', {
   // There is no mouth by default (the nose and small mouth in the pictures are omitted); when open, it is
   // a soft mouth without a fang.
   mouth: { y: 22, size: 3.8 },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It sits behind the limbs, which share its yellow, so it takes the house shade.
   body: { cx: 0, cy: 80, rx: 63, ry: 40, onigiri: 1 },
   // The tail is small and curly, behind the right hip: a thin plume bent all the way around into a

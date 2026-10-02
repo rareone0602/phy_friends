@@ -63,7 +63,7 @@ PhyFriends.define('jiaoyue', {
   blush: { x: 55, y: 26, rx: 11, ry: 6, tilt: 10 },
   // There is no mouth by default; when open, it shows the red-pink tongue of PENUP_20261001_192151.png.
   mouth: { y: 32, size: 4.6 },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It is in the house
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade. Shoulder tufts sit under the cheeks.
   body: {
     cx: 0, cy: 81, rx: 66, ry: 50, onigiri: 1,

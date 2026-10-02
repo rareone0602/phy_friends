@@ -19,11 +19,6 @@
   const ON_GROUND = 4;
   // The least share of a limb that shows against what lies behind it.
   const SHOWN = 0.4;
-  // The friends whose arms and paws are the colors of the face and head in front of which they are raised, so that
-  // they cannot show there without an outline, which the house does not draw (FWIENDS.md). How they should show is
-  // phy's to decide; until then they are listed here, and the test fails if one of them starts to show or a friend not
-  // listed stops showing, so that the list only ever shrinks.
-  const PAWS_LOST_ON_FACE = ['brian', 'howdi', 'jiaoyue', 'kevin', 'phy', 'raze', 'teni', 'terry', 'yuanyuan', 'yuda'];
   // The friends with an ear drawn as the flap that hangs from its fold, as cowosus's folded ear is: such a flap turns
   // about the fold, above it, so that a positive ear rotation swings it in against the head. Every other ear turns
   // about its root, below it. An ear that hangs from a pivot above it is added here only on purpose, since a lobe hung
@@ -117,6 +112,26 @@
     }
   });
 
+  test('every friend of the house sits and stands on its ground with a taller or a shorter body', async () => {
+    const height = PF.BODY.height;
+    try {
+      for (const k of [0.8, 1.3]) {
+        PF.BODY.height = k;
+        for (const name of houseFriends()) {
+          // A fresh copy of the spec, since the core works a friend's figure out once per spec. The view keeps the
+          // ground in the frame, however far it drops.
+          const spec = { ...PF.get(name) }, view = { w: 400, h: 400, x: 200, y: 340 - PF.groundOf(spec), scale: 1, rotate: 0 };
+          for (const stance of ['sit', 'stand']) {
+            const below = await raster.lowest(spec, { stance }, { view });
+            assert(Math.abs(below) <= ON_GROUND, `${name} ${stance}s on a body ${k} times as tall with its lowest point ${below.toFixed(1)} units below the ground`);
+          }
+        }
+      }
+    } finally {
+      PF.BODY.height = height;
+    }
+  });
+
   test('every friend of the house keeps a foot on the ground as it walks', async () => {
     for (const name of houseFriends()) {
       for (const u of [0.1, 0.3, 0.55, 0.8]) {
@@ -140,14 +155,14 @@
     }
   });
 
-  test('a paw raised in front of the face shows against it, except on the friends whose paws are the color of their face', async () => {
+  test('a paw raised in front of the face shows against it, even where it is the color of the face, in its house shade', async () => {
     const pose = A.sample({ stance: 'stand', armL: 150, elbowL: -30, armR: 150, elbowR: -30, over: 'armL armR' });  // As scared holds them.
     const lost = [];
     for (const name of houseFriends()) {
       const shares = await Promise.all(['L', 'R'].map(S => raster.visibility(name, [`arm${S}`, `paw${S}`], pose, { against: 'head' })));
       if (shares.some(({ area, share }) => area > 0 && share < SHOWN)) lost.push(name);
     }
-    assertEqual(lost.sort(), PAWS_LOST_ON_FACE, 'the friends whose raised paws are lost against the face');
+    assertEqual(lost.sort(), [], 'the friends whose raised paws are lost against the face');
   });
 
   test('every friend of the house waves and points with the arm away from its tail', () => {

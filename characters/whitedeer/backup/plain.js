@@ -74,7 +74,7 @@ PhyFriends.define('whitedeer', {
   // There is no mouth by default (the sheet's :3 is omitted); when open, it shows the pink tongue of the dressed
   // figure.
   mouth: { y: 32, size: 4.4 },
-  // The body is an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It is in the house
+  // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade.
   body: {
     cx: 0, cy: 82, rx: 64, ry: 49, onigiri: 1,

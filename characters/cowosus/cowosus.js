@@ -89,7 +89,7 @@ PhyFriends.define('cowosus', {
   // There is no mouth by default (the sheet's nose and grin are omitted). It sits on the white muzzle; when open, it
   // shows his yellow tongue and one fang for the sheet's two.
   mouth: { y: 44, size: 3.8, fang: true },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It is in the house shade of the white. Shoulder tufts sit under the cheeks, and small hip tufts below
   // them.
   body: {
@@ -154,8 +154,8 @@ PhyFriends.define('cowosus', {
     // side, clipped to the body so that the outer one turns out of sight.
     { feature: 'thighs', on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: -48, cy: 98, rx: 36, ry: 40 },
     { feature: 'thighs', on: 'body', clip: true, kind: 'ellipse', fill: 'gold', cx: 48, cy: 98, rx: 36, ry: 40 },
-    { feature: 'thighs', on: 'body', clip: true, fill: 'orange', polys: [[-38, 89, 13, 4, 90, 0.72], [38, 89, 13, 4, 90, 0.72],
-      [-22, 103, 6, 4, 90, 0.75], [22, 103, 6, 4, 90, 0.75], [-53, 101, 6, 4, 90, 0.75], [53, 101, 6, 4, 90, 0.75]] },
+    { feature: 'thighs', on: 'body', clip: true, fill: 'orange', polys: [[-32, 89, 13, 4, 90, 0.72], [32, 89, 13, 4, 90, 0.72],
+      [-18.5, 103, 6, 4, 90, 0.75], [18.5, 103, 6, 4, 90, 0.75], [-45, 101, 6, 4, 90, 0.75], [45, 101, 6, 4, 90, 0.75]] },
     // The gold star on the belly, between the thighs, as on the sheet.
     { feature: 'belly', on: 'body', fill: 'gold', cx: 0, cy: 93, rx: 8, ry: 8, valley: 0.45,
       tips: [[0, 84.4], [8.2, 90.3], [5.1, 100], [-5.1, 100], [-8.2, 90.3]] },

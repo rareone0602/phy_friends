@@ -23,6 +23,18 @@
   };
   const SITTER = { ...STANDER, name: 'test-sitter', stand: false };
 
+  // Runs fn with every friend's body drawn k times as tall as its spec gives it (PF.BODY.height), and puts the height
+  // back however fn ends. The core works a friend's figure out once per spec, so fn should use fresh copies of specs.
+  function atHeight(k, fn) {
+    const height = PF.BODY.height;
+    PF.BODY.height = k;
+    try {
+      return fn();
+    } finally {
+      PF.BODY.height = height;
+    }
+  }
+
   // Whether node b is drawn after node a (later in the document, and so in front of it).
   const after = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
 
@@ -70,28 +82,55 @@
     }, STANDER);
   });
 
-  test('the limbs and the ground are fitted to the friend\'s body', () => {
-    const F = PF.STAND_FIT, stand = PF.standFor(STANDER), [hx, hy] = stand.legs.L.hip, [sx, sy] = stand.arms.L.shoulder;
+  test('the limbs and the ground are fitted to the friend\'s body', () => atHeight(1, () => {
+    const S = { ...STANDER }, F = PF.STAND_FIT, stand = PF.standFor(S), [hx, hy] = stand.legs.L.hip, [sx, sy] = stand.arms.L.shoulder;
     assertEqual(stand.ground, 80 + 45 + F.legs, 'the legs show STAND_FIT.legs below the body');
     assertEqual([hx, hy], [60 * F.hip, 80 + 45 - F.hipUp], 'the hips sit inside the bottom of the body');
-    const reach = PF.shapes.reachAt(STANDER.body, sy);
+    const reach = PF.shapes.reachAt(S.body, sy);
     assert(sx < reach && sx > reach - stand.arms.L.width / 2, 'the shoulder sits just inside the body\'s side');
-    assertEqual(PF.standLift(STANDER), stand.ground - 120, 'the rig lifts it by the legs it shows below its seat');
-    const given = PF.standFor({ ...STANDER, stand: { ground: 150, arms: { shoulder: [30, 70], angle: 12 } } });
+    assertEqual(PF.standLift(S), stand.ground - 120, 'the rig lifts it by the legs it shows below its seat');
+    const given = PF.standFor({ ...S, stand: { ground: 150, arms: { shoulder: [30, 70], angle: 12 } } });
     assertEqual([given.ground, given.arms.R.shoulder, given.arms.R.angle], [150, [30, 70], 12], 'a spec may place them itself');
-    const oni = PF.standFor({ ...STANDER, body: { ...STANDER.body, onigiri: 1 } });
+    const oni = PF.standFor({ ...S, body: { ...S.body, onigiri: { taper: 0.6, square: 2 } } });
     assert(oni.arms.L.angle > stand.arms.L.angle + 10, 'arms hang out along the sloping sides of a rice ball');
+  }));
+
+  test('a taller body grows down from under the chin, and what rests on the ground drops with its base', () => {
+    // At 1.25, the body (top 35, half-height 45) keeps its top and reaches 22.5 lower.
+    const SEAT = { paw: { cx: 18, cy: 115, rx: 12, ry: 10 }, foot: { cx: 50, cy: 118, rx: 18, ry: 7 } };
+    const plain = atHeight(1, () => {
+      const S = { ...STANDER, tail: { base: [40, 110] }, stand: { seat: SEAT } };
+      return { ground: PF.groundOf(S), stand: PF.standFor(S), tail: PF.poseState(S, {}).transform.tail };
+    });
+    atHeight(1.25, () => {
+      const S = { ...STANDER, tail: { base: [40, 110] }, stand: { seat: SEAT } }, stand = PF.standFor(S);
+      assertEqual(PF.groundOf(S), plain.ground + 22.5, 'the ground drops as far as the base');
+      assertEqual(stand.ground, plain.stand.ground + 22.5, 'and so do the feet, standing');
+      assertEqual(stand.lift, plain.stand.lift, 'so the friend rises by the same legs');
+      assertEqual(stand.seat.paw.L.cy, 115 + 22.5, 'the seated paws drop with it');
+      assertEqual(stand.legs.L.hip[1], plain.stand.legs.L.hip[1] + 22.5, 'the hips stay inside the base');
+      assert(/<g transform="matrix\(1 0 0 1.25 0 -8.75\)">/.test(PF.render(S)), 'the body and its extras stretch down from its top (35)');
+      // The tail is placed last in its transform, at its root (tailPlace).
+      const tailY = transform => +[...transform.matchAll(/translate\(([-\d.]+) ([-\d.]+)\)/g)].pop()[2];
+      assertEqual([tailY(plain.tail), tailY(PF.poseState(S, {}).transform.tail)], [110, 35 + 75 * 1.25], 'the tail\'s root moves along with the body');
+      const given = PF.standFor({ ...S, stand: { ground: 150, arms: { shoulder: [30, 70] }, tail: { base: [40, 115] } } });
+      assertEqual([given.ground, given.arms.L.shoulder, given.tail.base], [150 + 22.5, [30, 35 + 35 * 1.25], [40, 35 + 80 * 1.25]],
+        'what a spec places on the body moves along with it, and its ground drops');
+      assertEqual(PF.groundOf({ ...SITTER }), 120, 'a friend that never stands keeps its body');
+    });
   });
 
-  test('an onigiri body is a rice ball: narrow at the top, broad and flat at the base, with its tufts kept', () => {
+  test('an onigiri body is a rice ball: narrower at the top by its taper, squared off at the base by its square, with its tufts kept', () => {
     const E = { cx: 0, cy: 80, rx: 60, ry: 45, fluff: [{ from: 20, to: 60, n: 2, len: 6, sym: true }] };
-    const R = PF.shapes.reachAt, O = { ...E, onigiri: 1 };
+    const R = PF.shapes.reachAt, O = { ...E, onigiri: { taper: 0.6, square: 2 } }, point = { ...E, onigiri: { taper: 1, square: 0 } };
     assertEqual(PF.shapes.shapeD({ ...E, onigiri: 0 }, 7), PF.shapes.shapeD(E, 7), 'onigiri: 0 is the ellipse itself');
     assert(R(O, 50) < 0.75 * R(E, 50), 'narrower under the chin');
-    assert(R(O, 118) > 1.2 * R(E, 118), 'broader near the base');
+    assert(R(O, 118) > 1.2 * R(E, 118), 'broader near the base, where it is squared off');
     const bottom = PF.shapes.outlineOf(O).point(90);
     assert(Math.abs(bottom[0]) < 1e-6 && Math.abs(bottom[1] - 125) < 1e-6, 'its base rests where the ellipse\'s bottom did');
     assert(Math.abs(PF.shapes.outlineOf(O).point(80)[1] - 125) < 1.5, 'and is flat');
+    assert(Math.abs(PF.shapes.outlineOf(point).point(-90)[0]) < 1e-6 && R(point, 118) < R(E, 118), 'a taper of 1 comes to a point at the top; square 0 leaves the base round');
+    assertEqual(PF.shapes.shapeD({ ...E, onigiri: 1 }, 7), PF.shapes.shapeD({ ...E, onigiri: { ...PF.ONIGIRI } }, 7), 'onigiri: 1 is the house rice ball (PF.ONIGIRI)');
     assertEqual(PF.shapes.fluffy(O).filter(n => n.c).length, PF.shapes.fluffy(E).filter(n => n.c).length, 'the same tufts');
   });
 
@@ -202,7 +241,7 @@
     }
   });
 
-  test('seated, its arms hang straight down in front of its body to its paws, from the body\'s middle, sleeves and all', () => {
+  test('seated, its arms hang straight down in front of its body to its paws, from the body\'s middle, sleeves and all', () => atHeight(1, () => {
     const NUBBED = {
       ...STANDER, name: 'test-nubbed',
       stand: { seat: { paw: { cx: 18, cy: 115, rx: 12, ry: 10 } }, arms: { bands: [{ from: 0, to: 0.4, color: 'fur', grow: 2 }] } },
@@ -217,7 +256,7 @@
     }, NUBBED);
     const folded = { ...NUBBED, name: 'test-folded', stand: { ...NUBBED.stand, seat: { ...NUBBED.stand.seat, arms: { length: 0 } } } };
     assertEqual(PF.standFor(folded).seat.arms.L.shoulder, [18, 115], 'an arm given length 0 folds into its paw');
-  });
+  }));
 
   // The page box of an ellipse { cx, cy, rx, ry } given in head units, in a rig's standing view.
   const boxOf = (rig, spec, { cx, cy, rx, ry }) => {
@@ -228,12 +267,13 @@
   const near = (a, b, label) => assert(['left', 'right', 'top', 'bottom'].every(k => Math.abs(a[k] - b[k]) < 1),
     `${label}: ${['left', 'right', 'top', 'bottom'].map(k => `${a[k].toFixed(1)}/${b[k].toFixed(1)}`).join(' ')}`);
 
-  test('seated, its paws and feet are its seated drawing\'s; standing, the template\'s', () => {
+  test('seated, its paws and feet are its seated drawing\'s; standing, the template\'s', () => atHeight(1, () => {
+    const seated = { ...SEATED };
     withRig(rig => {
       const shape = part => rig.parts[`${part}seat`].querySelector('path').getBoundingClientRect();
-      near(shape('pawL'), boxOf(rig, SEATED, { cx: -20, cy: 98, rx: 12, ry: 22 }), 'the left forepaw');
-      near(shape('pawR'), boxOf(rig, SEATED, { cx: 20, cy: 98, rx: 12, ry: 22 }), 'the right forepaw');
-      const tilted = boxOf(rig, SEATED, { cx: 50, cy: 109, rx: 18, ry: 11 }), foot = shape('footR');
+      near(shape('pawL'), boxOf(rig, seated, { cx: -20, cy: 98, rx: 12, ry: 22 }), 'the left forepaw');
+      near(shape('pawR'), boxOf(rig, seated, { cx: 20, cy: 98, rx: 12, ry: 22 }), 'the right forepaw');
+      const tilted = boxOf(rig, seated, { cx: 50, cy: 109, rx: 18, ry: 11 }), foot = shape('footR');
       assert(Math.abs((foot.left + foot.right) / 2 - (tilted.left + tilted.right) / 2) < 1 && Math.abs(foot.bottom - foot.top - 2 *
         Math.hypot(18 * Math.sin(10 * Math.PI / 180), 11 * Math.cos(10 * Math.PI / 180)) * (tilted.bottom - tilted.top) / 22) < 1, 'the right hind foot, turned');
       // How much of its height the sole keeps (its frame's vertical scale about the foot's lower edge).
@@ -242,12 +282,12 @@
       rig.setPose({ rise: 0.5 });
       const half = sole();
       rig.setPose({ stance: 'stand' });
-      const paw = PF.standFor(SEATED).arms.L.paw;
+      const paw = PF.standFor(seated).arms.L.paw;
       const [kx, ky] = rig.parts.pawLseat.getAttribute('transform').match(/scale\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
       assert(Math.abs(kx * 12 - paw.rx) < 0.2 && Math.abs(ky * 22 - paw.ry) < 0.2, 'standing, the paw is the template\'s');
       assert(half === 0.5 && sole() === 0, `the sole flattens as it rises, to nothing (${half} of it halfway)`);
-    }, SEATED);
-  });
+    }, seated);
+  }));
 
   test('its feet lie in front of its body, and a crouch drops its paws with the body, by the crouch and no more', () => {
     withRig(rig => {
@@ -300,13 +340,13 @@
     }, SEATED);
   });
 
-  test('a spec may fit the template to itself', () => {
+  test('a spec may fit the template to itself', () => atHeight(1, () => {
     const fit = PF.standFor({ ...STANDER, stand: { fit: { legs: 18, hip: 0.3 } } });
     assertEqual([fit.ground, fit.legs.L.hip[0]], [80 + 45 + 18, 60 * 0.3]);
     const E = { cx: 0, cy: 80, rx: 60, ry: 45 }, d = s => PF.shapes.shapeD(s, 3);
     assertEqual(d({ ...E, onigiri: { taper: PF.ONIGIRI.taper, square: PF.ONIGIRI.square } }), d({ ...E, onigiri: 1 }), 'the rice ball\'s own taper and squareness');
     assertEqual(d({ ...E, onigiri: { taper: PF.ONIGIRI.taper / 2, square: PF.ONIGIRI.square / 2 } }), d({ ...E, onigiri: 0.5 }), 'a number scales both');
-  });
+  }));
 
   test('a limb\'s arc keeps its length however it bends, and bendFor inverts it', () => {
     const L = 40, arc = PF.shapes.limbArc([0, 0], Math.PI / 2, Math.PI / 2, L);
@@ -331,10 +371,11 @@
     assert(![tailAt(own, 0), tailAt(own, 1)].includes(tailAt(own, 0.5)), 'and halfway, between the two');
   });
 
-  // A friend whose head is large enough to cover its shoulders, its arms in a color of their own, drawn flat.
+  // A friend whose head is large enough to cover its shoulders, whatever the body's height (BODY.height), its arms in
+  // a color of their own, drawn flat.
   const TUCKER = {
     name: 'test-tucker', palette: { fur: '#808080', chest: '#404040', arm: '#ff0000' },
-    head: { cx: 0, cy: 0, rx: 90, ry: 85 }, body: { cx: 0, cy: 80, rx: 60, ry: 45 },
+    head: { cx: 0, cy: 0, rx: 90, ry: 95 }, body: { cx: 0, cy: 80, rx: 60, ry: 45 },
     stand: { arms: { color: 'arm', paw: { color: 'arm' } } },
   };
   const TUCKER_VIEW = { w: 300, h: 300, x: 150, y: 170, scale: 1, rotate: 0 };
@@ -362,7 +403,7 @@
     const pose = { stance: 'stand', armL: 150, elbowL: -30 };
     const st = PF.poseState(TUCKER, pose), [px, py] = st.transform.pawL.match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
     const shoulder = [-sx, sy - lift], paw = [px, py - lift];
-    assert(Math.hypot(paw[0] / 90, paw[1] / 85) < 1, 'the paw lies over the head');
+    assert(Math.hypot(paw[0] / 90, paw[1] / 95) < 1, 'the paw lies over the head');
     assertEqual(await drawnAt(pose, [paw, shoulder]), ['arm', 'head'], 'the paw in front, the shoulder under the head');
     assertEqual(await drawnAt({ ...pose, over: 'armL' }, [paw, shoulder]), ['arm', 'arm'], 'over draws the shoulder in front too');
   });

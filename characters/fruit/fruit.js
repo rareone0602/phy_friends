@@ -84,7 +84,7 @@ PhyFriends.define('fruit', {
   // There is no mouth by default (the pictures' nose and mouth are omitted); when open, it shows the cyan tongue and
   // the one fang of sitting.png.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small, and an onigiri (a rice ball): narrow under the chin, broad and flat at the base. It is in the
+  // The body is small, and an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the
   // house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
     cx: 0, cy: 84, rx: 66, ry: 48, onigiri: 1,
@@ -143,7 +143,7 @@ PhyFriends.define('fruit', {
         [-16, 88, 1], [-28, 80, 1], [-20, 72, 1]] },
     // A bright-blue diamond on each hip, for the small diamonds that the pictures scatter over the flanks. The diamond
     // with a dark-red center that spoon.png and moon.png draw on the upper arm lies under the cheek fluff in this pose.
-    { feature: 'thighs', on: 'body', fill: 'stripe', polys: [[-40, 88, 9, 4, 90, 0.6], [40, 88, 9, 4, 90, 0.6]] },
+    { feature: 'thighs', on: 'body', fill: 'stripe', polys: [[-34, 88, 9, 4, 90, 0.6], [34, 88, 9, 4, 90, 0.6]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -132, +x away from the body); the
     // library bends them onto the curve. The lighter blue end, which every picture draws, its edge cut into
     // flame-shaped tufts that reach back toward the base. It is an extra no wider than the plume rather than the tail's

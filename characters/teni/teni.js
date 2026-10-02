@@ -67,7 +67,7 @@ PhyFriends.define('teni', {
   // There is no mouth by default (the pictures' nose is left out); when open, it shows one fang for the small
   // fangs that headshot.jpeg and skeb.png draw.
   mouth: { y: 21, size: 3.8, fang: true },
-  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and flat at the
+  // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base. It is in the house shade. Short shoulder tufts sit under the cheeks, low enough not to rise beside the chin
   // like a collar, and small hip tufts below them.
   body: {
