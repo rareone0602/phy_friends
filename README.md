@@ -62,11 +62,12 @@ out/           generated output (git-ignored)
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
 | `tools/feelings.html` | a review sheet of every friend in every feeling, still or playing, seated or standing (`?stand`) |
+| `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI` and `BODY`), with every friend that stands, seated, standing and moving, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
 | `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
 | `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
-| `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/scratch/` for experiments |
+| `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/tune.html` for the tuning page to send, `out/scratch/` for experiments |
 | `LICENSE` | the GNU Affero General Public License, version 3, which covers everything here but the fwiends and the font (see [Licence](#licence)) |
 
 New work goes where it will be used from:
@@ -131,7 +132,9 @@ the body's bottom, from hips tucked under it and set close together, and each
 arm, 42 units long, hangs from high on the body's side, just inside it, and
 well out from the side below it, so that its paw shows past the body. These
 numbers, with the rice ball's and the body's height below, were chosen by eye
-on the tuning page. The feet touch the figure's own ground (`stand.ground`,
+on the tuning page (`tools/tune.html`) by Terry's owner,
+[@FreshSnails_x_6](https://x.com/FreshSnails_x_6), all but the rice ball's
+taper, which is phy's. The feet touch the figure's own ground (`stand.ground`,
 the body's bottom plus 30, about 171 for most friends), and the rig lifts the
 friend by the difference
 (`PhyFriends.standLift(spec)`), so that its feet stand where its seated paws
@@ -596,6 +599,7 @@ python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --shee
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
 python3 tools/pf.py test                                    # The in-browser tests, and the pages against the cast
 python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows, written from the cast
+python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
 ```
 
 `compare` snaps every pixel of the reference and the render to the nearest
@@ -614,8 +618,9 @@ is refused unless `--draft` is given, in which case the page marks it as a draft
 non-zero on a failure or a page error. The page also works opened by hand.
 `test` also checks the gallery against the cast, which `index.html` repeats by
 hand: each friend's name, species and credit, the name in its `aria-label`, the
-host, the owner's agreement to the gallery, and the names in the link preview's
-alt text. A mismatch is a failure that names the friend and the field. What
+host, the owner's agreement to the gallery, the footer's credit to Terry's owner
+(any link marked `data-credit`), and the names in the link preview's alt text.
+A mismatch is a failure that names the friend and the field. What
 follows from the cast and the drawings is written, not typed: `pf.py pages`
 (`tools/gallery.py`) writes the script tags of every page that loads all the
 friends, in the cast's order, and the gallery's rows, from the friends' reaches;

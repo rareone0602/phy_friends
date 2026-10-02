@@ -21,7 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 GALLERY = ROOT / 'index.html'
 # The pages that load every friend: the gallery, the tests and the tools that show any friend. The demos are one-offs
 # that keep the friends they were made with.
-PAGES = [GALLERY, ROOT / 'test' / 'index.html', ROOT / 'tools' / 'animate.html', ROOT / 'tools' / 'feelings.html']
+PAGES = [GALLERY, ROOT / 'test' / 'index.html', ROOT / 'tools' / 'animate.html', ROOT / 'tools' / 'feelings.html',
+         ROOT / 'tools' / 'tune.html']
 SCRIPT_TAG = re.compile(r'^(?P<indent>[ \t]*)<script src="(?P<prefix>[^"]*?)characters/(?P<name>[\w-]+)/(?P=name)\.js"></script>[ \t]*$', re.M)
 
 # ---- The cast and the friends' reaches, read in Chrome -------------------------------------
@@ -249,15 +250,16 @@ NUMBER_WORDS = ('no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'ei
 
 class GalleryLabels(html.parser.HTMLParser):
     """Reads the gallery page: for each .friend in page order, its key, whether it is the host, its
-    aria-label and its label (name, species, and the credit link's text and address); and the link
-    preview's alt text (og:image:alt)."""
+    aria-label and its label (name, species, and the credit link's text and address); every other link
+    that credits a friend's owner (data-credit, the friend's key), with its text and address; and the
+    link preview's alt text (og:image:alt)."""
 
     VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
     TEXT = ('name', 'species', 'credit')  # The parts of a label whose text is read.
 
     def __init__(self):
         super().__init__()
-        self.friends, self.preview_alt = [], None
+        self.friends, self.credits, self.preview_alt = [], [], None
         self.open = []  # The open elements, each as (tag, the part of a friend it lies in, or None).
 
     def handle_starttag(self, tag, attrs):
@@ -266,6 +268,9 @@ class GalleryLabels(html.parser.HTMLParser):
         part = self.open[-1][1] if self.open else None
         if tag == 'meta' and attrs.get('property') == 'og:image:alt':
             self.preview_alt = attrs.get('content') or ''
+        elif tag == 'a' and 'data-credit' in attrs and not part:
+            self.credits.append({'key': attrs['data-credit'], 'credit': '', 'credit link': attrs.get('href') or ''})
+            part = 'other credit'
         elif tag == 'li' and 'friend' in classes:
             self.friends.append({'key': attrs.get('data-friend'), 'host': 'data-host' in attrs, 'aria-label': '',
                                  'name': '', 'species': '', 'credit': '', 'credit link': ''})
@@ -293,6 +298,8 @@ class GalleryLabels(html.parser.HTMLParser):
         part = self.open[-1][1] if self.open else None
         if part in self.TEXT:  # A <wbr> splits a handle's text, so the pieces are joined.
             self.friends[-1][part] += data
+        elif part == 'other credit':
+            self.credits[-1]['credit'] += data
 
 
 def label_drift(cast, gallery=GALLERY):
@@ -300,8 +307,10 @@ def label_drift(cast, gallery=GALLERY):
 
     The cast (characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
     label (name, species and credit), the name that opens its aria-label, and which friend is the
-    host. A friend is there only with its owner's agreement to the gallery. The link preview's alt
-    text counts the friends and names them in the gallery's order, as the preview pictures them.
+    host. A friend is there only with its owner's agreement to the gallery. Any other link that
+    credits an owner, such as the footer's to Terry's, gives the owner's credit as the cast does. The
+    link preview's alt text counts the friends and names them in the gallery's order, as the preview
+    pictures them.
     cast: {host, friends: {key: entry}}, as READ_CAST_JS reads it, or None.
     """
     if cast is None:
@@ -315,6 +324,8 @@ def label_drift(cast, gallery=GALLERY):
     for friend in page.friends:
         if friend['key'] in entries:
             problems += friend_drift(friend, entries[friend['key']], cast['host'])
+    for credit in page.credits:
+        problems += credit_drift(credit, entries.get(credit['key']))
     return problems + preview_drift(page.preview_alt, [entries[key]['name'] for key in keys if key in entries])
 
 
@@ -335,6 +346,20 @@ def friend_drift(friend, entry, host):
                         f'but the cast\'s host is {host}')
     if 'gallery' not in entry.get('agreed', []):
         problems.append(f"{key}: on the gallery without its owner's agreement ('gallery' is not in its agreed media in the cast)")
+    return problems
+
+
+def credit_drift(credit, entry):
+    """Return the ways in which a link that credits a friend's owner outside its label disagrees with the
+    friend's entry in the cast, which is None if the cast has no such friend."""
+    key = credit['key']
+    if entry is None:
+        return [f'{key}: credited by a link (data-credit) but not in the cast']
+    problems = []
+    for field, value in (('credit', entry['credit']['handle']), ('credit link', entry['credit']['href'])):
+        found = ' '.join(credit[field].split())
+        if found != value:
+            problems.append(f'{key}: the {field} is "{found}" in a link that credits its owner but "{value}" in the cast')
     return problems
 
 

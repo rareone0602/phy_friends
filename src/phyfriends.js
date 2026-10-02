@@ -663,9 +663,9 @@
   // a seated paw and foot, its feet slide out until they rest `feet` of the body's half-width out, beside its base,
   // and each arm swings in to reach for a paw resting `paws` [of the half-width out, above the ground], in front of
   // the body. A spec may change any of these for itself (stand.fit). These numbers, with STAND_DEFAULT's, ONIGIRI's
-  // and BODY's, were chosen by eye on the tuning page (October 2026): long arms that hang high on the body and well
-  // out from it, and longer legs set close together. Each arm tucks under the scarf and the head for `tuck` of its
-  // length from the shoulder (see render).
+  // and BODY's, were chosen by eye on the tuning page (tools/tune.html) by Terry's owner in October 2026, all but
+  // ONIGIRI's taper, which is phy's: long arms that hang high on the body and well out from it, and longer legs set
+  // close together. Each arm tucks under the scarf and the head for `tuck` of its length from the shoulder (see render).
   const STAND_FIT = { legs: 30, hip: 0.3, hipUp: 14, shoulder: -12, inset: 0.3, out: 12, feet: 0.7, paws: [0.32, 12], forelegs: 0, tuck: 0.6 };
   // How tall the body of every friend that stands is, as a share of the height its own spec gives it. A taller body
   // keeps its top, under the chin, and reaches lower: it stretches downward with its markings and clothes (its

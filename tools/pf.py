@@ -15,6 +15,7 @@
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
   python3 tools/pf.py test                              # Runs test/index.html headless and checks the pages against the cast; exits non-zero on a failure.
   python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows (tools/gallery.py).
+  python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
@@ -28,7 +29,8 @@ that index.html repeats by hand, and the script tags and rows that `pages` write
 (tools/gallery.py).
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
-out/design/ for page mockups, and out/scratch/ for experiments.
+out/design/ for page mockups, out/tune.html for the tuning page to send, and
+out/scratch/ for experiments.
 
 Requires Google Chrome (override the path with $CHROME) and Pillow; video
 output also requires ffmpeg.
@@ -53,7 +55,9 @@ import style_page
 from cdp import CHROME, ChromeError, HeadlessChrome, PageError, kill_process_group, screenshot_once
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/ and out/scratch/.
+OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/, out/tune.html and out/scratch/.
+TUNE_PAGE = ROOT / 'tools' / 'tune.html'  # The tuning page, which `tune` writes out as one file.
+LOCAL_SCRIPT = re.compile(r'<script src="(?P<src>[^":]+)"></script>')  # A script tag that loads a file of this repository.
 CHARACTERS = ROOT / 'characters'  # Holds characters/<name>/<name>.js and characters/<name>/examples/.
 IMAGE_TYPES = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
 EXTRA = []  # Scripts from --with, loaded after the characters (e.g. a working copy that redefines one).
@@ -697,6 +701,20 @@ def run_tests(page=TEST_PAGE):
     return len(results['failed']) + len(errors)
 
 
+def one_file(page, out):
+    """Writes a page out as one file, with every script that it loads from this repository written into it, so that it
+    works when sent to someone without the repository. Returns the path written."""
+    def inline(tag):
+        script = (page.parent / tag['src']).read_text(encoding='utf-8')
+        if '</script' in script:
+            raise ValueError(f"{tag['src']} contains '</script', which would end the inline script early")
+        return f'<script>\n{script}\n</script>'
+    out = Path(out)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(LOCAL_SCRIPT.sub(inline, page.read_text(encoding='utf-8')), encoding='utf-8')
+    return out
+
+
 def frame_size(text):
     """Parse a frame size given as WxH, e.g. 1280x720."""
     match = re.fullmatch(r'([1-9]\d*)x([1-9]\d*)', text)
@@ -759,6 +777,8 @@ def main(argv=None):
 
     sub.add_parser('test', help="run the in-browser tests in test/index.html and check the pages against the cast")
     sub.add_parser('pages', help="write the friends' script tags and the gallery's rows from the cast and the friends' reaches")
+    u = sub.add_parser('tune', help='write the tuning page (tools/tune.html) out as one file, to send to an artist')
+    u.add_argument('-o', '--out', default=OUT / 'tune.html')
 
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])
@@ -792,6 +812,8 @@ def main(argv=None):
             changed += gallery.write_pages(cast, gallery.measure_gallery(chrome))
         for page in dict.fromkeys(changed):
             print(page)
+    elif a.cmd == 'tune':
+        print(one_file(TUNE_PAGE, a.out))
 
 
 if __name__ == '__main__':

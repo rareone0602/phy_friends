@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>phy's fwiends · tune</title>
+<style>
+  :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --rule: #d6d1c5; --accent: #5b6f8a; --card: #fffdf8; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.45 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  main { max-width: 1280px; margin: 0 auto; padding: 16px 16px 40px; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+  p.intro { margin: 0 0 16px; color: var(--ink-2); max-width: 46em; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 20px; align-items: start; }
+  .stage { position: sticky; top: 0; background: var(--paper); padding-top: 4px; z-index: 1; }
+  .controls { display: flex; flex-direction: column; gap: 12px; }
+  section.box { background: var(--card); border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; }
+  .slider { margin: 10px 0 0; }
+  .slider:first-of-type { margin-top: 0; }
+  .slider .row { display: flex; justify-content: space-between; gap: 8px; font-size: 14px; }
+  .slider output { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  .hint { font-size: 12px; color: var(--ink-2); }
+  .slider .hint { margin-top: -2px; }
+  input[type=range] { width: 100%; margin: 4px 0 2px; accent-color: var(--accent); }
+  select, button { font: inherit; font-size: 14px; }
+  select { width: 100%; padding: 6px; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
+  button { padding: 6px 12px; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; }
+  button:hover { border-color: var(--ink-2); }
+  button.main { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+  .picker { display: flex; flex-wrap: wrap; gap: 6px; }
+  .picker label { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px 3px 6px; border: 1px solid var(--rule); border-radius: 999px; background: #fff; font-size: 13px; cursor: pointer; }
+  .picker input { margin: 0; accent-color: var(--accent); }
+  .friend { margin-bottom: 10px; }
+  .friend h2 { margin: 0; padding-bottom: 2px; border-bottom: 1px solid var(--rule); }
+  .cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 4px; }
+  .cell { aspect-ratio: 340 / 450; }
+  .cell svg { display: block; width: 100%; height: 100%; }
+  .caption { text-align: center; font-size: 12px; color: var(--ink-2); padding-bottom: 2px; }
+  .empty { color: var(--ink-2); font-size: 14px; padding: 24px 0; }
+  pre { margin: 8px 0 0; padding: 10px; background: #fff; border: 1px solid var(--rule); border-radius: 6px; font-size: 11.5px;
+        line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .copied { font-size: 13px; color: var(--accent); align-self: center; }
+  @media (max-width: 760px) {
+    main { padding: 12px 12px 32px; }
+    h1 { font-size: 20px; }
+    .layout { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .stage { max-height: 46vh; overflow-y: auto; border-bottom: 1px solid var(--rule); padding-bottom: 4px; }
+    .caption { font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>tune the fwiends’ bodies</h1>
+  <p class="intro">All of phy’s fwiends share one body plan for sitting and standing. Move the sliders until they look right to you,
+    then press “copy the values” at the bottom and send what you copied to phy.</p>
+  <div class="layout">
+    <div class="stage" id="stage" aria-live="off"></div>
+    <div class="controls">
+      <section class="box">
+        <h2>sitting or standing</h2>
+        <div class="slider"><div class="row"><label for="rise">how far up (the second picture of each)</label><output id="riseOut"></output></div>
+          <input type="range" id="rise" min="0" max="1" step="0.01" value="0.5">
+          <div class="hint">from sitting, on the left, to standing, on the right</div></div>
+      </section>
+      <section class="box">
+        <h2>fwiends to show</h2>
+        <div class="picker" id="picker"></div>
+        <div class="hint" style="margin-top:6px">lorem is a plain placeholder fwiend, with nobody’s markings.</div>
+      </section>
+      <section class="box">
+        <h2>start from</h2>
+        <select id="preset" aria-label="start from"></select>
+        <div class="buttons"><button type="button" id="reset">back to this starting point</button></div>
+      </section>
+      <div id="sliders" class="controls"></div>
+      <section class="box">
+        <h2>when you are happy</h2>
+        <div class="hint" style="font-size:13px;color:var(--ink-2)">copy these values and send them to phy; they go straight into the code.</div>
+        <div class="buttons"><button type="button" class="main" id="copy">copy the values</button><span class="copied" id="copied" role="status"></span></div>
+        <pre id="values"></pre>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/howdi/howdi.js"></script>
+<script src="../characters/yuanyuan/yuanyuan.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../characters/fruit/fruit.js"></script>
+<script src="../characters/yuda/yuda.js"></script>
+<script src="../characters/terry/terry.js"></script>
+<script src="../characters/brian/brian.js"></script>
+<script src="../characters/mumuyou/mumuyou.js"></script>
+<script src="../characters/kevin/kevin.js"></script>
+<script src="../characters/bardell/bardell.js"></script>
+<script src="../characters/cowosus/cowosus.js"></script>
+<script src="../characters/raze/raze.js"></script>
+<script src="../characters/tanyuan/tanyuan.js"></script>
+<script src="../characters/alfie/alfie.js"></script>
+<script src="../characters/teni/teni.js"></script>
+<script src="../characters/whitedeer/whitedeer.js"></script>
+<script src="../characters/jiaoyue/jiaoyue.js"></script>
+<script src="../characters/claude/claude.js"></script>
+<script src="../src/cast.js"></script>
+<script src="../characters/cast.js"></script>
+<script src="../src/anim.js"></script>
+<script src="lorem.js"></script>
+<script>
+// A page for tuning the friends' shared body plan by eye, for an artist who draws rather than codes. It shows every
+// friend that stands (all but Claude), after the lorem placeholder (lorem.js), Terry and phy, each seated, in between,
+// standing and moving. Each slider changes one of the core's shared defaults in the page (PhyFriends.STAND_FIT,
+// STAND_DEFAULT's arms and legs, ONIGIRI and BODY), and the friends are redrawn from fresh copies of their specs, since
+// the core works out a friend's figure once per spec. The values block prints those four objects as src/phyfriends.js
+// writes them, to paste back there. The page opens on the values in the code, so it is never out of date.
+// `python3 tools/pf.py tune` writes it out as one file (out/tune.html) that can be sent to someone without the repository.
+(function () {
+  'use strict';
+  const PF = PhyFriends, A = PF.anim;
+  // Each slider: the parameter it sets (a key of PARAMS below), its label for an artist, its range and step, and a hint
+  // shown under it. The sliders are grouped under a title each.
+  const SLIDERS = [
+    ['the body (a rice ball)', [
+      ['height', 'taller body', 0.7, 1.6, 0.01, 'how tall the body is, as a share of each fwiend’s own: it grows downward from under the chin, and the legs, the paws and the ground move down with it'],
+      ['taper', 'narrower at the top', 0, 1, 0.05, 'how much narrower the body is under the chin than at its base'],
+      ['square', 'flatter at the base', 0, 4, 0.1, 'how square and flat the bottom of the body is, rather than round'],
+    ]],
+    ['legs and feet', [
+      ['legs', 'leg length', 8, 50, 1, 'how much leg shows below the body when standing'],
+      ['legWidth', 'leg thickness', 16, 38, 1, ''],
+      ['footRx', 'foot width', 8, 22, 0.5, ''],
+      ['footRy', 'foot height', 6, 18, 0.5, ''],
+      ['hip', 'legs apart', 0.2, 0.6, 0.01, 'how far apart the legs are, as a share of the body’s width'],
+    ]],
+    ['arms and paws', [
+      ['armLength', 'arm length', 18, 60, 1, ''],
+      ['armWidth', 'arm thickness', 14, 30, 1, ''],
+      ['paw', 'paw size', 7, 16, 0.5, ''],
+      ['shoulder', 'shoulder height', -24, 10, 1, 'where the arms join the body: higher to the left, lower to the right'],
+      ['out', 'arms held out', -10, 35, 1, 'how far the arms hang away from the body’s sides, in degrees'],
+      ['tuck', 'arm hidden at the shoulder', 0, 1, 0.05, 'how much of the arm hides under the ruff or the chin at the shoulder'],
+      ['forelegs', 'top of the arms when sitting', -0.5, 0.6, 0.05, 'where the arms start on the body when sitting, hanging down to the paws: higher to the left, lower to the right'],
+    ]],
+  ];
+  // The starting points: the values in the code, which the page opens on, and earlier picks, each given in full. Terry's
+  // owner chose Terry's pick on this page; the code keeps all of it but the taper, which is phy's (0.85).
+  const PRESETS = [
+    ['the values in the code', {}],
+    ['Terry’s pick (2 oct 2026)', { height: 1.1, taper: 1, square: 0, legs: 30, legWidth: 26, footRx: 15, footRy: 11, hip: 0.3,
+      armLength: 42, armWidth: 22, paw: 11.5, shoulder: -12, out: 12, tuck: 0.6, forelegs: 0 }],
+    ['the earlier pick, V10 (1 oct 2026)', { height: 1, taper: 0.6, square: 2, legs: 22, legWidth: 28, footRx: 15, footRy: 12, hip: 0.4,
+      armLength: 30, armWidth: 22, paw: 11.5, shoulder: -12, out: 12, tuck: 0.6, forelegs: 0 }],
+  ];
+  // The friends listed first, before the rest in the cast's order, and those on show when the page opens.
+  const FIRST = ['lorem', 'terry', 'phy'], SHOWN = ['lorem', 'terry', 'phy'];
+  const D = PF.STAND_DEFAULT, F = PF.STAND_FIT, O = PF.ONIGIRI, B = PF.BODY;
+  // Every friend that stands, as [the spec's name, the name as its owner writes it]: FIRST, then the cast's order.
+  const nameOf = name => (name === 'lorem' ? 'lorem' : PF.cast.friend(name).name);
+  const FRIENDS = [...FIRST, ...PF.cast.names().filter(name => !FIRST.includes(name))].filter(name => PF.standFor(name)).map(name => [name, nameOf(name)]);
+
+  // Each parameter: where it lives in the core's shared defaults.
+  const PARAMS = {
+    height: [() => B.height, v => { B.height = v; }],
+    taper: [() => O.taper, v => { O.taper = v; }],
+    square: [() => O.square, v => { O.square = v; }],
+    legs: [() => F.legs, v => { F.legs = v; }],
+    legWidth: [() => D.legs.width, v => { D.legs.width = v; }],
+    footRx: [() => D.legs.foot.rx, v => { D.legs.foot.rx = v; }],
+    footRy: [() => D.legs.foot.ry, v => { D.legs.foot.ry = v; }],
+    hip: [() => F.hip, v => { F.hip = v; }],
+    armLength: [() => D.arms.length, v => { D.arms.length = v; }],
+    armWidth: [() => D.arms.width, v => { D.arms.width = v; }],
+    paw: [() => D.arms.paw.rx, v => { D.arms.paw.rx = v; D.arms.paw.ry = v; }],
+    shoulder: [() => F.shoulder, v => { F.shoulder = v; }],
+    out: [() => F.out, v => { F.out = v; }],
+    tuck: [() => F.tuck, v => { F.tuck = v; }],
+    forelegs: [() => F.forelegs, v => { F.forelegs = v; }],
+  };
+  // A foot stands on the ground by the lower of its own bottom and its leg's round end.
+  const settle = () => { D.legs.ankle = Math.max(D.legs.width / 2, (D.legs.foot.cy || 0) + D.legs.foot.ry); };
+  const CURRENT = Object.fromEntries(Object.entries(PARAMS).map(([k, [get]]) => [k, get()]));
+
+  // The controls.
+  const sliders = document.getElementById('sliders'), fixed = v => String(Math.round(v * 100) / 100);
+  for (const [title, items] of SLIDERS) {
+    sliders.insertAdjacentHTML('beforeend', `<section class="box"><h2>${title}</h2>` + items.map(([key, label, min, max, step, hint]) =>
+      `<div class="slider"><div class="row"><label for="${key}">${label}</label><output id="${key}Out"></output></div>` +
+      `<input type="range" id="${key}" min="${min}" max="${max}" step="${step}">${hint ? `<div class="hint">${hint}</div>` : ''}</div>`).join('') + '</section>');
+  }
+  const preset = document.getElementById('preset');
+  preset.innerHTML = PRESETS.map(([label], i) => `<option value="${i}">${label}</option>`).join('');
+  const picker = document.getElementById('picker');
+  picker.innerHTML = FRIENDS.map(([name, label]) => `<label><input type="checkbox" value="${name}"${SHOWN.includes(name) ? ' checked' : ''}> ${label}</label>`).join('');
+
+  // The values to send back, written as they are in src/phyfriends.js.
+  const literal = v => Array.isArray(v) ? `[${v.map(literal).join(', ')}]` : v && typeof v === 'object'
+    ? `{ ${Object.entries(v).map(([k, x]) => `${k}: ${literal(x)}`).join(', ')} }` : typeof v === 'number' ? fixed(v) : String(v);
+  const values = () => `  const STAND_DEFAULT = {\n    arms: ${literal(D.arms)},\n` +
+    `    legs: ${literal(D.legs)},\n  };\n  const STAND_FIT = ${literal(F)};\n  const ONIGIRI = ${literal(O)};\n  const BODY = ${literal(B)};\n`;
+
+  // The friends on show: for each, fresh copies of its spec (the core works a figure out once per spec, so a copy
+  // made after a change picks the change up), seated, at the stance slider, standing, and moving. Each stands on a line
+  // near the bottom of its frame: its own ground, which drops with a taller body.
+  const viewOf = spec => ({ w: 340, h: 450, x: 170, y: 450 - 14 - PF.groundOf(spec), scale: 1, rotate: 0 });
+  const stage = document.getElementById('stage'), rise = document.getElementById('rise');
+  const sit = A.still({ stance: 'sit' }), up = A.still({ stance: 'stand' });
+  const loopOf = spec => A.seq(A.still({ stance: 'sit' }, 0.6), A.layer(sit, A.make.standUp({ spec })), A.still({ stance: 'stand' }, 0.3),
+    A.layer(up, A.make.wave({ spec })), A.layer(up, A.loop(A.make.walk(), 1)), A.still({ stance: 'stand' }, 0.3),
+    A.layer(up, A.make.sitDown({ spec })), A.still({ stance: 'sit' }, 0.5));
+  let shown = [], made = 0;
+  function draw() {
+    settle();
+    const names = [...picker.querySelectorAll('input:checked')].map(i => i.value);
+    stage.innerHTML = names.length ? '' : '<p class="empty">tick a fwiend under “fwiends to show”.</p>';
+    shown = names.map(name => {
+      const label = FRIENDS.find(f => f[0] === name)[1], spec = PF.define(`${name}~${++made}`, { ...PF.get(name) });
+      stage.insertAdjacentHTML('beforeend', `<div class="friend"><h2>${label}</h2><div class="cells">` +
+        '<div class="cell"></div>'.repeat(4) + ['sitting', 'in between', 'standing', 'moving'].map(c => `<div class="caption">${c}</div>`).join('') + '</div></div>');
+      const rigs = [...stage.lastElementChild.querySelectorAll('.cell')].map(cell => PF.mount(cell, spec, { bg: false, view: viewOf(spec) }));
+      rigs[0].setPose({ stance: 'sit' }, true);
+      rigs[2].setPose({ stance: 'stand' }, true);
+      return { between: rigs[1], moving: rigs[3], loop: loopOf(spec) };
+    });
+    pose();
+    for (const [key, [get]] of Object.entries(PARAMS)) {
+      document.getElementById(key).value = get();
+      document.getElementById(`${key}Out`).textContent = fixed(get());
+    }
+    document.getElementById('values').textContent = values();
+  }
+  function pose() {
+    document.getElementById('riseOut').textContent = `${Math.round(+rise.value * 100)}%`;
+    for (const { between } of shown) between.setPose({ stance: 'sit', rise: +rise.value }, true);
+  }
+  // Redraws at most a few times a second while a slider is dragged, and once more when it is let go.
+  let pending = 0;
+  const soon = () => { if (!pending) pending = setTimeout(() => { pending = 0; draw(); }, 120); };
+  sliders.addEventListener('input', e => {
+    if (e.target.type !== 'range') return;
+    PARAMS[e.target.id][1](+e.target.value);
+    document.getElementById(`${e.target.id}Out`).textContent = fixed(+e.target.value);
+    soon();
+  });
+  sliders.addEventListener('change', () => { clearTimeout(pending); pending = 0; draw(); });
+  rise.addEventListener('input', pose);
+  picker.addEventListener('change', draw);
+  const apply = change => { for (const [k, [, set]] of Object.entries(PARAMS)) set(k in change ? change[k] : CURRENT[k]); draw(); };
+  preset.addEventListener('change', () => apply(PRESETS[+preset.value][1]));
+  document.getElementById('reset').addEventListener('click', () => apply(PRESETS[+preset.value][1]));
+
+  // Copies the values, or selects them for copying by hand where the browser will not.
+  document.getElementById('copy').addEventListener('click', async () => {
+    const text = values(), note = document.getElementById('copied');
+    try { await navigator.clipboard.writeText(text); note.textContent = 'copied'; } catch (e) {
+      const area = Object.assign(document.createElement('textarea'), { value: text });
+      document.body.appendChild(area); area.select();
+      const ok = document.execCommand && document.execCommand('copy');
+      area.remove();
+      if (ok) note.textContent = 'copied';
+      else { getSelection().selectAllChildren(document.getElementById('values')); note.textContent = 'selected: copy it by hand'; }
+    }
+    setTimeout(() => { note.textContent = ''; }, 3000);
+  });
+
+  apply(PRESETS[0][1]);
+  const start = performance.now();
+  const frame = now => {
+    const t = (now - start) / 1000;
+    for (const { moving, loop } of shown) moving.setPose(A.sample(loop, t % loop.duration), true);
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

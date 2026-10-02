@@ -38,8 +38,9 @@ The page has five parts, in this order:
 4. **The stage**, a group photo: the fwiends stand together on pencilled
    ground and all watch the cursor. A mock disclaimer stands under the last
    of them.
-5. The footer: "characters belong to the people named under them", the style
-   guide and the source.
+5. The footer: "characters belong to the people named under them"; a credit
+   to Terry's owner, who tuned the fwiends' proportions by eye on the tuning
+   page; the style guide; and the source.
 
 **The stage:**
 - The stage is the one centred thing on the page, as the subject of a group
@@ -145,12 +146,13 @@ soles". The specimen's portrait is named and described the same way.
 
 The cast (`characters/cast.js`) is the source of these facts, and the page
 repeats them by hand: each label's name, species and credit, the name in
-the `aria-label`, the host, and the names in the link preview's alt text, in
-the gallery's order. `python3 tools/pf.py test` names the friend and the
-field wherever the two disagree, and fails any friend whose owner has not
-agreed to the gallery. The pages that load every friend (the gallery, the
-tests, and the animation and feelings tools) load them in the cast's order;
-`python3 tools/pf.py pages` writes their script tags.
+the `aria-label`, the host, the footer's credit to Terry's owner, and the
+names in the link preview's alt text, in the gallery's order. `python3
+tools/pf.py test` names the friend and the field wherever the two disagree,
+and fails any friend whose owner has not agreed to the gallery. The pages
+that load every friend (the gallery, the tests, and the animation, feelings
+and tuning tools) load them in the cast's order; `python3 tools/pf.py pages`
+writes their script tags.
 
 Names keep their owner's capitalisation: **Howdi**, **Fruit**, **Yuda**,
 **Terry**, **Brian**, **Teni**, **Alfie**, **Raze** and **Claude** are
