@@ -177,11 +177,14 @@
   });
 
   test('a friend without a voice may not say words, and strangers may not talk or hand things over', () => {
-    withScene({}, scene => {
+    withScene({}, (scene, el) => {
       const yuda = scene.add('yuda', { x: 400 }), terry = scene.add('terry', { x: 1100 });
       assertThrows(() => yuda.say('hello'), /Yuda has no voice/);
       assertThrows(() => yuda.emote('hello'), /is not a mark/);
       yuda.emote('♪');
+      yuda.say('heart', { at: 1 });
+      const said = [...el.querySelectorAll('.pf-words')].at(-1);
+      assert(said.dataset.mark === 'heart' && said.querySelector('svg') && !said.textContent.includes('heart'), 'a mark said is drawn, not the word');
       assertThrows(() => yuda.say('!', { to: terry }), /Yuda may not talk to Terry/);
       assertThrows(() => yuda.give(scene.prop({ w: 10, h: 10, svg: '' }), terry), /Yuda may not hand something to Terry/);
     });

@@ -45,7 +45,7 @@ out/           generated output (git-ignored)
 | `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
-| `src/emotion.js` | feelings: happy, content, shy, proud, surprised, scared, curious, sleepy, asleep, sad and cross, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture |
+| `src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
 | `src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
 | `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
 | `src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
@@ -61,7 +61,7 @@ out/           generated output (git-ignored)
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
-| `tools/feelings.html` | a review sheet of every friend in every feeling, still or playing, seated or standing (`?stand`) |
+| `tools/feelings.html` | a review sheet of every friend in every feeling, with each feeling's mark, still or playing, seated or standing (`?stand`), or held at a moment of the feeling (`?at=1.5`) |
 | `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI`, `BODY` and `TURN`), with every friend that stands, seated, standing and moving, then side-on, from behind and turning round, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
 | `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
@@ -548,8 +548,8 @@ Every field is optional:
 
 ```js
 { x, y, squash, tilt, headX, headY, turnX, turnY, lookX, lookY, blink, widen, lid, lidTilt, earL, earR, hair, tail,
-  blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint', eyeL, eyeR,
-  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open', show: 'laptop side',
+  blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint' | 'swirl', eyeL, eyeR,
+  mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'flat' | 'wobble' | 'open', show: 'laptop side',
   stance: 'sit' | 'stand', rise, crouch, lean, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR',
   facing: 0 | 90 | 180 | 270 }
 ```
@@ -604,9 +604,11 @@ rig.setPose({ lookX: 0.8, turnX: 0.5, eyes: 'happy' });
 
 `src/emotion.js` (`PhyFriends.emotion`) shows how a friend feels with the parts
 every friend drawn on the house template has, so every feeling works on every
-one of them without a new drawing. There are eleven: happy, content, shy,
-proud, surprised, scared, curious, sleepy, asleep, sad and cross. Each comes in
-four forms, all partial poses that layer over a friend's idle clip:
+one of them without a new drawing. There are twenty-three, listed from the
+pleased to the drowsy: happy, excited, laughing, playful, fond, content,
+relieved, proud, determined, inspired, curious, thoughtful, shy, surprised,
+confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep. Each
+comes in four forms, all partial poses that layer over a friend's idle clip:
 
 ```js
 const E = PhyFriends.emotion;
@@ -626,11 +628,19 @@ eyes look. So feelings that sit close look alike, and a new feeling needs only
 its place, its face and its movements. A friend standing has arms, so its
 posture carries them too (raised and out when pleased or alert, in and low when
 unhappy, limp when drowsy), and most feelings add a gesture of their own: paws
-together when shy, on the hips when proud, up by the face when scared, a paw
-raised under the chin when curious, arms folded when cross. A friend takes
-less of them the lower it is, and seated it ignores them.
-Some have a mark (`!` for surprise, `z`,
-repeating, for sleep), which a scene shows with `feel()`, and `E.describe(name,
+up by the face when excited and in front of it when scared, together when shy
+or nervous, clasped under the chin when fond, on the hips when proud; fists at
+the chest when determined; a paw raised beside the head when inspired, by a
+winking eye when playful, at the chin when thoughtful and under it when
+curious; the sides held when laughing, a shrug when confused, the arms out for
+balance when dizzy and folded when cross. A friend takes less of them the lower
+it is, and seated it ignores them. Most feelings have a mark, which a scene
+shows with `feel()`: written in the hand (`!` for surprise, `??` when confused,
+`z`, repeating, for sleep) or drawn in a line as thick as the hand's (a heart
+when fond, a bead of sweat when relieved or nervous, a sparkle when excited, a
+light bulb when inspired, a swirl when dizzy, and the `♪` of contentment, a
+letter the hand lacks). `E.markMarkup(mark)` gives either as the markup for an
+element whose font size is the mark's. `E.describe(name,
 'Howdi')` gives a screen reader "Howdi looks surprised." What the code that
 shows feelings needs to know of one, it asks the library: whether it turns a
 friend inward, so that it stops following the pointer (`E.inward('shy')`), and

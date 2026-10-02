@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>phy's fwiends · feelings</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
 <style>
   :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --rule: #cfdbe8; --cell: 132px; }
   body { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
@@ -17,13 +18,17 @@
   td { padding: 0; border-bottom: 1px solid var(--rule); }
   .cell { width: var(--cell); height: var(--cell); }
   .cell svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  /* A feeling's mark, under its name, as a scene or a live page shows it: in the hand, bold, in ink-2. */
+  .mark { display: flex; justify-content: center; align-items: flex-end; height: 32px; margin-top: 4px;
+    font: 600 28px/1 'Shantell Sans', sans-serif; font-variation-settings: 'INFM' 100, 'BNCE' 50; }
 </style>
 </head>
 <body>
 <p>every friend in every feeling of src/emotion.js. <label><input id="live" type="checkbox"> play them</label>
   (each plays its reaction, then holds the feeling, then starts again). <label><input id="stand" type="checkbox"> stand them up</label>
   (a standing friend adds its arms and legs). ?who=howdi,phy and ?feel=sad,cross narrow the sheet; ?live plays it and ?stand
-  stands them up.</p>
+  stands them up; ?at=1.5 holds every cell that many seconds into its feeling (its reaction, then the feeling held), and
+  ?cell=240 draws the cells larger. under each feeling, its mark, if it has one.</p>
 <table><thead><tr id="feelings"><th></th></tr></thead><tbody id="rows"></tbody></table>
 
 <script src="../src/phyfriends.js"></script>
@@ -59,6 +64,8 @@
   const query = new URLSearchParams(location.search);
   const pick = (key, all) => (query.get(key) ? query.get(key).split(',').filter(name => all.includes(name)) : all);
   const friends = pick('who', PF.list()), feelings = pick('feel', E.names);
+  const at = query.has('at') ? Number(query.get('at')) : null;  // Seconds into each feeling for a still, or the face alone.
+  if (query.has('cell')) document.documentElement.style.setProperty('--cell', `${Number(query.get('cell'))}px`);
 
   const live = document.getElementById('live'), stand = document.getElementById('stand');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -66,7 +73,11 @@
   stand.checked = query.has('stand');
   let start = 0, cells = [];
 
-  for (const feeling of feelings) document.getElementById('feelings').insertAdjacentHTML('beforeend', `<th>${feeling}</th>`);
+  for (const feeling of feelings) {
+    const mark = E.mark(feeling);
+    document.getElementById('feelings').insertAdjacentHTML('beforeend',
+      `<th>${feeling}<div class="mark" aria-hidden="true">${mark ? E.markMarkup(mark.text) : ''}</div></th>`);
+  }
 
   // Mounts a cell for every friend and feeling, seated or standing as the checkbox says.
   function build() {
@@ -85,7 +96,8 @@
         const rig = PF.mount(box, name, { view, bg: false });
         rig.svg.setAttribute('role', 'img');
         rig.svg.setAttribute('aria-label', `${name}, ${feeling}${stand.checked ? ', standing' : ''}`);
-        cells.push({ rig, stance, clip: E.feel(feeling, { spec: name }), still: A.sample({ ...E.face(feeling, { spec: name }), stance }) });
+        const clip = E.feel(feeling, { spec: name }), still = at === null ? E.face(feeling, { spec: name }) : clip(at);
+        cells.push({ rig, stance, clip, still: A.sample({ ...still, stance }) });
       }
       rows.appendChild(row);
     }

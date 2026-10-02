@@ -719,7 +719,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         PF.cast.ensureVoice(name, text);
         if (to) PF.cast.ensure('talk', name, to.name);
         const s = side ?? (to && to.state(at).x < actor.state(at).x ? -1 : 1);
-        const node = textNode(dom, 'pf-words hand', text);
+        const node = VOICED_MARKS.includes(text) ? markNode(dom, 'pf-words hand', text) : textNode(dom, 'pf-words hand', text);
         node.style.fontSize = `${size}px`;
         words.push({ text, at, until: at + (seconds ?? 1.2 + text.length / WORDS.perSecond), side: s, rise, node });
         return actor;
@@ -883,7 +883,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     // Adds a mark (one of PhyFriends.cast.MARKS) shown from `at` for `seconds`; a drifting one rises as it goes.
     function addMark(mark, { at, seconds, drifting = false }) {
       if (!VOICED_MARKS.includes(mark)) throw new Error(`phy_friends/scene: "${mark}" is not a mark; use one of ${VOICED_MARKS.join(' ')}`);
-      const node = textNode(dom, 'pf-mark hand', mark);
+      const node = markNode(dom, 'pf-mark hand', mark);
       node.setAttribute('aria-hidden', 'true');  // A mark is a drawing, not words; a game says what happened in words.
       marks.push({ text: mark, at, until: at + seconds, node, drifting });
     }
@@ -956,6 +956,14 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     node.style.display = 'none';
     if (graphite && dom.graphite) node.style.filter = 'url(#graphite)';
     dom.layer.appendChild(node);
+    return node;
+  }
+
+  // A node for a mark (src/cast.js MARKS), written or drawn as the emotion library has it (markMarkup()).
+  function markNode(dom, className, mark) {
+    const node = textNode(dom, className, '');
+    node.innerHTML = E.markMarkup(mark);
+    node.dataset.mark = mark;
     return node;
   }
 

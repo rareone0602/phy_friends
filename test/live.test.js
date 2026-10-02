@@ -159,7 +159,7 @@
       }
       assertEqual(phy.feeling, 'content');
       assertEqual(said, ['phy looks content.']);
-      assert(phy.rig.el.querySelector('.pf-live-mark').textContent === '♪', 'with its mark');
+      assert(phy.rig.el.querySelector('.pf-live-mark').dataset.mark === '♪', 'with its mark');
       stage.draw(0.5);
       assertEqual(phy.feeling, 'content', 'still content just after');
       stage.draw(1.2);
@@ -270,7 +270,7 @@
       stage.draw(1 + L.DOZE.spread + L.DOZE.asleep + 1);
       assertEqual([howdi.feeling, phy.feeling, claude.feeling], ['asleep', 'asleep', null]);
       assertEqual(howdi.rig.pose.eyes, 'closed');
-      assert([...howdi.rig.el.querySelectorAll('.pf-live-mark')].some(mark => mark.textContent === 'z'), 'a z over a sleeper');
+      assert([...howdi.rig.el.querySelectorAll('.pf-live-mark')].some(mark => mark.dataset.mark === 'z'), 'a z over a sleeper');
       assertEqual(said, ['Everyone but Claude falls asleep.']);
       stage.noteInput(null);
       assertEqual(said.at(-1), 'Everyone wakes up.');

@@ -43,8 +43,10 @@
   const OPT_INS = ['touch', 'rival'];
   const MEDIA = ['gallery', 'video', 'games'];
 
-  // The marks a friend without a voice may use: surprise, a question, a pause, a song, a doze.
-  const MARKS = ['!', '?', '!?', '…', '♪', 'z'];
+  // The marks a friend without a voice may use. Some are written in the hand: surprise, a question, alarm, a pause or
+  // a thought, a doze, and puzzlement. The rest are drawn (src/emotion.js draws them): a song, a heart, a bead of
+  // sweat, a sparkle, a light bulb and a swirl.
+  const MARKS = ['!', '?', '!?', '…', 'z', '??', '♪', 'heart', 'sweat', 'spark', 'bulb', 'swirl'];
 
   // The least gap between two friends' outlines (heads, bodies and tails, not ears), in head units.
   // Strangers keep a strip of paper between them; friends who know each other may stand side by side.

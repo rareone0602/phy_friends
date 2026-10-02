@@ -444,12 +444,14 @@ true turn looks worse than a cheat, the cheat wins.
   and the back on the tuning page, which shows them.
 
 **Feelings come from the pose, not from new drawings.** The emotion library
-(`src/emotion.js`) has eleven, each shown with the parts every fwiend on the
-house template has: the eye shapes (`happy`, `closed`, `squint`), a lid held
-over the open eyes (`lid`, slanted by `lidTilt` for a sad or a cross look),
-the blush spreading (`flush`), a mouth (`w`, `smile`, `frown`, `o`, `open`),
-the ears, the tail and the posture, and, standing, the arms and a gesture
-(paws on the hips when proud). So a spec needs nothing for its
+(`src/emotion.js`) has twenty-three, each shown with the parts every fwiend
+on the house template has: the eye shapes (`happy`, `closed`, `squint` and
+the dizzy `swirl`), a lid held over the open eyes (`lid`, slanted by
+`lidTilt` for a sad or a cross look), the blush spreading (`flush`), a mouth
+(`w`, `smile`, `frown`, `o`, `flat`, `wobble`, `open`), the ears, the tail
+and the posture, and, standing, the arms and a gesture (paws on the hips when
+proud, a shrug when confused). Each shape is drawn from the eye's or the
+mouth's own size and colour, never per fwiend. So a spec needs nothing for its
 feelings, and a new fwiend has them all. A feeling's body language follows
 from how pleasant and how alert it is, so feelings that sit close look
 alike. `eyes.arc` and `eyes.stroke` set how wide and thick the happy and
@@ -542,17 +544,23 @@ them.
 - Strangers keep a strip of paper between them, 40 head units between
   outlines (ears apart); fwiends who know each other may stand side by
   side. Choreograph so that nobody hops past anybody.
-- **Only phy speaks in words.** The others speak in marks (! ? !? … ♪ z),
-  since only their owners know how they talk. A mark is a drawing over a
+- **Only phy speaks in words.** The others speak in marks: ! ? !? … z ??,
+  and drawn ones, a ♪, a heart, a bead of sweat, a sparkle, a light bulb
+  and a swirl, since only their owners know how they talk. A mark is a drawing over a
   fwiend's head, not punctuation, so the calm punctuation of `STYLE.md` §3
   doesn't apply to it. Likewise, nobody is given a
   personality, a birthday or any other fact its owner didn't give it. A
   mark is written in the hand pressed harder, bold (`600`) in `--ink-2`,
-  so that it reads at a glance in the gallery as in a film.
+  so that it reads at a glance in the gallery as in a film; a drawn mark is
+  a line as thick as that hand's stem, never filled, standing on the same
+  baseline. The hand has no ♪, so the ♪ is drawn too.
 - **Feelings are reactions, not temperaments.** Every fwiend feels with
   the same library, and a feeling answers something that happens in the
   scene (`actor.feel('surprised', { at })`, with its mark). Nobody is shy,
-  cross or sleepy by nature.
+  cross or sleepy by nature. A feeling aimed at another fwiend follows the
+  table above: a heart or a fond look needs the two owners to know each
+  other, and a wink or a laugh at another fwiend is teasing, which needs
+  both to opt in. Aimed at a thing in the scene, any feeling will do.
 - Nobody is hurt, frightened for a laugh or beaten by another fwiend. Games
   are won against the clock or the page; a miss ends with a fwiend sitting
   down, not falling over or knocked out. Nobody is blamed for a miss, and

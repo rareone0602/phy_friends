@@ -34,7 +34,7 @@
   });
 
   test('a feeling that is not in the library is an error that lists the ones that are', () => {
-    assertThrows(() => E.face('smug'), /not a feeling; use one of happy, content/);
+    assertThrows(() => E.face('hungry'), /not a feeling; use one of happy, excited/);
   });
 
   test('every face is a pose the renderer draws on every friend of the house template', () => {
@@ -149,5 +149,33 @@
       const flushed = rig.parts.cheekL.getBoundingClientRect().width;
       assert(Math.abs(flushed / cheek - 1.5) < 0.05, `the cheek grows ${flushed / cheek} times`);
     });
+  });
+
+  test('the dizzy eyes swirl the other way in each eye, and the flat and wobbly mouths show when posed', () => {
+    support.withBoxSync(el => {
+      const rig = PF.mount(el, 'howdi', { bitmap: false });
+      const shows = key => [...rig.svg.querySelectorAll(`[data-pf-when="${key}"]`)].map(node => !node.hasAttribute('display'));
+      rig.setPose({ eyes: 'swirl', mouth: 'wobble' });
+      assertEqual([...shows('eyeL=swirl'), ...shows('eyeR=swirl'), ...shows('mouth=wobble')], [true, true, true]);
+      const turn = side => rig.svg.querySelector(`[data-pf-when="eye${side}=swirl"] path`).getAttribute('d').split('L')[1];
+      const [left, right] = ['L', 'R'].map(side => turn(side).split(' ').map(Number));
+      assert(Math.abs(left[0] + right[0]) < 1e-6 && Math.abs(left[1] - right[1]) < 1e-6, 'the right eye mirrors the left');
+      rig.setPose({ eyes: 'open', mouth: 'flat' });
+      assertEqual([...shows('eyeL=swirl'), ...shows('mouth=wobble'), ...shows('mouth=flat')], [false, false, true]);
+    });
+  });
+
+  test('every mark is written in the hand or drawn, and a drawn one is a pencil line an em tall, never filled', () => {
+    for (const name of E.drawnMarks) assert(PF.cast.MARKS.includes(name), `${name} is drawn but is not a mark`);
+    for (const mark of PF.cast.MARKS) {
+      const markup = E.markMarkup(mark);
+      if (!E.drawnMarks.includes(mark)) { assertEqual(markup, mark, `${mark} is written`); continue; }
+      const box = document.createElement('div');
+      box.innerHTML = markup;
+      const svg = box.firstElementChild;
+      assertEqual([svg.tagName, svg.getAttribute('height'), svg.getAttribute('fill'), svg.getAttribute('stroke')], ['svg', '1em', 'none', 'currentColor'], mark);
+      assert(svg.querySelector('path').getAttribute('d').length > 0, `${mark} has a line`);
+    }
+    assertEqual(E.markMarkup('<b>'), '&#60;b&#62;', 'a written mark is text, never markup');
   });
 })();

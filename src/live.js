@@ -87,7 +87,7 @@
   // order seeded by `seed`, and each falls asleep `asleep` seconds (give or take `jitter`) later. Woken
   // by the pointer, the nearest starts first, `wake` seconds sooner for every 100 px nearer.
   const DOZE = { after: 30, spread: 8, asleep: 6, jitter: 0.4, seed: 11, wake: 0.05 };
-  // A mark (src/cast.js MARKS) in the hand, in head units within the friend's box, from its eyes: `size`
+  // A mark (src/cast.js MARKS), written or drawn in the hand, in head units within the friend's box, from its eyes: `size`
   // tall, its bottom at (x, y), just outside the right ear and just above the box, clear of the labels of
   // a row above. A mark that repeats (the z of sleep) starts lower, beside the head, and drifts up without
   // rising above the box. Both stand far enough out to clear every right ear but Howdi's, the widest,
@@ -725,7 +725,8 @@
       function showMark(text, { at, lasting = E.MARK.seconds, drifting = false }) {
         const node = document.createElement('span'), place = drifting ? MARK.drifting : MARK;
         node.className = 'pf-live-mark hand';
-        node.textContent = text;
+        node.innerHTML = E.markMarkup(text);
+        node.dataset.mark = text;
         node.setAttribute('aria-hidden', 'true');
         const unit = `100cqw / ${view.w}`;
         Object.assign(node.style, {

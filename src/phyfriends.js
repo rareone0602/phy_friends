@@ -615,8 +615,8 @@
     tail: 0,            // Tail wag in degrees: positive swings the tip outward, negative tucks it in behind
     blush: 1,           // Blush opacity
     flush: 0,           // How far the blush spreads: 0 as drawn, 0.5 half as large again
-    eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override it)
-    mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open'
+    eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' | 'swirl' (eyeL / eyeR override it)
+    mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'flat' | 'wobble' | 'open'
     show: null,         // The extras shown on cue: a space-separated list of their names (an extra's `show`)
     facing: 0,          // Which way the friend faces, in degrees about the vertical: 0 toward the viewer, 90 side-on to the
                         // viewer's right, 180 away, 270 side-on to the left. It snaps to the nearest of the four (TURN)
@@ -1788,18 +1788,34 @@
   }
 
   // Eye strokes take the eye's w and h, a = the half-span as a fraction of w (eyes.arc),
-  // and d = 1 for the left eye or -1 for the right ('squint' points inward: > <).
+  // and d = 1 for the left eye or -1 for the right ('squint' points inward: > <; 'swirl' winds
+  // the other way in each eye, so that the two mirror each other).
   const EYE_STROKES = {
     happy: (w, h, a) => `M${num(-w * a)} ${num(h * 0.12)}Q0 ${num(-h * 0.42)} ${num(w * a)} ${num(h * 0.12)}`,
     closed: (w, h, a) => `M${num(-w * a)} ${num(-h * 0.08)}Q0 ${num(h * 0.3)} ${num(w * a)} ${num(-h * 0.08)}`,
     squint: (w, h, a, d) => `M${num(-d * w * a * 0.8)} ${num(-h * 0.26)}L${num(d * w * a * 0.7)} 0L${num(-d * w * a * 0.8)} ${num(h * 0.26)}`,
+    swirl: (w, h, a, d) => spiralPath(SWIRL.reach * Math.max(w, h), SWIRL.turns, d),
   };
+  // The swirl of a dizzy eye: how far out it winds, as a fraction of the eye's longer side, in how many turns, and
+  // how thick its line is, as a fraction of the other strokes', so that its turns stay apart.
+  const SWIRL = { reach: 0.4, turns: 1.75, stroke: 0.55 };
+  // A spiral from the middle of the eye out to radius r, winding `turns` times: clockwise for d = 1, and mirrored for -1.
+  function spiralPath(r, turns, d) {
+    const steps = Math.round(turns * 16), points = [];
+    for (let i = 0; i <= steps; i++) {
+      const u = i / steps, angle = u * turns * 2 * Math.PI - Math.PI / 2, reach = r * (0.08 + 0.92 * u);
+      points.push(`${num(d * reach * Math.cos(angle))} ${num(reach * Math.sin(angle))}`);
+    }
+    return `M${points.join('L')}`;
+  }
   const MOUTHS = {
     w: s => `M${-s} ${-s * 0.3}Q${-s * 0.5} ${s * 0.7} 0 ${-s * 0.1}Q${s * 0.5} ${s * 0.7} ${s} ${-s * 0.3}`,
     smile: s => `M${-s} ${-s * 0.2}Q0 ${s * 0.9} ${s} ${-s * 0.2}`,
     frown: s => `M${-s * 0.9} ${s * 0.35}Q0 ${-s * 0.6} ${s * 0.9} ${s * 0.35}`,
     v: s => `M${-s * 0.6} ${-s * 0.3}L0 ${s * 0.4}L${s * 0.6} ${-s * 0.3}`,
     o: s => `M0 ${-s * 0.5}a${s * 0.45} ${s * 0.55} 0 1 0 0.01 0Z`,
+    flat: s => `M${-s * 0.75} ${s * 0.1}Q0 ${-s * 0.05} ${s * 0.75} ${s * 0.1}`,
+    wobble: s => `M${-s} ${s * 0.1}Q${-s * 0.75} ${-s * 0.35} ${-s * 0.5} ${s * 0.1}T0 ${s * 0.1}T${s * 0.5} ${s * 0.1}T${s} ${s * 0.1}`,
   };
 
   // A render draws the friend part by part, from the back: the tail, the legs, then the upper body (the body, the feet
@@ -2013,10 +2029,10 @@
         open += `<g clip-path="${eyeClip}">${marks}</g>`;
       }
       if (tilt) open = `<g transform="rotate(${tilt})">${open}</g>`;
-      // Strokes for 'happy', 'closed', and 'squint': eyes.stroke sets the line width, and
+      // Strokes for 'happy', 'closed', 'squint' and 'swirl': eyes.stroke sets the line width (a swirl's is thinner), and
       // eyes.arc sets the half-span (as a multiple of w).
       const stroke = k => `<path d="${EYE_STROKES[k](w, h, eye.arc ?? 0.9, side === 'L' ? 1 : -1)}" fill="none" stroke="${c}"` +
-        ` stroke-width="${num(eye.stroke ?? w * 0.42)}" stroke-linecap="round" stroke-linejoin="round"/>`;
+        ` stroke-width="${num((eye.stroke ?? w * 0.42) * (k === 'swirl' ? SWIRL.stroke : 1))}" stroke-linecap="round" stroke-linejoin="round"/>`;
       const key = `eye${side}`;
       // The lid (pose.lid) is a clip whose edge comes down over the open eye; it widens and blinks with the eye.
       const reach = Math.max(w, h) * 2, top = -h / 2 - LID_CLEARANCE;
