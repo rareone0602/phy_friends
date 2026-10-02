@@ -103,7 +103,7 @@ PhyFriends.define('tanyuan', {
     fit: { forelegs: 0.4 },
     seat: { paw: { cx: 15, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 48, cy: 120, rx: 19, ry: 10, rot: -8 } },
     arms: { bands: [{ from: 0.34, to: 0.74, color: 'hoodieShade', grow: 1.5 }, { from: 0, to: 0.4, color: 'hoodieShade', grow: 2.5 }] },
-    legs: { bands: [{ from: 0.5, to: 0.95, color: 'face' }] },
+    legs: { bands: [{ from: 0.5, to: 1, color: 'face' }] },
   },
   extras: [
     // The tan band across the eyes: it covers the top of the white face down to just under the eyes, far enough
@@ -142,8 +142,9 @@ PhyFriends.define('tanyuan', {
     // ends. The inside of the hood, in its house shade: it lies behind the rim, which is the
     // same gray, and shows where the rim's two sides part under the chin, as the inside of the hood does beside the
     // chest in hoodie.jpg. The white chest that the pictures show there is left out: right under the white chin it
-    // would merge with the chin, and in its own house shade it would merge with the rim.
-    { feature: 'hood', on: 'body', fill: 'hoodShade', nodes: [[-9, 44, 1], [9, 44, 1], [0, 82, 1]] },
+    // would merge with the chin, and in its own house shade it would merge with the rim. The inside opens at the front
+    // (turn: 'front'), so it is hidden when he turns his back.
+    { feature: 'hood', on: 'body', turn: 'front', fill: 'hoodShade', nodes: [[-9, 44, 1], [9, 44, 1], [0, 82, 1]] },
     // The rim of the hood, lying bunched around the neck as a thick roll, one side from each shoulder down to a point
     // under the chin; his left side (the viewer's right) lies over the other, as in hoodie.jpg. Its ends rest on the
     // narrow shoulders and stand out past them, so that the roll overhangs the hoodie below and reads as cloth lying

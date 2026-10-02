@@ -400,6 +400,49 @@ standing.
 **Layering:** ears, head, face mask, blush, eyes, mouth, then hair on top.
 Bangs may cross the face.
 
+**Turning round comes from the spec, not from new drawings.** Every fwiend
+but Claude turns as South Park's cut-outs do, a quarter turn at a time
+(`pose.facing`): side-on to either side, or its back to the viewer. Nobody
+draws a fwiend's side or back. The factory turns each one by rules that every
+fwiend shares (`PhyFriends.TURN`), so a change to the body plan turns with it.
+The rules choose what looks pleasing over what is spatially right: where the
+true turn looks worse than a cheat, the cheat wins.
+- Side-on, the face slides forwards and narrows, keeping a pale patch wide
+  enough to read, with only its near eye on it, drawn over the hair, its
+  mouth, its near cheek and its near side's markings; the hair bends from the
+  head, where the crown stays (a mop keeps covering the side of the head), to
+  the face, which a fringe follows; the ears close up and stand straighter,
+  the far one in its house shade, the body narrows, the far limbs go behind,
+  and the tail grows from its back. Whatever lies on one side wraps round the
+  near side and hides on the far one.
+- From behind, a fwiend is its own mirror image: its tail and anything
+  one-sided change sides, its face is hidden but its chin keeps the head's
+  outline, its ears show their backs in their house shade, hair that covers
+  the crown lies over its head, its arms hang beside it, and its tail is drawn
+  over everything.
+- How a marking or a garment turns follows from its feature
+  (`ANATOMY.turns`): a chest or a bib goes to the front and hides from behind,
+  a hood or wings go to the back and show over it from behind, a thigh wraps
+  round the side, a shoulder patch rides the near arm, horns and antlers move
+  with the ears (the far one left out), the
+  inside of an ear faces forwards, and glasses are left out once a fwiend
+  turns, as is the custom in a side view. Name a feature for what it is and it
+  turns rightly: the anchor on WhiteDeer's hat is a `badge`, which faces
+  forwards. Give an extra its own `turn` only where it lies another way from
+  its feature: the pale lock on phy's forehead faces forwards, the inside of
+  tanyuan's hood opens at the front, cowosus's eye patch covers the side of
+  his head, and Raze's purple cheek mark is left out once he turns, since it
+  would hang under his eye. Teni's spec lights his back (`backLit`), so that
+  the back of his bob takes its own colour from behind.
+- A part that shows only once a fwiend turns is drawn from the owner's own
+  picture or description of its back, as WhiteDeer's sailor-collar flap is
+  from his sheet's drawing of the outfit from behind, and the knot of Brian's
+  bandana from his sheet, and lies under the body facing the viewer, so that
+  the front is unchanged.
+- A fwiend's own turn numbers (`turn` in its spec) are a last resort. A
+  difference that several fwiends share belongs in the rules. Check the side
+  and the back on the tuning page, which shows them.
+
 **Feelings come from the pose, not from new drawings.** The emotion library
 (`src/emotion.js`) has eleven, each shown with the parts every fwiend on the
 house template has: the eye shapes (`happy`, `closed`, `squint`), a lid held

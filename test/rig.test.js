@@ -422,4 +422,124 @@
     assert(legAt(kneed, 12).width > legAt(kneed, 0).width + 3, 'the leg with knees bows out');
     assert(Math.abs(legAt(STANDER, -3).foot - legAt(STANDER, 0).foot) < 0.5, 'a little rise stretches the leg and leaves the foot down');
   });
+
+  // ---- Turning (PF.TURN)
+
+  // A friend with a face, a brow over each eye, a tail, and a marking on the front and the back of its body, to turn.
+  const TURNER = {
+    ...STANDER, name: 'test-turner', face: { cx: 0, cy: 20, rx: 40, ry: 18 },
+    tail: { base: [50, 100], angle: 40, length: 90, width: 40 },
+    extras: [
+      { feature: 'brows', on: 'face', kind: 'ellipse', fill: 'fur', cx: -30, cy: -30, rx: 7, ry: 5 },
+      { feature: 'brows', on: 'face', d: 'M22 -30A8 5 0 1 1 38 -30A8 5 0 1 1 22 -30Z', fill: 'fur' },
+      { feature: 'chest', on: 'body', kind: 'ellipse', fill: 'fur', cx: 0, cy: 80, rx: 24, ry: 20 },
+      { feature: 'hood', on: 'body', kind: 'ellipse', fill: 'fur', cx: 0, cy: 50, rx: 30, ry: 10 },
+    ],
+  };
+  // The drawing of a spec in a pose, as a document to look into.
+  const drawing = (spec, pose) => {
+    const box = document.createElement('div');
+    box.innerHTML = PF.render(spec, { pose, view: PF.standingView(spec), uid: 'turn' });
+    return box;
+  };
+  const named = (root, name) => root.querySelector(`[data-pf="${name}"]`);
+
+  test('a friend turns a quarter at a time, and one that never stands never turns', () => {
+    assertEqual([44, 46, 135, 224, -90, 400].map(PF.quarterOf), [0, 90, 180, 180, 270, 0]);
+    const still = facing => PF.render(SITTER, { pose: { facing }, uid: 'same' });
+    assertEqual(still(180), still(0), 'a friend that never stands faces the viewer');
+    assertEqual(PF.render(TURNER, { pose: { facing: 100 }, uid: 'same' }), PF.render(TURNER, { pose: { facing: 90 }, uid: 'same' }), 'a facing between snaps');
+  });
+
+  test('from behind, a friend is its own mirror image, its face hidden, its arms beside it and its tail over it', () => {
+    const back = drawing(TURNER, { stance: 'stand', facing: 180 }), root = named(back, 'root');
+    assertEqual(root.firstElementChild.getAttribute('transform'), 'scale(-1 1)', 'the figure is mirrored');
+    assert(after(named(back, 'upper'), named(back, 'tail')), 'the tail comes after the upper body');
+    const beside = named(back, 'armsBeside');
+    assert(beside.contains(named(back, 'armL')) && beside.contains(named(back, 'armR')), 'standing, both arms hang beside it');
+    assert(after(named(back, 'body'), beside) && after(beside, named(back, 'head')), 'over the body and under the head');
+    const seated = drawing(TURNER, { stance: 'sit', facing: 180 }), behind = named(seated, 'armsBehind');
+    assert(behind.contains(named(seated, 'armL')) && after(behind, named(seated, 'body')), 'seated, they hang behind it');
+    assertEqual(named(back, 'face').children.length, 0, 'no face');
+    const marks = [...named(back, 'body').querySelectorAll('ellipse')];
+    assertEqual(marks.map(n => n.getAttribute('rx')), ['30'], 'the chest is hidden, and the hood shows');
+    assert(after(named(back, 'body').querySelector('path'), marks[0]), 'the hood lies over the body');
+  });
+
+  test('side-on, the far arm hangs behind the body, the far leg comes first, the near eye alone shows, and the face, the eye and the chest go ahead', () => {
+    for (const [facing, near, far, way] of [[90, 'L', 'R', 1], [270, 'R', 'L', -1]]) {
+      const side = drawing(TURNER, { stance: 'stand', facing });
+      assert(named(side, 'armsBehind').contains(named(side, `arm${far}`)), `facing ${facing}: the far arm is behind`);
+      assert(named(side, 'armsUnder').contains(named(side, `arm${near}`)), `facing ${facing}: the near arm is in front`);
+      assert(after(named(side, `leg${far}`), named(side, `leg${near}`)), `facing ${facing}: the near leg is drawn over the far one`);
+      const at = n => +n.getAttribute('transform').match(/translate\((-?[\d.]+)/)[1];
+      assert(way * at(named(side, `eye${near}`)) > 0, `facing ${facing}: the near eye is ahead`);
+      assertEqual(named(side, `eye${far}`).children.length, 0, `facing ${facing}: the far eye is hidden`);
+      const brows = [...named(side, 'face').querySelectorAll('ellipse, path')].filter(n => n.getAttribute('fill') === '#888888');
+      assertEqual(brows.map(n => n.tagName), [near === 'L' ? 'ellipse' : 'path'], `facing ${facing}: the near brow alone`);
+      const [chest, hood] = named(side, 'body').querySelectorAll('ellipse');
+      const tx = n => +n.parentNode.getAttribute('transform').split(' ')[4];
+      assert(way * tx(chest) > 0 && way * tx(hood) < 0, `facing ${facing}: the chest is ahead and the hood behind`);
+    }
+  });
+
+  test('side-on, the hair bends from the head to the face, a dotted mark loses its far dots, glasses are left out, the far ear shows its back, the near eye lies over the hair, and the face keeps its patch', () => {
+    const spec = {
+      ...TURNER, name: 'test-turner-hair', ears: { inner: { scale: 0.6 } },
+      hair: { cx: 0, cy: -45, rx: 45, ry: 20, tips: [[0, -80], [-50, -30], [0, 5], [50, -30]] },
+      extras: [...TURNER.extras, { feature: 'thighs', on: 'body', fill: '#123456', polys: [[-40, 100, 5], [40, 100, 5]] },
+        { feature: 'glasses', on: 'face', kind: 'ellipse', fill: '#654321', cx: -30, cy: 0, rx: 14, ry: 14 }],
+    };
+    support.withBoxSync(box => {
+      const rig = PF.mount(box, spec, { view: PF.standingView(spec), pose: { stance: 'stand', facing: 90 }, bitmap: false });
+      const path = rig.parts.hair.querySelector('path'), length = path.getTotalLength();
+      const points = Array.from({ length: 200 }, (_, i) => path.getPointAtLength((i * length) / 200));
+      const top = points.reduce((a, p) => (p.y < a.y ? p : a)), bottom = points.reduce((a, p) => (p.y > a.y ? p : a));
+      assert(Math.abs(top.x) < 2, `the crown stays on the head (${top.x.toFixed(1)})`);
+      assert(bottom.x > 20, `the lock at the eyes goes forward with the face (${bottom.x.toFixed(1)})`);
+      assertEqual(rig.svg.querySelectorAll('[fill="#123456"]').length, 1, 'the near dot alone');
+      assertEqual(rig.svg.querySelectorAll('[fill="#654321"]').length, 0, 'no glasses, though they lie on the near side');
+      const inner = S => rig.parts[`ear${S}`].querySelectorAll('path').length;
+      assertEqual([inner('L'), inner('R')], [2, 1], 'the near ear with its inside, the far one without');
+      const earFill = S => rig.parts[`ear${S}`].querySelector('path').getAttribute('fill');
+      assertEqual([earFill('L'), earFill('R')], ['#888888', PF.shadeOf('#888888')], 'the far ear shows its back, in the house shade of the head it matches');
+      assert(after(rig.parts.hair, rig.parts.eyes), 'the near eye lies over the hair');
+      const faceWidth = () => rig.parts.face.querySelector('path').getBoundingClientRect().width;
+      const side = faceWidth();
+      rig.setPose({ stance: 'stand', facing: 0 }, true);
+      assert(Math.abs(side / faceWidth() - PF.TURN.patch) < 0.03, `the face's patch is TURN.patch as wide side-on (${(side / faceWidth()).toFixed(2)})`);
+    }, 160);
+  });
+
+  test('side-on, a friend is drawn from the shared numbers: its body as wide as TURN.body has it, whatever its figure', () => {
+    const width = (spec, facing) => support.withBoxSync(box => {
+      const rig = PF.mount(box, spec, { view: PF.standingView(spec), pose: { stance: 'stand', facing }, bitmap: false });
+      return rig.parts.body.querySelector('path').getBoundingClientRect().width;  // The body's own outline, without its marks.
+    }, 160);
+    const k = PF.TURN.body;
+    try {
+      for (const body of [0.8, 0.6]) {
+        PF.TURN.body = body;
+        const spec = { ...TURNER, name: `test-turner-${body}` };
+        const ratio = width(spec, 90) / width(spec, 0);
+        assert(Math.abs(ratio - body) < 0.02, `side-on, the body is ${ratio.toFixed(3)} as wide, for TURN.body ${body}`);
+      }
+    } finally {
+      PF.TURN.body = k;
+    }
+  });
+
+  test('a mounted rig that turns draws itself afresh in the same svg, and keeps its parts and its texture', () => {
+    support.withBoxSync(box => {
+      const rig = PF.mount(box, TURNER, { view: PF.standingView(TURNER) }), parts = rig.parts, svg = rig.svg;
+      const texture = svg.querySelector('image[data-pf-texture]'), body = parts.body;
+      rig.setPose({ facing: 90 });
+      assert(rig.svg === svg && rig.parts === parts, 'the same svg and parts');
+      assert(parts.body !== body && parts.body.isConnected, 'its parts are the new drawing\'s');
+      assert(svg.querySelector('image[data-pf-texture]') === texture, 'the same texture');
+      assert(named(svg, 'armsBehind').contains(parts.armR), 'drawn side-on');
+      rig.setPose({ facing: 0 });
+      assertEqual(named(svg, 'armsBehind').children.length, 0, 'and facing the viewer again');
+    }, 160);
+  });
 })();

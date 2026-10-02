@@ -98,10 +98,10 @@ PhyFriends.define('phy', {
       fluff: [{ from: 64.6, to: 94.6, n: 1, len: 14.8, depth: 0, b1: -25, b2: 10, jit: 0 }] },
     { feature: 'earFold', on: 'ears', fill: 'furShade', nodes: [[3, -89, 1, -25], [-9, -79, 1, 15], [3, -77, 1, 0]] },
     // The dark top of the crest, with a fur lock rising into it. A pale band runs down its left
-    // edge, with a pale lock below it.
+    // edge, with a pale lock below it, on the forehead, which faces forward (turn: 'forward').
     { feature: 'crest', on: 'hair', clip: true, fill: 'furShade', nodes: [[-48, -72, 1], [-40, -115, 1], [25, -110, 1], [17.5, -73.8, 1, -4], [-23.1, -84.7, 1, -52], [-28.4, -60, 1]] },
     { feature: 'crest', on: 'hair', kind: 'ellipse', clip: true, fill: 'marble', cx: -49.7, cy: -94.3, rx: 36.1, ry: 8.3, rot: 47.8 },
-    { feature: 'crest', on: 'hair', fill: 'marble', nodes: [[-37, -63, 1, 40], [-53, -42, 1, 0], [-39, -40, 1, -40]] },
+    { feature: 'crest', on: 'hair', turn: 'forward', fill: 'marble', nodes: [[-37, -63, 1, 40], [-53, -42, 1, 0], [-39, -40, 1, -40]] },
     // The ruff: cream clumps rising to the white chin, modeled on a tuxedo cat's bib, on a marble layer that shows at
     // its sides. Both narrow toward the top, as the body does (onigiri: 1, the house's rice ball). The ruff lies over
     // the tops of the arms, as a scarf does (scarf), as in front.png and walking.png.

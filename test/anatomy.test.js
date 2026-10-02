@@ -34,6 +34,19 @@
     assertEqual(PF.check(spec), [], 'a seated foot declared hidden');
   });
 
+  test('a turn number that the house lacks, or an extra that turns with no group of the house, departs from the anatomy', () => {
+    // The friend's copy, with a turn section in its place in the house order, after the standing figure.
+    const spec = Object.fromEntries(Object.entries(copy('jiaoyue')).flatMap(e => (e[0] === 'stand' ? [e, ['turn', { eye: 0.5 }]] : [e])));
+    assertEqual(PF.check(spec), [], 'a number of the house');
+    spec.turn.nose = 1;
+    assert(departs(spec, /turn\.nose is not a number of the house's turn/), 'a number the house lacks');
+    const extra = copy('jiaoyue');
+    extra.extras[0].turn = 'sideways';
+    assert(departs(extra, /turns with "sideways", which is not a group of the house's turns/), 'a group the house lacks');
+    extra.extras[0].turn = 'none';
+    assertEqual(PF.check(extra), [], 'none');
+  });
+
   test('a part left out, a misnamed key, and a part with a color of its own each depart from the anatomy', () => {
     const noHair = copy('jiaoyue');
     delete noHair.hair;

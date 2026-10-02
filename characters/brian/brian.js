@@ -122,6 +122,10 @@ PhyFriends.define('brian', {
     // does (scarf).
     { feature: 'bandana', on: 'scarf', fill: 'scarfShade', nodes: [[-32, 40, 1, 0], [32, 40, 1, 0], [42, 56, 1, -10], [-42, 56, 1, 10]], round: 0.3 },
     { feature: 'bandana', on: 'scarf', fill: 'scarf', nodes: [[-38, 47, 1, -4], [38, 47, 1, -4], [0, 104, 1, -4]], round: 0.2 },
+    // The knot at the back and its two ends, which show only once he turns (turn: 'back'), lying under the body until then.
+    { feature: 'bandana', on: 'body', under: true, turn: 'back', fill: 'scarf', round: 0.3, nodes: [[-3, 60, 1, 0], [-22, 88, 1, -8], [-7, 90, 1, 0]] },
+    { feature: 'bandana', on: 'body', under: true, turn: 'back', fill: 'scarf', round: 0.3, nodes: [[3, 60, 1, 0], [7, 90, 1, 0], [22, 88, 1, 8]] },
+    { feature: 'bandana', on: 'body', under: true, turn: 'back', kind: 'ellipse', fill: 'scarfShade', cx: 0, cy: 62, rx: 9.5, ry: 7.5 },
     // Feet extras are in the seated foot's space (its center on the origin, +x toward the center line). The cuff of
     // each boot shows behind the foot, so it takes the boot's house shade.
     { feature: 'boots', on: 'feet', under: true, kind: 'ellipse', fill: 'bootShade', cx: 0, cy: -9, rx: 18, ry: 15 },

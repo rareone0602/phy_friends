@@ -24,6 +24,8 @@
   // about its root, below it. An ear that hangs from a pivot above it is added here only on purpose, since a lobe hung
   // that way by mistake turns the same way (Terry's did, until his ears were set on their roots).
   const EARS_HUNG_FROM_A_FOLD = ['cowosus'];
+  // The quarter turns besides facing the viewer (PF.TURN): side-on to the right, away, and side-on to the left.
+  const TURNED = [90, 180, 270];
 
   test('every friend of the house has the parts that a pose moves, under the same names', () => {
     withBoxSync(box => {
@@ -75,7 +77,7 @@
     const tuck = root.querySelector('[data-pf="tuck"]');
     return {
       looks: parts.map(n => [named(n), n.getAttribute('transform'), n.getAttribute('display'), n.getAttribute('opacity'), named(within(n))].join(':')).sort(),
-      slots: ['armsUnder', 'pawsUnder', 'armsOver'].map(slot),
+      slots: ['armsBehind', 'armsBeside', 'armsUnder', 'pawsUnder', 'armsOver'].map(slot),
       tucked: tuck ? tuck.hasAttribute('mask') : null,
       outlines: [...root.querySelectorAll('[data-pf-d]')].map(n => `${n.getAttribute('data-pf-d')}:${n.getAttribute('d')}`),
       toggles: [...root.querySelectorAll('[data-pf-when], [data-pf-show]')].map(n => n.getAttribute('display')),
@@ -88,6 +90,11 @@
       { stance: 'stand', armL: 120, elbowL: 30, crouch: 5, lean: 6, stepR: 4, over: 'armL', lid: 0.3, tail: 20 },
       { stance: 'stand', armR: 150, elbowR: -30, legL: 15, turnX: 0.6, lookY: -1, earL: 12, blink: 0.5 },
       { stance: 'stand', over: 'armR armL', armL: 90, eyes: 'closed', mouth: 'o', show: 'laptop' },
+      { stance: 'stand', facing: 90, armR: 120, legL: 10, eyes: 'happy' },
+      { stance: 'stand', facing: 90, over: 'armR', armR: 150, elbowR: -30, mouth: 'open' },
+      { stance: 'sit', facing: 180, tail: 20, rise: 0.3 },
+      { stance: 'stand', facing: 270, armL: 60, lookX: 0.5, blink: 0.4 },
+      { stance: 'sit', facing: 0, earL: 10 },
     ];
     withBoxSync(box => {
       for (const name of houseFriends()) {
@@ -103,11 +110,55 @@
     });
   });
 
+  test('every friend of the house turns to each quarter, sitting and standing, in finite numbers, and keeps its parts', () => {
+    withBoxSync(box => {
+      for (const name of houseFriends()) {
+        const rig = PF.mount(box, name, { bitmap: false, view: 'stand' });
+        for (const facing of TURNED) {
+          for (const stance of ['sit', 'stand']) {
+            const svg = PF.render(name, { view: 'stand', pose: { stance, facing }, bg: false });
+            assert(!BROKEN.test(svg), `${name} ${stance}ing, facing ${facing}: ${(svg.match(BROKEN) || [])[0]}`);
+          }
+          rig.setPose({ facing }, true);
+          assertEqual(PF.ANATOMY.parts.filter(part => !rig.parts[part]), [], `${name} facing ${facing} lacks`);
+        }
+      }
+    });
+  });
+
+  test('every friend of the house, side-on, has its face ahead of the middle of its head with its near eye alone, and from behind, none', () => {
+    withBoxSync(box => {
+      for (const name of houseFriends()) {
+        const rig = PF.mount(box, name, { bitmap: false, view: 'stand' });
+        const middle = part => { const r = rig.parts[part].getBoundingClientRect(); return r.left + r.width / 2; };
+        const shapes = part => rig.parts[part].querySelectorAll('path, ellipse, rect, circle').length;
+        for (const [facing, way, near, far] of [[90, 1, 'eyeL', 'eyeR'], [270, -1, 'eyeR', 'eyeL']]) {
+          rig.setPose({ facing, mouth: 'o' }, true);  // A mouth that shows, since a friend's own may be none.
+          for (const part of [near, 'mouth']) assert(way * (middle(part) - middle('base')) > 0, `${name} facing ${facing}: its ${part} is ahead`);
+          assertEqual(shapes(far), 0, `the shapes ${name} draws of its far eye facing ${facing}`);
+        }
+        rig.setPose({ facing: 180 }, true);
+        for (const part of ['face', 'eyes', 'mouth']) assertEqual(shapes(part), 0, `the shapes ${name} draws of its ${part} from behind`);
+      }
+    });
+  });
+
   test('every friend of the house sits and stands on its ground', async () => {
     for (const name of houseFriends()) {
       for (const stance of ['sit', 'stand']) {
         const below = await raster.lowest(name, { stance });
         assert(Math.abs(below) <= ON_GROUND, `${name} ${stance}s with its lowest point ${below.toFixed(1)} units below the ground`);
+      }
+    }
+  });
+
+  test('every friend of the house sits and stands on its ground in every quarter turn', async () => {
+    for (const name of houseFriends()) {
+      for (const facing of TURNED) {
+        for (const stance of ['sit', 'stand']) {
+          const below = await raster.lowest(name, { stance, facing });
+          assert(Math.abs(below) <= ON_GROUND, `${name} ${stance}s facing ${facing} with its lowest point ${below.toFixed(1)} units below the ground`);
+        }
       }
     }
   });
@@ -132,12 +183,14 @@
     }
   });
 
-  test('every friend of the house keeps a foot on the ground as it walks', async () => {
+  test('every friend of the house keeps a foot on the ground as it walks, facing the viewer or side-on', async () => {
     for (const name of houseFriends()) {
-      for (const u of [0.1, 0.3, 0.55, 0.8]) {
-        const pose = A.sample({ ...A.walking(u, 4).pose, stance: 'stand' });
-        const below = await raster.lowest(name, pose);
-        assert(Math.abs(below) <= ON_GROUND, `${name} at ${u} of a walk has its lowest point ${below.toFixed(1)} units below the ground`);
+      for (const facing of [0, 90]) {
+        for (const u of [0.1, 0.3, 0.55, 0.8]) {
+          const pose = A.sample({ ...A.walking(u, 4, { distance: 48, facing }).pose, stance: 'stand', facing });
+          const below = await raster.lowest(name, pose);
+          assert(Math.abs(below) <= ON_GROUND, `${name} at ${u} of a walk facing ${facing} has its lowest point ${below.toFixed(1)} units below the ground`);
+        }
       }
     }
   });

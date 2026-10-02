@@ -90,11 +90,14 @@ PhyFriends.define('teni', {
     legs: { bands: [{ from: 0.6, to: 1, color: 'diamond', teeth: 1, depth: 6 }] },
     tail: { base: [46, 116], angle: 80 },
   },
+  // From behind, the back of his bob lies over his head, so it takes the hair's own color rather than its shade.
+  turn: { backLit: true },
   extras: [
     // The back of the bob, in the house shade because it lies behind the mop: it shows beside the jaw and under each
-    // side lock, and its middle is tucked behind the chin.
+    // side lock, and its middle is tucked behind the chin, reaching down to the nape so that, when he turns his back,
+    // it covers the back of his head.
     { feature: 'backHair', on: 'base', under: true, fill: 'hairShade', cx: 0, cy: -24, rx: 100, ry: 74,
-      tips: [[0, -110, 0, 0, [104, -30]], [98, 46, -10, 0, [64, 30]], [0, 20, 0, 0, [-64, 30]], [-98, 46, 0, 10, [-104, -30]]] },
+      tips: [[0, -110, 0, 0, [104, -30]], [98, 46, -10, 0, [64, 30]], [0, 50, 0, 0, [-64, 30]], [-98, 46, 0, 10, [-104, -30]]] },
     // The curl on the crown, from the keychain: a lock that rises from the top of the mop and curls over to the
     // right and back in.
     { feature: 'curl', on: 'hair', fill: 'hair', nodes: [[-10, -100, 1, 0], [-16, -126], [-4, -146], [18, -150], [32, -136], [26, -120],

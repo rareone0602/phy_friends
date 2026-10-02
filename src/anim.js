@@ -12,8 +12,9 @@
  * leaves the field to lower layers, and null selects the spec default.
  * Afterward, sample() clamps blink and lid to 0..1 and look/turn to -1..1.
  *
- * The clips here are movements (idle, hop, bounce, nod, ...), and the movements
- * of a friend standing (walk, wave, cheer, jump, standUp, sitDown, dance, ...).
+ * The clips here are movements (idle, hop, bounce, nod, turn, ...), and the
+ * movements of a friend standing (walk, wave, cheer, jump, standUp, sitDown,
+ * dance, ...). A friend turns in quarter turns (pose.facing; PhyFriends.TURN).
  * Feelings, which add a face and a posture to a movement, are in src/emotion.js,
  * which adds its react(), hold() and feel() to what parse() understands (extend()).
  *
@@ -560,6 +561,18 @@
     return track({ [`arm${side}`]: held(80), lean: held(2 * d), tilt: held(3 * d), earL: held(-3), earR: held(-3) }, { duration: end });
   };
 
+  // Turns round as South Park's cut-out characters do, a quarter turn at a time (PhyFriends.TURN): `quarters` quarter
+  // turns, toward the viewer's right (a negative number turns the other way, and 4 all the way round), one every
+  // `seconds`, each snapping in with a small hop. The facing it ends on holds to the clip's end; laid over a pose, it
+  // adds to that pose's facing.
+  make.turn = ({ quarters = 2, seconds = 0.25, hop = 3 } = {}) => {
+    const n = Math.max(1, Math.round(Math.abs(quarters))), d = quarters < 0 ? -1 : 1, duration = (n + 0.6) * seconds;
+    return clip(t => {
+      const k = Math.min(n, Math.floor(t / seconds)), u = t / seconds - k, snap = k > 0 && u < 1 ? Math.sin(Math.PI * Math.min(1, u * 2)) : 0;
+      return { facing: d * 90 * k, y: -hop * snap, squash: -0.04 * snap };
+    }, duration);
+  };
+
   const clips = {};
   for (const k in make) clips[k] = make[k]();
   // In an expression, a library clip's name is that clip, and called with options (or none) it makes one, as make
@@ -813,8 +826,10 @@
   // the viewer's left): along, the share of the distance covered, which eases in over the first step and out
   // over the last; and pose, the partial pose of the walk there (a standing one: the feet, the arms, the lean).
   // Each leg (at rest, `leg` out and down from its hip; see WALK) swings so that its foot stays where it was
-  // planted while the body moves on over it; the body drops by as much as that swing lifts a planted foot (y).
-  function walking(u, steps, { distance = 0, leg = WALK.leg } = {}) {
+  // planted while the body moves on over it; the body drops by as much as that swing lifts a planted foot (y). A
+  // friend side-on (`facing`; PhyFriends.TURN), whose legs hang straight down and swing forward or back, takes the same
+  // steps, the leading foot stepping forward and the other closing up behind it.
+  function walking(u, steps, { distance = 0, leg = WALK.leg, facing = 0 } = {}) {
     const n = 2 * Math.max(1, Math.ceil(steps / 2)), p = clamp(u, 0, 1) * n, k = Math.min(n - 1, Math.floor(p)), v = p - k;
     const dir = distance < 0 ? -1 : 1, stride = (2 * Math.abs(distance)) / n;  // How far a foot moves in a step
     const start = w => w * w * (2 - w);  // Eases from rest into the walk's pace over a step
@@ -825,19 +840,22 @@
       [moving]: from + stride * ease.smooth(v) - body,
       [planted]: from + (k % 2) * stride - body,
     };
-    const [out, down] = leg, reach = Math.hypot(out, down), slant = Math.atan2(out, down);
-    const swing = side => Math.asin(clamp((out + (side === 'R' ? 1 : -1) * dir * offset[side]) / reach, -0.95, 0.95)) - slant;
+    const quarter = PF.quarterOf(facing), f = quarter === 90 ? 1 : quarter === 270 ? -1 : 0;
+    const [out, down] = f ? [0, Math.hypot(...leg)] : leg, reach = Math.hypot(out, down), slant = Math.atan2(out, down);
+    // A swing outward (facing the viewer) or forward (side-on) that puts the foot `offset` ahead of its rest.
+    const ahead = side => (f ? f : side === 'R' ? 1 : -1) * dir * offset[side];
+    const swing = side => Math.asin(clamp((out + ahead(side)) / reach, -0.95, 0.95)) - slant;
     const lift = a => down * (1 - Math.cos(a)) + out * Math.sin(a);
     const pose = stepping(p, WALK, { first: dir, follow: ease.smooth(clamp(Math.min(p, n - p), 0, 1)) });
     Object.assign(pose, { legL: swing('L') / DEG, legR: swing('R') / DEG, y: lift(swing(planted)) });
     return { along: progress / n, pose };
   }
 
-  // A pose seen in a mirror: what turns one way turns the other (MIRROR.turned), and each part of a pair changes
-  // places with the other (MIRROR.paired), so that a reaction toward the viewer's left plays toward the right. The
-  // tail stays on its side of the body, as it would on the friend turned round.
+  // A pose seen in a mirror: what turns one way turns the other (MIRROR.turned; a friend side-on to the right faces
+  // left), and each part of a pair changes places with the other (MIRROR.paired), so that a reaction toward the
+  // viewer's left plays toward the right. The tail stays on its side of the body, as it would on the friend turned round.
   const MIRROR = {
-    turned: ['x', 'headX', 'tilt', 'lookX', 'turnX', 'lean', 'hair'],
+    turned: ['x', 'headX', 'tilt', 'lookX', 'turnX', 'lean', 'hair', 'facing'],
     paired: [['earL', 'earR'], ['eyeL', 'eyeR'], ['armL', 'armR'], ['elbowL', 'elbowR'], ['legL', 'legR'], ['stepL', 'stepR']],
   };
   function mirror(clip) {

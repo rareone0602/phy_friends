@@ -154,7 +154,7 @@
   // A rice ball (onigiri) is an ellipse squared off toward a superellipse of exponent 2 + square, which gives it
   // a broad, flat base with round corners, and narrowed toward its top until it is `taper` narrower there. The
   // house's rice ball is a soft rounded triangle: much narrower under the chin, and round at the base (square 0).
-  const ONIGIRI = { square: 0, taper: 0.85 };
+  const ONIGIRI = { square: 0, taper: 0.8 };
   // The outline a fluffy shape grows its tufts on: its ellipse or, with `onigiri`, a rice ball: a number (0 to 1)
   // makes the ellipse ONIGIRI's rice ball by that much, and { taper, square } gives the rice ball's own.
   // point(deg, k) is the point at angle deg (k scales it toward the center) and normal(deg) the outward normal
@@ -198,7 +198,8 @@
   //   Each range places n tufts between angles from..to. Per range: len = tuft length;
   //   lean shifts the tips toward +angle (degrees); jit = randomness (0..1); depth =
   //   notch depth (0..1 of the radius); b1/b2 bend the rising/falling side of each tuft;
-  //   sym mirrors the range across the vertical axis. Ranges must not overlap.
+  //   sym mirrors the range across the vertical axis. Ranges must not overlap. A shape with `trim` (1 or -1, set by a
+  //   turn: trimmed) drops the one of each mirrored pair that lies on that side, its front side-on.
   //   For sawtooth shingles, use len ~0, depth ~0.1, a lean that puts each tip near
   //   one of its valleys, and a convex long side (b ~ -15) with a straight
   //   notch (b ~ 0). A negative len pulls the tip inward (with n: 1, it flattens an arc).
@@ -215,12 +216,12 @@
         len: (fl.len ?? 8) * (1 + (R() * 2 - 1) * jit),
       });
       const r = { from: fl.from, span, valleys, tips, depth: fl.depth ?? 0.03, b1: fl.b1 ?? -8, b2: fl.b2 ?? 22 };
-      ranges.push(r);
-      if (fl.sym) ranges.push({
+      const pair = fl.sym ? [r, {
         ...r, from: 180 - fl.to, b1: r.b2, b2: r.b1,
         valleys: valleys.map(v => 1 - v).reverse(),
         tips: tips.map(t => ({ ...t, pos: 1 - t.pos })).reverse(),
-      });
+      }] : [r];
+      ranges.push(...pair.filter(q => !(fl.sym && s.trim && Math.cos((q.from + q.span / 2) * DEG) * s.trim > 0)));
     });
     ranges.forEach(r => { r.from = ((r.from % 360) + 360) % 360; });
     ranges.sort((a, b) => a.from - b.from);
@@ -444,10 +445,11 @@
   //             friend's other colors follow the roles.
   //   features: what an extra draws (its `feature`), grouped by where it sits, so that what friends share has one
   //             name: one friend's eyebrow dots are `brows` as much as another's.
+  //   turns:    how the features turn with the friend (TURN), grouped by what they move with.
   const ANATOMY = {
     sections: {
       palette: true, head: true, face: true, ears: true, hair: true, eyes: true, blush: true, mouth: true, body: true,
-      tail: true, stand: true, extras: true, rig: true, views: false,
+      tail: true, stand: true, turn: false, extras: true, rig: true, views: false,
     },
     roles: {
       bg: '', fur: '', head: 'head', face: 'face', hair: 'hair', ear: 'ears', earRight: null, earInner: 'ears.inner',
@@ -456,7 +458,7 @@
     },
     features: {
       head: ['cheekRuff', 'neck', 'backHair', 'horns', 'antlers', 'blaze', 'brows', 'forehead', 'cheekMarks', 'eyePatch',
-        'mask', 'muzzle', 'noseBand', 'glasses', 'cap'],
+        'mask', 'muzzle', 'noseBand', 'glasses', 'cap', 'badge'],
       ears: ['earInner', 'earTufts', 'earFold', 'earTips', 'earLobes', 'earFront'],
       hair: ['locks', 'curl', 'crest', 'partings', 'streaks', 'lockTips', 'ponytail'],
       body: ['chest', 'belly', 'shoulders', 'armStripes', 'thighs', 'wings', 'crumbs'],
@@ -464,6 +466,23 @@
         'collar', 'print', 'sash', 'bow', 'anklet', 'boots'],
       tail: ['tailTip', 'tailMarks', 'tailBase', 'tailUnderside', 'marbling'],
       limbs: ['cuffs', 'socks', 'toes', 'soles', 'hooves'],
+    },
+    // How the features turn with the friend (TURN): side-on, those of the face move with it, those on the front or the
+    // back of the body (or of the head) go to its front or its back, those on its sides wrap round the near side, those
+    // on the shoulders and the arms go with the near arm, and those that grow from the head as the ears do move with
+    // the ears; from behind, those of the face and the front, and those that face forward (the insides of the ears, a
+    // badge on a hat, a hoof's cleft), are hidden, those on the back are drawn over their part, and those on the sides
+    // show where they are. Some are drawn only facing the viewer (frontal): soles, which face it only while the friend
+    // sits, and glasses, which a turned drawing leaves out, as is the custom. Any other feature rides its part.
+    turns: {
+      face: ['blaze', 'brows', 'forehead', 'cheekMarks', 'eyePatch', 'mask', 'muzzle', 'noseBand'],
+      front: ['chest', 'belly', 'bandana', 'neckerchief', 'collar', 'drawstrings', 'yukata', 'headphones'],
+      back: ['backHair', 'ponytail', 'wings', 'bow', 'hood'],
+      sides: ['thighs'],
+      arms: ['shoulders', 'armStripes'],
+      ears: ['horns', 'antlers'],
+      forward: ['earInner', 'earTufts', 'earFront', 'badge', 'hooves'],
+      frontal: ['soles', 'glasses'],
     },
     // The layers an extra may lie on (its `on`); 'ears', 'paws' and 'feet' mean both.
     layers: ['base', 'face', 'ears', 'earL', 'earR', 'hair', 'blush', 'body', 'scarf', 'tail', 'paws', 'pawL', 'pawR',
@@ -494,7 +513,7 @@
   // Where a spec departs from the house anatomy (ANATOMY), as a list of plain sentences; empty when it keeps to it.
   function check(specOrName) {
     const spec = resolve(specOrName);
-    return [checkSections, checkPalette, checkColors, checkStand, checkExtras].flatMap(departures => departures(spec));
+    return [checkSections, checkPalette, checkColors, checkStand, checkTurn, checkExtras].flatMap(departures => departures(spec));
   }
   const valueAt = (o, path) => path.split('.').reduce((v, k) => (v == null ? v : v[k]), o);
 
@@ -560,12 +579,19 @@
     return out;
   }
 
-  // Each extra names a feature of the house's list, and lies on a layer of the figure.
+  // A friend's own numbers for turning are TURN's.
+  function checkTurn(spec) {
+    return isObj(spec.turn) ? Object.keys(spec.turn).filter(k => !(k in TURN)).map(k => `turn.${k} is not a number of the house's turn (TURN)`) : [];
+  }
+
+  // Each extra names a feature of the house's list, lies on a layer of the figure, and turns with a group of the house's
+  // turns, if it names one.
   function checkExtras(spec) {
-    const out = [], { features, layers } = ANATOMY, all = Object.values(features).flat();
+    const out = [], { features, layers, turns } = ANATOMY, all = Object.values(features).flat();
     (spec.extras || []).forEach((x, i) => {
       if (!all.includes(x.feature)) out.push(`extras[${i}] (on ${x.on}) names no feature of the house's list ("${x.feature}")`);
       if (!layers.includes(x.on)) out.push(`extras[${i}] lies on "${x.on}", which is not a layer of the figure`);
+      if (x.turn !== undefined && x.turn !== 'none' && !(x.turn in turns)) out.push(`extras[${i}] turns with "${x.turn}", which is not a group of the house's turns`);
     });
     return out;
   }
@@ -592,6 +618,8 @@
     eyes: 'open',       // Eye state: 'open' | 'happy' | 'closed' | 'squint' (eyeL / eyeR override it)
     mouth: null,        // Mouth shape: null = spec default; 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open'
     show: null,         // The extras shown on cue: a space-separated list of their names (an extra's `show`)
+    facing: 0,          // Which way the friend faces, in degrees about the vertical: 0 toward the viewer, 90 side-on to the
+                        // viewer's right, 180 away, 270 side-on to the left. It snaps to the nearest of the four (TURN)
     // The figure's limbs (spec.stand), on which a friend both sits and stands. A spec with stand: false always sits
     // and ignores the fields below.
     stance: 'sit',      // 'sit' | 'stand'
@@ -886,14 +914,16 @@
     };
     const out = {};
     for (const [S, d] of [['L', 1], ['R', -1]]) {
+      // The way a limb's pose swings it: outward facing the viewer, and forward on either side for a figure side-on.
+      const w = stand.forward ? -stand.forward : d;
       const arm = folded(stand.arms[S], stand.seat.arms[S], fold), [sx, sy] = arm.shoulder;
-      const a0 = (90 + d * (arm.angle + (p[`arm${S}`] || 0))) * DEG;
-      const arc = limbArc([-d * sx, sy], a0, d * (arm.bend + (p[`elbow${S}`] || 0)) * DEG, arm.length);
+      const a0 = (90 + d * arm.angle + w * (p[`arm${S}`] || 0)) * DEG;
+      const arc = limbArc([-d * sx, sy], a0, w * (arm.bend + (p[`elbow${S}`] || 0)) * DEG, arm.length);
       out[`arm${S}`] = { at: arc, L: arm.length, spec: arm, end: arc(arm.length) };
 
       const leg = folded(stand.legs[S], stand.seat.legs[S], fold), [hx, hy] = leg.hip, foot = leg.foot;
       const ankle = leg.ankle ?? (foot.cy || 0) + (foot.ry ?? foot.rx ?? 0);
-      const rest = [-d * (hx + leg.spread), stand.ground - ankle], swing = d * (p[`leg${S}`] || 0) * DEG;
+      const rest = [-d * (hx + leg.spread), stand.ground - ankle], swing = w * (p[`leg${S}`] || 0) * DEG;
       const [ox, oy] = rot(rest[0] + d * hx, rest[1] - hy, swing);
       const hip = carry(-d * hx, hy), want = [-d * hx + ox, hy + oy - (p[`step${S}`] || 0)];
       const L = Math.hypot(rest[0] + d * hx, rest[1] - hy) * (1 + (leg.bow || 0));
@@ -902,21 +932,332 @@
       // without knees shortens at once.
       const knees = leg.knees !== false;
       const length = c > L ? Math.min(c, L * STRETCH) : knees ? Math.min(L, c / FOLD) : c, b = knees && c < length ? bendFor(c, length) : 0;
-      const legArc = limbArc(hip, chord + (d * b) / 2, -d * b, length);
+      const legArc = limbArc(hip, chord + (w * b) / 2, -w * b, length);
       out[`leg${S}`] = { at: legArc, L: length, spec: leg, end: legArc(length), tilt: swing * 0.5 };
     }
     return out;
   }
 
-  function earFor(spec, side) {
-    const ears = { ...EAR_DEFAULT, ...(spec.ears || {}) };
-    return side === 'R' ? { ...ears, ...(ears.right || {}) } : ears;
+  // --------------------------------------------------------------- Turning
+
+  // Every friend that stands also turns, as South Park's cut-out characters do: not through every angle but in quarter
+  // turns (pose.facing, in degrees about the vertical): toward the viewer (0), side-on to the viewer's right (90), away
+  // from the viewer (180), or side-on to the left (270). A turned friend is drawn from its own spec by the rules below,
+  // never from a drawing of its own, so that it turns the same way after any change to its spec or to the house's
+  // figure (STAND_FIT, ONIGIRI, BODY). Where the spatially right turn looks worse than a cheat, the cheat wins: one eye
+  // side-on, glasses left out, an eye over the hair.
+  // Side-on, each part of the head and the body lies on a plane that slides toward the way the friend faces and
+  // narrows: a point at x facing the viewer lies at t + k·x. The face comes forward and narrows until its near eye sits
+  // `eye` of the head's half-width ahead of the middle and its front edge reaches `reach` of it, and carries that eye
+  // and the near cheek, which keep their shape, the mouth, and the markings of the face (ANATOMY.turns.face), which
+  // come in with the head above the eyes; a small mark keeps its shape too, and one across the face (a blaze, an
+  // emblem) at least `patch` of its width. The face's own patch keeps its front edge but is `patch` as wide, so that a
+  // white face still reads. The far eye and cheek are hidden, as is whatever lies wholly on the far side of the center
+  // line (extraPlane); a dotted mark turns dot by dot. The near eye lies over the hair. The head is `head` as wide, and
+  // loses the tufts in front of it. The hair bends from the head, where its top lies, to the face at the eyes, so that
+  // a crown stays on the head and a fringe goes with the face, and hair that covers the crown (at least `crown` of the
+  // head's width) keeps covering the side of the head (hairAt). The ears close up to `ears` of their spacing, `earBack`
+  // of the head's half-width behind its middle, tilted out by only `earTilt` of their angle (a folded ear keeps its
+  // fold) and `earWidth` as broad, the far one first and showing its back, in its house shade where it is the head's
+  // color; horns and antlers stand with them, as broad, but for the far one. The body is `body` as wide; what lies on
+  // its front (ANATOMY.turns.front) comes forward, `front` as wide (`scarf` round the neck), until its front edge
+  // reaches the body's, hanging forward where it is wider than the body, and what lies on its back (ANATOMY.turns.back)
+  // goes to its back. What lies on one side (ANATOMY.turns.sides, and any marking of the head or the body wholly on one
+  // half) wraps round the near side, and hides on the far one; a mark on the shoulder or the arm (ANATOMY.turns.arms)
+  // goes with the near arm. The limbs close up to `limbs` of their spacing and hang straight down, the far ones behind,
+  // and swing forward for a positive angle on either side; the feet point forward by `toes` of their width; seated, the
+  // forepaws come `paws` of the body's half-width forward and the hind feet `feet` of it. The tail's root goes to the
+  // body's back, `tailRoot` of the way out to its edge.
+  // From behind, the friend is its own mirror image, as it would be turned round: the face and what lies on the front
+  // are hidden, though the head keeps the outline its face gives it, as is what faces forward (ANATOMY.turns.forward);
+  // what lies on the back is drawn over its part, in its own color rather than its shade for a spec with `backLit`; the
+  // ears show their backs, in their house shade where they are the head's color; the arms hang behind the body while it
+  // sits and beside it, under the head, once it rises; hair that covers the crown lies over the head, and a narrower
+  // forelock or crest under it (`backHair` 'auto'; or 'over', 'under' or 'none'); and the tail, its root `tail` of the
+  // way out from the middle of the back, is drawn over everything. Soles and glasses (ANATOMY.turns.frontal) show only
+  // toward the viewer. A spec changes any of these numbers for itself (spec.turn), and an extra's own `turn` names the
+  // group of ANATOMY.turns it turns with, or 'none' to ride its part as it is.
+  const TURN = {
+    head: 1, eye: 0.55, reach: 0.92, patch: 0.55, crown: 0.6, ears: 0.35, earBack: 0.15, earTilt: 0.35, earWidth: 0.75, body: 0.8,
+    front: 0.5, scarf: 0.8, limbs: 0.3, toes: 0.3, paws: 0.45, feet: 0.15, tailRoot: 0.85, tail: 0.35, backHair: 'auto', backLit: false,
+  };
+  // The quarter turn nearest a pose's facing: 0, 90, 180 or 270.
+  const quarterOf = facing => ((Math.round((facing || 0) / 90) % 4) + 4) % 4 * 90;
+  // A plane of a friend turned side-on: a point at x facing the viewer lies at t + k·x.
+  const plane = (t, k) => ({ t, k, at: x => t + k * x });
+  const SAME = plane(0, 1);
+  const turnCache = new WeakMap();
+  // How a spec is drawn facing `facing` (quarterOf): null while it faces the viewer, and for a friend that never stands
+  // (Claude), which never turns either.
+  function turnOf(spec, facing) {
+    const quarter = quarterOf(facing);
+    if (!quarter || !stands(spec)) return null;
+    if (!turnCache.has(spec)) turnCache.set(spec, {});
+    const kept = turnCache.get(spec);
+    return kept[quarter] || (kept[quarter] = turning(spec, quarter));
+  }
+  // Whether a friend's hair is a mop, which covers its crown, rather than a forelock or a crest: as wide as `crown` of
+  // the head's half-width.
+  const isMop = (spec, T) => !!spec.hair && Math.abs(spec.hair.cx || 0) + (spec.hair.rx ?? 50) >= T.crown * ellipse(spec.head || {}).rx;
+  // The turn of a spec to a quarter: its numbers (T); from behind, whether its hair lies over its head; and side-on,
+  // which way it faces (f: 1 to the viewer's right), its near and far sides (L, the viewer's left facing us, is near
+  // facing right), and the planes of its parts.
+  function turning(spec, quarter) {
+    const T = { ...TURN, ...(spec.turn || {}) };
+    if (quarter === 180) return { quarter, back: true, T, hair: T.backHair === 'auto' ? (isMop(spec, T) ? 'over' : 'under') : T.backHair };
+    const f = quarter === 90 ? 1 : -1, eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
+    const head = ellipse(spec.head || {}), face = spec.face && ellipse(spec.face);
+    // The face's plane puts the near eye `eye` of the head's half-width ahead of its middle and the face's front edge
+    // `reach` of it, which sets how narrow the face is.
+    const faceHalf = face ? Math.abs(face.cx) + face.rx : eye.x + eye.w;
+    const k = Math.min(1, Math.max(0.1, ((T.reach - T.eye) * head.rx) / (faceHalf + eye.x)));
+    const facePlane = plane(f * (T.eye * head.rx + k * eye.x), k);
+    // The hair bends from the head to the face: from its top, which lies on the head's plane, so that a crown stays on
+    // the head, down to the eyes, below which it lies on the face's, so that a fringe or a lock beside the face goes
+    // with the face; in between, on a plane part of the way from the one to the other (hairAt).
+    // Hair that covers the crown (a mop) keeps covering the side of the head: outward of the near eye, it runs from where
+    // the bend puts that eye's column back to its own outer edge, which stays where it is.
+    const top = spec.hair ? extentOf(spec.hair).y0 : 0, headPlane = plane(0, T.head), mop = isMop(spec, T);
+    const outer = spec.hair ? (f > 0 ? extentOf(spec.hair).x0 : extentOf(spec.hair).x1) : 0, column = -f * eye.x;
+    const hairAt = (y, x) => {
+      const u = Math.min(1, Math.max(0, (y - top) / Math.max(1, eye.y - top)));
+      const bent = plane(u * facePlane.t, headPlane.k + u * (facePlane.k - headPlane.k));
+      if (!mop || x === undefined || f * x >= f * column || Math.abs(column - outer) < 1) return bent;
+      const hinge = (bent.at(column) - headPlane.at(outer)) / (column - outer);
+      return plane(headPlane.at(outer) - hinge * outer, hinge);
+    };
+    // The face's patch keeps its front edge on the face's plane but is wider (`patch`), so that a white face or muzzle
+    // still reads side-on; the near cheek keeps inside it.
+    const patchK = Math.max(k, T.patch), patch = plane(facePlane.at(f * faceHalf) - patchK * f * faceHalf, patchK);
+    const edge = patch.at(-f * faceHalf), rx = (spec.blush && spec.blush.rx) || 0;
+    const cheek = x => (face ? f * Math.max(f * facePlane.at(x), f * edge + rx) : facePlane.at(x));
+    const side = T.body * ellipse(bodyHeight(spec).body).rx;
+    return {
+      quarter, T, f, near: f > 0 ? 'L' : 'R', far: f > 0 ? 'R' : 'L', eye, hairAt, cheek,
+      planes: {
+        head: headPlane, face: facePlane, patch,
+        ears: plane(-f * T.earBack * head.rx, T.ears), body: plane(0, T.body),
+        limbs: plane(0, T.limbs), paws: plane(f * T.paws * side, T.limbs), feet: plane(f * T.feet * side, T.limbs),
+      },
+    };
+  }
+  // A fluffy shape of the head side-on, which loses the one of each mirrored pair of tufts that lies in front, where the
+  // face is, so that the head's front is the plain curve of its outline (fluffy).
+  const trimmed = (shape, turn) => (shape && shape.fluff && turn && !turn.back ? { ...shape, trim: turn.f } : shape);
+  // The plane that each layer of the figure lies on side-on (the hair bends instead: hairAt; the ears, the tail and the
+  // limbs move by their numbers).
+  const LAYER_PLANES = { base: 'head', face: 'patch', blush: 'face', body: 'body', scarf: 'body' };
+  // The marks whose pieces turn as one: a piece of one that lies on the far side stays while another crosses the
+  // center line (K3V1N's forehead glyph), where a lone far piece (a far brow) is hidden.
+  const EMBLEMS = ['forehead', 'badge'];
+  // The things worn on the front whose pieces turn as one, against the front edge: a neckerchief's knot and its ends.
+  const KNOTS = ['neckerchief'];
+  // The least share of its width that a lock or a mark on the hair keeps side-on, so that it still reads as one.
+  const LOCK = 0.5;
+  // The group of ANATOMY.turns an extra turns with: its own `turn`, its feature's group, or its layer's: the face's for
+  // what lies on the face or the cheeks, and the front's for the scarf (a ruff or a bib); null to ride its part.
+  function turnGroupOf(x) {
+    if (x.turn) return x.turn === 'none' ? null : x.turn;
+    const group = Object.keys(ANATOMY.turns).find(g => ANATOMY.turns[g].includes(x.feature));
+    return group || (x.on === 'face' || x.on === 'blush' ? 'face' : x.on === 'scarf' ? 'front' : null);
+  }
+  const HIDDEN = { show: false };
+  // From behind, a spec with `backLit` draws what lies on its back in a house shade (shaded facing the viewer, as it lies
+  // behind the head or the body) in that color itself, since it is now in front: Teni's back hair.
+  function backLit(spec, turn, x) {
+    const base = typeof x.fill === 'string' && x.fill.endsWith('Shade') && x.fill.slice(0, -5);
+    return turn && turn.back && turn.T.backLit && turnGroupOf(x) === 'back' && base && base in (spec.palette || {}) ? { ...x, fill: base } : x;
+  }
+  // The pieces in which an extra turns side-on: each dot of a dotted one (polys) on its own, so that a dot on the far
+  // side hides and one on the near side wraps round where it lies; any other extra whole.
+  const turnedPieces = (x, sideOn) => (sideOn && x.polys && x.polys.length > 1 ? x.polys.map(p => ({ ...x, polys: [p] })) : [x]);
+  // How an extra on `layer` is drawn turned: whether it shows, whether it lies under its part, and side-on, the
+  // transform that moves it from its layer's plane onto its own (extraPlane).
+  function turnedExtra(spec, turn, x, layer) {
+    const group = turnGroupOf(x), under = !!x.under;
+    if (!turn) return { show: true, under, move: '' };
+    if (group === 'frontal') return HIDDEN;
+    if (turn.back) return group === 'face' || group === 'front' || group === 'forward' ? HIDDEN : { show: true, under: group === 'back' ? false : under, move: '' };
+    if (group === 'forward' && layer === `ear${turn.far}`) return HIDDEN;  // The far ear shows its back side-on.
+    const own = extraPlane(spec, turn, x, layer, group), on = turn.planes[LAYER_PLANES[layer]] || SAME;
+    if (own === HIDDEN) return HIDDEN;
+    if (!own || own === on) return { show: true, under, move: '' };
+    return { show: true, under, move: `matrix(${num(own.k / on.k)} 0 0 1 ${num((own.t - on.t) / on.k)} 0)` };
+  }
+  // The pieces of one mark: the extras of an extra's feature on its layer that lie on the same side of the center line
+  // as it (side: -1, 1, or 0 for those that cross it; null for all of them), and where they lie together (extentOf).
+  function piecesOf(spec, x, side) {
+    const pieces = (spec.extras || []).flatMap(o => turnedPieces(o, true)).filter(o => o.feature === x.feature && o.on === x.on)
+      .map(extentOf).filter(e => side === null || e.side === side);
+    const x0 = Math.min(...pieces.map(e => e.x0)), x1 = Math.max(...pieces.map(e => e.x1));
+    const y0 = Math.min(...pieces.map(e => e.y0)), y1 = Math.max(...pieces.map(e => e.y1));
+    return { x0, x1, y0, y1, w: Math.max(-x0, x1), y: (y0 + y1) / 2, side };
+  }
+  // Where an extra lies side-on: its plane, null to ride its layer, or HIDDEN. What lies wholly on one side of the
+  // center line (a brow, a cheek mark, a lock, a shoulder patch, a horn) is hidden on the far side; on the near side, a
+  // small mark of the face keeps its shape, as the eye does, a mark on the shoulder or the arm goes with the near arm,
+  // and a marking of the head or the body wraps round it where it lies (wrapAt). What crosses the line moves with its
+  // group: with the face, keeping at least `patch` of its width (a blaze, an emblem); against the front edge, `front` as
+  // wide (`scarf` for a ruff or a bib), hanging forward where it is wider than the body; or about the back edge, keeping
+  // what it reaches past the outline. A one-sided mark on the back reaches out behind from the back edge. The pieces of
+  // one mark (piecesOf) share one plane, as do all the pieces of a knot worn on the front (KNOTS).
+  function extraPlane(spec, turn, x, layer, group) {
+    const { planes, T, f } = turn, own = extentOf(x), crosses = own.side === 0, crossed = piecesOf(spec, x, 0).x0 < Infinity;
+    const emblem = EMBLEMS.includes(x.feature) && crossed, knot = KNOTS.includes(x.feature) && group === 'front' && crossed;
+    const far = own.side === f && !emblem && !knot, onHead = layer === 'base' || layer === 'hair' || layer === 'face';
+    if (group === 'ears') {
+      // Horns and antlers stand where the ears' plane puts their middle, `earWidth` as broad as the ears are; the far
+      // one is hidden, so that they do not crowd the ears.
+      if (far) return HIDDEN;
+      const c = (own.x0 + own.x1) / 2;
+      return plane(planes.ears.at(c) - T.earWidth * c, T.earWidth);
+    }
+    if (group === 'face') {
+      if (far) return HIDDEN;
+      // Above the eyes, where the head narrows, the face's plane comes in with it, so that a mark there stays on it.
+      const narrow = Math.min(1, reachAt(spec.head, Math.min(own.y, turn.eye.y)) / Math.max(1, reachAt(spec.head, turn.eye.y)));
+      const face = plane(planes.face.t * narrow, planes.face.k);
+      if (crosses || emblem) {
+        const all = piecesOf(spec, x, emblem ? null : 0), c = (all.x0 + all.x1) / 2, kk = Math.max(face.k, T.patch);
+        return plane(face.at(c) - kk * c, kk);
+      }
+      const mark = piecesOf(spec, x, own.side), c = (mark.x0 + mark.x1) / 2;
+      return mark.x1 - mark.x0 > 2 * turn.eye.w ? face : plane(face.at(c) - c, 1);
+    }
+    // Extras on the body lie inside its stretch (drawBody), so they are measured against the spec's own body.
+    const outline = onHead ? spec.head : layer === 'body' ? spec.body : bodyHeight(spec).body, k = onHead ? T.head : T.body;
+    if (group === 'back') {
+      if (crosses) {
+        const { w, y } = piecesOf(spec, x, 0), reach = reachAt(outline, y), over = Math.max(0, w - reach);
+        return plane(-f * (k * reach + over - T.front * w), T.front);
+      }
+      const { x0, x1, y } = piecesOf(spec, x, own.side), inner = own.side > 0 ? x0 : x1;
+      return plane(-f * k * reachAt(outline, y) + f * own.side * T.front * inner, -f * own.side * T.front);
+    }
+    const planed = layer === 'base' || layer === 'body' || layer === 'scarf';
+    if (far && (planed || (layer === 'hair' && !x.clip))) return HIDDEN;
+    if (group === 'arms') {
+      // On the near arm's side, where the limbs' plane puts it, as narrow as the limbs close up, so that the arm hangs
+      // over it as it does facing the viewer; a small one keeps its shape.
+      const { x0, x1 } = piecesOf(spec, x, own.side), c = (x0 + x1) / 2, kk = x1 - x0 <= 2 * turn.eye.w ? 1 : planes.limbs.k;
+      return plane(planes.limbs.at(c) - kk * c, kk);
+    }
+    if (layer === 'hair') {
+      // On the bent hair (hairAt), at the mark's middle, keeping between LOCK and all of its width.
+      const { x0, x1, y } = piecesOf(spec, x, emblem ? null : own.side), c = (x0 + x1) / 2, at = turn.hairAt(y, c);
+      const kk = Math.min(1, Math.max(at.k, LOCK));
+      return plane(at.at(c) - kk * c, kk);
+    }
+    if (!planed || (group && group !== 'front' && group !== 'sides')) return null;
+    if (!crosses && !knot) {
+      // A piece worn on the front (a lapel, a knot's end) hangs to where it meets the others, so it is measured there.
+      const mark = piecesOf(spec, x, own.side);
+      return wrapAt(group === 'front' ? { ...mark, y: mark.y1 } : mark, outline, k, T, f, !!x.clip);
+    }
+    if (group !== 'front') return null;
+    // Against the front edge; a piece wider than the body there hangs forward of it rather than out behind.
+    const { w } = piecesOf(spec, x, knot ? null : 0), { y } = piecesOf(spec, x, 0), width = layer === 'scarf' ? T.scarf : T.front;
+    return plane(f * Math.abs(k * reachAt(outline, y) - width * w), width);
+  }
+  // The plane on which a mark on one side of a part (a head or a body: its outline, `k` as wide side-on) wraps round it
+  // side-on, as on a round part turned a quarter: a point x out from the center line facing the viewer comes to
+  // sqrt(1 - (x/R)²) of the part's half-width side-on toward its front, R being the outline's half-width at the mark's
+  // height, and a point past the outline goes on round toward the back. The plane runs from where the mark's inner end
+  // comes to; a mark clipped to its part that reaches past the outline (a patch over half the head) runs on past the
+  // back edge, so that the clip, not a straight cut, ends it, and any other is never wider than it is facing the viewer.
+  function wrapAt({ x0, x1, y, side }, outline, k, T, f, clipped) {
+    const R = Math.max(1, reachAt(outline, y)), D = k * R;
+    const round = x => {
+      const u = Math.min(2, Math.abs(x) / R);
+      return u <= 1 ? f * D * Math.sqrt(1 - u * u) : -f * D * Math.sqrt(1 - (2 - u) ** 2);
+    };
+    const inner = side > 0 ? x0 : x1, outer = side > 0 ? x1 : x0, span = outer - inner;
+    if (clipped && Math.abs(outer) > R && Math.abs(span) > 1e-6) {
+      const slope = (-f * (D + Math.abs(outer) - R) - round(inner)) / span;
+      return plane(round(inner) - slope * inner, slope);
+    }
+    const slope = Math.abs(span) < 1e-6 ? T.front : Math.max(T.front, Math.min(1, (round(outer) - round(inner)) / span));
+    return plane(round(inner) - slope * inner, slope);
+  }
+  // Where a shape lies across the figure: from x0 to x1 and y0 to y1, how far it reaches out from the center line (w),
+  // the height of its middle (y), and the side of the center line it lies on (side: -1 or 1, or 0 where it crosses).
+  function extentOf(x) {
+    let points;
+    if (x.d) points = pathPoints(x.d);
+    else if (x.polys) points = x.polys.flatMap(([px, py, r]) => [[px - r, py - r], [px + r, py + r]]);
+    else if (x.kind === 'ellipse') {
+      const e = ellipse(x), c = Math.cos(e.rot), s = Math.sin(e.rot);
+      const ex = Math.hypot(e.rx * c, e.ry * s), ey = Math.hypot(e.rx * s, e.ry * c);
+      points = [[e.cx - ex, e.cy - ey], [e.cx + ex, e.cy + ey]];
+    } else points = shapeNodes(x, 1).map(n => [n.x, n.y]);
+    if (!points.length) points = [[0, 0]];
+    const xs = points.map(p => p[0]), ys = points.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs);
+    const y0 = Math.min(...ys), y1 = Math.max(...ys);
+    return { x0, x1, y0, y1, w: Math.max(-x0, x1), y: (y0 + y1) / 2, side: x1 < -0.5 ? -1 : x0 > 0.5 ? 1 : 0 };
+  }
+  // The points that an SVG path's commands end on, in absolute coordinates: enough to say where the path lies.
+  function pathPoints(d) {
+    const points = [], tokens = d.match(/[a-z]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/gi) || [];
+    const ARGS = { m: 2, l: 2, t: 2, h: 1, v: 1, c: 6, s: 4, q: 4, a: 7, z: 0 };
+    let x = 0, y = 0, start = [0, 0], command = 'M', i = 0;
+    while (i < tokens.length) {
+      if (/[a-z]/i.test(tokens[i])) command = tokens[i++];
+      const lower = command.toLowerCase(), relative = command !== command.toUpperCase(), n = ARGS[lower];
+      if (lower === 'z') { [x, y] = start; points.push([x, y]); continue; }
+      const args = tokens.slice(i, i + n).map(Number);
+      i += n;
+      if (args.length < n) break;
+      if (lower === 'h') x = (relative ? x : 0) + args[0];
+      else if (lower === 'v') y = (relative ? y : 0) + args[0];
+      else [x, y] = [(relative ? x : 0) + args[n - 2], (relative ? y : 0) + args[n - 1]];
+      if (lower === 'm') { start = [x, y]; command = relative ? 'l' : 'L'; }
+      points.push([x, y]);
+    }
+    return points;
+  }
+  const turnedFigures = new WeakMap();
+  // The standing figure side-on: its limbs closed up on their plane, hanging straight down, with the feet pointing
+  // forward and the seated paws and feet brought forward on theirs. The figure gives a point of a pair from the
+  // center line on either side (x = -d·s, with d = 1 on the left), and so does this one. Its `forward` is the way it
+  // faces (f), toward which a limb's pose then swings it on either side (limbsFor).
+  function turnedFigure(stand, turn) {
+    if (!stand || !turn || turn.back) return stand;
+    if (!turnedFigures.has(stand)) turnedFigures.set(stand, {});
+    const kept = turnedFigures.get(stand);
+    return kept[turn.quarter] || (kept[turn.quarter] = sideOn(stand, turn));
+  }
+  function sideOn(stand, { planes, T, f }) {
+    const move = (p, s, d) => -d * p.at(-d * s);
+    const arms = {}, legs = {}, seat = { ...stand.seat, arms: {}, legs: {}, paw: {}, foot: {} };
+    for (const [S, d] of [['L', 1], ['R', -1]]) {
+      const arm = stand.arms[S], leg = stand.legs[S], hip = move(planes.limbs, leg.hip[0], d);
+      arms[S] = { ...arm, shoulder: [move(planes.limbs, arm.shoulder[0], d), arm.shoulder[1]], angle: 0 };
+      const foot = { ...leg.foot, cx: (leg.foot.cx || 0) + d * f * T.toes * (leg.foot.rx ?? 0) };
+      legs[S] = { ...leg, hip: [hip, leg.hip[1]], spread: move(planes.limbs, leg.hip[0] + (leg.spread || 0), d) - hip, foot };
+      const seatArm = stand.seat.arms[S], seatLeg = stand.seat.legs[S], paw = stand.seat.paw[S], seatFoot = stand.seat.foot[S];
+      seat.arms[S] = seatArm.shoulder ? { ...seatArm, shoulder: [move(planes.paws, seatArm.shoulder[0], d), seatArm.shoulder[1]] } : { ...seatArm, angle: 0 };
+      if (paw) seat.paw[S] = { ...paw, cx: move(planes.paws, paw.cx, d) };
+      const spread = seatLeg.spread ?? leg.spread ?? 0;
+      seat.legs[S] = { ...seatLeg, spread: move(planes.feet, leg.hip[0] + spread, d) - hip };
+      if (seatFoot) seat.foot[S] = { ...seatFoot, cx: move(planes.feet, seatFoot.cx, d) };
+    }
+    return { ...stand, arms, legs, seat, hips: [planes.limbs.at(stand.hips[0]), stand.hips[1]], forward: f };
+  }
+
+  function earFor(spec, side, turn) {
+    const ears = { ...EAR_DEFAULT, ...(spec.ears || {}) }, ear = side === 'R' ? { ...ears, ...(ears.right || {}) } : ears;
+    if (!turn || turn.back) return ear;
+    // Side-on, the ear's root moves on the ears' plane (the right one's root is given mirrored), and it stands up,
+    // unless it is folded over (turned past 90 degrees), as cowosus's flap is, which keeps its fold.
+    const d = side === 'L' ? 1 : -1, x = turn.planes.ears.at(d * ear.base[0]);
+    const angle = Math.abs(ear.angle) > 90 ? ear.angle : ear.angle * turn.T.earTilt;
+    return { ...ear, base: [d * x, ear.base[1]], angle, narrow: turn.T.earWidth };
   }
   function earPlace(ear, side, twitch) {
-    const [bx, by] = ear.base, a = ear.angle + twitch;
+    const [bx, by] = ear.base, a = ear.angle + twitch, narrow = ear.narrow ? ` scale(${num(ear.narrow)} 1)` : '';
     return side === 'L'
-      ? `translate(${num(bx)} ${num(by)}) rotate(${num(-a)})`
-      : `translate(${num(-bx)} ${num(by)}) rotate(${num(a)}) scale(-1 1)`;
+      ? `translate(${num(bx)} ${num(by)}) rotate(${num(-a)})${narrow}`
+      : `translate(${num(-bx)} ${num(by)}) rotate(${num(a)}) scale(-1 1)${narrow}`;
   }
   // The tail pivots at its base and leans `angle` degrees away from the body's
   // center line (mirrored when the base is on the left, so +x stays outward).
@@ -989,10 +1330,10 @@
   // The transforms, opacities and states that a pose gives a spec's parts, and for a friend with limbs their
   // outlines (paths).
   function poseState(spec, pose) {
-    const p = { ...POSE, ...(pose || {}) }, rig = spec.rig || {};
-    const stand = standFor(spec), at = stanceFor(stand, p), q = foldedPose(p, at);
-    const turn = rig.turn ?? 14;
-    const tx = p.turnX * turn, ty = p.turnY * turn * 0.7;
+    const p = { ...POSE, ...(pose || {}) }, rig = spec.rig || {}, turn = turnOf(spec, p.facing);
+    const stand = turnedFigure(standFor(spec), turn), at = stanceFor(stand, p), q = foldedPose(p, at);
+    const yaw = rig.turn ?? 14;
+    const tx = p.turnX * yaw, ty = p.turnY * yaw * 0.7;
     const par = z => `translate(${num(tx * z)} ${num(ty * z)})`;
     const ground = groundOf(spec);
     const t = {
@@ -1001,9 +1342,9 @@
       // The upper body of a friend with limbs (its body, arms, head and tail) drops with crouch, all the way down while
       // it sits, and leans about the hips.
       upper: stand ? `translate(0 ${num(at.crouch)}) rotate(${num(q.lean)} ${stand.hips[0]} ${stand.hips[1]})` : '',
-      ...headTransforms(spec, p, par),
+      ...headTransforms(spec, p, par, turn),
     };
-    if (spec.tail) t.tail = `${t.upper} ${par(DEPTH.tail)} ${tailPlace(tailAt(spec, stand, at), p.tail)}`.trim();
+    if (spec.tail) t.tail = `${t.upper} ${par(DEPTH.tail)} ${tailPlace(turnedTail(spec, tailAt(spec, stand, at), turn), p.tail)}`.trim();
     for (const s of ['L', 'R']) if (earFor(spec, s).inner?.front) t[`ear${s}front`] = t[`ear${s}`];
     const paths = {}, shade = {};
     if (stand) {
@@ -1015,16 +1356,16 @@
       // The feet lie in front of the body, inside the upper body's group, so they undo its crouch and lean.
       if (stand.seat.front) t.feet = `rotate(${num(-q.lean)} ${stand.hips[0]} ${stand.hips[1]}) translate(0 ${num(-at.crouch)}) ${par(DEPTH.body)}`;
       // Each arm and its paw show their house shades by as much as the paw has come in front of the head (drawLimbs).
-      for (const S of ['L', 'R']) shade[`arm${S}Shade`] = shade[`paw${S}Shade`] = num(inFrontOfHead(spec, limbs.paws[S], stand.arms[S].paw, p));
+      for (const S of ['L', 'R']) shade[`arm${S}Shade`] = shade[`paw${S}Shade`] = num(inFrontOfHead(spec, limbs.paws[S], stand.arms[S].paw, p, turn));
     }
-    const mouth = p.mouth || (spec.mouth && spec.mouth.shape) || 'none';
+    const mouth = p.mouth || (spec.mouth && spec.mouth.shape) || 'none', over = shownBy(p.over);
     return {
       transform: t,
       // How strongly the arms tuck under the scarf and the head (see render): not at all while the friend sits, when its
       // arms hang in front of it, and fully once it is halfway up, so that they slide under as it rises.
       opacity: { blush: num(p.blush), ...(stand ? { tuckInk: num(Math.min(1, at.up * 2)) } : {}), ...shade },
-      // Whether the arms take the tuck at all: only once the friend has risen.
-      state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth, show: shownBy(p.show), over: shownBy(p.over), tucked: at.up > 0 },
+      // Whether the arms take the tuck at all: only once the friend has risen. Turned, where the arms hang (armSlots).
+      state: { eyeL: p.eyeL || p.eyes, eyeR: p.eyeR || p.eyes, mouth, show: shownBy(p.show), over, tucked: at.up > 0, ...armSlots(turn, over, at.up) },
       paths,
     };
   }
@@ -1040,32 +1381,48 @@
   // How far a paw at [x, y] (in the upper body's space, as limbStateFor places it) has come in front of the head: 0 while
   // it is a paw's breadth or more outside the head and the face, 1 once it is as far inside either, and between the
   // two as it crosses their edge. The head's nod and tilt are undone first, so that the paw is measured against the
-  // head where the pose has put it.
-  function inFrontOfHead(spec, [x, y], paw, p) {
+  // head where the pose has put it. Side-on, the face is where its plane puts it; from behind, the paws are behind.
+  function inFrontOfHead(spec, [x, y], paw, p, turn) {
+    if (turn && turn.back) return 0;
     const neck = (spec.rig || {}).neck || [0, 50], r = Math.max(paw.rx ?? 0, paw.ry ?? paw.rx ?? 0) || 10;
     const [u, v] = rot(x - (p.headX || 0) - neck[0], y - (p.headY || 0) - neck[1], -(p.tilt || 0) * DEG);
     let inside = -Infinity;  // How far inside the head or the face the paw's center is (negative: outside)
-    for (const shape of [spec.head, spec.face]) {
+    for (const [shape, on] of [[spec.head, 'head'], [spec.face, 'patch']]) {
       if (!shape) continue;
-      const e = ellipse(shape), [dx, dy] = rot(u + neck[0] - e.cx, v + neck[1] - e.cy, -e.rot), d = Math.hypot(dx / e.rx, dy / e.ry);
+      const flat = ellipse(shape), { t, k } = turn ? turn.planes[on] : SAME, e = { ...flat, cx: t + k * flat.cx, rx: k * flat.rx };
+      const [dx, dy] = rot(u + neck[0] - e.cx, v + neck[1] - e.cy, -e.rot), d = Math.hypot(dx / e.rx, dy / e.ry);
       inside = Math.max(inside, d < 1e-9 ? Infinity : Math.hypot(dx, dy) * (1 / d - 1));
     }
     return Math.min(1, Math.max(0, (inside + r) / (2 * r)));
   }
 
+  // Where a turned friend's arms hang (drawLimbs): behind the body (side-on, the far one, unless the pose draws it
+  // whole in front; from behind, both while the friend sits, when they hang in front of it), or beside it, over the body
+  // and under the scarf and the head (from behind, both once it has risen); and the order in which they are drawn
+  // (side-on, the far one first).
+  function armSlots(turn, over, up) {
+    const none = new Set(), both = new Set(['armL', 'armR']);
+    if (!turn) return { behind: none, beside: none, arms: ['armL', 'armR'] };
+    if (turn.back) return { behind: up > 0 ? none : both, beside: up > 0 ? both : none, arms: ['armL', 'armR'] };
+    const far = `arm${turn.far}`;
+    return { behind: over.has(far) ? none : new Set([far]), beside: none, arms: [far, `arm${turn.near}`] };
+  }
+
   // The head's transforms: its tilt and nod, and each of its layers, which slide by their depth (par) as it turns.
-  function headTransforms(spec, p, par) {
+  // Side-on, the eyes keep their shape and move with the face's plane, and the ears stand where their own put them.
+  function headTransforms(spec, p, par, turn) {
     const neck = (spec.rig || {}).neck || [0, 50];
     const eye = { ...EYE_DEFAULT, ...(spec.eyes || {}) };
     const lx = p.lookX * eye.range, ly = p.lookY * eye.range * 0.8;
     const k = Math.max(0.2, 1 + p.widen), eyeOpen = `scale(${num(k)} ${num(k * Math.max(0.06, 1 - p.blink))})`;
-    const hc = spec.hair ? [spec.hair.cx || 0, spec.hair.cy || 0] : [0, 0];
+    const side = turn && !turn.back, at = side ? turn.planes.face.at : x => x;
+    const hc = spec.hair ? [side ? turn.hairAt(spec.hair.cy || 0, spec.hair.cx || 0).at(spec.hair.cx || 0) : spec.hair.cx || 0, spec.hair.cy || 0] : [0, 0];
     const t = {
       head: `${p.headX || p.headY ? `translate(${num(p.headX)} ${num(p.headY)}) ` : ''}rotate(${num(p.tilt)} ${neck[0]} ${neck[1]})`,
-      earL: `${par(DEPTH.earL)} ${earPlace(earFor(spec, 'L'), 'L', p.earL)}`,
-      earR: `${par(DEPTH.earR)} ${earPlace(earFor(spec, 'R'), 'R', p.earR)}`,
-      eyeL: `translate(${num(-eye.x + lx)} ${num(eye.y + ly)})`,
-      eyeR: `translate(${num(eye.x + lx)} ${num(eye.y + ly)})`,
+      earL: `${par(DEPTH.earL)} ${earPlace(earFor(spec, 'L', turn), 'L', p.earL)}`,
+      earR: `${par(DEPTH.earR)} ${earPlace(earFor(spec, 'R', turn), 'R', p.earR)}`,
+      eyeL: `translate(${num(at(-eye.x) + lx)} ${num(eye.y + ly)})`,
+      eyeR: `translate(${num(at(eye.x) + lx)} ${num(eye.y + ly)})`,
       eyeLopen: eyeOpen,
       eyeRopen: eyeOpen,
       lidL: lidPlace(eye, p, 1),
@@ -1075,11 +1432,21 @@
     for (const k of ['body', 'face', 'blush', 'eyes', 'mouth']) t[k] = par(DEPTH[k]);
     t.scarf = t.body;
     if (spec.blush) {
-      const { x, y } = spec.blush, k = num(Math.max(0, 1 + p.flush));
-      t.cheekL = `translate(${num(-x)} ${num(y)}) scale(${k}) translate(${num(x)} ${num(-y)})`;
-      t.cheekR = `translate(${num(x)} ${num(y)}) scale(${k}) translate(${num(-x)} ${num(-y)})`;
+      const { x: bx, y } = spec.blush, k = num(Math.max(0, 1 + p.flush));
+      for (const [S, x] of [['L', cheekAt(turn, -bx)], ['R', cheekAt(turn, bx)]]) {
+        t[`cheek${S}`] = `translate(${num(x)} ${num(y)}) scale(${k}) translate(${num(-x)} ${num(-y)})`;
+      }
     }
     return t;
+  }
+
+  // Where a turned friend's tail is (TURN): side-on, its root at the back of the body, and from behind, toward the middle
+  // of the back.
+  function turnedTail(spec, tail, turn) {
+    if (!turn) return tail;
+    const [bx, by] = tail.base, { T } = turn;
+    if (turn.back) return { ...tail, base: [bx * T.tail, by] };
+    return { ...tail, base: [-turn.f * T.tailRoot * T.body * reachAt(bodyHeight(spec).body, by), by] };
   }
 
   // Where the tail is: where the seated drawing has it, or, for a tail with a standing place of its own (stand.tail),
@@ -1436,17 +1803,25 @@
   };
 
   // A render draws the friend part by part, from the back: the tail, the legs, then the upper body (the body, the feet
-  // that lie in front of it, the scarf, the head and the arms), then the props on the ground. Each part has a drawer
-  // of its own, and the drawers share a context (renderContext); each one adds what it defines (clips, masks, filters)
-  // to the context's defs, in the order in which render calls it.
+  // that lie in front of it, the scarf, the head and the arms), then the props on the ground; turned away from the
+  // viewer (TURN), its tail comes last. Each part has a drawer of its own, and the drawers share a context
+  // (renderContext); each one adds what it defines (clips, masks, filters) to the context's defs, in the order in which
+  // render calls it.
   function render(specOrName, opts = {}) {
-    const ctx = renderContext(resolve(specOrName), opts), { spec, g, part } = ctx;
+    const ctx = renderContext(resolve(specOrName), opts), { g, turn } = ctx;
     const eye = eyeDrawer(ctx), mouth = drawMouth(ctx), blush = drawBlush(ctx);
     const head = drawHead(ctx, { eye, mouth, blush });
-    const body = g('body', drawBody(ctx));
+    const body = g('body', onPlane(ctx, 'body', drawBody(ctx)));
     const limbs = drawLimbs(ctx);
-    const upper = drawUpper(ctx, { body, head, limbs });
-    return drawSheet(ctx, opts, drawTail(ctx) + limbs.legs + upper);
+    const upper = drawUpper(ctx, { body, head, limbs }), tail = drawTail(ctx);
+    return drawSheet(ctx, opts, turn && turn.back ? limbs.legs + upper + tail : tail + limbs.legs + upper);
+  }
+
+  // A layer's drawing side-on, on its plane (TURN): inside the layer's group, so that the pose moves the layer as it
+  // would facing the viewer.
+  function onPlane(ctx, name, inner) {
+    const { turn } = ctx, p = turn && turn.planes && turn.planes[name];
+    return p && (p.t || p.k !== 1) ? `<g transform="matrix(${num(p.k)} 0 0 1 ${num(p.t)} 0)">${inner}</g>` : inner;
   }
 
   // What every drawer of one render shares: the spec, its view and the state of its pose, the palette with its shades,
@@ -1455,7 +1830,8 @@
     const uid = opts.uid || `pf${(++UID).toString(36)}`;
     const view = resolveView(spec, opts.view, opts.size);
     // A view may carry the pose its reference was drawn in; opts.pose overrides that pose.
-    const st = poseState(spec, view.pose ? { ...view.pose, ...opts.pose } : opts.pose);
+    const pose = view.pose ? { ...view.pose, ...opts.pose } : opts.pose || {};
+    const st = poseState(spec, pose), turn = turnOf(spec, pose.facing);
     const P = withShades(spec.palette || {});
     const col = c => (c && P[c]) || c || '#000';
     const seed = part => hash(`${spec.name || ''}/${part}`);
@@ -1493,16 +1869,21 @@
           return `<ellipse cx="${num(e.cx)}" cy="${num(e.cy)}" rx="${num(e.rx)}" ry="${num(e.ry)}"` +
             `${x.rot ? ` transform="rotate(${x.rot} ${num(e.cx)} ${num(e.cy)})"` : ''} fill="${paint(x.fill)}"/>`;
         }
-        return fill(shapeD(x, seed(`${part}/extra${i}`)), x.fill);
+        return fill(shapeD(part === 'base' ? trimmed(x, turn) : x, seed(`${part}/extra${i}`)), x.fill);
       };
+      // A turned friend (TURN) draws an extra only where it shows, under its part or over it, and on its own plane.
       const extras = (part, clip, under, keep = () => true) => {
         const out = [];
         (spec.extras || []).forEach((x, i) => {
           // An extra on 'ears', 'paws' or 'feet' is drawn on both (the right one's space is mirrored).
           const on = BOTH[x.on] && BOTH[x.on].includes(part) ? part : x.on;
-          if (on !== part || !!x.under !== under || !keep(x)) return;
-          const s = extraShape(x, i, part);
-          out.push(cue(x, x.clip && clip ? `<g clip-path="${clip}">${s}</g>` : s));
+          if (on !== part || !keep(x)) return;
+          for (const piece of turnedPieces(x, !!turn && !turn.back)) {
+            const turned = turnedExtra(spec, turn, piece, on);
+            if (!turned.show || turned.under !== under) continue;
+            const shape = extraShape(backLit(spec, turn, piece), i, part), s = turned.move ? `<g transform="${turned.move}">${shape}</g>` : shape;
+            out.push(cue(x, x.clip && clip ? `<g clip-path="${clip}">${s}</g>` : s));
+          }
         });
         return out.join('');
       };
@@ -1523,28 +1904,43 @@
       if (!shades.has(hex)) shades.set(hex, shadeOf(hex));
       return shades.get(hex);
     };
-    return { spec, uid, view, st, P, seed, defs, attrs, g, when, clipUrl, cue, ...drawers(col), shade: drawers(shaded) };
+    return { spec, uid, view, st, turn, P, seed, defs, attrs, g, when, clipUrl, cue, ...drawers(col), shade: drawers(shaded) };
   }
 
   // The head: its layers from the back (the ears, the head, the inner ears that lie in front of it, any ear drawn over
-  // it, then the face and what lies on it), in a group that the body's tuck mask can refer to.
+  // it, then the face and what lies on it), in a group that the body's tuck mask can refer to. Side-on, each layer lies
+  // on its plane (TURN). From behind, the face's layers are empty, and the hair lies under the head, or over it.
   function drawHead(ctx, { eye, mouth, blush }) {
-    const { spec, g, part } = ctx;
+    const { spec, g, part, turn } = ctx, back = !!(turn && turn.back), hair = back ? turn.hair : 'over';
     const layers = {
       earL: () => drawEar(ctx, 'L'),
       earR: () => drawEar(ctx, 'R'),
       earLfront: () => drawEarFront(ctx, 'L'),
       earRfront: () => drawEarFront(ctx, 'R'),
-      base: () => g('base', part('base', spec.head, roleOr(spec, 'head', 'fur'))),
-      face: () => g('face', part('face', spec.face, 'face')),
-      blush: () => g('blush', blush + ctx.extras('blush', null, false)),
+      // From behind, the head keeps the outline its face gives it (a chin, cheek tufts), in the head's color, under it.
+      base: () => g('base', (back && spec.face ? ctx.fill(shapeD(spec.face, ctx.seed('face')), roleOr(spec, 'head', 'fur')) : '') +
+        onPlane(ctx, 'head', part('base', trimmed(spec.head, turn), roleOr(spec, 'head', 'fur')))),
+      face: () => g('face', back ? '' : onPlane(ctx, 'patch', part('face', spec.face, 'face'))),
+      blush: () => g('blush', blush + (back ? '' : onPlane(ctx, 'face', ctx.extras('blush', null, false)))),
       eyes: () => g('eyes', eye('L') + eye('R')),
       mouth: () => g('mouth', mouth),
-      hair: () => g('hair', part('hair', spec.hair, 'hair')),
+      hair: () => g('hair', hair === 'none' ? '' : part('hair', bentHair(ctx), 'hair')),
     };
-    const earsOver = over => ['earL', 'earR'].filter(k => !!earFor(spec, k.slice(-1)).over === over);
-    const order = [...earsOver(false), 'base', 'earLfront', 'earRfront', ...earsOver(true), 'face', 'blush', 'eyes', 'mouth', 'hair'];
+    // Side-on, the far ear comes first, and lies behind the head even where it is drawn over it facing the viewer.
+    const side = turn && !back, isOver = S => !!earFor(spec, S).over && !(side && S === turn.far);
+    const earsOver = over => (side ? [`ear${turn.far}`, `ear${turn.near}`] : ['earL', 'earR']).filter(k => isOver(k.slice(-1)) === over);
+    // Side-on, the near eye lies over the hair, as both eyes are clear of it facing the viewer.
+    const face = side ? ['face', 'blush', 'mouth'] : ['face', 'blush', 'eyes', 'mouth'];
+    const hairUnder = hair === 'under' ? ['hair'] : [], hairOver = hairUnder.length ? [] : ['hair'];
+    const order = [...earsOver(false), ...hairUnder, 'base', 'earLfront', 'earRfront', ...earsOver(true), ...face, ...hairOver, ...(side ? ['eyes'] : [])];
     return g('head', order.map(k => layers[k]()).join(''), 'head');
+  }
+
+  // The hair side-on, bent from the head to the face (turning: hairAt), each of its points on the plane at its height.
+  function bentHair({ spec, turn, seed }) {
+    if (!spec.hair || !turn || turn.back) return spec.hair;
+    const nodes = shapeNodes(spec.hair, seed('hair')).map(n => ({ ...n, x: turn.hairAt(n.y, n.x).at(n.x) }));
+    return { nodes, ...(spec.hair.color ? { color: spec.hair.color } : {}) };
   }
 
   // Ears. The inner ear goes in its own layer when it sits in front of the head.
@@ -1554,13 +1950,20 @@
   }
   function drawEarFront(ctx, side) {
     const e = earFor(ctx.spec, side);
-    return e.inner && e.inner.front ? ctx.g(`ear${side}front`, drawInnerEar(ctx, e)) : '';
+    return e.inner && e.inner.front && !backOf(ctx.turn, side) ? ctx.g(`ear${side}front`, drawInnerEar(ctx, e)) : '';
   }
+  // Whether a turn shows an ear's back, and so not its inside: both ears' from behind, and the far one's side-on.
+  const backOf = (turn, side) => !!turn && (turn.back || side === turn.far);
+  // Turned so that an ear shows its back (backOf), an ear of the head's color takes its house shade, so that it stands
+  // apart from the head rather than melting into it.
   function drawEar(ctx, side) {
-    const { spec, fill, g, clipUrl, extras } = ctx;
+    const { spec, g, clipUrl, P } = ctx, ears = spec.ears || {}, pair = ears.color || roleOr(spec, 'ear', 'fur');
+    const color = side === 'R' ? (ears.right && ears.right.color) || roleOr(spec, 'earRight', pair) : pair;
+    const head = roleOr(spec, 'head', 'fur'), asHead = (P[color] || color) === (P[head] || head);
+    const { fill, extras } = backOf(ctx.turn, side) && asHead ? ctx.shade : ctx;
     const e = earFor(spec, side), outer = earNodes(e), d = pathD(outer);
     const clip = clipUrl(`ear${side}`, d);
-    const inner = e.inner && !e.inner.front ? drawInnerEar(ctx, e) : '';
+    const inner = e.inner && !e.inner.front && !backOf(ctx.turn, side) ? drawInnerEar(ctx, e) : '';
     const stripes = (e.stripes || []).map(s => {
       const [X0, X1] = s.span || [-e.width * 1.5, e.width * 1.5];
       const h = (s.w || 6) / 2, cy = -(s.t ?? 0.5) * e.length, b = s.b || 0;
@@ -1571,8 +1974,6 @@
       return fill(pathD(nodes), s.color || e.stripeColor || 'stripe');
     }).join('');
     // The right ear takes its own color, then its role (earRight), before the pair's, as the right eye and paw do.
-    const ears = spec.ears || {}, pair = ears.color || roleOr(spec, 'ear', 'fur');
-    const color = side === 'R' ? (ears.right && ears.right.color) || roleOr(spec, 'earRight', pair) : pair;
     return g(`ear${side}`, extras(`ear${side}`, null, true) + fill(d, color) + (stripes && `<g clip-path="${clip}">${stripes}</g>`) +
       inner + extras(`ear${side}`, clip, false));
   }
@@ -1592,8 +1993,10 @@
         : `M${num(-w / 2)} ${num(-h / 2 + r)}A${num(r)} ${num(r)} 0 0 1 ${num(w / 2)} ${num(-h / 2 + r)}V${num(h / 2 - r)}` +
           `A${num(r)} ${num(r)} 0 0 1 ${num(-w / 2)} ${num(h / 2 - r)}Z`);
     }
-    // The eyes.right entry overrides the right eye's color and shine (for eyes of two colors).
+    // The eyes.right entry overrides the right eye's color and shine (for eyes of two colors). Turned (TURN), only the
+    // near eye shows side-on, and neither from behind.
     return side => {
+      if (ctx.turn && (ctx.turn.back || side === ctx.turn.far)) return g(`eye${side}`, '');
       const e = side === 'R' && eye.right ? { ...eye, ...eye.right } : eye;
       const iris = eye.color || roleOr(spec, 'iris', 'eye');
       const c = col(side === 'R' ? (eye.right && eye.right.color) || roleOr(spec, 'irisRight', iris) : iris);
@@ -1625,8 +2028,15 @@
     };
   }
 
-  // The mouth: every shape it takes, each shown while the pose names it.
+  // The mouth: every shape it takes, each shown while the pose names it. Side-on, it keeps its shape and moves with the
+  // face's plane; from behind, it is hidden (TURN).
   function drawMouth(ctx) {
+    const { spec, turn } = ctx, m = spec.mouth || {};
+    if (!turn) return mouthShapes(ctx);
+    if (turn.back) return '';
+    return `<g transform="translate(${num(turn.planes.face.at(m.x || 0) - (m.x || 0))} 0)">${mouthShapes(ctx)}</g>`;
+  }
+  function mouthShapes(ctx) {
     const { spec, P, col, when, fill, clipUrl } = ctx;
     const m = spec.mouth || {}, ink = m.color || roleOr(spec, 'ink', 'eye');
     return Object.keys(MOUTHS).map(k => {
@@ -1643,13 +2053,19 @@
     })());
   }
 
-  // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt).
+  // Blush. A tilt > 0 raises the outer ends (mirrored, like eyes.tilt). Turned (TURN), only the near cheek shows
+  // side-on, keeping its shape, as the eye does, where the face's plane puts its middle; and neither from behind.
   function drawBlush(ctx) {
-    const { spec, col, g } = ctx, bl = spec.blush;
-    return bl ? [-1, 1].map(sx => g(sx < 0 ? 'cheekL' : 'cheekR',
-      `<ellipse cx="${num(sx * bl.x)}" cy="${num(bl.y)}" rx="${bl.rx}" ry="${bl.ry}"` +
-      `${bl.tilt ? ` transform="rotate(${num(-sx * bl.tilt)} ${num(sx * bl.x)} ${num(bl.y)})"` : ''} fill="${col(bl.color || 'blush')}"/>`)).join('') : '';
+    const { spec, col, g, turn } = ctx, bl = spec.blush;
+    const shows = S => !turn || (!turn.back && S === turn.near);
+    return bl ? [-1, 1].map(sx => {
+      const S = sx < 0 ? 'L' : 'R', x = cheekAt(turn, sx * bl.x);
+      return g(`cheek${S}`, shows(S) ? `<ellipse cx="${num(x)}" cy="${num(bl.y)}" rx="${bl.rx}" ry="${bl.ry}"` +
+        `${bl.tilt ? ` transform="rotate(${num(-sx * bl.tilt)} ${num(x)} ${num(bl.y)})"` : ''} fill="${col(bl.color || 'blush')}"/>` : '');
+    }).join('') : '';
   }
+  // Where the middle of a cheek at x facing the viewer is, side-on: where the face's plane puts it, but on the face.
+  const cheekAt = (turn, x) => (turn && !turn.back ? turn.cheek(x) : x);
 
   // The limbs (standFor), on which the friend sits and stands: the legs behind the upper body, and the arms in front
   // of the head (see drawUpper). A limb is its hose, its bands, then its paw or foot, whose transform carries it to the
@@ -1667,8 +2083,8 @@
   }
 
   function drawLimbs(ctx) {
-    const { spec, st, g, clipUrl } = ctx, stand = standFor(spec);
-    const out = { legs: '', feet: '', under: '', paws: '', over: '' };
+    const { spec, st, g, clipUrl, turn } = ctx, stand = turnedFigure(standFor(spec), turn);
+    const out = { legs: '', feet: '', behind: '', beside: '', under: '', paws: '', over: '' };
     if (!stand) return out;
     // An arm and its paw are drawn twice, in the palette's colors and then in their house shades (ctx.shade), which
     // show as the paw comes in front of the head (armLShade, pawLShade; see poseState), so that a paw the color of the
@@ -1700,11 +2116,17 @@
       return g(name, twice(name, look => hose(look) + bands(() => true, look), end) + (only === 'bare' ? '' : tipOf(tip, end, S, l)));
     };
     // Where the seated feet lie on the body, the feet (and the bands that reach them) are drawn in front of the body
-    // and the leg hoses behind it.
-    const front = stand.seat.front;
-    out.legs = g('legs', front ? limb('legL', 'foot', 'hose') + limb('legR', 'foot', 'hose') : limb('legL', 'foot') + limb('legR', 'foot'));
-    if (front) out.feet = g('feet', limb('legL', 'foot', 'end') + limb('legR', 'foot', 'end'));
-    const [over, under] = [true, false].map(o => ['armL', 'armR'].filter(n => st.state.over.has(n) === o));
+    // and the leg hoses behind it. Turned (TURN), the far leg comes first and lies whole behind the body, as both do
+    // from behind; and the arms come in the turn's order, those that hang behind or beside the body (armSlots) each
+    // whole with its paw.
+    const side = turn && !turn.back, front = stand.seat.front && !(turn && turn.back);
+    const legs = side ? [`leg${turn.far}`, `leg${turn.near}`] : ['legL', 'legR'], split = n => front && (!side || n === `leg${turn.near}`);
+    out.legs = g('legs', legs.map(n => (split(n) ? limb(n, 'foot', 'hose') : limb(n, 'foot'))).join(''));
+    if (front) out.feet = g('feet', legs.filter(split).map(n => limb(n, 'foot', 'end')).join(''));
+    const { arms, behind, beside } = st.state, hung = n => behind.has(n) || beside.has(n), whole = n => limb(n, 'paw', 'bare') + limb(n, 'paw', 'tip');
+    const [over, under] = [true, false].map(o => arms.filter(n => !hung(n) && st.state.over.has(n) === o));
+    out.behind = g('armsBehind', arms.filter(n => behind.has(n)).map(whole).join(''));
+    out.beside = g('armsBeside', arms.filter(n => beside.has(n)).map(whole).join(''));
     out.under = g('armsUnder', under.map(n => limb(n, 'paw', 'bare')).join(''));
     out.paws = g('pawsUnder', under.map(n => limb(n, 'paw', 'tip')).join(''));
     out.over = g('armsOver', over.map(n => limb(n, 'paw', 'bare') + limb(n, 'paw', 'tip')).join(''));
@@ -1723,7 +2145,7 @@
     let scarf = '', armsFront = limbs.under;
     if ((spec.extras || []).some(x => x.on === 'scarf')) {
       const clip = spec.body ? `url(#${uid}-${bodyHeight(spec).k === 1 ? 'body' : 'bodyTall'})` : null;
-      scarf = g('scarf', extras('scarf', clip, true) + extras('scarf', clip, false), 'scarf');
+      scarf = g('scarf', onPlane(ctx, 'body', extras('scarf', clip, true) + extras('scarf', clip, false)), 'scarf');
     }
     if (limbs.under) {
       const box = 'x="-1000" y="-1000" width="2000" height="2000"', ink = `filter="url(#${uid}-ink)"`;
@@ -1737,7 +2159,7 @@
       const mask = `url(#${uid}-tuck)`;
       armsFront = `<g data-pf="tuck" data-pf-mask="${mask}"${st.state.tucked ? ` mask="${mask}"` : ''}>${limbs.under}</g>`;
     }
-    return g('upper', body + limbs.feet + scarf + head + armsFront + limbs.paws + limbs.over);
+    return g('upper', limbs.behind + body + limbs.feet + limbs.beside + scarf + head + armsFront + limbs.paws + limbs.over);
   }
 
   // Tail (optional, drawn behind the body): the plume, then a tip marking whose edge
@@ -1775,7 +2197,7 @@
 
   // The sheet: the figure seen through the view's camera, the props on the ground, the pencil and the paper.
   function drawSheet(ctx, opts, figure) {
-    const { spec, uid, view, P, g, extras, defs } = ctx;
+    const { spec, uid, view, P, g, extras, defs, turn } = ctx;
     const bg = opts.bg === false ? null : opts.bg || view.bg || P.bg;
     const size = opts.fluid ? '' : ` width="${num(view.w)}" height="${num(view.h)}"`;
     const cam = `translate(${num(view.x)} ${num(view.y)}) rotate(${view.rotate || 0}) scale(${num(view.scale * 1000) / 1000})`;
@@ -1783,10 +2205,12 @@
     // for matching a flat reference picture.
     // Extras on 'ground' stand on the ground in front of the friend, in head space but outside its
     // pose: a prop it has put down stays where it is while the friend hops, squashes or moves. They drop with the
-    // ground under a taller body (bodyHeight).
-    const props = extras('ground', null, false), drop = bodyHeight(spec).drop;
-    const ground = drop && props ? `<g transform="translate(0 ${num(drop)})">${props}</g>` : props;
-    let drawing = `<g id="${uid}-drawing" transform="${cam}">${g('root', figure)}${ground && g('ground', ground)}</g>`;
+    // ground under a taller body (bodyHeight). A friend turned away from the viewer (TURN) is its own mirror image,
+    // and the props in front of it lie behind it.
+    const props = extras('ground', null, false), drop = bodyHeight(spec).drop, back = !!(turn && turn.back);
+    const ground = drop && props ? `<g transform="translate(0 ${num(drop)})">${props}</g>` : props, onGround = ground && g('ground', ground);
+    const root = g('root', back ? `<g transform="scale(-1 1)">${figure}</g>` : figure);
+    let drawing = `<g id="${uid}-drawing" transform="${cam}">${back ? onGround + root : root + onGround}</g>`;
     if (opts.pencil !== false) {
       defs.push(pencilMask(`${uid}-pencil`, view));
       const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
@@ -1808,14 +2232,30 @@
     // same every time, such as a film.
     const bitmap = !!textureWatch && opts.bitmap !== false;
     if (bitmap) textureWatch.observe(svg);
-    const drawing = indexDrawing(svg);
-    let pose = { ...(opts.pose || {}) };
+    let drawing = indexDrawing(svg), pose = { ...(opts.pose || {}) };
+    // The quarter turn that the drawing faces (TURN). A turned friend is drawn in another order, so a pose that turns
+    // it draws it afresh, into the same svg, whose parts (rig.parts) and texture it keeps.
+    const facingOf = p => (turnOf(spec, p.facing) ? quarterOf(p.facing) : 0);
+    const posed = () => (rig.view.pose ? { ...rig.view.pose, ...pose } : pose);
+    const turnTo = () => {
+      const fresh = document.createElement('div');
+      fresh.innerHTML = render(spec, { fluid: true, ...opts, pose, uid: svg.getAttribute('data-pf-uid') });
+      const next = fresh.querySelector('svg'), image = next.querySelector('image[data-pf-texture]');
+      if (texture && image) image.replaceWith(texture);
+      svg.replaceChildren(...next.childNodes);
+      const { parts } = drawing;
+      for (const name of Object.keys(parts)) delete parts[name];
+      drawing = indexDrawing(svg);
+      drawing.parts = Object.assign(parts, drawing.parts);
+    };
     const rig = {
       el, svg, spec, parts: drawing.parts, view: resolveView(spec, opts.view, opts.size),
       get pose() { return pose; },
       setPose(next, replace = false) {
+        const facing = facingOf(posed());
         pose = replace ? { ...next } : { ...pose, ...next };
-        redraw(drawing, poseState(spec, rig.view.pose ? { ...rig.view.pose, ...pose } : pose));
+        if (facingOf(posed()) !== facing) turnTo();
+        else redraw(drawing, poseState(spec, posed()));
         return rig;
       },
       // Shows a variant of the pencil texture (0 is a still's). A boiling page cycles through
@@ -1890,19 +2330,20 @@
       if (st.state.tucked) parts.tuck.setAttribute('mask', parts.tuck.getAttribute('data-pf-mask'));
       else parts.tuck.removeAttribute('mask');
     }
-    restackArms(parts, st.state.over);
+    restackArms(parts, st.state);
   }
 
-  // Puts each arm and its paw where a render would draw them (drawLimbs): the left one first, and an arm that `over`
-  // names followed by its paw.
-  function restackArms(parts, over) {
-    for (const S of ['L', 'R']) {
-      const arm = parts[`arm${S}`], paw = parts[`paw${S}`], isOver = over.has(`arm${S}`);
+  // Puts each arm and its paw where a render would draw them (drawLimbs), in the order the state gives (arms): an arm
+  // hung behind or beside the body (armSlots), or one that `over` names, followed by its paw.
+  function restackArms(parts, { over, behind, beside, arms }) {
+    for (const name of arms) {
+      const S = name.slice(-1), arm = parts[name], paw = parts[`paw${S}`], first = name === arms[0];
       if (!arm || !paw) continue;
-      const slot = parts[isOver ? 'armsOver' : 'armsUnder'], pawSlot = isOver ? slot : parts.pawsUnder;
-      if (arm.parentNode !== slot) slot.insertBefore(arm, S === 'L' ? slot.firstChild : null);
-      const before = isOver ? arm.nextSibling : S === 'L' ? pawSlot.firstChild : null;
-      if (paw.parentNode !== pawSlot || (isOver && before !== paw)) pawSlot.insertBefore(paw, before);
+      const at = behind.has(name) ? 'armsBehind' : beside.has(name) ? 'armsBeside' : over.has(name) ? 'armsOver' : 'armsUnder';
+      const whole = at !== 'armsUnder', slot = parts[at], pawSlot = whole ? slot : parts.pawsUnder;
+      if (arm.parentNode !== slot) slot.insertBefore(arm, first ? slot.firstChild : null);
+      const before = whole ? arm.nextSibling : first ? pawSlot.firstChild : null;
+      if (paw.parentNode !== pawSlot || (whole && before !== paw)) pawSlot.insertBefore(paw, before);
     }
   }
 
@@ -1910,6 +2351,7 @@
     VERSION, POSE, DEPTH,
     define, get: resolve, list: () => [...registry.keys()], merge, check, ANATOMY,
     render, mount, poseState, resolveView, standingView, groundOf, STANDING_BOX, standFor, standLift, riseOf, freeSide, STAND_DEFAULT, STAND_FIT, ONIGIRI, BODY,
+    TURN, quarterOf,
     shapes: { pathD, fluffy, star, polyNodes, earNodes, tailNodes, tailBend, shapeNodes, shapeD, ellipse, ellPoint, ellAngle, limbArc, limbNodes, bendFor, outlineOf, reachAt, ellipseD },
     rng, hash, SHADE, shadeOf,
     // The pencil, for drawing props in the characters' texture and for redrawing it (film/scene.js).

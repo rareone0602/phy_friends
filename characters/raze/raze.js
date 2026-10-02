@@ -123,8 +123,9 @@ PhyFriends.define('raze', {
     // The marks under his right eye: a slanted bar and a small triangle, in teal.
     { feature: 'cheekMarks', on: 'face', fill: 'teal', round: 0.2, nodes: [[-38, 26, 1], [-32, 26, 1], [-38, 42, 1], [-44, 42, 1]] },
     { feature: 'cheekMarks', on: 'face', fill: 'teal', round: 0.2, nodes: [[-25, 27, 1], [-18, 41, 1], [-32, 41, 1]] },
-    // The mark beside his left eye: a purple bar running down the outer cheek.
-    { feature: 'cheekMarks', on: 'face', fill: 'purple', round: 0.3, nodes: [[42, 25, 1], [48, 25, 1], [52, 44, 1], [46, 44, 1]] },
+    // The mark beside his left eye: a purple bar running down the outer cheek. Side-on it would hang right under the
+    // purple eye, so it is left out once he turns (turn: 'frontal').
+    { feature: 'cheekMarks', on: 'face', turn: 'frontal', fill: 'purple', round: 0.3, nodes: [[42, 25, 1], [48, 25, 1], [52, 44, 1], [46, 44, 1]] },
     // Tail extras are drawn on the straight tail (base on the origin, tip at y -108, +x away from the body); the
     // library bends them onto the curve. Two purple bands before the tuft, as on the sheet, and the cyan streaks in it.
     { feature: 'tailMarks', on: 'tail', clip: true, kind: 'ellipse', fill: 'purple', cx: 0, cy: -49, rx: 60, ry: 3.2 },

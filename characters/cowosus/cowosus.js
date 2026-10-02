@@ -131,7 +131,9 @@ PhyFriends.define('cowosus', {
     // The lime patch over his right eye (the viewer's left), from the upright ear down the side of the head to the
     // cheek, as on the sheet, under the white of the crown. Its inner edge bows in round the eye, far enough that an eye
     // looking about stays on the lime, and back out above and below it, so that it reads as a patch, not half the face.
-    { feature: 'eyePatch', on: 'base', clip: true, fill: 'lime', nodes: [[-130, -150, 1], [-46, -150, 1], [-42, -84, 1], [-26, -52], [-15, -26],
+    // It covers the side of his head, so it turns as a marking on the side does (turn: 'sides'): side-on, round the
+    // side of the head on his right, as the sheet's side view has it, and from behind, on the back of it.
+    { feature: 'eyePatch', on: 'base', turn: 'sides', clip: true, fill: 'lime', nodes: [[-130, -150, 1], [-46, -150, 1], [-42, -84, 1], [-26, -52], [-15, -26],
       [-11, 2], [-16, 22], [-30, 34, 1], [-130, 34, 1]] },
     // The white muzzle between the cheeks, from the mint band down to the chin.
     { feature: 'muzzle', on: 'face', clip: true, kind: 'ellipse', fill: 'fur', cx: 0, cy: 50, rx: 25, ry: 22 },

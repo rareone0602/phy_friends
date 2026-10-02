@@ -22,6 +22,7 @@
   .slider output { font-variant-numeric: tabular-nums; color: var(--ink-2); }
   .hint { font-size: 12px; color: var(--ink-2); }
   .slider .hint { margin-top: -2px; }
+  .slider select { margin: 4px 0 2px; }
   input[type=range] { width: 100%; margin: 4px 0 2px; accent-color: var(--accent); }
   select, button { font: inherit; font-size: 14px; }
   select { width: 100%; padding: 6px; border: 1px solid var(--rule); border-radius: 6px; background: #fff; color: var(--ink); }
@@ -54,8 +55,8 @@
 <body>
 <main>
   <h1>tune the fwiends’ bodies</h1>
-  <p class="intro">All of phy’s fwiends share one body plan for sitting and standing. Move the sliders until they look right to you,
-    then press “copy the values” at the bottom and send what you copied to phy.</p>
+  <p class="intro">All of phy’s fwiends share one body plan for sitting, standing and turning round. Move the sliders until they look
+    right to you, then press “copy the values” at the bottom and send what you copied to phy.</p>
   <div class="layout">
     <div class="stage" id="stage" aria-live="off"></div>
     <div class="controls">
@@ -111,16 +112,17 @@
 <script>
 // A page for tuning the friends' shared body plan by eye, for an artist who draws rather than codes. It shows every
 // friend that stands (all but Claude), after the lorem placeholder (lorem.js), Terry and phy, each seated, in between,
-// standing and moving. Each slider changes one of the core's shared defaults in the page (PhyFriends.STAND_FIT,
-// STAND_DEFAULT's arms and legs, ONIGIRI and BODY), and the friends are redrawn from fresh copies of their specs, since
-// the core works out a friend's figure once per spec. The values block prints those four objects as src/phyfriends.js
-// writes them, to paste back there. The page opens on the values in the code, so it is never out of date.
+// standing and moving, then turned: side-on, from behind and turning round. Each control changes one of the core's
+// shared defaults in the page (PhyFriends.STAND_FIT, STAND_DEFAULT's arms and legs, ONIGIRI, BODY and TURN), and the
+// friends are redrawn from fresh copies of their specs, since the core works out a friend's figure once per spec. The
+// values block prints those five objects as src/phyfriends.js writes them, to paste back there. The page opens on the
+// values in the code, so it is never out of date.
 // `python3 tools/pf.py tune` writes it out as one file (out/tune.html) that can be sent to someone without the repository.
 (function () {
   'use strict';
   const PF = PhyFriends, A = PF.anim;
   // Each slider: the parameter it sets (a key of PARAMS below), its label for an artist, its range and step, and a hint
-  // shown under it. The sliders are grouped under a title each.
+  // shown under it; or, for a menu, its choices in place of the range, then its hint. They are grouped under a title each.
   const SLIDERS = [
     ['the body (a rice ball)', [
       ['height', 'taller body', 0.7, 1.6, 0.01, 'how tall the body is, as a share of each fwiend’s own: it grows downward from under the chin, and the legs, the paws and the ground move down with it'],
@@ -143,9 +145,32 @@
       ['tuck', 'arm hidden at the shoulder', 0, 1, 0.05, 'how much of the arm hides under the ruff or the chin at the shoulder'],
       ['forelegs', 'top of the arms when sitting', -0.5, 0.6, 0.05, 'where the arms start on the body when sitting, hanging down to the paws: higher to the left, lower to the right'],
     ]],
+    ['turned side-on', [
+      ['turnEye', 'eye forward', 0.2, 0.9, 0.01, 'how far forward the one eye that shows side-on sits, with the face round it'],
+      ['turnReach', 'face forward', 0.5, 1.2, 0.01, 'how far forward the front of the face comes side-on: with the eye, it sets how narrow the face is'],
+      ['turnPatch', 'face patch width', 0.2, 1, 0.05, 'how wide a white face or muzzle stays side-on, and the least a blaze or a mark across the face keeps'],
+      ['turnHead', 'head width', 0.7, 1.1, 0.01, ''],
+      ['turnEars', 'ears apart', 0, 0.8, 0.01, 'how far apart the two ears are side-on'],
+      ['turnEarBack', 'ears set back', -0.3, 0.6, 0.01, 'how far behind the middle of the head the ears sit'],
+      ['turnEarTilt', 'ears tilted out', 0, 1, 0.05, 'how much of their tilt the ears keep side-on'],
+      ['turnEarWidth', 'ear width', 0.3, 1, 0.05, ''],
+      ['turnBody', 'body width', 0.5, 1, 0.01, ''],
+      ['turnFront', 'chest width', 0.2, 1, 0.05, 'how wide what lies on the chest and the back is side-on: a chest, a hood'],
+      ['turnScarf', 'ruff width', 0.2, 1, 0.05, 'how wide a ruff, a bib or a scarf round the neck is side-on'],
+      ['turnLimbs', 'arms and legs apart', 0, 0.8, 0.01, 'how far apart the near and far arms, and legs, are side-on'],
+      ['turnToes', 'feet pointing forward', 0, 0.8, 0.05, ''],
+      ['turnPaws', 'paws forward when sitting', 0, 1, 0.05, ''],
+      ['turnFeet', 'feet forward when sitting', -0.3, 0.8, 0.05, ''],
+      ['turnTailRoot', 'tail root at the back', 0.3, 1.1, 0.05, 'how far out to the back of the body the tail grows from, side-on'],
+    ]],
+    ['turned away', [
+      ['turnTail', 'tail root from the middle', 0, 1, 0.05, 'how far out from the middle of the back the tail grows from, seen from behind'],
+      ['turnCrown', 'hair that covers the head', 0.3, 1, 0.05, 'hair at least this wide, as a share of the head’s, covers the crown and lies over the head from behind; narrower hair, a forelock or a crest, lies behind it'],
+      ['turnBackHair', 'hair seen from behind', ['auto', 'over', 'under', 'none'], 'over the head for hair that covers it and behind it for a forelock (auto), or the one or the other for all, or not at all'],
+    ]],
   ];
   // The starting points: the values in the code, which the page opens on, and earlier picks, each given in full. Terry's
-  // owner chose Terry's pick on this page; the code keeps all of it but the taper, which is phy's (0.85).
+  // owner chose Terry's pick on this page; the code keeps all of it but the taper, which is phy's (0.8).
   const PRESETS = [
     ['the values in the code', {}],
     ['Terry’s pick (2 oct 2026)', { height: 1.1, taper: 1, square: 0, legs: 30, legWidth: 26, footRx: 15, footRy: 11, hip: 0.3,
@@ -155,7 +180,7 @@
   ];
   // The friends listed first, before the rest in the cast's order, and those on show when the page opens.
   const FIRST = ['lorem', 'terry', 'phy'], SHOWN = ['lorem', 'terry', 'phy'];
-  const D = PF.STAND_DEFAULT, F = PF.STAND_FIT, O = PF.ONIGIRI, B = PF.BODY;
+  const D = PF.STAND_DEFAULT, F = PF.STAND_FIT, O = PF.ONIGIRI, B = PF.BODY, T = PF.TURN;
   // Every friend that stands, as [the spec's name, the name as its owner writes it]: FIRST, then the cast's order.
   const nameOf = name => (name === 'lorem' ? 'lorem' : PF.cast.friend(name).name);
   const FRIENDS = [...FIRST, ...PF.cast.names().filter(name => !FIRST.includes(name))].filter(name => PF.standFor(name)).map(name => [name, nameOf(name)]);
@@ -177,18 +202,24 @@
     out: [() => F.out, v => { F.out = v; }],
     tuck: [() => F.tuck, v => { F.tuck = v; }],
     forelegs: [() => F.forelegs, v => { F.forelegs = v; }],
+    // A slider named turnX sets TURN.x (turnTailRoot sets TURN.tailRoot): each of TURN's numbers that has a control, a
+    // spec's own choices (backLit) having none.
+    ...Object.fromEntries(Object.keys(T).map(key => [`turn${key[0].toUpperCase()}${key.slice(1)}`, [() => T[key], v => { T[key] = v; }]])
+      .filter(([name]) => SLIDERS.some(([, items]) => items.some(([key]) => key === name)))),
   };
   // A foot stands on the ground by the lower of its own bottom and its leg's round end.
   const settle = () => { D.legs.ankle = Math.max(D.legs.width / 2, (D.legs.foot.cy || 0) + D.legs.foot.ry); };
   const CURRENT = Object.fromEntries(Object.entries(PARAMS).map(([k, [get]]) => [k, get()]));
 
   // The controls.
-  const sliders = document.getElementById('sliders'), fixed = v => String(Math.round(v * 100) / 100);
-  for (const [title, items] of SLIDERS) {
-    sliders.insertAdjacentHTML('beforeend', `<section class="box"><h2>${title}</h2>` + items.map(([key, label, min, max, step, hint]) =>
-      `<div class="slider"><div class="row"><label for="${key}">${label}</label><output id="${key}Out"></output></div>` +
-      `<input type="range" id="${key}" min="${min}" max="${max}" step="${step}">${hint ? `<div class="hint">${hint}</div>` : ''}</div>`).join('') + '</section>');
-  }
+  // A control with a list of choices in place of its range is a menu.
+  const sliders = document.getElementById('sliders'), fixed = v => (typeof v === 'number' ? String(Math.round(v * 100) / 100) : v);
+  const control = ([key, label, min, max, step, hint]) => Array.isArray(min)
+    ? `<div class="slider"><div class="row"><label for="${key}">${label}</label><output id="${key}Out"></output></div>` +
+      `<select id="${key}">${min.map(v => `<option>${v}</option>`).join('')}</select>${max ? `<div class="hint">${max}</div>` : ''}</div>`
+    : `<div class="slider"><div class="row"><label for="${key}">${label}</label><output id="${key}Out"></output></div>` +
+      `<input type="range" id="${key}" min="${min}" max="${max}" step="${step}">${hint ? `<div class="hint">${hint}</div>` : ''}</div>`;
+  for (const [title, items] of SLIDERS) sliders.insertAdjacentHTML('beforeend', `<section class="box"><h2>${title}</h2>${items.map(control).join('')}</section>`);
   const preset = document.getElementById('preset');
   preset.innerHTML = PRESETS.map(([label], i) => `<option value="${i}">${label}</option>`).join('');
   const picker = document.getElementById('picker');
@@ -196,19 +227,23 @@
 
   // The values to send back, written as they are in src/phyfriends.js.
   const literal = v => Array.isArray(v) ? `[${v.map(literal).join(', ')}]` : v && typeof v === 'object'
-    ? `{ ${Object.entries(v).map(([k, x]) => `${k}: ${literal(x)}`).join(', ')} }` : typeof v === 'number' ? fixed(v) : String(v);
+    ? `{ ${Object.entries(v).map(([k, x]) => `${k}: ${literal(x)}`).join(', ')} }` : typeof v === 'number' ? fixed(v) : typeof v === 'string' ? `'${v}'` : String(v);
   const values = () => `  const STAND_DEFAULT = {\n    arms: ${literal(D.arms)},\n` +
-    `    legs: ${literal(D.legs)},\n  };\n  const STAND_FIT = ${literal(F)};\n  const ONIGIRI = ${literal(O)};\n  const BODY = ${literal(B)};\n`;
+    `    legs: ${literal(D.legs)},\n  };\n  const STAND_FIT = ${literal(F)};\n  const ONIGIRI = ${literal(O)};\n  const BODY = ${literal(B)};\n` +
+    `  const TURN = ${literal(T)};\n`;
 
   // The friends on show: for each, fresh copies of its spec (the core works a figure out once per spec, so a copy
-  // made after a change picks the change up), seated, at the stance slider, standing, and moving. Each stands on a line
-  // near the bottom of its frame: its own ground, which drops with a taller body.
+  // made after a change picks the change up), seated, at the stance slider, standing, and moving; then turned (TURN):
+  // side-on seated and standing, from behind, and turning round a quarter at a time. Each stands on a line near the
+  // bottom of its frame: its own ground, which drops with a taller body.
   const viewOf = spec => ({ w: 340, h: 450, x: 170, y: 450 - 14 - PF.groundOf(spec), scale: 1, rotate: 0 });
   const stage = document.getElementById('stage'), rise = document.getElementById('rise');
   const sit = A.still({ stance: 'sit' }), up = A.still({ stance: 'stand' });
   const loopOf = spec => A.seq(A.still({ stance: 'sit' }, 0.6), A.layer(sit, A.make.standUp({ spec })), A.still({ stance: 'stand' }, 0.3),
     A.layer(up, A.make.wave({ spec })), A.layer(up, A.loop(A.make.walk(), 1)), A.still({ stance: 'stand' }, 0.3),
     A.layer(up, A.make.sitDown({ spec })), A.still({ stance: 'sit' }, 0.5));
+  const turning = A.layer(up, A.make.turn({ quarters: 4, seconds: 0.8 }));
+  const ROWS = [['sitting', 'in between', 'standing', 'moving'], ['side-on, sitting', 'side-on', 'from behind', 'turning round']];
   let shown = [], made = 0;
   function draw() {
     settle();
@@ -216,12 +251,15 @@
     stage.innerHTML = names.length ? '' : '<p class="empty">tick a fwiend under “fwiends to show”.</p>';
     shown = names.map(name => {
       const label = FRIENDS.find(f => f[0] === name)[1], spec = PF.define(`${name}~${++made}`, { ...PF.get(name) });
-      stage.insertAdjacentHTML('beforeend', `<div class="friend"><h2>${label}</h2><div class="cells">` +
-        '<div class="cell"></div>'.repeat(4) + ['sitting', 'in between', 'standing', 'moving'].map(c => `<div class="caption">${c}</div>`).join('') + '</div></div>');
+      stage.insertAdjacentHTML('beforeend', `<div class="friend"><h2>${label}</h2><div class="cells">` + ROWS.map(row =>
+        '<div class="cell"></div>'.repeat(row.length) + row.map(c => `<div class="caption">${c}</div>`).join('')).join('') + '</div></div>');
       const rigs = [...stage.lastElementChild.querySelectorAll('.cell')].map(cell => PF.mount(cell, spec, { bg: false, view: viewOf(spec) }));
       rigs[0].setPose({ stance: 'sit' }, true);
       rigs[2].setPose({ stance: 'stand' }, true);
-      return { between: rigs[1], moving: rigs[3], loop: loopOf(spec) };
+      rigs[4].setPose({ stance: 'sit', facing: 90 }, true);
+      rigs[5].setPose({ stance: 'stand', facing: 90 }, true);
+      rigs[6].setPose({ stance: 'stand', facing: 180 }, true);
+      return { between: rigs[1], moving: rigs[3], loop: loopOf(spec), turner: rigs[7] };
     });
     pose();
     for (const [key, [get]] of Object.entries(PARAMS)) {
@@ -238,9 +276,10 @@
   let pending = 0;
   const soon = () => { if (!pending) pending = setTimeout(() => { pending = 0; draw(); }, 120); };
   sliders.addEventListener('input', e => {
-    if (e.target.type !== 'range') return;
-    PARAMS[e.target.id][1](+e.target.value);
-    document.getElementById(`${e.target.id}Out`).textContent = fixed(+e.target.value);
+    if (!(e.target.id in PARAMS)) return;
+    const value = e.target.type === 'range' ? +e.target.value : e.target.value;
+    PARAMS[e.target.id][1](value);
+    document.getElementById(`${e.target.id}Out`).textContent = fixed(value);
     soon();
   });
   sliders.addEventListener('change', () => { clearTimeout(pending); pending = 0; draw(); });
@@ -268,7 +307,10 @@
   const start = performance.now();
   const frame = now => {
     const t = (now - start) / 1000;
-    for (const { moving, loop } of shown) moving.setPose(A.sample(loop, t % loop.duration), true);
+    for (const { moving, loop, turner } of shown) {
+      moving.setPose(A.sample(loop, t % loop.duration), true);
+      turner.setPose(A.sample(turning, t % turning.duration), true);
+    }
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

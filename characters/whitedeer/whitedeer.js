@@ -127,17 +127,17 @@ PhyFriends.define('whitedeer', {
       fluff: [{ from: 210, to: 330, n: 3, len: 9, lean: 3, depth: 0.05, b1: -20, b2: 6, jit: 0 }] },
     // The sailor hat, set on the crown in front of the antlers' roots and tipped down on his right (the viewer's
     // left), as in the dressed figure: a white dome with the dark navy ribbon round its foot, whose two ends hang down
-    // beside his left ear, and the gold anchor on its front: its ring, shank and stock, then its arms.
+    // beside his left ear, and the gold anchor on its front, a badge: its ring, shank and stock, then its arms.
     { feature: 'cap', on: 'hair', fill: 'face', nodes: [[-64, -58, 1], [-62, -84], [-46, -110], [-12, -126], [26, -126], [52, -112],
       [62, -90, 1]] },
     { feature: 'cap', on: 'hair', fill: 'knot', nodes: [[-64, -63, 1], [62, -94, 1], [63.5, -88, 1], [-62.5, -57, 1]] },
     { feature: 'cap', on: 'hair', fill: 'knot', round: 0.4, nodes: [[57, -90, 1], [62, -91, 1], [64, -40, 1], [59, -40, 1]] },
     { feature: 'cap', on: 'hair', fill: 'knot', round: 0.4, nodes: [[59, -91, 1], [64, -92, 1], [73, -46, 1], [68, -44, 1]] },
-    { feature: 'cap', on: 'hair', fill: 'gold', polys: [[-9, -111.5, 3.4, 8]] },
-    { feature: 'cap', on: 'hair', fill: 'gold', round: 0.3, nodes: [[-11, -108, 1], [-7, -108, 1], [-7, -104, 1],
+    { feature: 'badge', on: 'hair', fill: 'gold', polys: [[-9, -111.5, 3.4, 8]] },
+    { feature: 'badge', on: 'hair', fill: 'gold', round: 0.3, nodes: [[-11, -108, 1], [-7, -108, 1], [-7, -104, 1],
       [-1, -104, 1], [-1, -100, 1], [-7, -100, 1], [-7, -90, 1], [-11, -90, 1], [-11, -100, 1], [-17, -100, 1],
       [-17, -104, 1], [-11, -104, 1]] },
-    { feature: 'cap', on: 'hair', fill: 'gold', round: 0.3, nodes: [[-21, -96, 1], [-17, -96, 1], [-15, -91, 1], [-9, -88, 1],
+    { feature: 'badge', on: 'hair', fill: 'gold', round: 0.3, nodes: [[-21, -96, 1], [-17, -96, 1], [-15, -91, 1], [-9, -88, 1],
       [-3, -91, 1], [-1, -96, 1], [3, -96, 1], [1, -88, 1], [-9, -84, 1], [-19, -88, 1]] },
     // The hem of the shirt: a navy band round the foot of the shirt, standing proud of the body's round base at each
     // side and flaring a little, as the dressed figure's does, with a white stripe through it. Seated, it lies behind
@@ -157,6 +157,11 @@ PhyFriends.define('whitedeer', {
     { feature: 'collar', on: 'body', fill: 'navy', nodes: [[30, 34, 1], [46, 38, 1], [50, 54, 1], [0, 86, 1], [0, 70, 1]] },
     { feature: 'collar', on: 'body', fill: 'face', nodes: [[-36, 40, 1], [-3, 78, 1], [-3, 81.5, 1], [-39, 43, 1]] },
     { feature: 'collar', on: 'body', fill: 'face', nodes: [[36, 40, 1], [39, 43, 1], [3, 81.5, 1], [3, 78, 1]] },
+    // The collar's square flap on his back, navy with a white stripe inside its edge, as the sheet draws the outfit from
+    // behind. It lies on the back (turn: 'back'), under the body, so that it shows only once he turns.
+    { feature: 'collar', on: 'body', turn: 'back', under: true, fill: 'navy', nodes: [[-44, 36, 1], [44, 36, 1], [42, 92, 1], [-42, 92, 1]] },
+    { feature: 'collar', on: 'body', turn: 'back', under: true, fill: 'face', nodes: [[-39.5, 36, 1], [-37.8, 87.5, 1], [37.8, 87.5, 1],
+      [39.5, 36, 1], [36, 36, 1], [34.5, 84, 1], [-34.5, 84, 1], [-36, 36, 1]] },
     // The neckerchief, knotted at the collar's point, its two ends hanging down and apart, in dark navy. It lies over
     // the tops of the arms, as a scarf does (scarf).
     { feature: 'neckerchief', on: 'scarf', fill: 'knot', round: 0.4, nodes: [[-7, 72, 1], [7, 72, 1], [9, 84, 1], [-9, 84, 1]] },

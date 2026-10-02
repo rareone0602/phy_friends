@@ -44,7 +44,7 @@ out/           generated output (git-ignored)
 |---|---|
 | `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
-| `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
+| `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `src/emotion.js` | feelings: happy, content, shy, proud, surprised, scared, curious, sleepy, asleep, sad and cross, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture |
 | `src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
 | `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
@@ -62,7 +62,7 @@ out/           generated output (git-ignored)
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
 | `tools/feelings.html` | a review sheet of every friend in every feeling, still or playing, seated or standing (`?stand`) |
-| `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI` and `BODY`), with every friend that stands, seated, standing and moving, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
+| `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI`, `BODY` and `TURN`), with every friend that stands, seated, standing and moving, then side-on, from behind and turning round, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
 | `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
@@ -214,6 +214,85 @@ stands already, on the glyphs' four legs, so its spec sets `stand: false` and
 it keeps its shape in either stance, as does any spec without a body, or with
 one that is not an ellipse, on which the limbs could not be fitted.
 
+## Turning
+
+Every friend that stands also turns round, as South Park's cut-out characters
+do: not through every angle, but a quarter turn at a time. The pose's `facing`,
+in degrees about the vertical, snaps to the nearest quarter
+(`PhyFriends.quarterOf`): 0 faces the viewer, 90 is side-on, facing the
+viewer's right, 180 turns its back, and 270 is side-on, facing left. No friend
+has a turned drawing of its own. Each is turned from its own spec by rules that
+every friend shares (`PhyFriends.TURN`), so a friend turns the same way after
+any change to its spec or to the figure the house gives it (`STAND_FIT`,
+`ONIGIRI`, `BODY`): a taller or narrower body is taller or narrower side-on and
+from behind as well. The rules aim for what looks right rather than what is
+spatially right: where the true turn looks worse than a cheat, the cheat wins.
+
+Side-on, each part of the head and the body lies on a plane that slides towards
+the way the friend faces and narrows. The face comes forward and narrows until
+its near eye sits about halfway out from the middle of the head (`eye`) and its
+front edge nearly reaches the head's (`reach`), while its pale patch stays wide
+enough to read (`patch`). Only the near eye shows, drawn over the hair, with the
+near cheek, both keeping their shape and the cheek staying on the face, the
+mouth and the near side's markings of the face, which come in with the head
+above the eyes; a blaze or an emblem across the face keeps at least `patch` of
+its width. The far eye is hidden, and so is anything wholly on the far side of
+the centre line, a brow or a cheek mark. Glasses are left out, as is the custom
+in a side view, so Alfie turns without his. A dotted mark turns dot by dot. The
+head loses the tufts in front of it. The hair bends from the head to the face:
+its top stays on the head and lower down it comes ever further with the face,
+so that a fringe, or a lock beside the face, goes with it, while hair that
+covers the crown (at least `crown` of the head's width) keeps covering the side
+of the head as well. The ears close up behind the middle of the head and stand
+more upright, the far one first, showing its back, in its house shade where it
+is the colour of the head, and an ear folded over, as cowosus's is, keeps its
+fold; horns and antlers stand with them, but the far one is left out. The body
+is narrower (`body`, 0.8): what lies on its front (a chest, a collar, a yukata's
+crossed front) comes to its front, a ruff or a bib round the neck a little wider
+(`scarf`), hanging forward where it is wider than the body, and a neckerchief's
+knot and ends turn together; what lies on its back (a hood, a ponytail) goes to
+its back, and what lies on one side of it (wings, a bow) reaches out behind. A
+marking on one side of the head or the body (a thigh, a knot, cowosus's eye
+patch) wraps round the near side where it lies, as on a round body turned a
+quarter, never wider than it is facing the viewer, and hides on the far side; a
+shoulder patch or an arm's stripe goes with the near arm. The pieces of one
+marking turn together. The limbs close up and hang straight down, the far arm
+behind the body and the far leg behind the near one, the feet pointing
+forwards; seated, the forepaws come forwards. The tail grows from the back of
+the body. Each side keeps its own colours, so K3V1N shows his blue eye facing
+right and his orange one facing left.
+
+From behind, a friend is its own mirror image, as it would be turned round: its
+tail changes sides, and so does whatever is on its left or right. The face and
+what lies on the front are hidden, though the head keeps the outline its face
+gives it (a chin), as is whatever faces forwards (the insides of the ears, a
+badge such as the anchor on WhiteDeer's hat, a hoof's cleft); what lies on the
+back is drawn over the body, and what lies on the sides where it is; the ears
+show their backs, in their house shade where they are the colour of the head,
+so that they stand apart from it; the arms hang behind the body while it sits
+and beside it, under the head, once it rises; hair that covers the crown lies
+over the head, and a forelock or a crest behind it (`backHair`); and the tail,
+which grows from nearer the middle of the back (`tail`), is drawn over
+everything. A spec may light its back from behind (`backLit`), so that what is
+shaded facing the viewer for lying behind the head, as the back of Teni's bob
+is, takes its own colour once it is in front. Soles and glasses show only
+facing the viewer.
+
+How each feature turns is the house's (`ANATOMY.turns`): with the face, on the
+front, on the back, on the sides, on the arms (shoulder patches, arm stripes),
+with the ears (horns and antlers), facing forwards, or only facing the viewer
+(soles and glasses); any other feature rides its part. An extra may name its
+own group (`turn: 'forward'`, or `'none'` to ride its part), and a spec may
+change any of `TURN`'s numbers for itself (`turn`), though a difference shared
+by several friends belongs in the rules. A part that shows only once a friend
+turns, drawn from its owner's own picture of its back, lies under the body
+facing the viewer: WhiteDeer's sailor-collar flap and the knot of Brian's
+bandana. A mounted rig draws a friend afresh when it turns, into the same
+`<svg>`, keeping `rig.parts` and its pencil texture, since a turned friend is
+drawn in another order; every other change of pose rewrites a few transforms,
+as before. `PhyFriends.anim.make.turn({ quarters })` turns a friend round a
+quarter at a time, each turn landing with a small hop.
+
 ## Spec
 
 ```js
@@ -236,9 +315,11 @@ PhyFriends.define('name', {
     legs:  { hip, spread, ankle, bow, knees, width, taper, foot: { cx, cy, rx, ry }, bands, right },  // A paw or foot the seat leaves out may be any shape
     tail:  { base, angle },                                            // The tail's place while standing
   },
+  turn:  { eye, reach, patch, body, ..., backHair, backLit },        // Optional: this friend's own numbers for turning round (TURN)
   extras: [{ feature: 'chest', on: 'body', clip: true, fill: 'face', ...shape }],  // Markings, clothes and props; feature: what it draws (see Anatomy); on: 'ears' means both ears, 'paws' and 'feet' both of those
   // An extra with show: 'name' is drawn only while the pose's show lists that name (a prop); one on 'ground' stays put as the friend hops
   // An extra on 'paws' or 'feet' with sole: true faces us only while the friend sits, and flattens as it rises
+  // An extra's turn names the group of ANATOMY.turns it turns with, rather than its feature's ('none': it rides its part)
   rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
   emotions: false,                                                     // Only off the house template (Claude): no feelings
   routine: { says, saysStill, duration, keys: { field: [[t, value, ease]] } },  // Its third hi plays it, if it shows no feelings (Claude's laptop)
@@ -273,7 +354,7 @@ Shape primitives (`PhyFriends.shapes`):
   the ellipse becomes a rice ball by that much: it narrows towards its top
   and may square off into a broad, flat base with round corners, resting
   where the ellipse's bottom did, and its tufts keep their angles.
-  `onigiri: 1` is `PhyFriends.ONIGIRI`'s rice ball (`{ taper: 0.85,
+  `onigiri: 1` is `PhyFriends.ONIGIRI`'s rice ball (`{ taper: 0.8,
   square: 0 }`: a soft rounded triangle, round at the base), and
   `onigiri: { taper, square }` gives a rice ball its own: how much narrower
   its top is, and how far its base squares off. `outlineOf`
@@ -358,8 +439,13 @@ lacks is a decision rather than an oversight:
   limbs' (`cuffs`, `socks`, `toes`, `soles`). One friend's eyebrow dots are
   `brows` as much as another's, whatever their colour or layer. A feature that
   no friend has had yet is added to the list first.
-- The sections, the stand's keys and the extras' layers are checked by name,
-  so `feet` written for `foot` is caught.
+- Each feature turns one way for every friend (`ANATOMY.turns`; see
+  [Turning](#turning)): `chest` lies on the front, `hood` on the back, `brows`
+  on the face, `earInner` faces forwards, and `glasses` show only facing the
+  viewer, whoever wears them.
+- The sections, the stand's keys, the extras' layers, a spec's turn numbers and
+  an extra's turn group are checked by name, so `feet` written for `foot` is
+  caught.
 - Every friend's drawing has the same parts, by the names a mounted rig gives
   them (`ANATOMY.parts`, `rig.parts`): what a pose moves, and all that the code
   that animates a friend may rely on. The head's layers come in one order for
@@ -371,8 +457,10 @@ The anatomy makes the friends alike in what they are made of; the house contract
 clips, the feelings, the gallery and the films rely on. Every friend but Claude
 is held to every promise of it, so that the code that animates a friend never
 needs to know which friend it is: every movement and feeling poses it in finite
-numbers, sitting and standing; a mounted rig draws each pose as a fresh render
-does; it sits and stands on its ground and keeps a foot there as it walks; its
+numbers, sitting and standing; it turns to each quarter in finite numbers with
+all its parts, its face ahead of its head side-on and hidden from behind; a
+mounted rig draws each pose as a fresh render does, turned or not; it sits and
+stands on its ground, facing any way, and keeps a foot there as it walks; its
 limbs show against what lies behind them (by at least the colour difference by
 which phy's warm white, the palest the house allows, stands off the paper); it
 waves and points with the arm away from its tail; and its ears turn about their
@@ -462,7 +550,8 @@ Every field is optional:
 { x, y, squash, tilt, headX, headY, turnX, turnY, lookX, lookY, blink, widen, lid, lidTilt, earL, earR, hair, tail,
   blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint', eyeL, eyeR,
   mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'open', show: 'laptop side',
-  stance: 'sit' | 'stand', rise, crouch, lean, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR' }
+  stance: 'sit' | 'stand', rise, crouch, lean, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR',
+  facing: 0 | 90 | 180 | 270 }
 ```
 
 `rise` adds to the stance (0 for `sit`, 1 for `stand`), the sum held between 0
@@ -493,9 +582,18 @@ instead, so + lays it against the head and − lifts it away.
 − tucks it in behind the body. The clips keep it within about ±12°, and
 `PhyFriends.anim` clamps it to ±45°.
 
-Turning is faked with per-layer parallax: ears and the tail slide back, while the
-face, eyes and hair slide forward. That gives a convincing 2.5D head turn for
-look-at effects.
+`facing` turns the whole friend round, a quarter at a time (see
+[Turning](#turning)); like the other numbers, it adds up when clips are
+layered, so a clip that turns a friend by 90 turns one already side-on to face
+away. Side-on, a positive `armL`, `elbowL` or `legL` swings that limb forward,
+on either side, so a wave reaches forward and a walk strides
+(`PhyFriends.anim.walking(u, steps, { distance, facing })` keeps the planted
+foot still side-on as well); from behind, the friend being its own mirror image,
+`armL` is the arm on the viewer's right.
+
+A head turn (`turnX`, `turnY`) is faked with per-layer parallax: ears and the
+tail slide back, while the face, eyes and hair slide forward. That gives a
+convincing 2.5D head turn for look-at effects.
 
 ```js
 const rig = PhyFriends.mount(document.querySelector('#box'), 'howdi');

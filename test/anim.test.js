@@ -105,6 +105,14 @@
     assertThrows(() => A.sample(A.track({ tilt: [[0, 0], [1, 1, 'wobbly']] }), 0.5), 'unknown ease "wobbly"');
   });
 
+  test('a friend turns round a quarter at a time, and a mirror turns it the other way', () => {
+    const turn = A.make.turn({ quarters: 2, seconds: 0.25 });
+    assertEqual([0.1, 0.3, 0.6, turn.duration].map(t => A.sample(turn, t).facing), [0, 90, 180, 180]);
+    assertEqual(A.sample(A.make.turn({ quarters: -1 }), 1).facing, -90, 'a negative number turns the other way');
+    assertEqual(A.sample(A.layer(A.still({ facing: 90 }), turn), 0.6).facing, 270, 'it adds to the facing under it');
+    assertEqual(PhyFriends.quarterOf(A.sample(A.mirror(A.still({ facing: 90 })), 0).facing), 270, 'a mirror faces the other way');
+  });
+
   // ---- The standing figure
 
   const STANDING = ['walk', 'wave', 'cheer', 'jump', 'standUp', 'sitDown', 'dance', 'stretch', 'point'];
