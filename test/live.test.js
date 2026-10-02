@@ -167,6 +167,24 @@
     });
   });
 
+  test('the stage tells the page how long a friend has been stroked, until the stroking stops', () => {
+    const reports = [];
+    withStage(['phy'], { ...moving, onStroke: (friend, seconds) => reports.push([friend.name, seconds]) }, (stage, [phy]) => {
+      const rub = () => {
+        for (const x of [100, 120, 140, 110, 90, 120, 150]) phy.rig.el.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: x }));
+      };
+      stage.draw(0);
+      rub();
+      stage.draw(0.5);
+      rub();
+      stage.draw(0.9);
+      assertEqual(reports, [['phy', 0], ['phy', 0.5]]);
+      stage.draw(0.5 + L.STROKE.linger + 0.1);
+      stage.draw(3);
+      assertEqual(reports.length, 2, 'no more once the stroking has stopped');
+    });
+  });
+
   test('the left and right arrow keys, pressed in turn, stroke a friend too', () => {
     withStage(['terry'], moving, (stage, [terry], said) => {
       stage.draw(0);

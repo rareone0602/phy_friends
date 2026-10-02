@@ -400,6 +400,9 @@
   const ROLL_CALL = { first: 0.2, stride: 200, maxHops: 6, height: 20, clearance: 24, cadence: 0.4, smile: 0.8,
     watch: { before: 0.6, after: 0.9 } };
 
+  // Stroking Terry for `seconds` opens the tuning page, on which his owner chose the friends' proportions. It is an
+  // easter egg: nothing on the page points to it.
+  const TUNING = { friend: 'terry', seconds: 5, page: 'tools/tune.html' };
   const groundRandom = PhyFriends.rng(5);  // Seeded, so that every visit draws the same ground lines.
   // Whether the friends keep still: the reader's "keep still", or else the system's reduced motion.
   const reducedMotion = PhyFriends.live.still;
@@ -420,6 +423,7 @@
     beforeHi, beforeFrame: followTheRollCall, busy: onTheirWay, canDoze: () => !onTheirWay(),
     // The keyboard has reached a friend still to come, so everyone comes at once.
     onFocus: friend => { if (friend.arrival && friend.focused) endRollCall(); },
+    onStroke: openTuningPage,
     afterPose: (friend, travel) => { if (friend.arrival) showOnItsWay(friend, travel); },
   });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
@@ -435,6 +439,14 @@
   if (document.readyState === 'complete') greetLinkedFriend();
   else addEventListener('load', greetLinkedFriend, { once: true });
   addEventListener('hashchange', greetLinkedFriend);
+
+  // Opens the tuning page once Terry has been stroked long enough (TUNING).
+  let tuningPageOpened = false;
+  function openTuningPage(friend, seconds) {
+    if (friend.name !== TUNING.friend || seconds < TUNING.seconds || tuningPageOpened) return;
+    tuningPageOpened = true;
+    location.assign(TUNING.page);
+  }
 
   // Mounts one friend in its slot and draws its ground. In forced colors the page takes the system's
   // background, so each friend is drawn on a sheet of paper cut to its outline, as on any background of

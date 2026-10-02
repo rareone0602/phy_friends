@@ -573,6 +573,9 @@ A box that is a button takes `role="button"`, `tabindex="0"`, a short
 beside the box, not in it, since mounting replaces what the box holds. The
 page keeps its own layout; the gallery's roll call moves its friends and
 turns their eyes through two hooks on each friend, `travel` and `watch`.
+The stage's `onStroke(friend, seconds)` tells a page how long a friend has
+been stroked; on the gallery, stroking Terry for five seconds opens the
+tuning page (`tools/tune.html`), on which his owner chose the proportions.
 Options fix a pointer, a hi or a feeling for screenshots (the
 gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`) and set how long
 the friends wait before they doze (`?doze=<seconds>`). Under reduced motion

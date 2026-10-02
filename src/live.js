@@ -182,14 +182,16 @@
   // MediaQueryList, or anything with `matches`; still, the reader's choice or else the system's, by
   // default); announcer (the page's live region, role="status"), in
   // which the stage says what happened, or announce(text), to say it some other way; and
-  // hooks: beforeHi(friend), which may refuse a hi by returning false; onFocus(friend); beforeFrame(t),
-  // run before each frame; busy(t), true while the page wants every frame drawn; canDoze(), false while
-  // the friends must stay awake; and afterPose(friend, travel), run after each friend is posed.
+  // hooks: beforeHi(friend), which may refuse a hi by returning false; onFocus(friend); onStroke(friend,
+  // seconds), run on each frame while a friend is being stroked, with how long the stroking has lasted;
+  // beforeFrame(t), run before each frame; busy(t), true while the page wants every frame drawn; canDoze(),
+  // false while the friends must stay awake; and afterPose(friend, travel), run after each friend is posed.
   function stage(options = {}) {
     const o = {
       root: null, margin: 0, pointer: null, hold: null, feel: null, boil: BOIL, doze: DOZE.after,
       reducedMotion: still,
-      announcer: null, announce: null, beforeHi: null, onFocus: null, beforeFrame: null, busy: null, canDoze: null, afterPose: null,
+      announcer: null, announce: null, beforeHi: null, onFocus: null, onStroke: null, beforeFrame: null, busy: null, canDoze: null,
+      afterPose: null,
     };
     for (const key in options) if (options[key] !== undefined && options[key] !== null) o[key] = options[key];
     if (!o.announce) o.announce = o.announcer ? liveRegion(o.announcer) : () => {};
@@ -629,7 +631,7 @@
           stroking.last = clock;
           return;
         }
-        stroking = { last: clock };
+        stroking = { since: clock, last: clock };
         if (feel('content')) o.announce(E.describe('content', label));
       }
 
@@ -666,6 +668,7 @@
           stroking = null;
           attendedSince = t;  // Curiosity starts afresh once the stroking stops.
         }
+        if (stroking && o.onStroke) o.onStroke(friend, stroking.last - stroking.since);
         if (!hovered && !focused) {
           attendedSince = null;
           if (feeling && feeling.curious) calm(t);
