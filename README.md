@@ -683,7 +683,10 @@ page keeps its own layout; the gallery's roll call moves its friends and
 turns their eyes through two hooks on each friend, `travel` and `watch`.
 The stage's `onStroke(friend, seconds)` tells a page how long a friend has
 been stroked; on the gallery, stroking Terry for five seconds opens the
-tuning page (`tools/tune.html`), on which his owner chose the proportions.
+tuning page (`tools/tune.html`), on which his owner chose the proportions, and
+stroking every friend that shows feelings, each at least once in one visit,
+opens the feelings sheet (`tools/feelings.html`) once the last one's ♪ has
+shown.
 Options fix a pointer, a hi or a feeling for screenshots (the
 gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`) and set how long
 the friends wait before they doze (`?doze=<seconds>`). Under reduced motion

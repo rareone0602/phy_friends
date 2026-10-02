@@ -400,9 +400,11 @@
   const ROLL_CALL = { first: 0.2, stride: 200, maxHops: 6, height: 20, clearance: 24, cadence: 0.4, smile: 0.8,
     watch: { before: 0.6, after: 0.9 } };
 
-  // Stroking Terry for `seconds` opens the tuning page, on which his owner chose the friends' proportions. It is an
-  // easter egg: nothing on the page points to it.
+  // Two easter eggs, to which nothing on the page points. Stroking Terry for `seconds` opens the tuning page, on which
+  // his owner chose the friends' proportions. Stroking every friend that shows feelings, each at least once in one
+  // visit, opens the sheet of every friend in every feeling, once the last one's mark has shown.
   const TUNING = { friend: 'terry', seconds: 5, page: 'tools/tune.html' };
+  const FEELINGS_SHEET = { page: 'tools/feelings.html' };
   const groundRandom = PhyFriends.rng(5);  // Seeded, so that every visit draws the same ground lines.
   // Whether the friends keep still: the reader's "keep still", or else the system's reduced motion.
   const reducedMotion = PhyFriends.live.still;
@@ -423,7 +425,7 @@
     beforeHi, beforeFrame: followTheRollCall, busy: onTheirWay, canDoze: () => !onTheirWay(),
     // The keyboard has reached a friend still to come, so everyone comes at once.
     onFocus: friend => { if (friend.arrival && friend.focused) endRollCall(); },
-    onStroke: openTuningPage,
+    onStroke: findEasterEggs,
     afterPose: (friend, travel) => { if (friend.arrival) showOnItsWay(friend, travel); },
   });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
@@ -440,12 +442,20 @@
   else addEventListener('load', greetLinkedFriend, { once: true });
   addEventListener('hashchange', greetLinkedFriend);
 
-  // Opens the tuning page once Terry has been stroked long enough (TUNING).
-  let tuningPageOpened = false;
-  function openTuningPage(friend, seconds) {
-    if (friend.name !== TUNING.friend || seconds < TUNING.seconds || tuningPageOpened) return;
-    tuningPageOpened = true;
-    location.assign(TUNING.page);
+  // Follows the stroking to the easter eggs (TUNING, FEELINGS_SHEET), and opens the page of the first one found.
+  const stroked = new Set();
+  let eggFound = false;
+  function findEasterEggs(friend, seconds) {
+    if (eggFound) return;
+    if (friend.name === TUNING.friend && seconds >= TUNING.seconds) return leaveFor(TUNING.page);
+    if (PhyFriends.emotion.fits(friend.name)) stroked.add(friend.name);
+    if (friends.every(other => stroked.has(other.name) || !PhyFriends.emotion.fits(other.name))) {
+      leaveFor(FEELINGS_SHEET.page, PhyFriends.emotion.MARK.seconds);
+    }
+  }
+  function leaveFor(page, after = 0) {
+    eggFound = true;
+    setTimeout(() => location.assign(page), after * 1000);
   }
 
   // Mounts one friend in its slot and draws its ground. In forced colors the page takes the system's
