@@ -308,7 +308,7 @@ def label_drift(cast, gallery=GALLERY):
     The cast (characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
     label (name, species and credit), the name that opens its aria-label, and which friend is the
     host. A friend is there only with its owner's agreement to the gallery. Any other link that
-    credits an owner, such as the footer's to Terry's, gives the owner's credit as the cast does. The
+    credits an owner, such as the footer's to Terry's, uses the cast's name or handle and credit link. The
     link preview's alt text counts the friends and names them in the gallery's order, as the preview
     pictures them.
     cast: {host, friends: {key: entry}}, as READ_CAST_JS reads it, or None.
@@ -351,15 +351,19 @@ def friend_drift(friend, entry, host):
 
 def credit_drift(credit, entry):
     """Return the ways in which a link that credits a friend's owner outside its label disagrees with the
-    friend's entry in the cast, which is None if the cast has no such friend."""
+    friend's entry in the cast, which is None if the cast has no such friend. The link may use the
+    friend's name or the owner's handle, but its address must match the owner's credit link."""
     key = credit['key']
     if entry is None:
         return [f'{key}: credited by a link (data-credit) but not in the cast']
     problems = []
-    for field, value in (('credit', entry['credit']['handle']), ('credit link', entry['credit']['href'])):
+    expected = {'credit': (entry['credit']['handle'], entry['name']),
+                'credit link': (entry['credit']['href'],)}
+    for field, values in expected.items():
         found = ' '.join(credit[field].split())
-        if found != value:
-            problems.append(f'{key}: the {field} is "{found}" in a link that credits its owner but "{value}" in the cast')
+        if found not in values:
+            wanted = ' or '.join(f'"{value}"' for value in values)
+            problems.append(f'{key}: the {field} is "{found}" in a link that credits its owner but {wanted} in the cast')
     return problems
 
 
