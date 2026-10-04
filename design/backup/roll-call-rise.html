@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="eighteen fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="nineteen fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; WeiWei, an orange fox with a white mop and a big white ruff; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,21 +60,22 @@
      page, as the subject of a group photo stands in the middle of the frame. */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
-     less 0.06 for the overlap. The eighteen reaches add up to 826 head units (Terry's, WhiteDeer's and
-     Claude's are nil), so all eighteen take 19.9793 boxes. In the smaller splits the widest rows are the
-     first eight, Howdi to mumuyou, at 9.0052 boxes, the first five at 5.6815, K3V1N to Raze at 4.5822,
-     Brian to K3V1N at 3.5978, and Brian and mumuyou at 2.3837. Each is rounded up so that those friends always fit in
-     one row. The box is five rules, so that two
+     less 0.06 for the overlap. The nineteen reaches add up to 890 head units (Terry's, WhiteDeer's and
+     Claude's are nil), so all nineteen take 21.1563 boxes. In the smaller splits the widest rows are the
+     second eight, K3V1N to Teni, at 9.0607 boxes, the second five, Terry to WeiWei, at 5.7148, K3V1N to
+     cowosus at 4.6119, Brian to K3V1N at 3.5978, and K3V1N and WeiWei at 2.3911. Each is rounded up so that
+     those friends always fit in one row. The box is five rules, so that two
      rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
-  .troupe { --abreast: 2.384; --size: calc(var(--L) * 5); }
-  /* The page is wider than the kit's column so that the stage has room for a row of eighteen; the
+  .troupe { --abreast: 2.392; --size: calc(var(--L) * 5); }
+  /* The page is wider than the kit's column so that the stage has room for a row of nineteen; the
      header and footer keep to the margin line. */
-  main { max-width: 3309px; }
-  /* Friends stand in one row where all eighteen fit. Otherwise they stand eight to a row, with jiaoyue and
-     Claude, the last, under the rest, and where eight do not fit, in rows of five, where WhiteDeer, jiaoyue
-     and Claude share the last. Narrower, they stand four to a row, with jiaoyue and Claude last again, then
-     three, where WhiteDeer, jiaoyue and Claude share the last, or in pairs. Each row is grounded on a rule. */
+  main { max-width: 3498px; }
+  /* Friends stand in one row where all nineteen fit. Otherwise they stand eight to a row, with WhiteDeer,
+     jiaoyue and Claude, the last, under the rest, and where eight do not fit, in rows of five, where Teni,
+     WhiteDeer, jiaoyue and Claude share the last. Narrower, they stand four to a row, with WhiteDeer, jiaoyue
+     and Claude last again, then three, with Claude alone under the rest, or in pairs, with Claude alone again.
+     Each row is grounded on a rule. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
   .friend {
@@ -127,18 +128,18 @@
      rule is 30px and so a box 150px. Narrower, they stand in pairs, never a mix of pairs and threes,
      so that the same friends always share a row on a phone. */
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
-  /* Four stand in a row once the stage is 4.583 boxes wide, which it is from an 846px window, five
-     once it is 5.682 boxes wide, from a 1022px window, eight once it is 9.006 boxes wide, from a
-     1553px window, and all eighteen once it is 19.98 boxes wide, from a 3309px window, where the
+  /* Four stand in a row once the stage is 4.612 boxes wide, which it is from an 850px window, five
+     once it is 5.715 boxes wide, from a 1027px window, eight once it is 9.061 boxes wide, from a
+     1562px window, and all nineteen once it is 21.157 boxes wide, from a 3498px window, where the
      page stops growing. */
-  @container (width >= 734px) { .troupe { --abreast: 4.583; } }
-  @container (width >= 910px) {
-    .troupe { --abreast: 5.682; }
+  @container (width >= 738px) { .troupe { --abreast: 4.612; } }
+  @container (width >= 915px) {
+    .troupe { --abreast: 5.715; }
     .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
   }
-  @container (width >= 1441px) { .troupe { --abreast: 9.006; } }
-  @container (width >= 3197px) {
-    .troupe { --abreast: 19.98; }
+  @container (width >= 1450px) { .troupe { --abreast: 9.061; } }
+  @container (width >= 3386px) {
+    .troupe { --abreast: 21.157; }
     .friends { max-width: none; }
   }
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
@@ -147,9 +148,10 @@
   /* On phones the names step down a size, so that neighboring labels keep apart. */
   @media (max-width: 720px) { .name { font-size: 26px; } }
   /* On narrow phones there is no room to reserve for tails, so they extend into the space
-     beside the pair, and a long credit wraps onto two lines instead of widening the page. */
+     beside the pair; the two in a pair stand a whole box apart rather than overlapping, so that two long
+     species never run together; and a long credit wraps onto two lines instead of widening the page. */
   @media (max-width: 419px) {
-    .friend { width: var(--size); }
+    .friend { width: var(--size); margin: 0; }
     .rig, figcaption { margin-left: 0; }
     .credit { height: auto; } .credit .me { display: block; } .credit .dot { display: none; }
   }
@@ -247,6 +249,10 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N, an ice-blue cat with a yellow mark on his forehead, one eye blue over mint and the other orange over yellow, and a white-tipped tail"></div>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
+        <li class="friend" data-friend="weiwei"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to WeiWei, an orange fox with a white mop, white eyebrows, a white muzzle and a big white ruff, pink inner ears, one eye blue over mint and the other brown over yellow, and a bushy tail with a peach end"></div>
+          <figcaption><span class="name hand">WeiWei</span><span class="species">orange fox</span><span class="credit"><a href="https://www.facebook.com/Aawei1105/">fb/Aawei1105</a></span></figcaption>
+        </figure></li>
         <li class="friend" data-friend="bardell"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell, a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail"></div>
           <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
@@ -309,6 +315,7 @@
 <script src="../../characters/brian/brian.js"></script>
 <script src="../../characters/mumuyou/mumuyou.js"></script>
 <script src="../../characters/kevin/kevin.js"></script>
+<script src="../../characters/weiwei/weiwei.js"></script>
 <script src="../../characters/bardell/bardell.js"></script>
 <script src="../../characters/cowosus/cowosus.js"></script>
 <script src="../../characters/raze/raze.js"></script>

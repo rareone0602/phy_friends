@@ -56,7 +56,9 @@ The page has five parts, in this order:
   that sticks out at ground level widens that friend's slot
   (`--reach-left` and `--reach-right`, measured on load), so neighbours stand
   close but never tread on a tail. Below 420px there is no room, and a tail
-  reaches into the gap beside the pair.
+  reaches into the gap beside the pair; there the two in a pair stand a
+  whole box apart rather than overlapping, so that two long species never
+  run together.
 - Every friend stands in one row once the window is wide enough for all of
   them, where the page stops growing. Narrower, they stand eight to a row,
   then five, four and three, and on a phone in pairs, never a mix of pairs
@@ -71,10 +73,10 @@ The page has five parts, in this order:
   writes them into the page; `python3 tools/pf.py test` fails while they are
   stale, so a new fwiend never leaves the rows to be worked out by hand.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
-  every width; Fruit stands next to Yuda, Raze between cowosus and
-  tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue follow tanyuan in that
-  order; and on a phone Yuda shares a row with Terry, and Brian with
-  mumuyou. A new fwiend, or a change of order,
+  every width; Fruit stands next to Yuda, WeiWei between K3V1N and
+  BarDell, Raze between cowosus and tanyuan, and Alfie, Teni, WhiteDeer
+  and jiaoyue follow tanyuan in that order; and on a phone Yuda shares a
+  row with Terry, and Brian with mumuyou. A new fwiend, or a change of order,
   is checked at every width, since a row that breaks in the wrong place
   parts neighbours.
 - A phone held sideways, if it is at least 390px tall, still shows the
@@ -156,10 +158,10 @@ writes their script tags.
 
 Names keep their owner's capitalisation: **Howdi**, **Fruit**, **Yuda**,
 **Terry**, **Brian**, **Teni**, **Alfie**, **Raze** and **Claude** are
-capitalised; **YuanYuan**, **BarDell** and **WhiteDeer** have two capitals;
-**phy**, **mumuyou**, **cowosus**, **tanyuan** and **jiaoyue** are always
-lower case, even at the start of a line; and **K3V1N** is spelt with a 3 and
-a 1.
+capitalised; **YuanYuan**, **WeiWei**, **BarDell** and **WhiteDeer** have two
+capitals; **phy**, **mumuyou**, **cowosus**, **tanyuan** and **jiaoyue** are
+always lower case, even at the start of a line; and **K3V1N** is spelt with a
+3 and a 1.
 
 **The copy**, against what it isn't:
 
@@ -330,7 +332,7 @@ Follow them when turning someone's picture or design sheet into a friend.
   darker far side, no highlights.
 - A pale colour that would vanish on paper takes one slightly deeper tint
   wherever it appears (the white of mumuyou, tanyuan, YuanYuan, Alfie,
-  cowosus, jiaoyue, WhiteDeer, Yuda and Raze's headphones, `#efeef3`; phy's
+  cowosus, jiaoyue, WhiteDeer, WeiWei, Yuda and Raze's headphones, `#efeef3`; phy's
   warm white, `#f5ede6`; Teni's pale teal, `#ace1e0`; WhiteDeer's pale
   blue, `#b6def3`, with the pale blues beside it deepened by the same step,
   so that each stays as far from the fur as in his picture). The pencil lets
@@ -382,15 +384,16 @@ standing.
   house step deeper, as phy's green,
   Howdi's blue, tanyuan's red and Alfie's amber do; mumuyou's pale sky and
   lemon go further, to a blue and a gold that hold their own on his white
-  face, cowosus's pale blue to a teal, and jiaoyue's to a sky blue. On a dark
+  face, cowosus's pale blue to a teal, jiaoyue's to a sky blue, and WeiWei's
+  amber two steps, to a brown that holds on his orange fur. On a dark
   face the step goes the other way: Raze's irises, a deeper teal and purple,
   would be faint on his dark teal, so his eyes take the cyan and lavender that
   rim them. Eyes of two colours take the other through `eyes.right`:
-  mumuyou's, K3V1N's, Brian's and Raze's. An eye its
+  mumuyou's, K3V1N's, WeiWei's, Brian's and Raze's. An eye its
   owner draws in two colours keeps both, flat, the second as a mark clipped
   to the eye (`shine`), so that it glances and blinks with it: the orange
   lower quarter of cowosus's left eye, the mint and yellow lower halves of
-  K3V1N's and the cyan lower three-eighths of WhiteDeer's, which keep their
+  K3V1N's and of WeiWei's and the cyan lower three-eighths of WhiteDeer's, which keep their
   pictures' own tints because the colours above them hold the eye's shape. The palette keeps `eye`, a
   near-black, for the open mouth;
 - soft **blush** ovals, in the owner's colour if they have one (Yuda's is blue,
