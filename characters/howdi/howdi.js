@@ -1,5 +1,5 @@
-// Character spec for Howdi, a sky-blue wolf with a navy mop of hair, two navy bands on each ear, blue eyes
-// and a pale-tipped tail.
+// Character spec for Howdi, a sky-blue wolf with a navy mop of hair, a navy band round each ear, blue eyes and
+// a pale-tipped tail.
 // Pictures: examples/IMG_3308.png (a reference sheet), IMG_9372.png, 68c53a39-b337-489f-89a3-f325b83f11d9.png
 // (a crayon drawing by another artist) and ref.jpg (an earlier close-up in the house template, which the
 // newer pictures supersede).
@@ -11,7 +11,7 @@ PhyFriends.define('howdi', {
     fur: '#6ec7ff',        // The sky blue of the color bar. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#d5f0ff',       // The pale blue of the color bar: muzzle, cheeks, ruff, paws and tail end. Its house shade (faceShade) fills the back layer of the ruff.
-    hair: '#223678',       // The navy of the color bar: the mop and the bands on the ears.
+    hair: '#223678',       // The navy of the color bar: the mop and the band round each ear.
     ear: 'fur',
     earInner: '#eceff3',   // The white of the color bar, deepened to mumuyou's depth to stay visible on paper.
     iris: '#1f84e5',       // The bright blue of the irises in IMG_3308.png and IMG_9372.png (#539eff), one house step deeper so that it holds its weight.
@@ -42,13 +42,14 @@ PhyFriends.define('howdi', {
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
     ],
   },
-  // The wolf ears are large and pointed, and stand fairly upright. Two navy bands cross the upper half of
-  // each, and the tip stays sky blue, as in all three newer pictures. The white inner ear is drawn in front
-  // of the head, so that it runs down over the fur.
+  // The wolf ears are large and pointed, and stand fairly upright. One navy band runs round each, unbroken from
+  // edge to edge, as his owner asked, and the tip stays sky blue. It sits higher than the lower of the pictures'
+  // two bands, so that it clears the locks of the mop over each ear. The white inner ear lies over the band's
+  // middle, and is drawn in front of the head, so that it runs down over the fur.
   ears: {
     base: [-70, -60], angle: 34, width: 94, length: 92, lean: 26, tip: 5, b1: -15, b2: -12,
     inner: { front: true, scale: 1, dx: -2, dy: -8, width: 48, length: 62, lean: 18, tip: 4, b1: -20, b2: -4 },
-    stripes: [{ t: 0.52, w: 12, a: 6, span: [-80, 20] }, { t: 0.75, w: 11, a: 6 }],
+    stripes: [{ t: 0.62, w: 12, a: 2 }],
     stripeColor: 'hair',
   },
   // The messy mop is made of flame-shaped locks: a tall one leaning left on the crown, one sweeping right, a
