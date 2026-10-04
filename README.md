@@ -55,7 +55,7 @@ out/           generated output (git-ignored)
 | `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`), `examples/`, and `backup/` for the versions not taken |
 | `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`), which are made with the film kit |
 | `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken) |
-| `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages and run the tests (headless Chrome + ffmpeg) |
+| `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
@@ -711,6 +711,8 @@ python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
+python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4  # A part, with its part of the sound
+python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4  # Twice the pixels each way, at a higher quality
 python3 tools/pf.py test                                    # The in-browser tests, and the pages against the cast
 python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows, written from the cast
 python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
@@ -728,6 +730,28 @@ frame-exact however slow the machine, and filming a page twice gives the same
 frames, byte for byte. A film with a friend whose owner has not agreed to video
 is refused unless `--draft` is given, in which case the page marks it as a draft.
 
+With `--audio`, `film` puts a sound file under an `.mp4` or `.webm` film. The
+frames are copied rather than encoded again, so they are the same with sound as
+without, and the sound is cut to the filmed span by counting samples, so a part
+filmed alone with `--from` and `--to` keeps in step with the whole film to the
+sample. A sound that ends before the film is padded with silence, and `film`
+says so; one that runs on is cut. It fades out only when `--fade` gives the
+seconds to fade over, so a film cut to a looping track can loop too. The sound
+is AAC at 320 kb/s in an `.mp4` and Opus at 192 kb/s in a `.webm`.
+
+An `.mp4` or `.webm` is converted from the frames with the BT.709 matrix, in
+limited range, and tagged as such (primaries, transfer and matrix), because that
+is how browsers and YouTube decode HD video that says nothing about its colour;
+ffmpeg's own default, BT.601 and untagged, shifts every saturated colour a
+little (phy's green iris by about 4 ΔE). `--crf` sets the quality: 18 for an
+`.mp4` and 30 for a `.webm` unless given, lower being better and larger, with
+about 6 lower doubling the bit rate, which `film` prints. `--scale` films at
+more pixels than the page's own size: a 1920×1080 film with `--scale
+1.3333333333` comes out at 2560×1440, an upload that YouTube serves with its
+better codec at every size, so that the pencil's grain survives on a phone.
+YouTube asks for at least 8 Mb/s at 1080p30 and 16 Mb/s at 1440p30; coloured
+pencil at 1440p needs about `--crf 12` to get there.
+
 `test` runs `test/index.html` in headless Chrome, prints each failure, and exits
 non-zero on a failure or a page error. The page also works opened by hand.
 `test` also checks the gallery against the cast, which `index.html` repeats by
@@ -741,7 +765,7 @@ friends, in the cast's order, and the gallery's rows, from the friends' reaches;
 `test` fails while either is stale.
 
 The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
-ffmpeg for video.
+ffmpeg for video, with its ffprobe for a film's sound.
 
 ## Workflows
 

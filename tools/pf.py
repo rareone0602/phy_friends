@@ -13,6 +13,8 @@
   python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
   python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
+  python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4
+  python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4   # Twice the pixels each way, at a higher quality.
   python3 tools/pf.py test                              # Runs test/index.html headless and checks the pages against the cast; exits non-zero on a failure.
   python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
@@ -22,7 +24,12 @@ an examples/ folder of reference pictures. An example is compared through the
 view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
 
 `film` films any page that follows the film contract (see film() below) frame
-by frame, so a scene exports frame-exactly whatever the machine's speed.
+by frame, so a scene exports frame-exactly whatever the machine's speed. With
+--audio, it puts a sound file under the video, cut sample-exactly to the filmed
+span, so that a part filmed alone with --from and --to keeps in step with the
+whole; --fade fades the sound out at the end. An .mp4 or .webm is converted with
+the BT.709 matrix in limited range and tagged so, as players assume for HD video,
+so that its colors match the page's; --crf sets its quality.
 
 `test` also checks the pages against the cast in characters/cast.js: the labels
 that index.html repeats by hand, and the script tags and rows that `pages` writes
@@ -33,7 +40,7 @@ out/design/ for page mockups, out/tune.html for the tuning page to send, and
 out/scratch/ for experiments.
 
 Requires Google Chrome (override the path with $CHROME) and Pillow; video
-output also requires ffmpeg.
+output also requires ffmpeg, and a film's sound the ffprobe that comes with it.
 """
 import argparse
 import io
@@ -216,9 +223,22 @@ ENCODERS = {
 }
 _have = None
 
+# A player turns a video's YUV back into RGB with the matrix that the stream names or, when it names none, with
+# the one its size suggests: BT.709 for HD, as browsers and YouTube assume. Left to itself, ffmpeg converts RGB
+# frames with BT.601 and names nothing, which shifts saturated colors (phy's green iris by about 4 CIE76 dE).
+# Video is therefore converted with the BT.709 matrix, in limited range, and tagged so: matrix, primaries
+# (those of sRGB) and transfer. The tags are set on the frames (setparams), which the encoder follows; ffmpeg's
+# output options for primaries and transfer are overridden by the frames' own, which are unspecified.
+TO_BT709 = ('scale=out_color_matrix=bt709:out_range=tv:flags=accurate_rnd,format={},'
+            'setparams=colorspace=bt709:color_primaries=bt709:color_trc=bt709:range=tv')
 
-def pick_encoder(ext):
-    """Return (encoder, args) for an output extension, falling back when ffmpeg lacks the best one."""
+
+def pick_encoder(ext, crf=None):
+    """Return (encoder, args) for an output extension, falling back when ffmpeg lacks the best one.
+
+    crf: a constant quality in place of the encoder's own (lower is better and larger), for the
+    encoders that have one: libx264 for .mp4 and libvpx(-vp9) for .webm.
+    """
     global _have
     if ext not in ENCODERS:
         raise SystemExit(f'unknown output type {ext} (use .gif, .mp4, .webm or .apng)')
@@ -232,28 +252,37 @@ def pick_encoder(ext):
         if name in _have:
             if name != options[0][0]:
                 print(f'note: ffmpeg has no {options[0][0]}; using {name}', file=sys.stderr)
+            if crf is not None:
+                if '-crf' not in args:
+                    raise SystemExit(f'--crf sets the constant quality of an .mp4 (libx264) or a .webm (libvpx-vp9); '
+                                     f'{name}, which writes this {ext}, has none')
+                args = [*args[:args.index('-crf') + 1], f'{crf:g}', *args[args.index('-crf') + 2:]]
             return name, args
     raise SystemExit(f'{ext} needs one of the ffmpeg encoders {", ".join(n for n, _ in options)}, '
                      'and this ffmpeg has none of them; try .gif or .apng')
 
 
-def encode(frame_paths, out, fps=30):
-    """Encode frames (f0000.png, ...) into .gif, .mp4, .webm or .apng with ffmpeg."""
+def encode(frame_paths, out, fps=30, crf=None):
+    """Encode frames (f0000.png, ...) into .gif, .mp4, .webm or .apng with ffmpeg.
+
+    .mp4 and .webm are converted with the BT.709 matrix in limited range and tagged so (see TO_BT709).
+    crf: the constant quality of an .mp4 or .webm (see pick_encoder); None keeps the encoder's own.
+    """
     frame_dir = Path(frame_paths[0]).parent
     pattern = str(frame_dir / 'f%04d.png')
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     ext = out.suffix.lower()
-    codec, args = pick_encoder(ext)
+    codec, args = pick_encoder(ext, crf)
     base = ['ffmpeg', '-y', '-loglevel', 'error', '-framerate', str(fps), '-i', pattern]
     if ext == '.gif':
         vf = 'split[a][b];[a]palettegen=reserve_transparent=1:stats_mode=full[p];[b][p]paletteuse=dither=none'
         cmd = base + ['-vf', vf, '-loop', '0', str(out)]
     elif ext == '.mp4':  # MP4 has no alpha channel, and yuv420p requires even dimensions.
-        cmd = base + ['-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2', '-c:v', codec, *args, '-pix_fmt', 'yuv420p',
-                      '-movflags', '+faststart', str(out)]
+        cmd = base + ['-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2,' + TO_BT709.format('yuv420p'), '-c:v', codec, *args,
+                      '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(out)]
     elif ext == '.webm':
-        cmd = base + ['-c:v', codec, *args, '-pix_fmt', 'yuva420p', str(out)]
+        cmd = base + ['-vf', TO_BT709.format('yuva420p'), '-c:v', codec, *args, '-pix_fmt', 'yuva420p', str(out)]
     else:
         cmd = base + ['-plays', '0', '-f', 'apng', str(out)]
     subprocess.run(cmd, check=True)
@@ -472,6 +501,18 @@ SETTLE_ATTEMPTS = 10  # Screenshots taken at most while waiting for the first fr
 PROGRESS_REPORTS = 4  # Progress lines printed while filming.
 URL = re.compile(r'[a-zA-Z][a-zA-Z0-9+.-]*://')
 
+# The sound that --audio puts under a film, per output type: (ffmpeg encoder, extra args). Only the sound is
+# encoded; the frames are copied from the silent video as they are.
+FILM_SOUND = {
+    # AAC-LC is the sound that every MP4 player decodes. 320 kb/s, the usual ceiling for stereo, keeps a second
+    # lossy generation (AAC from an MP3, say) transparent and leaves headroom for a site that encodes the upload
+    # again. The source's sample rate is kept, so the sound is not resampled.
+    '.mp4': ('aac', ['-b:a', '320k']),
+    # Opus is the sound of WebM. It codes at 48 kHz only, so the sound is resampled once, here; 192 kb/s is well
+    # above the rate at which Opus is transparent for stereo music.
+    '.webm': ('libopus', ['-b:a', '192k', '-ar', '48000']),
+}
+
 # Resolves after two animation frames, by which time the DOM changes made before it have been painted.
 NEXT_PAINT_JS = 'new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))'
 READ_FILM_JS = """(async () => {
@@ -486,7 +527,8 @@ READ_FILM_JS = """(async () => {
 })()"""
 
 
-def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, draft=False, sheet=None):
+def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, draft=False, sheet=None, audio=None,
+         fade=None, crf=None):
     """Film a page frame by frame to a video, or save one still, and return the output path.
 
     The page must follow the film contract. Opened with ?film (plus &draft for a draft),
@@ -507,15 +549,27 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
     unless draft is set (STYLE.md, principle 8).
     page: an HTML file, relative to the current directory and optionally with a query
     of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
-    still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio.
+    still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio, so
+    that a page laid out at 1920x1080 is filmed at 2560x1440 with scale 4/3, say.
+    crf: the constant quality of an .mp4 or .webm (lower is better and larger; see
+    pick_encoder); None keeps the encoder's own (18 for .mp4, 30 for .webm). The video's
+    bit rate is printed, to be checked against what a site that takes the upload asks.
     sheet: a path for a contact sheet, or True for <out>-sheet.png.
+    audio: a sound file to put under a .mp4 or .webm film (see add_sound), cut to the
+    filmed span, so that a part filmed alone with start and end keeps in step with the
+    whole. fade: seconds over which the sound fades out at the end; by default it does
+    not fade, so that a film cut to a looping track can loop too.
     """
     page, out = absolute_page(page), Path(out)
+    if fade is not None and audio is None:
+        raise SystemExit('--fade fades the sound out: give --audio too')
+    # Fail before the slow part if the sound cannot go into the output.
+    sound = probe_sound(audio, out.suffix.lower(), fade) if audio is not None else None
     if at is not None:
         if out.suffix.lower() != '.png' or sheet:
             raise SystemExit('--at saves one still: give a .png output, and no --sheet')
         return film_still(page, out, at, size, scale, draft)
-    pick_encoder(out.suffix.lower())  # Fail before the slow part if no encoder is available.
+    pick_encoder(out.suffix.lower(), crf)  # Fail before the slow part if no encoder is available.
     if sheet is True:
         sheet = out.with_name(out.stem + '-sheet.png')
     work = Path(tempfile.mkdtemp(prefix='pf-film-'))
@@ -523,9 +577,74 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
         paths, fps, first = film_frames(page, work, size, scale, fps, start, end, draft)
         if sheet:
             contact_sheet(paths, sheet, fps=fps, start=first)
-        encode(paths, out, fps)
+        video = encode(paths, work / f'silent{out.suffix.lower()}' if sound else out, fps, crf)
+        if out.suffix.lower() in ('.mp4', '.webm'):
+            print(f'video: {video.stat().st_size * 8 * fps / len(paths) / 1e6:.1f} Mb/s', file=sys.stderr)
+        if sound:
+            add_sound(video, sound, out, first / fps, (first + len(paths)) / fps, fade)
     finally:
         shutil.rmtree(work, ignore_errors=True)
+    return out
+
+
+def probe_sound(path, ext, fade=None):
+    """Check that a sound file can go under a film of type ext, and return its first audio stream's properties:
+    {'path', 'rate' (samples a second), 'length' (in samples, or None when the file does not say)}."""
+    if ext not in FILM_SOUND:
+        raise SystemExit(f'--audio needs an .mp4 or .webm output: {ext or "a file without a type"} carries no sound')
+    if fade is not None and not fade > 0:
+        raise SystemExit(f'--fade must be a number of seconds above 0, not {fade:g}')
+    for tool in ('ffmpeg', 'ffprobe'):
+        if not shutil.which(tool):
+            raise SystemExit(f'{tool} not found: install ffmpeg (e.g. `brew install ffmpeg`) to film with sound')
+    path = Path(path).resolve()
+    if not path.is_file():
+        raise SystemExit(f'no sound file at {path}')
+    encoder = FILM_SOUND[ext][0]
+    listing = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True).stdout
+    if encoder not in {ln.split()[1] for ln in listing.splitlines() if ln.startswith(' A') and len(ln.split()) > 1}:
+        raise SystemExit(f'sound in {ext} needs the ffmpeg encoder {encoder}, and this ffmpeg lacks it')
+    probe = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries',
+                            'stream=sample_rate,duration:format=duration', '-of', 'json', str(path)],
+                           capture_output=True, text=True)
+    found = json.loads(probe.stdout or '{}') if probe.returncode == 0 else {}
+    if not found.get('streams'):
+        raise SystemExit(f'ffmpeg finds no sound in {path}')
+    # The stream's duration excludes the encoder's padding, such as an MP3's, which ffmpeg removes on decoding.
+    stream = found['streams'][0]
+    rate, duration = int(stream['sample_rate']), stream.get('duration') or found.get('format', {}).get('duration')
+    return {'path': path, 'rate': rate, 'length': round(float(duration) * rate) if duration else None}
+
+
+def add_sound(video, sound, out, start, end, fade=None):
+    """Write a silent video with the sound from start to end seconds under it to out, and return out.
+
+    sound: the properties from probe_sound. The video stream is copied, so the frames stay
+    byte for byte as encode() made them. The sound is cut by counting samples rather than
+    by timestamps, so its first sample is the one at start; it is padded with silence where
+    it ends before end, and faded out over its last `fade` seconds when fade is given.
+    """
+    rate, length = sound['rate'], sound['length']
+    first, last = round(start * rate), round(end * rate)
+    span = last - first
+    if length is not None and last > length:
+        print(f'note: the sound ends at {length / rate:.3f} s, so the last {(last - max(first, length)) / rate:.3f} s '
+              'of the film are silent', file=sys.stderr)
+    chain = [f'atrim=start_sample={first}:end_sample={last}', 'asetpts=PTS-STARTPTS', f'apad=whole_len={span}']
+    if fade is not None:
+        faded = min(round(fade * rate), span)
+        if faded < round(fade * rate):
+            print(f'note: --fade {fade:g} is longer than the filmed {span / rate:g} s; the sound fades over all of it',
+                  file=sys.stderr)
+        chain.append(f'afade=t=out:start_sample={span - faded}:nb_samples={faded}')
+    encoder, args = FILM_SOUND[out.suffix.lower()]
+    cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-i', str(video), '-i', str(sound['path']),
+           '-filter_complex', f'[1:a:0]{",".join(chain)}[sound]', '-map', '0:v', '-map', '[sound]',
+           '-c:v', 'copy', '-c:a', encoder, *args]
+    if out.suffix.lower() == '.mp4':
+        cmd += ['-movflags', '+faststart']
+    out.parent.mkdir(parents=True, exist_ok=True)
+    subprocess.run(cmd + [str(out)], check=True)
     return out
 
 
@@ -762,11 +881,14 @@ def main(argv=None):
 
     sub.add_parser('style', help='write STYLE.md and FWIENDS.md out as style.html')
 
-    f = sub.add_parser('film', help='film a page that defines window.film to .mp4 / .webm / .gif / .apng, or a still')
+    f = sub.add_parser('film', help='film a page that defines window.film to .mp4 / .webm (with --audio, with sound) / '
+                                    '.gif / .apng, or a still')
     f.add_argument('page', help='an HTML file, optionally with a query (e.g. "scene.html?take=2"), or a URL')
     f.add_argument('-o', '--out', required=True)
     f.add_argument('--size', type=frame_size, help="WxH in CSS pixels; default: the film's own size")
-    f.add_argument('--scale', type=float, default=1, help='device pixel ratio (2 films twice the pixels each way)')
+    f.add_argument('--scale', type=float, default=1,
+                   help='device pixel ratio (2 films twice the pixels each way; 1.3333333333 films a 1920x1080 '
+                        'film at 2560x1440)')
     f.add_argument('--fps', type=int, help="default: the film's own rate, or 30")
     f.add_argument('--from', dest='start', type=float, default=0, metavar='SECONDS')
     f.add_argument('--to', dest='end', type=float, metavar='SECONDS', help="default: the film's end")
@@ -774,6 +896,15 @@ def main(argv=None):
     f.add_argument('--draft', action='store_true',
                    help="film even without every owner's agreement; the page marks it as a draft")
     f.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
+    f.add_argument('--audio', metavar='FILE',
+                   help='put this sound under a .mp4 or .webm film, cut to the filmed span (--from to --to), '
+                        'padded with silence if it ends early')
+    f.add_argument('--fade', type=float, metavar='SECONDS',
+                   help='with --audio, fade the sound out over its last seconds; default: no fade')
+    f.add_argument('--crf', type=float, metavar='N',
+                   help='constant quality of a .mp4 (libx264, default 18) or .webm (VP9, default 30): lower is '
+                        'better and larger, about 6 lower doubling the bit rate, which film prints; YouTube asks '
+                        'for at least 8 Mb/s at 1080p30 and 16 Mb/s at 1440p30')
 
     sub.add_parser('test', help="run the in-browser tests in test/index.html and check the pages against the cast")
     sub.add_parser('pages', help="write the friends' script tags and the gallery's rows from the cast and the friends' reaches")
@@ -801,7 +932,7 @@ def main(argv=None):
         print(style_page.style_page())
     elif a.cmd == 'film':
         print(film(a.page, a.out, size=a.size, scale=a.scale, fps=a.fps, start=a.start, end=a.end, at=a.at,
-                   draft=a.draft, sheet=a.sheet))
+                   draft=a.draft, sheet=a.sheet, audio=a.audio, fade=a.fade, crf=a.crf))
     elif a.cmd == 'test':
         raise SystemExit(1 if run_tests() else 0)
     elif a.cmd == 'pages':
