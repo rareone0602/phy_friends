@@ -238,7 +238,7 @@ mouth and the near side's markings of the face, which come in with the head
 above the eyes; a blaze or an emblem across the face keeps at least `patch` of
 its width. The far eye is hidden, and so is anything wholly on the far side of
 the centre line, a brow or a cheek mark. Glasses are left out, as is the custom
-in a side view, so Alfie turns without his. A dotted mark turns dot by dot. The
+in a side view, so Alfie turns without them. A dotted mark turns dot by dot. The
 head loses the tufts in front of it. The hair bends from the head to the face:
 its top stays on the head and lower down it comes ever further with the face,
 so that a fringe, or a lock beside the face, goes with it, while hair that
