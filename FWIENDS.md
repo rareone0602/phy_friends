@@ -568,9 +568,13 @@ them.
   are won against the clock or the page; a miss ends with a fwiend sitting
   down, not falling over or knocked out. Nobody is blamed for a miss, and
   each fwiend keeps its own best score, never set against another's.
-- **Every frame credits** the owners of the fwiends in it, on the bottom
-  rule, and the page links each owner in its small print. A game that plays
-  only in the page may keep the credits to the small print.
+- **The owners are credited where a viewer can follow the link.** A page
+  links each owner in its small print. A frame may credit the owners of the
+  fwiends in it on the bottom rule, but a video need not: a link in a video
+  cannot be clicked, so a video names the owners once, written large (in a
+  roll call, say), and its post links them. Without the credits, recompose
+  the frame: the bottom rule they held must not be left as dead space. A
+  game that plays only in the page may keep the credits to the small print.
 - **Consent is per medium.** An owner who agreed to the gallery has not
   thereby agreed to films or games (`agreed` in `characters/cast.js`). Until
   they do, work that shows their fwiend carries the word "draft" in a

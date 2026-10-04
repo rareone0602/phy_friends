@@ -527,9 +527,10 @@ says their owners know each other, strangers keep a strip of paper between them
 and neither talk to nor hand things to each other, and only a friend with a
 voice says words. A broken rule throws, saying what would allow it. Each frame
 credits the owners of the friends in it, and a friend whose owner has not agreed
-to films or games marks the scene "draft". A game that runs only in the page may
-turn the frame's credits off (`credits: false`) and link each owner in the
-page's small print instead; a film keeps them, since they travel with the video.
+to films or games marks the scene "draft". `credits: false` turns the frame's
+credits off: a game that runs only in the page then links each owner in the
+page's small print, and a film names the owners once, written large, and leaves
+the links to its post, since a link in a video cannot be clicked.
 `paper: false` leaves the scene's ruled paper out so the page's own shows
 through, and `write(text, { graphite: true })` is for a title only (STYLE.md
 §6); `write(text, { pen: TITLE_PEN })` writes the gallery's title stroke by
