@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>say hi · phy's fwiends</title>
+<meta name="description" content="say hi: a music video about the library that draws the fwiends, drawn by the library itself.">
+<meta name="theme-color" content="#fbf9f3">
+<link rel="icon" href="../../site/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../site/notebook.css">
+<link rel="stylesheet" href="../../site/pencil.css">
+<link rel="stylesheet" href="say-hi.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- Graphite grain and a slight displacement wobble, for words and lines in pencil (STYLE.md §6). -->
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<div class="sh-host" aria-label="say hi, a film"></div>
+<p class="sh-controls"><button type="button" class="sh-play">play</button><span class="sh-time"></span></p>
+<!-- The music: the local copy where it exists (out/ is not published), else the same file from its source (beats.js). -->
+<audio class="sh-music" preload="auto">
+  <source src="../../out/video/music/candidates/cc-composers/komiku-the-road-we-use-to-travel.mp3" type="audio/mpeg">
+  <source src="https://archive.org/download/Komiku-TaleOnTheLate/Komiku_-_03_-_The_road_we_use_to_travel_when_we_were_kids.mp3" type="audio/mpeg">
+</audio>
+
+<script src="../../src/phyfriends.js"></script>
+<script src="../../src/anim.js"></script>
+<script src="../../src/emotion.js"></script>
+<script src="../../src/live.js"></script>
+<script src="../../src/pen.js"></script>
+<script src="../../site/title-pen.js"></script>
+<script src="../../src/cast.js"></script>
+<script src="../../film/scene.js"></script>
+<script src="beats.js"></script>
+<script src="core.js"></script>
+<script src="pages.js"></script>
+<script src="components.js"></script>
+<script src="source-data.js"></script>
+<!-- The sections, in the film's order. Each registers itself; the core builds them once the cast is in. -->
+<script src="sections/intro.js"></script>
+<script src="sections/build.js"></script>
+<script src="sections/gallery.js"></script>
+<script src="sections/method.js"></script>
+<script src="sections/owners.js"></script>
+<script src="sections/finale.js"></script>
+<script>
+  // The film owns window.film (the film contract in tools/pf.py). Opened by tools/pf.py film (?film), it
+  // is filmed frame by frame; otherwise it fits the window and plays with the music, or holds the
+  // frame that ?at= names: a bar and beat (?at=25.4) or seconds (?at=45.69s).
+  (function () {
+    'use strict';
+    const SH = window.SayHi, host = document.querySelector('.sh-host');
+    if (SH.MODE.filming) document.documentElement.classList.add('sh-filming');
+    const ready = SH.own(host);
+    if (SH.MODE.filming) return;
+
+    const frame = () => host.querySelector('.sh-frame');
+    const music = document.querySelector('.sh-music'), button = document.querySelector('.sh-play'), clock = document.querySelector('.sh-time');
+    let playing = false, started = 0, offset = 0, pending = false;
+
+    // Scales the frame to the window, centered.
+    function fit() {
+      const f = frame();
+      if (!f) return;
+      const scale = Math.min(innerWidth / SH.FRAME.width, innerHeight / SH.FRAME.height);
+      f.style.transform = `translate(${(innerWidth - SH.FRAME.width * scale) / 2}px, ${(innerHeight - SH.FRAME.height * scale) / 2}px) scale(${scale})`;
+    }
+    addEventListener('resize', fit);
+
+    // The music's clock where it plays, else the page's own.
+    function time() {
+      if (!music.paused && !music.error) return music.currentTime;
+      return offset + (performance.now() - started) / 1000;
+    }
+
+    function tick() {
+      if (!playing) return;
+      const t = time() % SayHi.beats.DURATION;
+      clock.textContent = SayHi.beats.label(t);
+      if (!pending) {
+        pending = true;
+        SH.seek(t).then(() => { pending = false; });
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function play() {
+      playing = !playing;
+      button.textContent = playing ? 'pause' : 'play';
+      if (!playing) { music.pause(); offset = time(); return; }
+      started = performance.now();
+      music.currentTime = offset;
+      music.loop = true;
+      music.play().catch(() => {});
+      requestAnimationFrame(tick);
+    }
+
+    ready.then(() => {
+      fit();
+      button.addEventListener('click', play);
+      const at = new URLSearchParams(location.search).get('at');
+      if (at !== null) {
+        offset = at.endsWith('s') ? Number(at.slice(0, -1)) : SayHi.beats.time(at);
+        SH.seek(offset);
+        clock.textContent = SayHi.beats.label(offset);
+      }
+    });
+  })();
+</script>
+</body>
+</html>
