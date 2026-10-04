@@ -3,6 +3,10 @@
 A tiny factory for characters in coloured pencil. The repository and the code
 are named `phy_friends`.
 
+[![say hi: Terry, a yellow plush toy, and Brian, a cream fox in an orange beret, stand in coloured pencil on ruled paper](demo/say-hi/thumbnail.jpg)](https://rareone0602.github.io/phy_friends/demo/say-hi/)
+
+*say hi*, a music video about the library, drawn by the library itself (`demo/say-hi/`).
+
 Images like `characters/howdi/examples/ref.jpg` have very low Kolmogorov complexity: a few
 ellipses, some fur tufts, a spiky hair mop, two pill eyes, and blush. So instead
 of storing pixels, a character here is a ~100-line **spec** (a palette plus a
