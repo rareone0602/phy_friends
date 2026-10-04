@@ -21,11 +21,11 @@ PhyFriends.cast.define({
   friends: {
     howdi: {
       name: 'Howdi', pronoun: 'he', species: 'sky-blue wolf',
-      credit: { handle: '@howdi1129', href: 'https://x.com/howdi1129' }, agreed: ['gallery'],
+      credit: { handle: '@howdi1129', href: 'https://x.com/howdi1129' }, agreed: ['gallery', 'video'],
     },
     yuanyuan: {
       name: 'YuanYuan', pronoun: 'he', species: 'lavender-haired cat',
-      credit: { handle: '@Milk_YuanYuan', href: 'https://x.com/Milk_YuanYuan' }, agreed: ['gallery'],
+      credit: { handle: '@Milk_YuanYuan', href: 'https://x.com/Milk_YuanYuan' }, agreed: ['gallery', 'video'],
     },
     phy: {
       name: 'phy', pronoun: 'they', species: 'tuxedo eevee',
@@ -33,19 +33,19 @@ PhyFriends.cast.define({
     },
     fruit: {
       name: 'Fruit', pronoun: 'he', species: 'navy-blue wolf',
-      credit: { handle: 'fb/cheekullowo', href: 'https://www.facebook.com/cheekullowo/' }, agreed: ['gallery'],
+      credit: { handle: 'fb/cheekullowo', href: 'https://www.facebook.com/cheekullowo/' }, agreed: ['gallery', 'video'],
     },
     yuda: {
       name: 'Yuda', pronoun: 'he', species: 'slate-blue wolf',
-      credit: { handle: '@YuDa_Hay', href: 'https://x.com/YuDa_Hay' }, agreed: ['gallery'],
+      credit: { handle: '@YuDa_Hay', href: 'https://x.com/YuDa_Hay' }, agreed: ['gallery', 'video'],
     },
     terry: {
       name: 'Terry', pronoun: 'he', species: 'yellow plush toy',
-      credit: { handle: '@FreshSnails_x_6', href: 'https://x.com/FreshSnails_x_6' }, agreed: ['gallery'],
+      credit: { handle: '@FreshSnails_x_6', href: 'https://x.com/FreshSnails_x_6' }, agreed: ['gallery', 'video'],
     },
     brian: {
       name: 'Brian', pronoun: 'he', species: 'cream fox',
-      credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery'],
+      credit: { handle: 'fb/brian.ren.856964', href: 'https://www.facebook.com/brian.ren.856964/' }, agreed: ['gallery', 'video'],
     },
     mumuyou: {
       name: 'mumuyou', pronoun: 'he', species: 'white fox',
@@ -61,39 +61,39 @@ PhyFriends.cast.define({
     },
     bardell: {
       name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
-      credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery'],
+      credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery', 'video'],
     },
     cowosus: {
       name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
-      credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery'],
+      credit: { handle: 'linktr.ee/cowosus', href: 'https://linktr.ee/cowosus' }, agreed: ['gallery', 'video'],
     },
     raze: {
       name: 'Raze', pronoun: 'he', species: 'dark-teal dragon',
-      credit: { handle: 'fb/huang.alan.9279', href: 'https://www.facebook.com/huang.alan.9279/' }, agreed: ['gallery'],
+      credit: { handle: 'fb/huang.alan.9279', href: 'https://www.facebook.com/huang.alan.9279/' }, agreed: ['gallery', 'video'],
     },
     tanyuan: {
       name: 'tanyuan', pronoun: 'he', species: 'tan dog',
-      credit: { handle: '@tanyuan_UwU', href: 'https://x.com/tanyuan_UwU' }, agreed: ['gallery'],
+      credit: { handle: '@tanyuan_UwU', href: 'https://x.com/tanyuan_UwU' }, agreed: ['gallery', 'video'],
     },
     alfie: {
       name: 'Alfie', pronoun: 'they', species: 'coral tabby cat',
-      credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery'],
+      credit: { handle: '@alfiecat_djq', href: 'https://x.com/alfiecat_djq' }, agreed: ['gallery', 'video'],
     },
     teni: {
       name: 'Teni', pronoun: 'he', species: 'cyan-haired glaceon',
-      credit: { handle: '@foxx_manome', href: 'https://x.com/foxx_manome' }, agreed: ['gallery'],
+      credit: { handle: '@foxx_manome', href: 'https://x.com/foxx_manome' }, agreed: ['gallery', 'video'],
     },
     whitedeer: {
       name: 'WhiteDeer', pronoun: 'he', species: 'ocean deer',
-      credit: { handle: 'fb/bai.lu.149190', href: 'https://www.facebook.com/bai.lu.149190/' }, agreed: ['gallery'],
+      credit: { handle: 'fb/bai.lu.149190', href: 'https://www.facebook.com/bai.lu.149190/' }, agreed: ['gallery', 'video'],
     },
     jiaoyue: {
       name: 'jiaoyue', pronoun: 'he', species: 'lavender dog',
-      credit: { handle: 'github/Louis0325', href: 'https://github.com/Louis0325' }, agreed: ['gallery'],
+      credit: { handle: 'github/Louis0325', href: 'https://github.com/Louis0325' }, agreed: ['gallery', 'video'],
     },
     claude: {
       name: 'Claude', pronoun: 'it', species: 'language model',
-      credit: { handle: '@AnthropicAI', href: 'https://x.com/AnthropicAI' }, agreed: ['gallery'],
+      credit: { handle: '@AnthropicAI', href: 'https://x.com/AnthropicAI' }, agreed: ['gallery', 'video'],
     },
   },
   know: [['yuda', 'fruit']],

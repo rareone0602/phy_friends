@@ -203,18 +203,18 @@
       const stamp = el.querySelector('.pf-draft');
       scene.add('phy', { x: 500 });
       assert(stamp.hidden, 'phy alone is not a draft');
-      scene.add('yuda', { x: 1100 });
-      assert(!stamp.hidden, 'Yuda makes it a draft');
+      scene.add('kevin', { x: 1100 });
+      assert(!stamp.hidden, 'K3V1N makes it a draft');
     });
   });
 
   test('a filmable scene lists the friends whose owners have not agreed to video', () => {
     withScene({}, scene => {
       scene.add('phy', { x: 400 });
-      scene.add('terry', { x: 1100 });
+      scene.add('mumuyou', { x: 1100 });
       assertEqual(scene.film({ duration: 2 }), false);
       assertEqual(window.film.duration, 2);
-      assertEqual(window.film.unagreed, ['terry']);
+      assertEqual(window.film.unagreed, ['mumuyou']);
     });
   });
 
@@ -247,8 +247,8 @@
     withScene({}, scene => {
       scene.add('phy', { x: 400 });
       scene.film({ duration: 2 });
-      scene.add('yuda', { x: 1100 });
-      assertEqual(window.film.unagreed, ['yuda']);
+      scene.add('kevin', { x: 1100 });
+      assertEqual(window.film.unagreed, ['kevin']);
     });
   });
 
