@@ -7,9 +7,9 @@
  * carries on down through the rule as the page drops. On the groove's hits each part's line lights and a
  * penciled leader runs from it to the part. In bar 24 the parts slide out from the head, each along a
  * trail that carries its line number in binary, with one long line to the library: fourteen trails and
- * the long line, as on the plaque's map; in bar 25 they snap back. Then the caret edits three numbers,
- * each shown large on a slip before the part changes (the ears, flicked between before and after; the
- * tail; the eyes), and when phy writes "hey." it undoes them, one a beat.
+ * the long line; in bar 25 they snap back. Then the caret edits three numbers, each shown large on a
+ * slip before the part changes (the ears, flicked between before and after; the tail; the eyes), and
+ * when phy writes "hey." it undoes them, one a beat.
  *
  * 31-36, page A at night. phy looks at their paws, which barely show on the paper, rings them, and calls
  * Claude, which hops in and opens its laptop. Claude renders the paws, shown large on a card of day
@@ -404,10 +404,9 @@ SayHi.section('method', k => {
 
   // The parts as the drawing groups them (data-pf), each with its anchor in head units, from phy.js, and the
   // line that places it. Each slides out from the origin along its own direction, the same distance.
-  // Fourteen trails and the long line, as the plaque's map has fourteen pulsars and the line to the
-  // galaxy's center. The head and the body stay where they are, the map's center; every other part the
-  // drawing names goes out along the line from the head's origin to its anchor in phy.js, or, for the
-  // legs, which phy.js leaves to the house template, to where the drawing puts them.
+  // Fourteen trails and the long line. The head and the body stay where they are, the map's center;
+  // every other part the drawing names goes out along the line from the head's origin to its anchor in
+  // phy.js, or, for the legs, which phy.js leaves to the house template, to where the drawing puts them.
   const seat = SPEC.stand.seat, legs = k.era.under(at('24.1'), () => drawnCenters(['legL', 'legR']));
   const PARTS = [
     { groups: ['base', 'face', 'mouth'], anchor: [SPEC.head.cx, SPEC.head.cy], line: LINE.head, trail: false, still: true },
@@ -432,9 +431,9 @@ SayHi.section('method', k => {
     return { ...p, r, dir, binary: p.line.toString(2), from: centerExit(dir) };
   });
   if (PARTS.filter(p => p.trail !== false).length !== 14) throw new Error('say hi: the map wants fourteen trails');
-  // The long line runs level, as the plaque's does, from the head's right edge a little above the origin,
-  // so that it passes between the right ear's trail and the right eye's (which leaves the origin almost
-  // level) and over the eye as it slides out, crossing no trail.
+  // The long line runs level, from the head's right edge a little above the origin, so that it passes
+  // between the right ear's trail and the right eye's (which leaves the origin almost level) and over
+  // the eye as it slides out, crossing no trail.
   const MAP = {
     out: at('24.1'), outSeconds: 0.5, back: at('25.1'), backSeconds: 0.16, apart: 100, drift: 0.1,
     rub: [at('25.2'), at(25, 3.5)], bit: { first: 6, step: 7.5, tick: 8, dash: 5 },
@@ -455,7 +454,7 @@ SayHi.section('method', k => {
 
   // The trails, under the parts: out along each part's direction from where it leaves the head and the
   // body (the map's center, which they would cover), drawn on as the part goes, with its line number in
-  // binary (| for 1, a dash for 0, as on the plaque) from there outward; then the long line to the library.
+  // binary (| for 1, a dash for 0) from there outward; then the long line to the library.
   // Where the long line leaves the head: the head's oval at the line's height, with the trails' room.
   const libraryFrom = (() => {
     const { cx, cy, rx, ry } = SPEC.head, dy = -MAP.library.lift - cy;
@@ -703,10 +702,10 @@ SayHi.section('method', k => {
 
   // phy calls Claude, in two lines on the rules left of phy, written quickly, and rubbed out as the
   // renders take the paper.
-  const BELL = [{ text: 'Claude — come here —', rule: 5 }, { text: 'I want to see you.', rule: 7 }];
-  const bellRight = PLACE.x - 110, BELL_UNTIL = at('34.1');
-  const bell1 = k.ui.hand(pageA.over, BELL[0].text, { x: bellRight, y: BELL[0].rule * RULE, align: 'right', at: NIGHT.call, seconds: 1.2, until: BELL_UNTIL, fadeOut: 0.35 });
-  k.ui.hand(pageA.over, BELL[1].text, { x: bellRight, y: BELL[1].rule * RULE, align: 'right', at: bell1.end + 0.1, seconds: 1.0, until: BELL_UNTIL, fadeOut: 0.35 });
+  const CALL = [{ text: 'Claude — come here —', rule: 5 }, { text: 'I want to see you.', rule: 7 }];
+  const callRight = PLACE.x - 110, CALL_UNTIL = at('34.1');
+  const call1 = k.ui.hand(pageA.over, CALL[0].text, { x: callRight, y: CALL[0].rule * RULE, align: 'right', at: NIGHT.call, seconds: 1.2, until: CALL_UNTIL, fadeOut: 0.35 });
+  k.ui.hand(pageA.over, CALL[1].text, { x: callRight, y: CALL[1].rule * RULE, align: 'right', at: call1.end + 0.1, seconds: 1.0, until: CALL_UNTIL, fadeOut: 0.35 });
 
   // Claude's routine (characters/claude/claude.js): from stepping aside, the laptop swung up and set down
   // open, the hop round to sit side-on, then the typing, round and round, until the night is over.
@@ -877,7 +876,7 @@ SayHi.section('method', k => {
     const card = i => onPage(CARD.x[i] + CARD.w / 2, CARD.y + CARD.h / 2);
     p.look({ x: PLACE.x - 10, y: PLACE.floor + 70 }, { at: NIGHT.look });
     p.emote('?', { at: NIGHT.puzzled });
-    p.look({ x: bellRight - 300, y: BELL[0].rule * RULE }, { at: NIGHT.call });
+    p.look({ x: callRight - 300, y: CALL[0].rule * RULE }, { at: NIGHT.call });
     if (c) {
       p.look(c, { at: NIGHT.enter + 0.2 });
       c.enter({ from: onPage(-160, 0).x, to: CLAUDE_X, at: NIGHT.enter, duration: 2 * B.BEAT, hops: 4 });
@@ -964,9 +963,9 @@ SayHi.section('method', k => {
   // The recorded run (`python3 tools/pf.py test`, in demo/say-hi/source-data.js), verbatim and in its
   // order, in the band under the rows (pages.js): the newest name on the band's first line, a name a beat
   // in bar 41, an eighth in bar 42, a sixteenth in bar 43, and the rest through bar 44, quickening into the
-  // swell, each ticked as it passes, while the count races up, large, at the line's right end. The two
-  // tests the film's rules come from are kept on the second line as they pass. On the downbeat of bar 45
-  // the count gives way to the run's own summary.
+  // swell, each ticked as it passes, while the count races up, large, at the line's right end. Two
+  // tests (KEEP) are kept on the second line as they pass. On the downbeat of bar 45 the count gives way
+  // to the run's own summary.
   k.shot('B', '41.1', '45.4');
   const TESTS = SayHi.source.tests;
   const RUN = TESTS.names;

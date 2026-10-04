@@ -8,7 +8,7 @@
  * typed and lights up: x parts them, y raises them to the rule above, w and h stretch them, tilt leans
  * them. The camera draws back to keep the line and the dots in view. The library's own eyes take their
  * place, looking down at the line, and look up at you. From the last eighth of bar 1, as soon as they
- * meet your eyes, they blink CQ in Morse, a sixteenth note to a unit, and the rule under them takes a
+ * meet your eyes, they blink a pattern, a sixteenth note to a unit, and the rule under them takes a
  * penciled dash or dot for each blink as it happens. In bar 4 they glance down, to where a thumb rests,
  * and back up at you, with a touch of blush.
  *
@@ -140,11 +140,11 @@ SayHi.section('intro', k => {
   const LIT = [
     { tokens: [`x: ${EYE.x}`] }, { tokens: [`y: ${EYE.y}`] }, { tokens: [`w: ${EYE.w}`, `h: ${EYE.h}`] }, { tokens: [`tilt: ${EYE.tilt}`] },
   ].map(group => ({ ...group, from: TYPED.find(stretch => stretch.upTo >= through(group.tokens[group.tokens.length - 1])).to }));
-  const CQ_AT = '1.4.5';                          // The eyes start to send as soon as they have looked up at you.
+  const BLINKS_AT = '1.4.5';                      // The eyes start to blink as soon as they have looked up at you.
 
   // The eyes look down at the line as they land, then up at you.
   const LANDING_LOOK = { lookX: 0, lookY: 0.9 };
-  const SHUT = 0.86;                               // How far a Morse blink closes the eyes (pose.blink).
+  const SHUT = 0.86;                               // How far a blink of the pattern closes the eyes (pose.blink).
   const T = {
     lift: [0.03, 0.25], turn: [0.04, at('1.2')],  // The copy lifts off and tips over (seconds from 0), on a still camera.
     arrow: [0.06, 0.34], arrowOut: [at('1.2.5'), at('1.3')],
@@ -152,15 +152,15 @@ SayHi.section('intro', k => {
     part: [LIT[0].from, LIT[0].from + 0.2], rise: [LIT[1].from, LIT[1].from + 0.22],
     stretch: [LIT[2].from, LIT[2].from + 0.2], lean: [LIT[3].from, LIT[3].from + 0.12],
     swap: LIT[3].from + 0.12, lookSeconds: 0.22,
-    cq: k.morse('-.-. --.-', CQ_AT),             // CQ, a sixteenth to a unit: 1.615 s to 4.731 s.
+    blinks: k.pattern('-.-. --.-', BLINKS_AT),   // A sixteenth to a unit: 1.615 s to 4.731 s.
     glance: at('4.1'), back: at('4.3'), blush: 0.5,
     blinkSince: at('4.1'),                        // The caret, solid until now, blinks on the beat from here.
   };
   T.lookUp = T.swap + B.SIXTEENTH;
-  if (T.lookUp + T.lookSeconds > T.cq[0].from - 0.04) throw new Error('say hi: intro: the eyes would blink before they look up at you');
+  if (T.lookUp + T.lookSeconds > T.blinks[0].from - 0.04) throw new Error('say hi: intro: the eyes would blink before they look up at you');
   // The lit numbers settle back over the beat in which the eyes begin to blink.
-  const UNLIT = { from: T.cq[0].from, to: T.cq[0].from + B.BEAT };
-  // The tape under the eyes: a mark for each element of the message, on the rule they sit over, from
+  const UNLIT = { from: T.blinks[0].from, to: T.blinks[0].from + B.BEAT };
+  // The tape under the eyes: a mark for each element of the pattern, on the rule they sit over, from
   // under the left eye rightward, as far along as its time (unit: head units a sixteenth).
   const TAPE = { y: phy.floor - 2 * k.RULE, start: -EYE.x - 12, unit: 11, gap: 4, thick: 4.2, dot: 6.5, ink: 0.85 };
 
@@ -380,7 +380,7 @@ SayHi.section('intro', k => {
     k.showParts(rig.svg, { show: t >= T.back ? ['eyes', 'blush'] : ['eyes'] });
   });
 
-  // The eyes' pose at t: looking down at the line, up at you, the Morse blinks, the glance at your
+  // The eyes' pose at t: looking down at the line, up at you, the pattern's blinks, the glance at your
   // thumb, and the blush as they come back.
   function eyesAt(t) {
     const up = easeIn(T.lookUp, T.lookUp + T.lookSeconds, t, A.ease.out);
@@ -393,11 +393,11 @@ SayHi.section('intro', k => {
     };
   }
 
-  // The Morse blinks: shut for each element of CQ, closing in a frame and opening in a little more.
+  // The pattern's blinks: shut for each of its elements, closing in a frame and opening in a little more.
   // Shut is the library's blink held short of a sliver, so that a closed eye still shows as a line.
   function blinkAt(t) {
     let shut = 0;
-    for (const { from, to } of T.cq) {
+    for (const { from, to } of T.blinks) {
       if (t < from - 0.04 || t > to + 0.06) continue;
       shut = Math.max(shut, Math.min(easeIn(from - 0.035, from, t, A.ease.linear), 1 - easeIn(to, to + 0.05, t, A.ease.linear)));
     }
@@ -406,13 +406,13 @@ SayHi.section('intro', k => {
 
   // ------------------------------------------------------------ the tape
 
-  // Under the eyes, on their rule, a mark for each element of CQ, drawn as the eyes blink it, left to
-  // right, each as long as its time: a hand-drawn dash or a dot, never quite level.
+  // Under the eyes, on their rule, a mark for each element of the pattern, drawn as the eyes blink it,
+  // left to right, each as long as its time: a hand-drawn dash or a dot, never quite level.
   const random = PF.rng(23);
-  const tapeMarks = T.cq.map(element => ({
+  const tapeMarks = T.blinks.map(element => ({
     ...element, dy: (random() - 0.5) * 2.4, tilt: (random() - 0.5) * 5, thick: TAPE.thick * (0.85 + random() * 0.3), bow: (random() - 0.5) * 2,
   }));
-  const tapeStart = T.cq[0].from;
+  const tapeStart = T.blinks[0].from;
   const tapeX = time => head.x + TAPE.start + ((time - tapeStart) / B.SIXTEENTH) * TAPE.unit;
 
   k.draw(page.under, '2.1', '7.2', (el, t) => {

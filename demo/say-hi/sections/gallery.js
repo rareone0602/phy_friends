@@ -14,7 +14,7 @@
  *          the line, where it reads as line 139 of phy.js; it cuts back, and phy writes "lo" and begins
  *          a g before the crash (21.1).
  *   29-30  dusk: the paper settles to the evening's tone and the friends doze off one by one, as the
- *          gallery's do, while Whitman writes itself in three lines above the rows and one along the
+ *          gallery's do, while a poem writes itself in three lines above the rows and one along the
  *          rule under them, its last word, "you?", under the empty place. phy stays up; Claude types on.
  *   37-40  dawn: the night is rubbed off the page from left to right, uncovering the title; each friend
  *          wakes with a start as it passes, and stretches; "you?" stays. Close on four friends, phy asks
@@ -22,7 +22,7 @@
  *          still camera, which cuts to the page whole on 41.1.
  *   45.1   every friend of the house hops and shows a song as the tests pass.
  *   52-68  phy's words in the band under the rows, then Claude's number beside them, then the shape:
- *          the friends stand and unfold, raise a paw, dance on the beat (Terry and Brian seen close for a
+ *          the friends stand up, raise a paw, dance on the beat (Terry and Brian seen close for a
  *          while) and turn round in quarter turns, faster and faster, the camera cutting from group to
  *          group before each turn.
  *   73-75  everyone leaps as the gallery comes back, without its title, and keeps the track's groove with
@@ -479,9 +479,8 @@ SayHi.section('gallery', k => {
 
   // The pencilled arrow, its tip at the origin, 56 units tall (as components.js draws it); the
   // pencilled pointing hand, its fingertip at the origin: the index finger up, three fingers curled
-  // beside it and the thumb out, the wrist at WRIST; and the open hand, raised, palm out, as on the
-  // plaque, the tip of its middle finger at the origin, four fingers up and the thumb out, its wrist
-  // at PALM_WRIST.
+  // beside it and the thumb out, the wrist at WRIST; and the open hand, raised, palm out, the tip of
+  // its middle finger at the origin, four fingers up and the thumb out, its wrist at PALM_WRIST.
   const ARROW = 'M0 0L0 46L12 35L21 56L30 52L21 32L37 31Z';
   const HAND = 'M-5.5 5C-5.5-1.5 5.5-1.5 5.5 5L5.5 23C5.5 18.5 13.5 18.5 13.5 23C13.5 19.5 21 19.5 21 24.5C21 21 28 21.5 28 26.5' +
     'L28 39C28 49 22 54 13 54L6 54C-1 54-5.5 50-5.5 44L-5.5 41C-9 38.5-13 35-15.5 31C-17.5 27.5-13.5 25-11 28C-9 30.5-7.5 32.5-5.5 33Z';
@@ -604,7 +603,7 @@ SayHi.section('gallery', k => {
 
   // phy writes "lo" and starts a g, at the rule of speech's size: the l on the third beat of bar 20,
   // the o on the fourth, and the g on its "and"; the crash takes the page on the downbeat, half way
-  // through the g. The rest of "login" is never written.
+  // through the g. The rest of the word is never written.
   const LO = { text: 'login', x: phyPlace.x + 110, y: phyPlace.y - 6 * RULE, at: at('20.3'), cut: at('21.1'), rotate: -1, font: 'hand' };
   LO.size = k.ui.sizeFor('hand', page.over, LO.at);
   LO.letters = [[LO.at, LO.at + 0.2], [at('20.4'), at('20.4') + 0.2], [at('20.4.5'), at('20.4.5') + 2 * (LO.cut - at('20.4.5'))], [Infinity, Infinity], [Infinity, Infinity]];
@@ -625,11 +624,11 @@ SayHi.section('gallery', k => {
   const DOZE = PF.live.DOZE, dozeScale = BAR / DOZE.spread;
   const DOZING = PF.live.dozeSchedule(SLEEPERS.length, at('29.1'), { spread: DOZE.spread * dozeScale, asleep: DOZE.asleep * dozeScale, jitter: DOZE.jitter * dozeScale });
 
-  // Whitman, "To You", the 1881 wording: its first line in three lines above the rows, where the title
-  // stands by day, and its second along the rule under row 2 that holds the empty place's label, its
-  // last word under the empty place, where it stays. In graphite, dark on the evening's paper, and large
-  // enough to read on a phone: the lines above the rows at a typed number's cap height; the line under
-  // the rows as large as it can be with its ascenders clear of the ground lines above it.
+  // The poem: its first line in three lines above the rows, where the title stands by day, and its
+  // second along the rule under row 2 that holds the empty place's label, its last word under the empty
+  // place, where it stays. In graphite, dark on the evening's paper, and large enough to read on a
+  // phone: the lines above the rows at a typed number's cap height; the line under the rows as large as
+  // it can be with its ascenders clear of the ground lines above it.
   const POEM = {
     lines: ['Stranger, if you passing meet me', 'and desire to speak to me,', 'why should you not speak to me?'],
     second: 'And why should I not speak to ', last: 'you?', cap: 56, faint: 0.57,
@@ -762,9 +761,9 @@ SayHi.section('gallery', k => {
   move(WHOLE, at('54.3'), 2 * BEAT, 'inOut');
 
   // The raised paw (55.1): the paw away from the tail raised beside the cheek and held still for a
-  // beat in unison, as the plaque's figure holds its hand up, then waved four times, a half beat each,
-  // the head and body rocking with it so that the wave reads at the size of the whole page; lowered on
-  // the next downbeat. (A friend's arms are short: a raised paw reaches its cheek, not above its head.)
+  // beat in unison, then waved four times, a half beat each, the head and body rocking with it so that
+  // the wave reads at the size of the whole page; lowered on the next downbeat. (A friend's arms are
+  // short: a raised paw reaches its cheek, not above its head.)
   function raisedPaw(spec) {
     const side = PF.freeSide(spec), d = side === 'L' ? -1 : 1, rise = 0.16, hold = BEAT, rock = BEAT / 2, rocks = 4, fall = 0.3;
     const duration = rise + hold + rocks * rock + fall;

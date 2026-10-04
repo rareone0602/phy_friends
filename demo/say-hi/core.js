@@ -756,33 +756,33 @@
       (match, x, y, w, h) => match.replace(/href="[^"]*"/, `href="${PF.pencil.texture(+x, +y, +w, +h, variant)}"`));
   }
 
-  // ------------------------------------------------------------- Morse
+  // ------------------------------------------------------------- Patterns
 
-  // When a Morse message is on, as a pure function of its arguments: code in dots and dashes, letters
-  // apart by a space and words by a slash ('-.-. --.-' is CQ); start a cue or seconds; unit the length
-  // of a dot, a sixteenth note unless given. A dash lasts three units; the gap within a letter is one
-  // unit, between letters three and between words seven. Returns [{ from, to, kind, letter }], where
-  // kind is 'dot' or 'dash' and letter counts the letters from 0.
-  function morse(code, start = 0, unit = B.SIXTEENTH) {
+  // When each element of a pattern of dots and dashes is on, as a pure function of its arguments: code
+  // in dots and dashes, groups apart by a space and runs of groups by a slash; start a cue or seconds;
+  // unit the length of a dot, a sixteenth note unless given. A dash lasts three units; the gap within a
+  // group is one unit, between groups three and between runs seven. Returns [{ from, to, kind, group }],
+  // where kind is 'dot' or 'dash' and group counts the groups from 0.
+  function pattern(code, start = 0, unit = B.SIXTEENTH) {
     const out = [];
-    let at = B.time(start), letter = 0;
-    code.trim().split(/\s*\/\s*/).forEach((word, w) => {
-      if (w) at += 4 * unit;
-      word.split(/\s+/).forEach((symbols, l) => {
-        if (l) at += 2 * unit;
+    let at = B.time(start), group = 0;
+    code.trim().split(/\s*\/\s*/).forEach((run, r) => {
+      if (r) at += 4 * unit;
+      run.split(/\s+/).forEach((symbols, g) => {
+        if (g) at += 2 * unit;
         for (const symbol of symbols) {
-          if (symbol !== '.' && symbol !== '-') throw new Error(`say hi: "${symbol}" is not Morse; use dots and dashes`);
+          if (symbol !== '.' && symbol !== '-') throw new Error(`say hi: "${symbol}" is neither a dot nor a dash`);
           const length = symbol === '-' ? 3 : 1;
-          out.push({ from: at, to: at + length * unit, kind: symbol === '-' ? 'dash' : 'dot', letter });
+          out.push({ from: at, to: at + length * unit, kind: symbol === '-' ? 'dash' : 'dot', group });
           at += (length + 1) * unit;
         }
-        letter++;
+        group++;
       });
     });
     return out;
   }
 
-  // The interval of a list (as morse() gives) that holds t, or null.
+  // The interval of a list (as pattern() gives) that holds t, or null.
   function during(intervals, t) {
     return intervals.find(i => t >= i.from && t < i.to) || null;
   }
@@ -801,7 +801,7 @@
     };
     const k = {
       name: owner,
-      beats: B, at: B.at, time: B.time, FRAME, RULE, BOIL, MODE, morse, during,
+      beats: B, at: B.at, time: B.time, FRAME, RULE, BOIL, MODE, pattern, during,
       page: pageOf,
       get pages() { return [...pages.keys()]; },
       // Defines another page (see definePage); its id must be new.
@@ -1049,7 +1049,7 @@
   }
 
   const api = {
-    FRAME, MODE, BOIL, section, start, own, seek, hash, unagreed, failures, notes, internals, morse, during,
+    FRAME, MODE, BOIL, section, start, own, seek, hash, unagreed, failures, notes, internals, pattern, during,
     get now() { return now; },
     exports: exportsOf,
     shots: () => shots.map(s => ({ owner: s.owner, from: s.from, to: s.to, pages: s.pages.slice() })),

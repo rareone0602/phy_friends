@@ -1,7 +1,7 @@
 /*!
  * say hi, bars 5-12 (theme A, page A): phy is built round the eyes, a part a beat, in the order the
  * library paints them; on the hit of bar 7 the colored pencil goes over the whole figure, rubbing out
- * the construction and the Morse tape; phy breathes and blinks, hops and writes "hello, world", then
+ * the construction and the eyes' tape; phy breathes and blinks, hops and writes "hello, world", then
  * "call me phy." on the next rule, and looks at you as the page turns.
  *
  * The build. Each part is the library's own drawing of it: a flat render (pencil: false) that shows

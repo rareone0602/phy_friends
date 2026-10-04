@@ -14,11 +14,11 @@
  *          the bar's hits, "one JavaScript library. / no build, no dependencies. / the fwiends are their
  *          owners'.", and holds them while bar 72 rings out.
  *   74.2   On the band under the rows the address types itself, larger, its caret solid at its end.
- *   76     phy signs "73, phy". In the top right corner, small, the colophon, drawn after the Voyager
- *          record's cover: page, seek(t), frame; thirty a second as ||||-; the same frame each time; and
- *          last a panel showing frame 0 (page "frame0", drawn by the intro's own painters). The caret
- *          sends K by going dark for each element, as the eyes sent CQ, and a pencilled tape takes each
- *          element as it is sent. Over the last half beat, in K's letter space, the panel grows to fill
+ *   76     phy writes "73, phy". In the top right corner, small, the colophon: page, seek(t), frame;
+ *          thirty a second as ||||-; the same frame each time; and last a panel showing frame 0 (page
+ *          "frame0", drawn by the intro's own painters). The caret blinks a short pattern, going dark
+ *          for each element as the eyes did in bars 1-3, and a pencilled tape takes each element as it
+ *          is blinked. Over the last half beat, in the pause after the pattern, the panel grows to fill
  *          the frame, quickening, and becomes frame 0 on the loop, so that the film runs back into its
  *          first frame without a seam.
  */
@@ -119,9 +119,8 @@ SayHi.section('finale', k => {
   // The title bar and its words grow with the window, so that the address reads while the gallery's
   // window is large: in desk units, at a window's scale.
   const barOf = scale => (BAR * scale) / TILE;
-  // phy's note under the gallery's window, one line, as large as a label to be read (a pause-and-find
-  // detail all the same): its size, the drop from the window's bottom to its baseline, and how far its
-  // ink reaches under the baseline.
+  // phy's note under the gallery's window, one line, as large as a label to be read: its size, the drop
+  // from the window's bottom to its baseline, and how far its ink reaches under the baseline.
   const NOTE = { text: 'the gallery (which others call the library)', size: (1.01 * k.ui.SPEECH.label) / k.ui.capOf('hand'), indent: 10 };
   NOTE.drop = 26 + 0.76 * NOTE.size;
   NOTE.under = 0.26 * NOTE.size;
@@ -408,13 +407,13 @@ SayHi.section('finale', k => {
   // B shown whole makes it.
   const band = layout.band || { lines: [layout.bands.below, layout.bands.below + 4 * RULE] };
   const PLACE = { x: layout.world.width / 2, y: band.lines[1], size: 73 * layout.perPixel };
-  const TYPE = { address: ['74.2', '74.3.5'], k: '76.2' };
-  const K = k.morse('-.-', TYPE.k);                     // K, a sixteenth to a unit, as phy's eyes sent CQ.
-  const K_END = K[K.length - 1].to;                     // Its letter space runs from here to the loop.
+  const TYPE = { address: ['74.2', '74.3.5'], blinks: '76.2' };
+  const BLINKS = k.pattern('-.-', TYPE.blinks);         // The caret's pattern, a sixteenth to a unit, as the eyes' was.
+  const BLINKS_END = BLINKS[BLINKS.length - 1].to;      // A pause runs from here to the loop.
 
   // Whether the address's caret shows at t: solid from the first character typed, and dark for each
-  // element of K, as the eyes closed for each element of CQ.
-  const caretOn = t => !k.during(K, t);
+  // element of its pattern, as the eyes closed for each element of theirs.
+  const caretOn = t => !k.during(BLINKS, t);
 
   // Typed text: how much of it shows at t, a character a step over [from, to).
   const typed = (text, [from, to], t) => text.slice(0, Math.round(text.length * span(from, to, t)));
@@ -439,15 +438,15 @@ SayHi.section('finale', k => {
   // Where the caret's middle lies on page B once the address is whole.
   const caretX = () => PLACE.x + (addressWidth ?? 0.6 * PLACE.size * ADDRESS.length) / 2 + 0.08 * PLACE.size + 0.22 * PLACE.size;
 
-  // ---- K's tape: on a rule over the address's end, clear of its ascenders, a pencilled dash or dot for
-  // each element as the caret sends it, left to right, each as long as its time, ending over the caret,
-  // as CQ's tape ran under the eyes.
+  // ---- the caret's tape: on a rule over the address's end, clear of its ascenders, a pencilled dash or
+  // dot for each element as the caret blinks it, left to right, each as long as its time, ending over
+  // the caret, as the eyes' tape ran under the eyes.
   const TAPE = { y: band.lines[1] - 3 * RULE, unit: 34 * layout.perPixel, gap: 12 * layout.perPixel, thick: 12 * layout.perPixel, dot: 18 * layout.perPixel };
   const random = PF.rng(73);
-  const tapeMarks = K.map(element => ({ ...element, dy: (random() - 0.5) * 3, tilt: (random() - 0.5) * 4, bow: (random() - 0.5) * 3 }));
-  k.draw(gallery.over, TYPE.k, Infinity, (el, t) => {
-    const svg = svgIn(el, 'graphite'), start = caretX() - ((K_END - K[0].from) / SIXTEENTH) * TAPE.unit;
-    const x = time => start + ((time - K[0].from) / SIXTEENTH) * TAPE.unit;
+  const tapeMarks = BLINKS.map(element => ({ ...element, dy: (random() - 0.5) * 3, tilt: (random() - 0.5) * 4, bow: (random() - 0.5) * 3 }));
+  k.draw(gallery.over, TYPE.blinks, Infinity, (el, t) => {
+    const svg = svgIn(el, 'graphite'), start = caretX() - ((BLINKS_END - BLINKS[0].from) / SIXTEENTH) * TAPE.unit;
+    const x = time => start + ((time - BLINKS[0].from) / SIXTEENTH) * TAPE.unit;
     svg.innerHTML = tapeMarks.filter(m => t >= m.from).map(m => {
       const drawn = span(m.from, m.to, t), x0 = x(m.from), y = TAPE.y + m.dy;
       if (m.kind === 'dot') {
@@ -467,20 +466,19 @@ SayHi.section('finale', k => {
   // Page B as the gallery's shot leaves it at 76.1 (its export), else shown whole with the band's two lines.
   const END_VIEW = k.exportsOf('gallery').end || (layout.wide && layout.wide.band && layout.wide.band[1]) || layout.whole;
   k.camera('B', END_VIEW, { at: '76.1' });
-  // phy's sign-off, a pause-and-find detail as large as a label: where phy wrote "say hi.", on the band's
-  // first line from its left.
+  // phy's sign-off, as large as a label, though it need not be read: where phy wrote "say hi.", on the
+  // band's first line from its left.
   k.ui.hand(gallery.over, '73, phy', { kind: 'label', x: band.left ?? layout.world.width * 0.1, y: band.lines[0], at: '76.1', seconds: 0.55, mustRead: false });
 
-  // The colophon, after the diagram in the top right of the Voyager record's cover (redrawn, not
-  // traced), drawn in units of its own from its top left and placed on the gallery's page (COLO), in the
-  // top right corner of the frame that page B is shown in from 76.1, clear of the friends. Row one: a
-  // page, an arrow marked seek(t) over thirty a second written the plaque's way (||||-, binary in
-  // strokes), a frame, and the same frame again (each frame the same, byte for byte). Row two: the page
-  // sought at 0 gives the last panel, the largest, where the cover has its calibration circle: frame 0
-  // itself (the frame0 page, placed in the panel).
+  // The colophon, a diagram of how the film is made, drawn in units of its own from its top left and
+  // placed on the gallery's page (COLO), in the top right corner of the frame that page B is shown in
+  // from 76.1, clear of the friends. Row one: a page, an arrow marked seek(t) over thirty a second
+  // written in strokes (||||-, binary: | for 1, a dash for 0), a frame, and the same frame again (each
+  // frame the same, byte for byte). Row two: the page sought at 0 gives the last panel, the largest:
+  // frame 0 itself (the frame0 page, placed in the panel).
   const FRAME_BOX = { w: 112, h: 63 }, PANEL = { x: 342, y: 100, w: 240, h: 135 };
-  // Its width and its margins from the frame's top and right edges, in frame pixels: a pause-and-find
-  // detail, small, but large enough to show what it draws.
+  // Its width and its margins from the frame's top and right edges, in frame pixels: small, but large
+  // enough to show what it draws.
   const COLO = { onFrame: 300, margin: { top: 64, right: 72 }, width: PANEL.x + PANEL.w + 5, height: PANEL.y + PANEL.h + 5 };
   {
     const perPixel = 1 / (gallery.fit * (END_VIEW.zoom ?? 1));
@@ -492,10 +490,10 @@ SayHi.section('finale', k => {
   const onPage = (x, y) => ({ x: COLO.x + COLO.scale * x, y: COLO.y + COLO.scale * y });
   const COLOPHON = ['76.1', '76.2.5'];                 // Drawn on over these beats.
   const REVEAL = ['76.2.1', '76.2.5'];                 // Frame 0 shows in its panel.
-  // The panel grows to fill the frame over the last half beat, in K's letter space, easing in, so that it
-  // closes on the loop's first frame, which is frame 0 itself.
+  // The panel grows to fill the frame over the last half beat, in the pause after the caret's pattern,
+  // easing in, so that it closes on the loop's first frame, which is frame 0 itself.
   const GROW = [k.time('76.4.5'), k.beats.DURATION];
-  if (GROW[0] < K_END) throw new Error('say hi: finale: the panel would grow before K is sent');
+  if (GROW[0] < BLINKS_END) throw new Error('say hi: finale: the panel would grow before the caret has blinked its pattern');
 
   // The colophon's strokes, each with the stretch of the drawing-on (0 to 1) over which it is drawn.
   const colophon = (() => {
