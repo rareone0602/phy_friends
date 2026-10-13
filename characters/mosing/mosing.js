@@ -1,7 +1,7 @@
-// Character spec for mosing, a black dragon: charcoal fur with a spiky charcoal mop, one cyan horn on his right of the
-// crown and two small cyan spikes behind the ears, big upright ears striped in cyan and cyan inside, a white diamond
-// and two cyan brows on the forehead, a white muzzle and cheeks parted by a charcoal band, one eye green and the other
-// amber, a big white chest ruff, cyan tribal stripes on the hips, and a slim tail with cyan fins.
+// Character spec for mosing, a black dragon: charcoal fur with a spiky charcoal mop, two cyan horns on the crown, big
+// upright ears striped in cyan and cyan inside, a white diamond and two cyan brows on the forehead, a white muzzle and
+// cheeks, one eye green and the other amber, a big white chest ruff, cyan tribal stripes on the hips, and a slim tail
+// with cyan fins.
 // Picture: examples/33_20240310124429.png (his reference sheet, front and back, standing, which is the color
 // standard). The lettering of his name and the paw prints are not his; the five prints are the sheet's color swatches
 // and give the colors below.
@@ -26,7 +26,7 @@ PhyFriends.define('mosing', {
     paw: 'fur',
     leg: 'furShade',
     foot: 'fur',
-    cyan: '#00e9ff',       // The cyan of the sheet's cyan swatch: the inside of the ears, the horn, the spikes, the ear stripes, the brows, the hip stripes and the tail's fins.
+    cyan: '#00e9ff',       // The cyan of the sheet's cyan swatch: the inside of the ears, the horns, the ear stripes, the brows, the hip stripes and the tail's fins.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears, and whose crown is spiky too.
   head: {
@@ -34,12 +34,11 @@ PhyFriends.define('mosing', {
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks, under the eyes, so that the eyes sit on the charcoal and a glance down reaches the
-  // white. Its sides are cut into the spiky tufts of the sheet's cheeks. An n: 1 range with len < 0 dips its top in
-  // the middle, where the charcoal band comes down between the eyes (an extra).
+  // white. Its sides are cut into the spiky tufts of the sheet's cheeks. The sheet's charcoal band down the middle,
+  // between the eyes, is left out, since it cut the white too sharply.
   face: {
     cx: 0, cy: 24, rx: 70, ry: 30,
-    fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true },
-      { from: 235, to: 305, n: 1, len: -8, b1: 0, b2: 0, jit: 0 }],
+    fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true }],
   },
   // The ears are big, tall and upright, charcoal outside with the sheet's cyan stripes, and cyan inside. The curved
   // stripes of the sheet are a band across each tip and a second lower down; the white tuft in the inner ear is an
@@ -101,12 +100,11 @@ PhyFriends.define('mosing', {
     { feature: 'cheekRuff', on: 'base', under: true, fill: 'fur', cx: 0, cy: 13, rx: 90, ry: 48,
       fluff: [{ from: -42, to: 21, n: 3, len: 15, lean: -2, depth: 0.1, b1: -35, b2: 12, jit: 0, sym: true },
         { from: 45, to: 135, n: 1, len: -12, b1: 5, b2: 5, jit: 0 }] },
-    // The one horn, a little to his right of the crown's center (the viewer's left), a cyan cone leaning in, as on the
-    // sheet. It is drawn on the mop's layer, since the mop, in the head's own charcoal, would hide it.
-    { feature: 'horns', on: 'hair', fill: 'cyan', round: 0.15, nodes: [[-4, -90, 1, 10], [-8, -148, 1, 6], [-26, -86, 1, 0]] },
-    // The two small spikes behind the ears, one on each side of the crown, as on the sheet.
-    { feature: 'horns', on: 'hair', fill: 'cyan', round: 0.15, nodes: [[-56, -86, 1, 6], [-70, -128, 1, 4], [-80, -80, 1, 0]] },
-    { feature: 'horns', on: 'hair', fill: 'cyan', round: 0.15, nodes: [[56, -86, 1, 6], [70, -128, 1, 4], [80, -80, 1, 0]] },
+    // The two horns, one on each side of the crown, cyan cones leaning in, as on the sheet's back view; its front view
+    // hides most of the far one behind the mop. They are drawn on the mop's layer, since the mop, in the head's own
+    // charcoal, would hide them.
+    { feature: 'horns', on: 'hair', fill: 'cyan', round: 0.15, nodes: [[-16, -90, 1, 10], [-20, -148, 1, 6], [-38, -86, 1, 0]] },
+    { feature: 'horns', on: 'hair', fill: 'cyan', round: 0.15, nodes: [[38, -86, 1, 6], [20, -148, 1, 10], [16, -90, 1, 0]] },
     // The white tuft in each inner ear, a few spiky points along its inner edge, as on the sheet.
     { feature: 'earTufts', on: 'ears', clip: true, fill: 'face', cx: 14, cy: -4, rx: 12, ry: 15,
       fluff: [{ from: 100, to: 260, n: 3, len: 10, depth: 0.05, b1: -20, b2: 8, jit: 0 }] },
@@ -115,10 +113,6 @@ PhyFriends.define('mosing', {
     // The cyan brows, a spot above each eye, tipped up toward the outside.
     { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'cyan', cx: -41, cy: -31, rx: 11, ry: 6, rot: 14 },
     { feature: 'brows', on: 'hair', kind: 'ellipse', fill: 'cyan', cx: 41, cy: -31, rx: 11, ry: 6, rot: -14 },
-    // The charcoal band that runs down from the forehead between the eyes and divides the white muzzle, a wedge that
-    // narrows toward the nose. Side-on it would run down beside the one eye, so it is left out once he turns
-    // (turn: 'frontal').
-    { feature: 'noseBand', on: 'face', turn: 'frontal', fill: 'fur', round: 0.3, nodes: [[-12, -4, 1], [12, -4, 1], [5, 40, 1], [-5, 40, 1]] },
     // The big white ruff round his neck: a back layer in the house shade of the white, which parts the white muzzle
     // from the white ruff, and the ruff in front of it, its long pointed tufts hanging to the middle of his chest. It is
     // fur round the neck, so it lies over the tops of the arms (scarf).
