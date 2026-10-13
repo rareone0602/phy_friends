@@ -245,7 +245,18 @@ def page_drift(cast, measures):
 # ---- The gallery's labels, checked against the cast -----------------------------------------
 
 NUMBER_WORDS = ('no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
-                'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty')
+                'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
+TENS_WORDS = ('', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety')
+
+
+def number_word(n):
+    """A count as prose writes it: "nineteen", "twenty", "twenty-one"; in figures from a hundred."""
+    if n < len(NUMBER_WORDS):
+        return NUMBER_WORDS[n]
+    if n < 100:
+        tens, ones = divmod(n, 10)
+        return TENS_WORDS[tens] + (f'-{NUMBER_WORDS[ones]}' if ones else '')
+    return str(n)
 
 
 class GalleryLabels(html.parser.HTMLParser):
@@ -372,10 +383,10 @@ def preview_drift(alt, names):
     wolf; ...; and Claude, ...") disagrees with the gallery, whose friends' names are given in order."""
     if alt is None:
         return ['og:image:alt: index.html has no alt text for its link preview']
-    match = re.match(r'(\w+) fwiends\b[^:]*: (.+)', alt)
+    match = re.match(r'([\w-]+) fwiends\b[^:]*: (.+)', alt)
     if not match:
         return ['og:image:alt: it should give the number of fwiends, then name each after a colon']
-    problems, count = [], NUMBER_WORDS[len(names)] if len(names) < len(NUMBER_WORDS) else str(len(names))
+    problems, count = [], number_word(len(names))
     if match[1] != count:
         problems.append(f'og:image:alt: it counts "{match[1]}" fwiends, but the gallery has {count}')
     named = [re.sub(r'^and ', '', item).split(',')[0].strip() for item in match[2].split('; ')]

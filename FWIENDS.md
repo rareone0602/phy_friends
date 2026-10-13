@@ -52,10 +52,11 @@ The page has five parts, in this order:
   writes them into the page; `python3 tools/pf.py test` fails while they are
   stale.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
-  every width; Fruit stands next to Yuda, WeiWei between K3V1N and BarDell,
-  Raze between cowosus and tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue
-  follow tanyuan in that order; on a phone Yuda shares a row with Terry, and
-  Brian with mumuyou. Claude stands last, so a new fwiend goes before it, and
+  every width; Fruit stands next to Yuda; K3V1N, Yawei, WeiWei and mosing
+  come between mumuyou and BarDell in that order; Raze stands between cowosus
+  and tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue follow tanyuan in that
+  order; on a phone Yuda shares a row with Terry, Brian with mumuyou, and
+  WeiWei with mosing. Claude stands last, so a new fwiend goes before it, and
   any change of order is checked at every width.
 - A phone held sideways, if at least 390px tall, shows the first row and its
   names on the first screen: the gallery gives up the blank rule above the

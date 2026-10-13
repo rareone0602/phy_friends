@@ -55,9 +55,17 @@ PhyFriends.cast.define({
       name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
       credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
     },
+    yawei: {
+      name: 'Yawei', pronoun: 'he', species: 'sky-blue dragon',
+      credit: { handle: 'fb/yaweithedragon', href: 'https://www.facebook.com/yaweithedragon' }, agreed: ['gallery'],
+    },
     weiwei: {
       name: 'WeiWei', pronoun: 'he', species: 'orange fox',
       credit: { handle: 'fb/Aawei1105', href: 'https://www.facebook.com/Aawei1105/' }, agreed: ['gallery'],
+    },
+    mosing: {
+      name: 'mosing', pronoun: 'he', species: 'black dragon',
+      credit: { handle: 'fb/furry.QAQ', href: 'https://www.facebook.com/furry.QAQ' }, agreed: ['gallery'],
     },
     bardell: {
       name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
