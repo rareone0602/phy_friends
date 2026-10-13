@@ -21,7 +21,7 @@
 <meta property="og:image" content="https://rareone0602.github.io/phy_friends/site/preview.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="twenty-one fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; Yawei, a sky-blue dragon with a white mane, white horns and small teal wings; WeiWei, an orange fox with a white mop and a big white ruff; mosing, a black dragon with a cyan horn and a big white ruff; BarDell, a cream puppy with a crimson mop and a red-tipped tail; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
+<meta property="og:image:alt" content="twenty-one fwiends in coloured pencil standing on pencilled lines on lined notebook paper: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; WeiWei, an orange fox with a white mop and a big white ruff; mosing, a black dragon with a cyan horn and a big white ruff; Yawei, a sky-blue dragon with a white mane, white horns and small teal wings; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +61,7 @@
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* A row's width in boxes (--abreast) is the sum of its slots, each a box plus its reaches,
      less 0.06 for the overlap. All twenty-one take 23.47 boxes. In the smaller splits the widest rows are
-     the widest eight at 9.176 boxes, the widest five at 5.7, four at 4.705, three at 3.598, and two at
+     the widest eight at 9.176 boxes, the widest five at 5.767, four at 4.635, three at 3.598, and two at
      2.384. Each is rounded up so that the friends in each always fit in one row. The box is five rules,
      so that two rows fit a laptop's first screen. */
   .stage { container-type: inline-size; }
@@ -125,13 +125,13 @@
      rule is 30px and so a box 150px. Narrower, they stand in pairs, never a mix of pairs and threes,
      so that the same friends always share a row on a phone. */
   @container (width >= 540px) { .troupe { --abreast: 3.598; } }
-  /* Four stand in a row once the stage is 4.705 boxes wide, which it is from an 865px window, five
-     once it is 5.7 boxes wide, from a 1024px window, eight once it is 9.176 boxes wide, from a
+  /* Four stand in a row once the stage is 4.635 boxes wide, which it is from an 854px window, five
+     once it is 5.767 boxes wide, from a 1035px window, eight once it is 9.176 boxes wide, from a
      1581px window, and all twenty-one once it is 23.47 boxes wide, from a 3868px window, where the
      page stops growing. */
-  @container (width >= 753px) { .troupe { --abreast: 4.705; } }
-  @container (width >= 912px) {
-    .troupe { --abreast: 5.7; }
+  @container (width >= 742px) { .troupe { --abreast: 4.635; } }
+  @container (width >= 923px) {
+    .troupe { --abreast: 5.767; }
     .note .long { display: inline; }  /* A row of five leaves room for the whole note. */
   }
   @container (width >= 1469px) { .troupe { --abreast: 9.176; } }
@@ -246,9 +246,9 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N, an ice-blue cat with a yellow mark on his forehead, one eye blue over mint and the other orange over yellow, and a white-tipped tail"></div>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="yawei"><figure>
-          <div class="rig" role="button" tabindex="0" aria-label="say hi to Yawei, a sky-blue dragon with a big spiky white mane, two long white horns and a white crest between them, long pale grey-blue ears, dark red eyes under white spots, small teal wings with a yellow streak, and a tail banded in yellow and white with a white tuft"></div>
-          <figcaption><span class="name hand">Yawei</span><span class="species">sky-blue dragon</span><span class="credit"><a href="https://www.facebook.com/yaweithedragon">fb/<wbr>yaweithedragon</a></span></figcaption>
+        <li class="friend" data-friend="bardell"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell, a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail"></div>
+          <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="weiwei"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to WeiWei, an orange fox with a white mop, white eyebrows, a white muzzle and a big white ruff, pink inner ears, one eye blue over mint and the other brown over yellow, and a bushy tail with a peach end"></div>
@@ -258,9 +258,9 @@
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mosing, a black dragon with a spiky black mop, a cyan horn, big ears cyan inside and at the tips, a white diamond and cyan spots on his forehead, a white muzzle and a big white ruff, one eye green and the other amber, and a tail with cyan fins"></div>
           <figcaption><span class="name hand">mosing</span><span class="species">black dragon</span><span class="credit"><a href="https://www.facebook.com/furry.QAQ">fb/<wbr>furry.QAQ</a></span></figcaption>
         </figure></li>
-        <li class="friend" data-friend="bardell"><figure>
-          <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell, a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail"></div>
-          <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
+        <li class="friend" data-friend="yawei"><figure>
+          <div class="rig" role="button" tabindex="0" aria-label="say hi to Yawei, a sky-blue dragon with a big spiky white mane, two long white horns and a white crest between them, long pale grey-blue ears, dark red eyes under white spots, small teal wings with a yellow streak, and a tail banded in yellow and white with a white tuft"></div>
+          <figcaption><span class="name hand">Yawei</span><span class="species">sky-blue dragon</span><span class="credit"><a href="https://www.facebook.com/yaweithedragon">fb/<wbr>yaweithedragon</a></span></figcaption>
         </figure></li>
         <li class="friend" data-friend="cowosus"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to cowosus, a white Australian Shepherd like a pineapple, with golden thighs scaled in orange diamonds, a ruff and tail tipped with green leaves, a lime patch round one eye, one folded ear, a red-tipped curl, a mint band across his muzzle and blue eyes, the left one orange at the bottom"></div>
@@ -320,10 +320,10 @@
 <script src="../../characters/brian/brian.js"></script>
 <script src="../../characters/mumuyou/mumuyou.js"></script>
 <script src="../../characters/kevin/kevin.js"></script>
-<script src="../../characters/yawei/yawei.js"></script>
+<script src="../../characters/bardell/bardell.js"></script>
 <script src="../../characters/weiwei/weiwei.js"></script>
 <script src="../../characters/mosing/mosing.js"></script>
-<script src="../../characters/bardell/bardell.js"></script>
+<script src="../../characters/yawei/yawei.js"></script>
 <script src="../../characters/cowosus/cowosus.js"></script>
 <script src="../../characters/raze/raze.js"></script>
 <script src="../../characters/tanyuan/tanyuan.js"></script>

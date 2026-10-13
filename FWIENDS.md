@@ -52,8 +52,8 @@ The page has five parts, in this order:
   writes them into the page; `python3 tools/pf.py test` fails while they are
   stale.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
-  every width; Fruit stands next to Yuda; K3V1N, Yawei, WeiWei and mosing
-  come between mumuyou and BarDell in that order; Raze stands between cowosus
+  every width; Fruit stands next to Yuda; K3V1N, BarDell, WeiWei, mosing
+  and Yawei come between mumuyou and cowosus in that order; Raze stands between cowosus
   and tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue follow tanyuan in that
   order; on a phone Yuda shares a row with Terry, Brian with mumuyou, and
   WeiWei with mosing. Claude stands last, so a new fwiend goes before it, and

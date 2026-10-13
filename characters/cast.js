@@ -55,9 +55,9 @@ PhyFriends.cast.define({
       name: 'K3V1N', pronoun: 'he', species: 'ice-blue cat',
       credit: { handle: '@K3V1N_V01D', href: 'https://x.com/K3V1N_V01D' }, agreed: ['gallery'],
     },
-    yawei: {
-      name: 'Yawei', pronoun: 'he', species: 'sky-blue dragon',
-      credit: { handle: 'fb/yaweithedragon', href: 'https://www.facebook.com/yaweithedragon' }, agreed: ['gallery'],
+    bardell: {
+      name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
+      credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery', 'video'],
     },
     weiwei: {
       name: 'WeiWei', pronoun: 'he', species: 'orange fox',
@@ -67,9 +67,9 @@ PhyFriends.cast.define({
       name: 'mosing', pronoun: 'he', species: 'black dragon',
       credit: { handle: 'fb/furry.QAQ', href: 'https://www.facebook.com/furry.QAQ' }, agreed: ['gallery'],
     },
-    bardell: {
-      name: 'BarDell', pronoun: 'he', species: 'maple syrup puppy',
-      credit: { handle: 'bardell_kc', href: 'https://sites.google.com/view/bardell-kc' }, agreed: ['gallery', 'video'],
+    yawei: {
+      name: 'Yawei', pronoun: 'he', species: 'sky-blue dragon',
+      credit: { handle: 'fb/yaweithedragon', href: 'https://www.facebook.com/yaweithedragon' }, agreed: ['gallery'],
     },
     cowosus: {
       name: 'cowosus', pronoun: 'he', species: 'australian shepherd',
