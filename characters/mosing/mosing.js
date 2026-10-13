@@ -1,7 +1,7 @@
 // Character spec for mosing, a black dragon: charcoal fur with a spiky charcoal mop, two cyan horns on the crown, big
 // upright ears striped in cyan and cyan inside, a white diamond and two cyan brows on the forehead, a white muzzle and
-// cheeks, one eye green and the other amber, a big white chest ruff, cyan tribal stripes on the hips, and a slim tail
-// with cyan fins.
+// cheeks with a charcoal V between the eyes, one eye green and the other amber, a big white chest ruff, cyan tribal
+// stripes on the hips, and a slim tail with cyan fins.
 // Picture: examples/33_20240310124429.png (his reference sheet, front and back, standing, which is the color
 // standard). The lettering of his name and the paw prints are not his; the five prints are the sheet's color swatches
 // and give the colors below.
@@ -34,11 +34,13 @@ PhyFriends.define('mosing', {
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks, under the eyes, so that the eyes sit on the charcoal and a glance down reaches the
-  // white. Its sides are cut into the spiky tufts of the sheet's cheeks. The sheet's charcoal band down the middle,
-  // between the eyes, is left out, since it cut the white too sharply.
+  // white. Its sides are cut into the spiky tufts of the sheet's cheeks. The sheet's charcoal comes down between the
+  // eyes into the white; it is kept as a moderate V notched in the top of the muzzle (an n: 1 range with len < 0 and
+  // straight sides), since a band down the whole muzzle cut the white too sharply.
   face: {
     cx: 0, cy: 24, rx: 70, ry: 30,
-    fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true }],
+    fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true },
+      { from: 252, to: 288, n: 1, len: -20, b1: 0, b2: 0, jit: 0 }],
   },
   // The ears are big, tall and upright, charcoal outside with the sheet's cyan stripes, and cyan inside. The curved
   // stripes of the sheet are a band across each tip and a second lower down; the white tuft in the inner ear is an
