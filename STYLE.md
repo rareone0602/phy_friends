@@ -53,12 +53,12 @@ short, for a brief with no room for the rest.
    layouts such as a grid of cards.
 4. **Graphite on paper; colour for the subject.** Everything is in paper and
    ink tones (§4), graphite rather than black, except what the work is
-   about: the characters on a page, the data in a figure. Red is only for an
-   error.
+   about: the characters on a page, the data in a figure, the things and
+   places in a film. Red is only for an error.
 5. **One layer.** Colour goes on in one layer: flat in a chart, in coloured
-   pencil on a character (§9). Each colour has at most one shade, the house
-   step darker: CIELAB L* `−10` and chroma `×1.2` at the same hue, with a
-   near-grey leaning to lavender, as `shadeOf` in `src/phyfriends.js`
+   pencil on a character or a thing (§9). Each colour has at most one shade,
+   the house step darker: CIELAB L* `−10` and chroma `×1.2` at the same hue,
+   with a near-grey leaning to lavender, as `shadeOf` in `src/phyfriends.js`
    computes it. The shade only parts two neighbours of the same colour, such
    as a character's body under its head. No lighting, highlights or second
    steps, and nothing copied from a reference's light and shade. The pencil's
@@ -90,6 +90,8 @@ And the particulars:
 - **British English, as The Economist writes it** (§3); code in American
   English, formal and clean (§10).
 - **Show phy first**, and keep private things private (§11).
+- **A film is cut to its music**, chosen first and free to set to pictures
+  (§12).
 
 ## 3. words
 
@@ -497,7 +499,37 @@ the humour stop at its edge.
   are phy's call, each time.
 - **Fanning out is welcome:** a big job may go to several agents in
   parallel. Visual work then goes to an adversarial reviewer who knows the
-  references.
+  references. A review, whoever writes it, is a reference rather than an
+  order: check each finding against the work, adopt what holds, and say what
+  was rejected and why.
+- **Ideas before the guide.** For a film, a game or anything made to delight,
+  think first of what the viewer will enjoy, without this guide in mind
+  (brief an ideas agent without it), then draw the idea in the house style.
+  Where a rule blocks a good idea, propose changing the rule rather than
+  dropping the idea. The owners' say (principle 8) is not style, and always
+  holds.
 - **Private stays private.** Personal references (photos of a real pet, say)
   live in a git-ignored folder and never reach a public page. Quote phy's own
   words only where a piece needs them.
+
+## 12. films and sound
+
+A film is a page that moves, so everything above holds; this adds the sound
+and the pace.
+- **Music first.** Choose the track before the story. Measure it once, into
+  data beside the film (its bars and beats, or, where the tempo is free, its
+  moments), and write every cue against that data, never by ear.
+- **The pace is the music's.** Motion lands on phrases, not on every beat,
+  and a film may cut, pan and push in on the music's lifts, where a page
+  stays calm (§9).
+- **Whose music.** Never music that the agent making the film composes or
+  generates; music someone else made with AI only where it is good. The
+  licence must let a hobby film set it to pictures: public domain in the US,
+  where the site is served (the recording as well as the score), CC0, CC BY
+  or CC BY-NC. CC BY-SA only where phy alone is on screen, since the other
+  characters are not phy's to license; never ND. Credit the composer even
+  where nothing requires it. A commercial song goes only through a
+  platform's own library, never on a page.
+- **Credits once, large.** A link in a picture cannot be clicked, so a video
+  names the people and characters in it once, written large, and the post
+  that carries it links them.

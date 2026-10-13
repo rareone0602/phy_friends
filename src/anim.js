@@ -561,6 +561,24 @@
     return track({ [`arm${side}`]: held(80), lean: held(2 * d), tilt: held(3 * d), earL: held(-3), earR: held(-3) }, { duration: end });
   };
 
+  // Beckons with one arm (side and spec as for wave), calling someone over: reaches it out straight to the side and
+  // sweeps the forearm back in toward itself, the paw up beside the cheek, `sweeps` times, one every `rate` seconds;
+  // the head tips toward the paw and the ears prick with each sweep. Seated, its arms are forelegs and keep still, so
+  // only the head beckons.
+  make.beckon = ({ spec, side = freeSide(spec), sweeps = 2, rate = 0.27 } = {}) => {
+    const rise = 0.18, fall = 0.18, duration = rise + sweeps * rate + fall, d = side === 'L' ? -1 : 1;
+    return clip(t => {
+      const up = t < rise ? ease.out(t / rise) : t > duration - fall ? 1 - ease.smooth((t - duration + fall) / fall) : 1;
+      const u = (t - rise) / rate, pull = u > 0 && u < sweeps ? (1 - Math.cos(TAU * u)) / 2 : 0;  // 1 with the paw drawn in.
+      return {
+        [`arm${side}`]: up * (70 + 5 * pull), [`elbow${side}`]: up * (-80 + 120 * pull),
+        tilt: d * (3 * up + 4 * pull), lean: -1.5 * d * pull, turnY: -0.12 * pull,
+        earL: -4 * up - 4 * pull, earR: -4 * up - 4 * pull, hair: -1.5 * d * pull,
+        tail: up * 5 * Math.sin((TAU * t) / 0.45),
+      };
+    }, duration);
+  };
+
   // Turns round as South Park's cut-out characters do, a quarter turn at a time (PhyFriends.TURN): `quarters` quarter
   // turns, toward the viewer's right (a negative number turns the other way, and 4 all the way round), one every
   // `seconds`, each snapping in with a small hop. The facing it ends on holds to the clip's end; laid over a pose, it

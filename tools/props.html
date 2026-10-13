@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>phy's fwiends · props</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="stylesheet" href="../site/notebook.css">
+<link rel="stylesheet" href="../site/pencil.css">
+<style>
+  :root { --informal: 100; --rules: 5; }  /* A sheet of the fwiends, a hobby project, so at the top of the dial (STYLE.md §5). */
+  /* Each prop stands on a rule in a box as tall as a seated friend's (--rules, five as in the gallery), with its name
+     on the next rule and its state on the one after. A row is eight rules, so that every row stands on a rule. */
+  main { max-width: none; }  /* The shelf is the sheet's one wide thing, as the gallery's stage is, so that every prop stands in phy's row. */
+  .shelf { list-style: none; margin: var(--L) 0 0; padding: 0; display: flex; flex-wrap: wrap; column-gap: var(--L); row-gap: var(--L); }
+  .shelf li { display: flex; flex-direction: column; align-items: center; }
+  .shelf p { margin: 0; }
+  .box { height: calc(var(--L) * var(--rules)); display: flex; align-items: flex-end; position: relative; padding: 0 8px; }
+  .box > div svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  /* The ground, the kit's mark over the rule at the box's bottom edge, through the graphite filter (STYLE.md §6). */
+  .box::after { content: ''; position: absolute; left: 0; right: 0; top: calc(100% - 4.8px); height: 8px; pointer-events: none;
+    background: var(--mark-ground) 0 0 / 100% 8px no-repeat; filter: url(#graphite); }
+  .name { --hand: 50; height: var(--L); font: 300 22px/var(--L) var(--face); position: relative; top: var(--sit); white-space: nowrap; }
+  .state { height: var(--L); font-size: 15px; color: var(--ink-2); position: relative; top: var(--sit); white-space: nowrap; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
+    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
+    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
+    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
+    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
+    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <header>
+    <h1>props</h1>
+    <p class="intro">every shared prop in each of its states, on its ground beside phy, at the gallery's size.</p>
+  </header>
+  <ul class="shelf"></ul>
+  <footer>
+    <ul>
+      <li>each prop is a spec in props/, drawn by film/props.js</li>
+      <li>?rules=10 draws them twice as large</li>
+    </ul>
+  </footer>
+</main>
+
+<script src="../src/phyfriends.js"></script>
+<script src="../characters/phy/phy.js"></script>
+<script src="../film/props.js"></script>
+<script src="../props/cake.js"></script>
+<script src="../props/candle.js"></script>
+<script src="../props/partyHat.js"></script>
+<script src="../props/balloon.js"></script>
+<script src="../props/gift.js"></script>
+<script src="../props/medal.js"></script>
+<script src="../props/pencil.js"></script>
+<script src="../props/gramophone.js"></script>
+<script>
+  // A review sheet for the props (film/props.js, props/): each one in each of its states, standing on a rule beside
+  // phy, drawn as a scene draws them, and the party hat once more in a friend's color. ?rules=10 draws everything
+  // twice as large, still on the rules.
+  const PF = PhyFriends, P = PF.props;
+  const YUDA_CYAN = PF.get('yuda').palette.scarf;  // Yuda's bandana.
+  const rules = Number(new URLSearchParams(location.search).get('rules')) || 5;
+  document.documentElement.style.setProperty('--rules', rules);
+  const unit = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L')) * rules / PF.STANDING_BOX;
+  const words = name => name.replace(/[A-Z]/g, letter => ` ${letter.toLowerCase()}`);
+  // The label of a prop drawn in none of its states: "not lit" for one state, and plainer for several.
+  const plain = states => (states.length > 1 ? 'in none of its states' : states.map(s => `not ${s}`).join(''));
+
+  const entries = [{ name: 'phy', state: 'for scale', w: PF.STANDING_BOX, h: PF.STANDING_BOX,
+    svg: PF.render('phy', { view: PF.standingView('phy'), bg: false, fluid: true }) }];
+  for (const prop of P.list()) {
+    const states = P.states(prop);
+    for (const state of [[], ...states.map(s => [s])]) {
+      entries.push(propEntry(prop, { state }, state.length ? state.join(', ') : plain(states)));
+    }
+    if (prop === 'partyHat') entries.push(propEntry(prop, { palette: { paper: YUDA_CYAN } }, "in Yuda's bandana cyan"));
+  }
+
+  const shelf = document.querySelector('.shelf');
+  for (const { name, state, w, h, svg } of entries) {
+    const item = document.createElement('li'), box = document.createElement('div'), drawing = document.createElement('div');
+    box.className = 'box';
+    Object.assign(drawing.style, { width: `${w * unit}px`, height: `${h * unit}px` });
+    drawing.innerHTML = svg;
+    drawing.setAttribute('role', 'img');
+    drawing.setAttribute('aria-label', [name, state].filter(Boolean).join(', '));
+    box.appendChild(drawing);
+    item.append(box, Object.assign(document.createElement('p'), { className: 'name', textContent: name }),
+      Object.assign(document.createElement('p'), { className: 'state', textContent: state }));
+    shelf.appendChild(item);
+  }
+
+  // A prop drawn as scene.prop() draws it: through the characters' pencil, in head units.
+  function propEntry(prop, options, state) {
+    const { w, h, svg } = P.drawing(prop, options);
+    return { name: words(prop), state, w, h, svg: PF.pencil.svg(svg, { w, h }) };
+  }
+</script>
+</body>
+</html>

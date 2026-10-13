@@ -218,11 +218,11 @@
     assertEqual(lost.sort(), [], 'the friends whose raised paws are lost against the face');
   });
 
-  test('every friend of the house waves and points with the arm away from its tail', () => {
+  test('every friend of the house waves, points and beckons with the arm away from its tail', () => {
     withBoxSync(box => {
       for (const name of houseFriends()) {
         const rig = PF.mount(box, name, { bitmap: false, view: 'stand' });
-        for (const move of ['wave', 'point']) {
+        for (const move of ['wave', 'point', 'beckon']) {
           const pose = A.sample(A.layer(STANCES[1], A.make[move]({ spec: name })), 0.6);
           rig.setPose(pose, true);
           const S = pose.armL > pose.armR ? 'L' : 'R';

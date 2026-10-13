@@ -15,7 +15,8 @@
  * markings.
  *
  * The cast rules (src/cast.js) are checked where friends meet: a friend without a voice may only use
- * marks, words aimed at another friend need the two to know each other, and friends never stand
+ * marks, said or written, unless the scene is made for its owner alone (madeFor), which may draft it a
+ * few lines; words aimed at another friend need the two to know each other, and friends never stand
  * closer than their relation allows (checked on every frame; see check()). A scene that shows a
  * friend whose owner has not agreed to its medium is stamped as a draft.
  *
@@ -27,7 +28,8 @@
  *   if (!scene.film({ duration: 4 })) scene.play();  // Filmable by tools/pf.py film; plays live otherwise.
  *
  * Loads as a classic script after src/phyfriends.js, src/anim.js, src/emotion.js, src/cast.js and
- * characters/cast.js (PhyFriends.scene).
+ * characters/cast.js (PhyFriends.scene). A scene that places props by name also loads film/props.js
+ * and the props it names (props/).
  */
 (function (root) {
   'use strict';
@@ -64,9 +66,11 @@
   // margin line, or false), boil (texture redraws per second; 0 keeps it still),
   // medium ('video' or 'games', for the draft stamp), credits (true shows the owners of the friends
   // in frame), loop (a live scene with a duration starts again at the end), strict (throw rather
-  // than warn when friends stand too close; always on while filming).
+  // than warn when friends stand too close; always on while filming), and madeFor (the name of the
+  // friend whose owner alone the film is made for, which may then say and write words; src/cast.js).
   function create(el, opts = {}) {
-    const o = { width: 1600, height: 900, ground: null, paper: true, margin: false, boil: 0, medium: 'video', credits: true, loop: false, strict: false, ...opts };
+    const o = { width: 1600, height: 900, ground: null, paper: true, margin: false, boil: 0, medium: 'video', credits: true, loop: false, strict: false, madeFor: null, ...opts };
+    if (o.madeFor != null) PF.cast.friend(o.madeFor);
     const ground = o.ground ?? Math.floor((o.height - RULE * 1.5) / RULE) * RULE;
     const reducedQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
     const dom = buildStage(el, o);
@@ -86,6 +90,7 @@
       get playing() { return playing; },
       get filming() { return filming; },
       get reduced() { return !filming && !!(reducedQuery && reducedQuery.matches); },
+      get madeFor() { return o.madeFor; },
       get actors() { return actors.slice(); },
       get pointer() { return pointer; },
       add, prop, write, camera, team, rivals, seek, play, pause, onStep, onEnd, film, check, toWorld, cameraAt, destroy,
@@ -117,9 +122,14 @@
       return actor;
     }
 
-    // Places a drawing ({ w, h, svg }, in its own viewBox) with its bottom center at (x, y).
-    function prop(drawing, p = {}) {
-      const item = createProp(dom, drawing, { x: o.width / 2, y: ground, rotate: 0, z: 0, at: -Infinity, until: Infinity, ...p });
+    // Places a prop with its bottom center at (x, y): a drawing ({ w, h, svg }, in its own viewBox), or a prop that
+    // film/props.js defines (its name, or a spec), drawn in p.state, p.palette and p.scale; only such a prop can be
+    // drawn again in other colors (recolor()), which are merged over p.palette.
+    function prop(what, p = {}) {
+      const defined = typeof what === 'string' || (what && what.parts);
+      const drawing = defined ? propDrawing(what, p) : what;
+      const recolored = defined ? palette => propDrawing(what, { ...p, palette: { ...p.palette, ...palette } }) : null;
+      const item = createProp(dom, drawing, { x: o.width / 2, y: ground, rotate: 0, z: 0, at: -Infinity, until: Infinity, ...p }, () => time, recolored);
       item.remove = () => {
         const i = props.indexOf(item);
         if (i < 0) return;
@@ -135,10 +145,21 @@
     // Writes text in the hand, its baseline starting at (x, y); it writes itself out over `seconds`,
     // from left to right, or stroke by stroke with pen: strokes made for the text (src/pen.js), such as
     // TITLE_PEN (site/title-pen.js). graphite: true puts the graphite filter over it, which STYLE.md §6
-    // keeps for a title.
+    // keeps for a title. by (an actor, or a friend's name) is the friend writing: its words are checked
+    // as say() checks them, whenever they are set, and a mark is drawn as said; a friend other than the
+    // host writes as its marks are, in the hand pressed harder, in ink-2.
     function write(text, w = {}) {
       if (w.pen && !PF.pen) throw new Error('phy_friends/scene: write() with a pen needs src/pen.js');
-      const item = createWriting(dom, text, { x: RULE, y: ground, size: 40, at: -Infinity, seconds: 0, until: Infinity, rotate: -1, tone: 'ink', align: 'left', graphite: false, pen: null, ...w });
+      const by = w.by == null ? null : typeof w.by === 'string' ? w.by : w.by.name;
+      const vet = words => { if (by != null) PF.cast.ensureVoice(by, words, { madeFor: o.madeFor }); };
+      vet(text);
+      const hand = by != null && by !== PF.cast.host ? { tone: 'ink-2', pressed: true } : {};
+      const item = createWriting(dom, text, {
+        x: RULE, y: ground, size: 40, at: -Infinity, seconds: 0, until: Infinity, rotate: -1, tone: 'ink', align: 'left', graphite: false, pen: null,
+        ...w, ...hand, mark: by != null && VOICED_MARKS.includes(text),
+      });
+      const set = item.set;
+      item.set = values => { if ('text' in values) vet(values.text); return set(values); };
       writings.push(item);
       redraw();
       return item;
@@ -512,10 +533,12 @@
 .pf-actor { width: ${BOX}px; height: ${BOX}px; }
 .pf-actor svg, .pf-prop svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .pf-prop { transform-origin: 50% 100%; }
+.pf-prop > svg + svg { position: absolute; left: 0; top: 0; }  /* A prop's colorings (recolor()) lie over its drawing. */
 .pf-writing, .pf-mark, .pf-words { margin: 0; white-space: pre; font-family: var(--face, 'Shantell Sans', sans-serif); font-weight: 300; line-height: 1;
   color: var(--ink, #3d3c39); pointer-events: none; z-index: 50; }
 .pf-writing.ink-2, .pf-mark, .pf-words { color: var(--ink-2, #6d6a63); }
 .pf-mark { z-index: 60; font-size: ${MARK.size}px; font-weight: 600; }  /* Bold, as on a live page (src/live.js), to read at a glance. */
+.pf-pressed { font-weight: 600; }  /* A friend other than the host says and writes in the hand of its marks. */
 .pf-words { z-index: 60; font-size: ${WORDS.size}px; }
 .pf-frame { position: absolute; inset: 0; pointer-events: none; }
 /* One owner to a span, each kept whole; where the line wraps, the dot that would end a line is clipped. */
@@ -711,15 +734,17 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return actor;
       },
 
-      // Says words beside the head, written out as they are said. Words need a voice (src/cast.js);
-      // words to another friend need the two to know each other. side is 1 (right of the head), -1
-      // (left) or 0 (centered above it, for a crowded row); rise lifts the words, in head units, and
-      // size sets their size.
+      // Says words beside the head, written out as they are said. Words need a voice, or a scene made
+      // for the friend's owner alone (madeFor; src/cast.js); words to another friend need the two to
+      // know each other. A friend other than the host says them as its marks are written, in the hand
+      // pressed harder. side is 1 (right of the head), -1 (left) or 0 (centered above it, for a crowded
+      // row); rise lifts the words, in head units, and size sets their size.
       say(text, { at = scene.time, seconds, to, side, rise = 0, size = WORDS.size } = {}) {
-        PF.cast.ensureVoice(name, text);
+        PF.cast.ensureVoice(name, text, { madeFor: scene.madeFor });
         if (to) PF.cast.ensure('talk', name, to.name);
         const s = side ?? (to && to.state(at).x < actor.state(at).x ? -1 : 1);
-        const node = VOICED_MARKS.includes(text) ? markNode(dom, 'pf-words hand', text) : textNode(dom, 'pf-words hand', text);
+        const className = `pf-words hand${name === PF.cast.host ? '' : ' pf-pressed'}`;
+        const node = VOICED_MARKS.includes(text) ? markNode(dom, className, text) : textNode(dom, className, text);
         node.style.fontSize = `${size}px`;
         words.push({ text, at, until: at + (seconds ?? 1.2 + text.length / WORDS.perSecond), side: s, rise, node });
         return actor;
@@ -969,9 +994,63 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
 
   // ---------------------------------------------------------------- Props
 
+  // The sides from which a prop is drawn in, colored in or rubbed out, as handwriting writes itself. For each, the edges
+  // of a clip (their places among inset()'s top, right, bottom and left) that cut off what is not drawn yet (`far`, the
+  // edge across from that side) and what is rubbed out already (`near`, the edge on that side). On the edges it does
+  // not cut, a clip reaches PAST percent beyond the box, so that a part reaching out of the box (a flame, a tail) is not
+  // cut off.
+  const SIDES = { bottom: { far: 0, near: 2 }, left: { far: 1, near: 3 } };
+  const PAST = -50;
+
+  function sideOf(from, doing) {
+    if (!SIDES[from]) throw new Error(`phy_friends/scene: a prop is ${doing} from ${Object.keys(SIDES).join(' or ')}, not "${from}"`);
+    return from;
+  }
+
+  // How far a cue that draws over `seconds` from `at` has come at t, from 0 to 1.
+  function progress(cue, t) {
+    return cue.seconds > 0 ? clamp((t - cue.at) / cue.seconds, 0, 1) : t >= cue.at ? 1 : 0;
+  }
+
+  // The clip path that shows what of a prop is drawn in from one side and not rubbed out from another (drawn and rubbed,
+  // each { side, share } or null), or '' for all of it. It is written as briefly as inset() allows, as a browser reads
+  // a style back.
+  function clipOf(drawn, rubbed) {
+    const edges = [PAST, PAST, PAST, PAST];
+    if (drawn && drawn.share < 1) edges[SIDES[drawn.side].far] = (1 - drawn.share) * 100;
+    if (rubbed && rubbed.share > 0) edges[SIDES[rubbed.side].near] = rubbed.share * 100;
+    if (edges.every(edge => edge === PAST)) return '';
+    const [top, right, bottom, left] = edges;
+    const values = left !== right ? edges : bottom !== top ? [top, right, bottom] : right !== top ? [top, right] : [top];
+    return `inset(${values.map(v => `${Math.round(v * 100) / 100}%`).join(' ')})`;
+  }
+
+  // The parts that a state shows or hides (film/props.js) in a prop's drawing.
+  function togglesIn(svg) {
+    return [...svg.querySelectorAll('[data-pf-show], [data-pf-hide]')].map(n => {
+      const shows = n.hasAttribute('data-pf-show');
+      return { n, shows, name: n.getAttribute(shows ? 'data-pf-show' : 'data-pf-hide'), shown: !n.hasAttribute('display') };
+    });
+  }
+
+  // Shows an svg cut by a clip path, or hides it (clip null).
+  function showClipped(svg, clip) {
+    svg.style.display = clip === null ? 'none' : '';
+    if (clip !== null) svg.style.clipPath = clip;
+  }
+
+  // A prop that film/props.js draws: one it defines by name, or a spec of one.
+  function propDrawing(what, { state, palette, scale } = {}) {
+    if (!PF.props) throw new Error('phy_friends/scene: a prop given by name or by spec needs film/props.js');
+    return PF.props.drawing(what, { state, palette, scale });
+  }
+
   // A prop is a drawing in the characters' pencil (or flat, for ink marks drawn as lines). Its
   // position is its bottom center, set directly by a game (set) or scheduled by a film (moveTo).
-  function createProp(dom, drawing, p) {
+  // The parts that a state shows or hides (film/props.js) are switched on cue (state), from the
+  // states the drawing was drawn in; clock gives the scene's time, the default for a cue, and
+  // recolored(palette) draws the prop again in other colors (null for a drawing placed as it is).
+  function createProp(dom, drawing, p, clock, recolored) {
     const node = document.createElement('div');
     node.className = 'pf-prop';
     Object.assign(node.style, { width: `${drawing.w}px`, height: `${drawing.h}px`, zIndex: String(20 + p.z) });
@@ -979,11 +1058,96 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     dom.layer.appendChild(node);
     const moves = [];
     const state = { x: p.x, y: p.y, rotate: p.rotate, visible: true };
+    const own = node.firstElementChild, toggles = togglesIn(own);
+    const drawnOn = toggles.filter(toggle => toggle.shows === toggle.shown).map(toggle => toggle.name), stateCues = [];
+    // How the prop is drawn in and rubbed out ({ at, seconds, from }), and its colorings, in the order they start: each
+    // the drawing in other colors ({ svg, at, seconds, from, amount }).
+    let reveal = null, erase = null;
+    const colorings = [];
+
+    // The states that are on at t: those it was drawn in, as the cues up to t turn them on and off.
+    function statesAt(t) {
+      const on = new Set(drawnOn);
+      for (const cue of stateCues) {
+        if (t < cue.at) break;
+        if (cue.on) on.add(cue.name); else on.delete(cue.name);
+      }
+      return on;
+    }
+
+    // A prop is rubbed out only once it has started to be drawn in, since rubbed out before, it would never show.
+    function ensureOrder(drawnIn, rubbedOut) {
+      if (drawnIn && rubbedOut && rubbedOut.at < drawnIn.at) {
+        throw new Error(`phy_friends/scene: a prop is rubbed out (at ${rubbedOut.at} s) only after it starts to be drawn in (at ${drawnIn.at} s)`);
+      }
+    }
+
+    // Each coloring shows the share of the prop it has colored that no later coloring has colored over, and the drawing
+    // itself shows the share that none has, so that the colors replace the drawing's rather than lie over them.
+    function drawColorings(t) {
+      const side = colorings[0].from;
+      let over = 0;  // The share of the prop colored by the colorings drawn so far, the latest first.
+      for (let i = colorings.length - 1; i >= 0; i--) {
+        const share = colorings[i].amount * progress(colorings[i], t);
+        showClipped(colorings[i].svg, share > over ? clipOf({ side, share }, { side, share: over }) : null);
+        over = Math.max(over, share);
+      }
+      showClipped(own, over < 1 ? clipOf(null, { side, share: over }) : null);
+    }
 
     const item = {
       node,
       set(values) { Object.assign(state, values); return item; },
       show(at, until = Infinity) { p.at = at; p.until = until; return item; },
+      // Draws the prop in from `at` over `seconds`, as handwriting writes itself: from the bottom up (from: 'bottom'),
+      // or from the left (from: 'left'). Until `at` none of it shows.
+      reveal({ at = clock(), seconds = 1, from = 'bottom' } = {}) {
+        const cue = { at, seconds, from: sideOf(from, 'drawn in') };
+        ensureOrder(cue, erase);
+        reveal = cue;
+        return item;
+      },
+      // Rubs the prop out from `at` over `seconds`, as reveal() draws it in, backward: the part nearest `from` ('bottom'
+      // or 'left') first, its colorings with it. From then on none of it shows. A prop also drawn in is rubbed out once
+      // the drawing in has started, and while the two overlap, only what is drawn and not yet rubbed out shows.
+      erase({ at = clock(), seconds = 1, from = 'bottom' } = {}) {
+        const cue = { at, seconds, from: sideOf(from, 'rubbed out') };
+        ensureOrder(reveal, cue);
+        erase = cue;
+        return item;
+      },
+      // Colors the prop in from `at` over `seconds`, as reveal() draws it in: the same drawing in other colors (palette,
+      // merged over its own) comes in over it from `from`, until `amount` of it (0 to 1) is colored, so that a stray
+      // stroke colors only the bottom fifth (amount: 0.2). A prop may be colored in again, each coloring over those that
+      // start before it, but always from the same side.
+      recolor(palette, { at = clock(), seconds = 1, from = 'bottom', amount = 1 } = {}) {
+        if (!recolored) {
+          throw new Error('phy_friends/scene: only a prop placed by name or by spec (film/props.js) can be colored in; ' +
+            'a drawing placed as it is has no palette to change');
+        }
+        sideOf(from, 'colored in');
+        if (colorings.length && colorings[0].from !== from) {
+          throw new Error(`phy_friends/scene: this prop is colored in from the ${colorings[0].from}, so it is colored in again from there, not from the ${from}`);
+        }
+        if (!(amount >= 0 && amount <= 1)) throw new Error(`phy_friends/scene: a coloring covers from 0 to 1 of a prop, not ${amount}`);
+        const copy = recolored(palette), texture = own.querySelector('image[data-pf-texture]');
+        node.insertAdjacentHTML('beforeend', PF.pencil.svg(copy.svg, { w: copy.w, h: copy.h, flat: !!p.flat }));
+        const svg = node.lastElementChild;
+        svg.style.display = 'none';  // Until a frame draws it.
+        // Its pencil is the drawing's own (the box is the same), boiled as the drawing's is now.
+        if (texture) for (const image of svg.querySelectorAll('image[data-pf-texture]')) image.setAttribute('href', texture.getAttribute('href'));
+        toggles.push(...togglesIn(svg));
+        colorings.push({ svg, at, seconds, from, amount });
+        colorings.sort((a, b) => a.at - b.at);
+        return item;
+      },
+      // Turns one of the prop's states on (or off, with on: false) from `at`: the cake's candles lit, say.
+      state(name, on = true, { at = clock() } = {}) {
+        if (!toggles.some(toggle => toggle.name === name)) throw new Error(`phy_friends/scene: this prop has no state "${name}"`);
+        stateCues.push({ name, on, at });
+        stateCues.sort((a, b) => a.at - b.at);
+        return item;
+      },
       moveTo(to, { at = 0, duration = 0.5, ease = 'inOut', arc = 0 } = {}) {
         moves.push({ to, at, duration, ease: A.ease[ease] || ease, arc });
         moves.sort((a, b) => a.at - b.at);
@@ -1002,11 +1166,23 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return pos;
       },
       draw(t) {
-        const shown = state.visible && t >= p.at && t < p.until;
+        const rubbed = erase ? progress(erase, t) : 0;
+        const shown = state.visible && t >= p.at && t < p.until && rubbed < 1;
         node.style.display = shown ? '' : 'none';
         if (!shown) return;
         const pos = item.at(t);
         node.style.transform = `translate(${pos.x - drawing.w / 2}px, ${pos.y - drawing.h}px) rotate(${pos.rotate}deg)`;
+        if (reveal || erase) {
+          node.style.clipPath = clipOf(reveal && { side: reveal.from, share: progress(reveal, t) }, erase && { side: erase.from, share: rubbed });
+        }
+        if (colorings.length) drawColorings(t);
+        const on = toggles.length ? statesAt(t) : null;
+        for (const toggle of toggles) {
+          const drawn = toggle.shows === on.has(toggle.name);
+          if (drawn === toggle.shown) continue;
+          toggle.shown = drawn;
+          if (drawn) toggle.n.removeAttribute('display'); else toggle.n.setAttribute('display', 'none');
+        }
       },
     };
     return item;
@@ -1014,9 +1190,11 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
 
   // ------------------------------------------------------------- Writing
 
-  // Handwriting whose baseline starts at (x, y). It writes itself out, left to right, over `seconds`.
+  // Handwriting whose baseline starts at (x, y). It writes itself out, left to right, over `seconds`;
+  // pressed writes it in the hand pressed harder, and mark draws it as a mark (src/cast.js MARKS).
   function createWriting(dom, text, w) {
-    const node = textNode(dom, `pf-writing hand${w.tone === 'ink-2' ? ' ink-2' : ''}`, text, { graphite: w.graphite });
+    const className = `pf-writing hand${w.tone === 'ink-2' ? ' ink-2' : ''}${w.pressed ? ' pf-pressed' : ''}`;
+    const node = w.mark ? markNode(dom, className, text) : textNode(dom, className, text, { graphite: w.graphite });
     node.style.fontSize = `${w.size}px`;
     let writing = null;  // The pen's copy of the text, laid over it the first time it is shown.
     const item = {

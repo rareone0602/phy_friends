@@ -190,6 +190,43 @@
     });
   });
 
+  // The weight and the color of a node's hand, once it is shown.
+  const handOf = node => { const style = getComputedStyle(node); return [style.fontWeight, style.color]; };
+  const INK = 'rgb(61, 60, 57)', INK_2 = 'rgb(109, 106, 99)';
+
+  test("a film made for one owner lets that owner's fwiend say and write words, as its marks are, and no other fwiend", () => {
+    withScene({ madeFor: 'yuda' }, (scene, el) => {
+      const yuda = scene.add('yuda', { x: 400 }), terry = scene.add('terry', { x: 1100 });
+      assertEqual(scene.madeFor, 'yuda');
+      yuda.say('happy birthday', { at: 0 });
+      const words = scene.write('found you', { by: yuda, at: 0, tone: 'ink' });
+      scene.write('found you too', { by: 'yuda', at: 0 });
+      assertThrows(() => terry.say('hello'), /Terry has no voice/);
+      assertThrows(() => scene.write('hello', { by: terry }), /Terry has no voice/);
+      scene.seek(1);
+      assertEqual(handOf(el.querySelector('.pf-words')), ['600', INK_2], 'said in the hand pressed harder');
+      assertEqual(handOf(words.node), ['600', INK_2], 'and written so, whatever tone is asked for');
+    });
+    const el = document.createElement('div');
+    assertThrows(() => S.create(el, { madeFor: 'nobody' }), /"nobody" is not in the cast/);
+    assertEqual(el.childElementCount, 0, 'a scene refused leaves no stage behind');
+  });
+
+  test('writing by a fwiend checks its words as said, and a fwiend other than the host writes as its marks are', () => {
+    withScene({}, scene => {
+      const phy = scene.add('phy', { x: 400 }), yuda = scene.add('yuda', { x: 1100 });
+      assertThrows(() => scene.write('hello', { by: yuda }), /Yuda has no voice/);
+      assertThrows(() => scene.write('hello', { by: 'nobody' }), /"nobody" is not in the cast/);
+      const host = scene.write('hello', { by: phy, at: 0 }), plain = scene.write('hello', { at: 0 });
+      const mark = scene.write('!?', { by: yuda, at: 0 }), heart = scene.write('heart', { by: 'yuda', at: 0 });
+      assertThrows(() => mark.set({ text: 'hello' }), /Yuda has no voice/, 'words set later are checked too');
+      scene.seek(1);
+      assertEqual([handOf(host.node), handOf(plain.node)], [['300', INK], ['300', INK]], "the host's writing is unchanged");
+      assertEqual(handOf(mark.node), ['600', INK_2], 'a fwiend writes in the hand pressed harder, in ink-2');
+      assert(heart.node.querySelector('svg') && !heart.node.textContent.includes('heart'), 'a mark written is drawn, as said');
+    });
+  });
+
   test('the host may talk to anyone and hand them things', () => {
     withScene({}, scene => {
       const phy = scene.add('phy', { x: 500 }), yuda = scene.add('yuda', { x: 1000 });

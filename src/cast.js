@@ -11,10 +11,12 @@
  *   opted in   touching and rivalry (competing head to head, teasing) need both owners to agree,
  *              pair by pair, even when they know each other.
  *
- * Two rules hold whoever knows whom. Only a friend with a voice speaks in words: the host, and anyone
- * whose owner has given them lines. Everyone else speaks in marks (MARKS), so that nobody is given
- * words or a personality their owner never gave them. And a friend appears in a medium (a film, a
- * game) only once its owner has agreed to it; until then, work that shows it is a draft.
+ * Two rules hold whoever knows whom. Only a friend with a voice speaks in words, said or written: the
+ * host, and anyone whose owner has given them lines. Everyone else speaks in marks (MARKS), so that
+ * nobody is given words or a personality their owner never gave them. The one exception is a film made
+ * for one owner alone (madeFor), which may draft a few lines for that owner's friend, for the owner to
+ * keep, change or strike. And a friend appears in a medium (a film, a game) only once its owner has
+ * agreed to it; until then, work that shows it is a draft.
  *
  * The data lives in characters/cast.js. film/scene.js checks these rules wherever friends meet, and
  * a game calls ensure() before anything the scene cannot see, such as putting two friends on one
@@ -133,15 +135,18 @@
       return relation(a, b) === 'strangers' ? GAP.strangers : GAP.know;
     }
 
-    function canSpeak(name) {
-      return name === host || !!friend(name).voice;
+    // Whether the friend may use words: the host may, as may a friend whose owner has given it lines, and, in a film
+    // made for one owner alone (madeFor, the name of that owner's friend), the friend it is made for.
+    function canSpeak(name, { madeFor } = {}) {
+      return name === host || !!friend(name).voice || (madeFor != null && known(madeFor) === name);
     }
 
-    // Throws unless the friend may say these words: words need a voice, and a mark must be one of MARKS.
-    function ensureVoice(name, words) {
-      if (MARKS.includes(words) || canSpeak(name)) return;
+    // Throws unless the friend may say or write these words (see canSpeak): a mark must be one of MARKS.
+    function ensureVoice(name, words, { madeFor } = {}) {
+      if (MARKS.includes(words) || canSpeak(name, { madeFor })) return;
       throw new Error(`phy_friends/cast: ${friend(name).name} has no voice and speaks in marks (${MARKS.join(' ')}), ` +
-        `not in words ("${words}"). Set voice: true for ${name} in characters/cast.js only if its owner has given it lines.`);
+        `not in words ("${words}"). Set voice: true for ${name} in characters/cast.js only if its owner has given it lines; ` +
+        `a film made for its owner alone may draft a few (madeFor: '${name}').`);
     }
 
     function agreed(name, medium) {

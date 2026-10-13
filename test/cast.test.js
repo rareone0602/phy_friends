@@ -52,6 +52,14 @@
     assertThrows(() => cast.ensureVoice('terry', 'hello'), /Terry has no voice/);
   });
 
+  test("a film made for one owner alone may draft words for that owner's friend, and for no other", () => {
+    const cast = sample();
+    assert(cast.canSpeak('yuda', { madeFor: 'yuda' }) && !cast.canSpeak('yuda'), 'only in a film made for its owner');
+    cast.ensureVoice('yuda', 'happy birthday', { madeFor: 'yuda' });
+    assertThrows(() => cast.ensureVoice('terry', 'hello', { madeFor: 'yuda' }), /Terry has no voice.*madeFor: 'terry'/);
+    assertThrows(() => cast.canSpeak('yuda', { madeFor: 'nobody' }), /"nobody" is not in the cast/);
+  });
+
   test('strangers keep a wider gap than friends who know each other, and touch removes it', () => {
     const cast = sample({ know: [['yuda', 'terry']], optIn: [{ pair: ['yuda', 'terry'], verbs: ['touch'] }] });
     assert(cast.gap('kevin', 'brian') > cast.gap('phy', 'kevin'), 'strangers keep more room');

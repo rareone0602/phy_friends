@@ -115,7 +115,7 @@
 
   // ---- The standing figure
 
-  const STANDING = ['walk', 'wave', 'cheer', 'jump', 'standUp', 'sitDown', 'dance', 'stretch', 'point'];
+  const STANDING = ['walk', 'wave', 'cheer', 'jump', 'standUp', 'sitDown', 'dance', 'stretch', 'point', 'beckon'];
   const NEUTRAL = A.sample({});
   // The numbers of a pose that are not at rest.
   const restless = pose => Object.keys(pose).filter(key => typeof pose[key] === 'number' && Math.abs(pose[key] - NEUTRAL[key]) > 1e-3);
@@ -147,6 +147,17 @@
     const pose = A.sample({ crouch: 40, stepL: -3, armL: 300, elbowR: -400, legR: -80, lean: 90 });
     assertEqual([pose.crouch, pose.stepL, pose.armL, pose.elbowR, pose.legR, pose.lean], [30, 0, 180, -150, -30, 30]);
     assertEqual([A.sample({ rise: 2 }).rise, A.sample({ rise: -2 }).rise], [1, -1], 'rise moves at most a whole stance');
+  });
+
+  test('a beckon reaches out the arm away from the tail and sweeps the paw back in twice, in under a second', () => {
+    const beckon = A.parse('beckon', { spec: 'yuda' }), side = PhyFriends.freeSide('yuda'), other = side === 'L' ? 'R' : 'L';
+    assert(beckon.duration > 0.8 && beckon.duration < 1, `it takes ${beckon.duration} s`);
+    assertEqual(beckon(0.5), A.make.beckon({ spec: 'yuda' })(0.5), 'played by name, it is made for the friend');
+    const poses = sampled(beckon, 120).map(t => A.sample(beckon, t)), elbows = poses.map(pose => pose[`elbow${side}`]);
+    const sweeps = elbows.filter((e, i) => i > 0 && i < elbows.length - 1 && e > elbows[i - 1] && e >= elbows[i + 1]);
+    assertEqual(sweeps.length, 2, 'the paw comes in twice');
+    assert(sweeps.every(e => e > 20) && Math.min(...elbows) < -60, 'from the arm held straight out to the paw drawn in');
+    assert(poses.every(pose => pose[`arm${other}`] === 0), 'the other arm rests');
   });
 
   test('idle breathes with a standing friend\'s arms, a little', () => {

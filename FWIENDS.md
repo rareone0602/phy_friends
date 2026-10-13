@@ -404,15 +404,19 @@ checks these rules and refuses to break them.
 - Strangers keep a strip of paper between them, 40 head units between
   outlines (ears apart); fwiends who know each other may stand side by side.
   Choreograph so that nobody hops past anybody.
-- **Only phy speaks in words.** The others speak in marks, since only their
-  owners know how they talk: ! ? !? … z ??, and drawn ones, a ♪, a heart, a
-  bead of sweat, a sparkle, a light bulb and a swirl. A mark is a drawing over
-  a fwiend's head, not punctuation, so the calm punctuation of `STYLE.md` §3
-  doesn't apply to it. It is written in the hand pressed harder, bold (`600`)
-  in `--ink-2`, so that it reads at a glance; a drawn mark is a line as thick
-  as that hand's stem, never filled, on the same baseline (the hand has no ♪,
-  so the ♪ is drawn too). Likewise, nobody is given a personality, a birthday
-  or any other fact its owner didn't give it.
+- **Only phy speaks in words,** said or written on the sheet. The others
+  speak in marks, since only their owners know how they talk: ! ? !? … z ??,
+  and drawn ones, a ♪, a heart, a bead of sweat, a sparkle, a light bulb and a
+  swirl. A mark is a drawing over a fwiend's head, not punctuation, so the
+  calm punctuation of `STYLE.md` §3 doesn't apply to it. It is written in the
+  hand pressed harder, bold (`600`) in `--ink-2`, so that it reads at a
+  glance; a drawn mark is a line as thick as that hand's stem, never filled,
+  on the same baseline (the hand has no ♪, so the ♪ is drawn too). Likewise,
+  nobody is given a personality, a birthday or any other fact its owner
+  didn't give it. A film made for one owner alone (`madeFor`) may draft a few
+  short lines and traits for that owner's fwiend, used sparingly and written
+  as its marks are (`write(text, { by })`); nobody else sees them until the
+  owner has kept, changed or struck each one.
 - **Feelings are reactions, not temperaments.** A feeling answers something
   that happens in the scene (`actor.feel('surprised', { at })`, with its
   mark); nobody is shy, cross or sleepy by nature. Aimed at another fwiend, it
@@ -425,10 +429,9 @@ checks these rules and refuses to break them.
   own best score.
 - **The owners are credited where a viewer can follow the link.** A page links
   each owner in its small print, and a frame may credit the owners of the
-  fwiends in it on the bottom rule. A video need not, since a link in it
-  cannot be clicked: it names the owners once, written large (in a roll call,
-  say), and its post links them. Without the credits, recompose the frame, so
-  that the bottom rule is not left as dead space.
+  fwiends in it on the bottom rule. A video credits them once, large
+  (`STYLE.md` §12), in a roll call, say. Without the credits, recompose the
+  frame, so that the bottom rule is not left as dead space.
 - **Consent is per medium.** An owner who agreed to the gallery has not
   thereby agreed to films or games (`agreed` in `characters/cast.js`). Until
   they do, work that shows their fwiend carries the word "draft" in a corner,
@@ -443,3 +446,23 @@ checks these rules and refuses to break them.
   reduced motion a scene plays as the motion rules above say; travel becomes a
   glide, a fwiend stands up or sits down in a cut, and a film shows its last
   frame and waits to be played.
+
+**Props and sets.** Everything in a scene that is not a fwiend is drawn as a
+fwiend is, so that the sheet keeps one hand.
+- **A prop is a spec** (`film/props.js`): a palette of the colours the thing
+  really has, a box in head units whose bottom centre stands on the ground, and
+  a few of the factory's shapes, coloured in with the fwiends' pencil, with no
+  outline. Never a traced path or a picture. A prop that films share lives in
+  `props/`, one to a file; one that a single film needs stays in its folder. A
+  set (rock, soil, grass) is props too, laid on the sheet, whose rules show
+  through the pencil.
+- **A prop takes a fwiend's colour by override**
+  (`palette: { paper: PF.get('yuda').palette.scarf }`), never by copying the
+  value, and its shade follows (`STYLE.md` principle 5).
+- **A flame is a pale shape,** never a glow or a halo.
+- **Ink is a stroke:** a wick, a string, a vein or a rib is one pencil line in
+  an ink, at `STYLE.md` §6's width, never filled.
+- **A prop changes by its states,** parts shown or hidden on cue (the candles
+  lit, the needle down), never by a second drawing, and it may be drawn in,
+  coloured in or rubbed out from the bottom or the left, as handwriting writes
+  itself (`reveal`, `recolor`, `erase`).
