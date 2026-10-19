@@ -252,13 +252,13 @@ intro step down one (in brackets); the rest of the print keeps its size.
   print. A title is about 12 letters, what fits on a phone's line. It sits on
   the first rule, with the rule under it left blank for its tails; too long
   for a phone, it shrinks rather than wraps.
-- **Loading it:**
-  `https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap`,
-  about 170 KB for Latin. `site/notebook.css` sets the dial; a page changes
-  only `--informal`, and marks its hand text with `.hand`. Files for LaTeX,
-  matplotlib or a design tool are in `figures/fonts/`. The SIL Open Font
-  License allows any use, embedding in a PDF included; keep the licence file
-  beside any copy of the font.
+- **Loading it:** from the site itself, so the face needs no font service.
+  `site/notebook.css` declares it from `site/fonts/`, a subset of about 170 KB
+  for Latin with all three axes (`tools/font_subset.py` makes it), and sets the
+  dial; a page preloads the file, changes only `--informal`, and marks its hand
+  text with `.hand`. Files for LaTeX, matplotlib or a design tool are in
+  `figures/fonts/`. The SIL Open Font License allows any use, embedding in a
+  PDF included; keep the licence file beside any copy of the font.
 - **CJK text** adds `'LXGW WenKai TC'` (Google Fonts, a pencil-like hand)
   after the face, loaded only on pages that need it, with the text marked by
   `lang`.
@@ -307,14 +307,15 @@ point somewhere or grow to hold its own; it is still the same mark.
 
 **The kit**, to copy from rareone0602/phy_friends: `site/notebook.css` (the
 paper), `site/pencil.css` (everything drawn on it; its opening comment lists
-the classes), `site/icon.svg` (the favicon), `figures/` (§8) and the graphite
-filter (§6). `specimen.html` shows every part below at work, on the rules,
-with the dial to turn. A page is put together as the specimen is:
-`<html lang="en-GB">` with the colour-scheme meta (§4); in the head the face,
-then `notebook.css`, then `pencil.css`, and `--informal` on `:root` where the
-work is not at `50`; the graphite filter first in the body; and a `main`
-holding a `header` (the title, the intro and any nav), the writing inside
-`.doc`, and a `footer`.
+the classes), `site/fonts/` (the face, which stays beside `notebook.css`),
+`site/icon.svg` (the favicon), `figures/` (§8) and the graphite filter (§6).
+`specimen.html` shows every part below at work, on the rules, with the dial to
+turn. A page is put together as the specimen is: `<html lang="en-GB">` with
+the colour-scheme meta (§4); in the head a preload of the face, then
+`notebook.css`, then `pencil.css`, and `--informal` on `:root` where the work
+is not at `50`; the graphite filter first in the body; and a `main` holding a
+`header` (the title, the intro and any nav), the writing inside `.doc`, and a
+`footer`.
 
 **Layout.** One column, `42em` at most, left-aligned against the margin
 line: a title in the hand, one line of intro, the content and a small

@@ -5,7 +5,7 @@
   python3 tools/shoot.py design/fonts.html out/design/fonts.png --size 1280x2400
 
 Unlike shoot() in tools/pf.py, which shoots an HTML string, it loads a real file:// URL (so that
-relative ../src and ../characters paths resolve) and gives Google Fonts time to load. Both take
+relative ../src and ../characters paths resolve) and gives web fonts time to load. Both take
 the screenshot with cdp.screenshot_once(). The pages honor ?px=..&py=.. (CSS pixels) as a
 simulated pointer position, so a still shows the eyes following it.
 """

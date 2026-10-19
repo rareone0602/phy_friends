@@ -1,9 +1,19 @@
 /* The paper: a page of lined notebook paper (design C). It is shared by index.html,
    style.html and specimen.html and is meant to be copied into other projects together
-   with site/pencil.css, which styles everything drawn on it. Every vertical measure is
-   a whole number of rules (--L), and text sits on the rules. A page that declares both
-   color schemes turns to the dark sheet (at the end) where the reader's system asks for
-   dark. See STYLE.md §4. */
+   with site/pencil.css, which styles everything drawn on it, and site/fonts/, which holds
+   the face. Every vertical measure is a whole number of rules (--L), and text sits on the
+   rules. A page that declares both color schemes turns to the dark sheet (at the end)
+   where the reader's system asks for dark. See STYLE.md §4. */
+
+/* The face, served from site/fonts/ (a Latin subset made by tools/font_subset.py) with the
+   three axes that the dial uses at their full ranges. The URL is relative to this file. A
+   page preloads the file so that it starts early (rel="preload", as="font", type="font/woff2"
+   and crossorigin, which a font request needs even from the same origin). */
+@font-face {
+  font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;
+  src: url('fonts/ShantellSans-Latin.woff2') format('woff2');
+}
+
 :root {
   --L: 32px;                /* Rule spacing. */
   --paper: #fbf9f3;

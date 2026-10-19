@@ -32,7 +32,7 @@ The repository is laid out by what each part is for:
 
 ```
 index.html  style.html  specimen.html    the site (GitHub Pages serves it from the root)
-site/          the site's stylesheets, icons, link preview and title strokes
+site/          the site's stylesheets, face, icons, link preview and title strokes
 src/           the library: what a friend is and does
 film/          the film kit: friends together on a sheet, played in a page or filmed
 characters/    the fwiends: a spec each, and the cast
@@ -47,7 +47,7 @@ out/           generated output (git-ignored)
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper (and the dark sheet), `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper (and the dark sheet), `site/pencil.css` everything drawn on it, `site/fonts/` the face it is set in (a Latin subset of Shantell Sans, served from the site, not by a font service) and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
@@ -66,6 +66,7 @@ out/           generated output (git-ignored)
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
+| `tools/font_subset.py` | subsets the house face, `figures/fonts/`, to the WOFF2 in `site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
 | `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (STYLE.md §4) and writes them into `site/notebook.css` and `site/pencil.css` |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
@@ -837,5 +838,5 @@ The exceptions:
   preview) belongs to whoever is named under it in the gallery, and the licence
   gives no rights to it. That goes for phy's own, and for Claude's, whose figure
   is Claude Code's mascot and belongs to Anthropic.
-- **Shantell Sans** (`figures/fonts/`) is under the SIL Open Font License, whose
-  text sits next to it.
+- **Shantell Sans** (`figures/fonts/`, and its subset in `site/fonts/`) is under the
+  SIL Open Font License, whose text sits next to each copy.

@@ -4,8 +4,8 @@
   python3 tools/title_pen.py            # Requires numpy, scipy, Pillow and Google Chrome.
   python3 tools/title_pen.py --check    # Also writes out/design/title-pen.png, the strokes over the title.
 
-Headless Chrome sets the title exactly as the gallery does (Shantell Sans, weight 300, INFM 100 and
-BNCE 50), large and upright, and the ink is thinned to its centerlines. Each letter's strokes are
+Headless Chrome sets the title exactly as the gallery does (Shantell Sans from site/fonts/, weight 300, INFM 100
+and BNCE 50), large and upright, and the ink is thinned to its centerlines. Each letter's strokes are
 given below as a few waypoints, in the order and direction a hand writes them; a stroke follows the
 centerline from one waypoint to the next. The gallery reveals its title along these strokes
 (src/pen.js; FWIENDS.md, "the opening"), as does the roll-call film. Run this again whenever the title, the face or its axes change: it
@@ -66,7 +66,6 @@ STROKES = {
 SECOND_S = [[(0.3475, -0.5925), (0.0975, -0.45), (0.385, -0.1875), (0.0725, -0.10)]]
 
 PAGE = f'''<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=block">
 <link rel="stylesheet" href="{(ROOT / 'site' / 'notebook.css').as_uri()}">
 <style>
   :root {{ --informal: 100; }}  /* As index.html sets it. */
@@ -125,7 +124,7 @@ def set_title():
         loaded = chrome.evaluate(f"document.fonts.load({json.dumps(face)}).then(() => document.fonts.ready)"
                                  f".then(() => document.fonts.check({json.dumps(face)}, {json.dumps(TITLE)}))")
         if not loaded:
-            sys.exit('title_pen: Shantell Sans did not load from Google Fonts, so the title would be set in another face')
+            sys.exit('title_pen: Shantell Sans did not load from site/fonts/, so the title would be set in another face')
         chrome.evaluate(TWO_FRAMES_JS)  # Lets the page paint with the face in place.
         layout = json.loads(chrome.evaluate(MEASURE_JS))
         shot = chrome.screenshot()

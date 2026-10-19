@@ -153,9 +153,7 @@ STYLE_PAGE = Template("""<!doctype html>
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">
 <!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="preload" href="site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site/notebook.css">
 <link rel="stylesheet" href="site/pencil.css">
 </head>

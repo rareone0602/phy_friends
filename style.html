@@ -12,9 +12,7 @@
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">
 <!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="preload" href="site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="site/notebook.css">
 <link rel="stylesheet" href="site/pencil.css">
 </head>
@@ -154,7 +152,7 @@
 <ul>
 <li>The line height is a whole number of rules. A line moves down by <code>--sit</code> so its baseline lands on its rule: half a rule, less the rule's 1px, less <code>0.35em</code> (half the face's ascent, <code>1.02em</code>, minus its descent, <code>0.32em</code>). No nudge is picked by eye.</li>
 <li><strong>The hand is for a few words</strong>; anything longer than a line goes in the print. A title is about 12 letters, what fits on a phone's line. It sits on the first rule, with the rule under it left blank for its tails; too long for a phone, it shrinks rather than wraps.</li>
-<li><strong>Loading it:</strong> <code>https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&amp;display=swap</code>, about 170 KB for Latin. <code>site/notebook.css</code> sets the dial; a page changes only <code>--informal</code>, and marks its hand text with <code>.hand</code>. Files for LaTeX, matplotlib or a design tool are in <code>figures/fonts/</code>. The SIL Open Font License allows any use, embedding in a PDF included; keep the licence file beside any copy of the font.</li>
+<li><strong>Loading it:</strong> from the site itself, so the face needs no font service. <code>site/notebook.css</code> declares it from <code>site/fonts/</code>, a subset of about 170 KB for Latin with all three axes (<code>tools/font_subset.py</code> makes it), and sets the dial; a page preloads the file, changes only <code>--informal</code>, and marks its hand text with <code>.hand</code>. Files for LaTeX, matplotlib or a design tool are in <code>figures/fonts/</code>. The SIL Open Font License allows any use, embedding in a PDF included; keep the licence file beside any copy of the font.</li>
 <li><strong>CJK text</strong> adds <code>'LXGW WenKai TC'</code> (Google Fonts, a pencil-like hand) after the face, loaded only on pages that need it, with the text marked by <code>lang</code>.</li>
 </ul>
 <h2 id="s6">6. hand-drawn marks</h2>
@@ -186,7 +184,7 @@
   &lt;/filter&gt;
 &lt;/svg&gt;</code></pre>
 <h2 id="s7">7. parts of a page</h2>
-<p><strong>The kit</strong>, to copy from rareone0602/phy_friends: <code>site/notebook.css</code> (the paper), <code>site/pencil.css</code> (everything drawn on it; its opening comment lists the classes), <code>site/icon.svg</code> (the favicon), <code>figures/</code> (<a href="#s8">§8</a>) and the graphite filter (<a href="#s6">§6</a>). <code>specimen.html</code> shows every part below at work, on the rules, with the dial to turn. A page is put together as the specimen is: <code>&lt;html lang="en-GB"&gt;</code> with the colour-scheme meta (<a href="#s4">§4</a>); in the head the face, then <code>notebook.css</code>, then <code>pencil.css</code>, and <code>--informal</code> on <code>:root</code> where the work is not at <code>50</code>; the graphite filter first in the body; and a <code>main</code> holding a <code>header</code> (the title, the intro and any nav), the writing inside <code>.doc</code>, and a <code>footer</code>.</p>
+<p><strong>The kit</strong>, to copy from rareone0602/phy_friends: <code>site/notebook.css</code> (the paper), <code>site/pencil.css</code> (everything drawn on it; its opening comment lists the classes), <code>site/fonts/</code> (the face, which stays beside <code>notebook.css</code>), <code>site/icon.svg</code> (the favicon), <code>figures/</code> (<a href="#s8">§8</a>) and the graphite filter (<a href="#s6">§6</a>). <code>specimen.html</code> shows every part below at work, on the rules, with the dial to turn. A page is put together as the specimen is: <code>&lt;html lang="en-GB"&gt;</code> with the colour-scheme meta (<a href="#s4">§4</a>); in the head a preload of the face, then <code>notebook.css</code>, then <code>pencil.css</code>, and <code>--informal</code> on <code>:root</code> where the work is not at <code>50</code>; the graphite filter first in the body; and a <code>main</code> holding a <code>header</code> (the title, the intro and any nav), the writing inside <code>.doc</code>, and a <code>footer</code>.</p>
 <p><strong>Layout.</strong> One column, <code>42em</code> at most, left-aligned against the margin line: a title in the hand, one line of intro, the content and a small footer. Nothing else is required.</p>
 <p class="lead"><strong>Small print</strong>, in <code>--ink-2</code>: the nav, a date line, a contents line and the footer.</p>
 <ul>
