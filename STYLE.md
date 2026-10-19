@@ -385,8 +385,9 @@ the blank band, and may watch the cursor.
 **Other places:**
 - **Favicon:** phy's head on everything phy makes, unless the work is about
   another character.
-- **Link preview:** the page itself, photographed at `1200×630`; not a
-  designed card, with no extra text and no logo.
+- **Link preview:** the page's own paper, title and characters, set to fill
+  `1200×630` with every character at one size; not a designed card, with no
+  extra text and no logo.
 - **README:** GitHub strips CSS, so the style lives in the words, in
   sentence case (§3): a title, one honest line, the preview picture and short
   plain sections. No badges, no emoji and no feature lists.

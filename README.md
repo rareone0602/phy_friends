@@ -64,7 +64,7 @@ out/           generated output (git-ignored)
 | `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
-| `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
+| `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `figures/fonts/`, to the WOFF2 in `site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
 | `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (STYLE.md §4) and writes them into `site/notebook.css` and `site/pencil.css` |
