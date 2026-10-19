@@ -144,10 +144,11 @@ STYLE_PAGE = Template("""<!doctype html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>$title</title>
 <meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
-<meta name="theme-color" content="#fbf9f3">
+<meta name="theme-color" content="#fbf9f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#3d3c39" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">

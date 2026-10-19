@@ -62,9 +62,8 @@ short, for a brief with no room for the rest.
    computes it. The shade only parts two neighbours of the same colour, such
    as a character's body under its head. No highlights or second steps, and
    nothing copied from a reference's light and shade. The pencil's texture is
-   paper, a scale of data values (§8) is data, and a piece's light (§12) is a
-   shape drawn on the place, never on what stands in it: none of them is
-   shading.
+   paper, a scale of data values (§8) is data, and light (§12) is a shape
+   drawn on the place, never on what stands in it: none of them is shading.
 6. **Keep the set aligned.** Within a set (a family of characters, a figure
    series, a deck), anything new matches what is there in look, size and
    structure, and in code where the set is code. When a rule changes, it
@@ -164,26 +163,37 @@ exact and honest, like a note in the margin.
 The page is a sheet of **lined notebook paper**: pale blue rules, a faded
 red margin line on the left, and a little paper tooth. **Everything is
 written on the rules:** every vertical measure is a whole number of rules,
-and text sits on them. The values are tokens in `site/notebook.css`:
+and text sits on them. The values are tokens in `site/notebook.css`, on
+the paper and on the dark sheet:
 
-| token | value | use it for |
-|---|---|---|
-| `--paper` | `#fbf9f3` | the sheet |
-| `--rule` | `#cfdbe8` | the pale blue rules, `--L` apart: `32px`, `30px` on phones, with `--band`, 4 blank rules, above the first |
-| `--margin` | `#e6aaa3` | the faded red margin line, `--margin-x` in: `88px`, `22px` on phones |
-| `--ink` | `#3d3c39` | graphite, `10.5:1`: anything, titles, names and body text |
-| `--ink-2` | `#6d6a63` | `5.1:1`: quieter words (intros, small print, notes, captions, table heads, code), the lines of controls, focus |
-| `--ink-3` | `#97938a` | `2.9:1`: marks only (dashes, squiggles, the quote line, disabled controls); never words someone needs to read |
-| `--red` | `#a64a3f` | `5.4:1`: errors, and nothing else; the margin's red, pressed harder |
+| token | paper | dark | use it for |
+|---|---|---|---|
+| `--paper` | `#fbf9f3` | `#3d3c39` | the sheet |
+| `--rule` | `#cfdbe8` | `#45505a` | the pale blue rules, `--L` apart: `32px`, `30px` on phones, with `--band`, 4 blank rules, above the first |
+| `--margin` | `#e6aaa3` | `#8b5751` | the faded red margin line, `--margin-x` in: `88px`, `22px` on phones |
+| `--ink` | `#3d3c39` | `#fbf9f3` | graphite, `10.5:1`: anything, titles, names and body text |
+| `--ink-2` | `#6d6a63` | `#b4b1a9` | `5.1:1`: quieter words (intros, small print, notes, captions, table heads, code), the lines of controls, focus |
+| `--ink-3` | `#97938a` | `#86837a` | `2.9:1`: marks only (dashes, squiggles, the quote line, disabled controls); never words someone needs to read |
+| `--red` | `#a64a3f` | `#fe9c8c` | `5.4:1`: errors, and nothing else; the margin's red, pressed harder |
 
 - The rules and the margin line are decoration: nothing that carries meaning
   is drawn in them.
 - The paper tooth is a fine fractal noise at `40%`, multiplied over
   everything.
-- There is no dark theme: the page is paper
-  (`<meta name="color-scheme" content="light">`). On a dark host, a slide
-  say, lay a sheet of paper on it rather than inverting the inks. A piece's
-  night is a darker sheet (§12).
+- **The dark sheet.** Where the reader's system asks for dark, the paper and
+  the ink swap: the sheet is graphite, and the words are in the paper's
+  colour, like white pencil on black paper. Every other ink keeps its hue,
+  and its contrast with the sheet, as the table's numbers say;
+  `python3 tools/dark_sheet.py` derives them again and writes them, and the
+  marks, into the kit. The tooth shows through the graphite as light specks,
+  and the graphite lies in strokes rising to the right. A page opts in by
+  declaring both schemes
+  (`<meta name="color-scheme" content="light dark">`); one made for paper
+  alone says `light`, and a print is always on paper. The system's setting
+  decides, and a page never offers a switch. Nothing is inverted:
+  a character keeps its own paper (§9), and a scan its own white (§7).
+- On a dark host the page doesn't control, a slide say, lay a sheet of paper
+  on it. A piece's night is a darker sheet (§12).
 
 ## 5. type
 
@@ -332,7 +342,8 @@ indented like a list, with no box, and wraps rather than scrolls.
 no frame, no rounded corners and no shadow, and are scaled to fit, never
 cut: a chart loses nothing on a phone. A photo stays a photo. A scan or a
 line drawing on white is laid in with `multiply`, so its white becomes the
-paper; a character or a chart is drawn on paper or on nothing. The caption is
+paper, and keeps its white on the dark sheet (§4); a character or a chart is
+drawn on paper or on nothing. The caption is
 a note on the next rule. Never put words over a photo.
 
 **Tables.** The rules are the rows: no borders, stripes or vertical lines.
@@ -482,10 +493,10 @@ carries it for TikZ, and `figures/diagram.tex` is an example.
   lightly, with the paper, rules and all, showing through. The texture
   belongs to the paper: it stays put while the character breathes, turns or
   hops on the spot, and travels with it about a page, as a figure cut out of
-  paper would. On a background of its own, such as a dark close-up, a
-  character is drawn on paper cut to its outline, so the pencil shows paper,
-  never the background. An icon too small to hold the texture, such as a
-  favicon, is drawn flat.
+  paper would. On a background of its own, such as a dark close-up or the
+  dark sheet (§4), a character is drawn on paper cut to its outline, so the
+  pencil shows paper, never the background. An icon too small to hold the
+  texture, such as a favicon, is drawn flat.
 - **Motion** is calm and alive: eyes that follow the pointer, smoothed so
   they never jitter, over breathing, irregular blinks and a slow sway.
   Nothing bounces all the time. Under `prefers-reduced-motion` only the eyes
@@ -553,8 +564,8 @@ its own colours (principle 4) and its own light:
   lamplight is a pale shape in coloured pencil, laid on the set. It falls on
   the place, never on a character or a thing (principle 5).
 - **Night is a darker sheet** of paper, not a filter over the light one. On
-  it the inks turn over: words and marks are in the paper's colour, like
-  white pencil on black paper, and each character keeps its own paper (§9).
+  it the inks turn over, as on the dark sheet (§4), and each character keeps
+  its own paper (§9).
 
 **References**, each for the one thing to take from it (principle 2), never
 its whole look:

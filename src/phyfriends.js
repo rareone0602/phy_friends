@@ -2214,7 +2214,12 @@
   // The sheet: the figure seen through the view's camera, the props on the ground, the pencil and the paper.
   function drawSheet(ctx, opts, figure) {
     const { spec, uid, view, P, g, extras, defs, turn } = ctx;
-    const bg = opts.bg === false ? null : opts.bg || view.bg || P.bg;
+    // opts.bg: false draws no background, so that the pencil shows the page's paper. 'page' does the same, and adds a
+    // sheet of paper cut to the outline (class pf-cutout) that a page shows only where its own paper cannot show
+    // through: on the kit's dark sheet and in forced colors (site/pencil.css). Any other value is a background, laid
+    // under a drawing that always has the sheet.
+    const onPage = opts.bg === 'page';
+    const bg = opts.bg === false || onPage ? null : opts.bg || view.bg || P.bg;
     const size = opts.fluid ? '' : ` width="${num(view.w)}" height="${num(view.h)}"`;
     const cam = `translate(${num(view.x)} ${num(view.y)}) rotate(${view.rotate || 0}) scale(${num(view.scale * 1000) / 1000})`;
     // opts.pencil: false draws the flat shapes alone, for an icon too small to hold the texture or
@@ -2229,8 +2234,8 @@
     let drawing = `<g id="${uid}-drawing" transform="${cam}">${back ? onGround + root : root + onGround}</g>`;
     if (opts.pencil !== false) {
       defs.push(pencilMask(`${uid}-pencil`, view));
-      const sheet = bg ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"/>` : '';
-      if (bg) defs.push(paperSheet(`${uid}-paper`));
+      const sheet = bg || onPage ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"${onPage ? ' class="pf-cutout"' : ''}/>` : '';
+      if (bg || onPage) defs.push(paperSheet(`${uid}-paper`));
       drawing = sheet + penciled(`${uid}-pencil`, drawing);
     }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(view.w)} ${num(view.h)}"${size} data-pf-uid="${uid}">` +

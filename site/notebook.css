@@ -1,7 +1,9 @@
 /* The paper: a page of lined notebook paper (design C). It is shared by index.html,
    style.html and specimen.html and is meant to be copied into other projects together
    with site/pencil.css, which styles everything drawn on it. Every vertical measure is
-   a whole number of rules (--L), and text sits on the rules. See STYLE.md §4. */
+   a whole number of rules (--L), and text sits on the rules. A page that declares both
+   color schemes turns to the dark sheet (at the end) where the reader's system asks for
+   dark. See STYLE.md §4. */
 :root {
   --L: 32px;                /* Rule spacing. */
   --paper: #fbf9f3;
@@ -97,4 +99,20 @@ footer a:hover { color: var(--ink); }
   h1 { font-size: 54px; height: calc(var(--L) * 2); line-height: calc(var(--L) * 2); top: calc(var(--sit) + var(--L) / 2); }
   .intro { font-size: 18px; }
   header > .intro { margin-top: 0; }
+}
+
+/* The dark sheet (STYLE.md §4). A page that declares both schemes (<meta name="color-scheme" content="light dark">)
+   turns to it where the reader's system asks for dark: the paper and the ink swap, and every other ink keeps its
+   contrast with the sheet. A page made for paper alone, and any print, stays on paper. */
+/* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */
+@media screen and (prefers-color-scheme: dark) {
+  :root:has(meta[name="color-scheme"][content~="dark"]) { --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; }
+}
+/* The end of the dark sheet's inks. */
+@media screen and (prefers-color-scheme: dark) {
+  /* The graphite was laid on in strokes rising to the right, and the paper's tooth shows through it in light specks. */
+  :root:has(meta[name="color-scheme"][content~="dark"]) body::before { mix-blend-mode: screen; opacity: .22;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .98  0 0 0 0 .98  0 0 0 0 .95  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  :root:has(meta[name="color-scheme"][content~="dark"]) body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9; mix-blend-mode: screen; opacity: .07;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1600'><filter id='s' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.002 .5' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .9  0 0 0 0 .9  0 0 0 0 .88  1.6 0 0 0 -.62'/></filter><g transform='rotate(-30 800 800)'><rect x='-800' y='-800' width='3200' height='3200' filter='url(%23s)'/></g></svg>") 0 0 / 1600px 1600px; }
 }

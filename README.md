@@ -47,7 +47,7 @@ out/           generated output (git-ignored)
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper, `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, every part of a page working, with the dial (`--informal`) to turn. `site/notebook.css` is the paper (and the dark sheet), `site/pencil.css` everything drawn on it, and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
@@ -66,6 +66,7 @@ out/           generated output (git-ignored)
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
+| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (STYLE.md §4) and writes them into `site/notebook.css` and `site/pencil.css` |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
 | `tools/feelings.html` | a review sheet of every friend in every feeling, with each feeling's mark, still or playing, seated or standing (`?stand`), or held at a moment of the feeling (`?at=1.5`) |
@@ -499,7 +500,11 @@ the character breathes or turns (in a scene, a character that travels takes its
 paper with it, as a figure cut out of paper would), and, being an image, costs a browser one draw rather
 than one per frame. A render with a background of its own lays a sheet of
 paper, cut to the character's outline, under the drawing, so the pencil shows
-paper rather than the background. `{ pencil: false }` draws the flat shapes
+paper rather than the background. `{ bg: false }` draws no background, so the
+pencil shows the page's own paper; `{ bg: 'page' }`, for a page that may turn
+to the dark sheet, does the same but adds the cut-out with the class
+`pf-cutout`, which `site/pencil.css` shows only on the dark sheet and in forced
+colours. `{ pencil: false }` draws the flat shapes
 alone, for an icon too small to hold the texture or for matching a flat
 reference picture.
 

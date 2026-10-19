@@ -13,10 +13,12 @@ editing either.
 ## the gallery page
 
 `index.html` (the gallery), `style.html` (the guides) and `specimen.html`
-(the kit at work) all wear the kit. The paper is design C of the mockups in
-`design/`; A and B are kept in `design/backup/`. The specimen sits at `50`,
-and its dial turns the face, never the case, to `0` or `100` until a reload.
-The gallery is a hobby project, so it sits at `100` (`STYLE.md` §5).
+(the kit at work) all wear the kit, and turn to the dark sheet where the
+reader's system asks for it (`STYLE.md` §4). The paper is design C of the
+mockups in `design/`; A and B are kept in `design/backup/`. The specimen
+sits at `50`, and its dial turns the face, never the case, to `0` or `100`
+until a reload. The gallery is a hobby project, so it sits at `100`
+(`STYLE.md` §5).
 
 The page has five parts, in this order:
 1. The title, `phy's fwiends`, in the hand: the project's name wherever
@@ -63,8 +65,16 @@ The page has five parts, in this order:
   title, and the note the one below it.
 - Each friend's ground is its own patch of rule, gone over in pencil (a
   seeded wobble, `PhyFriends.rng(5)`, ink at 70%, 1.4px, through the graphite
-  filter). In forced colours each friend is drawn on paper cut to its outline
-  (`STYLE.md` §9), and its ground is in the system's text colour.
+  filter). Each friend is drawn on the page (`bg: 'page'`): on the dark
+  sheet and in forced colours, on paper cut to its outline instead
+  (`STYLE.md` §9). In forced colours its ground is in the system's text
+  colour.
+- **A spotlight** comes on, on the dark sheet, over the friend you point at,
+  tap or focus: a beam from the tips of its ears and a pool on its ground,
+  in warm light drawn in pale coloured pencil (`STYLE.md` §12). It is the
+  one light on the site's pages, since the gallery is a stage, and it lights
+  one friend at a time, so that the page still has one thing to look at. It
+  stays within the friend's slot, clear of the words above and below.
 - The ring circles the host's name, phy's: "this one" is the one whose page
   it is.
 - **Two winks**, both in corners of the stage (`STYLE.md` §3). A pencilled

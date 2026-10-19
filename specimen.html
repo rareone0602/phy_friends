@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
 <title>specimen</title>
 <meta name="description" content="every part of phy's house style, working, on the rules.">
-<meta name="theme-color" content="#fbf9f3">
+<meta name="theme-color" content="#fbf9f3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#3d3c39" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="site/apple-touch-icon.png">
@@ -84,10 +85,10 @@
     <table class="inks">
       <thead><tr><th>ink</th><th class="n">contrast</th><th>use it for</th></tr></thead>
       <tbody>
-        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#3d3c39" stroke-width="2.2" stroke-linecap="round"/></svg>ink</td><td class="n">10.5 : 1</td><td>anything</td></tr>
-        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#6d6a63" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;2</td><td class="n">5.1 : 1</td><td>quieter words, the lines of controls</td></tr>
-        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#97938a" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;3</td><td class="n">2.9 : 1</td><td>marks only, never words</td></tr>
-        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="#a64a3f" stroke-width="2.2" stroke-linecap="round"/></svg>red</td><td class="n">5.4 : 1</td><td>errors only</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink)" stroke-width="2.2" stroke-linecap="round"/></svg>ink</td><td class="n">10.5 : 1</td><td>anything</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink-2)" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;2</td><td class="n">5.1 : 1</td><td>quieter words, the lines of controls</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink-3)" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;3</td><td class="n">2.9 : 1</td><td>marks only, never words</td></tr>
+        <tr><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--red)" stroke-width="2.2" stroke-linecap="round"/></svg>red</td><td class="n">5.4 : 1</td><td>errors only</td></tr>
       </tbody>
     </table>
     <hr>
@@ -135,14 +136,20 @@
     root: portrait, announcer: document.querySelector('.announcer'),
     pointer: params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null,
   });
-  stage.add(portrait, 'phy', { label: 'phy' });
+  stage.add(portrait, 'phy', { label: 'phy', bg: 'page' });
   stage.start();
   const ground = PhyFriends.groundOf('phy');
-  // The pictures: the house close-up on its own dark background (a photo), and phy on a transparent background (a character).
+  // The pictures: the house close-up on its own dark background (a photo), and phy drawn on the page (a character),
+  // which is drawn in place, so that on the dark sheet it can take its own paper.
   const img = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
   document.getElementById('photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));
-  document.getElementById('drawing').src = img(PhyFriends.render('phy', {
-    view: { w: 300, h: 300, x: 150, y: 300 - ground - 12, scale: 1.02, rotate: 0 }, bg: false, pose: { eyes: 'closed', tail: -40 } }));
+  const placeholder = document.getElementById('drawing');
+  placeholder.insertAdjacentHTML('afterend', PhyFriends.render('phy', {
+    view: { w: 300, h: 300, x: 150, y: 300 - ground - 12, scale: 1.02, rotate: 0 }, bg: 'page', pose: { eyes: 'closed', tail: -40 } }));
+  const drawing = placeholder.nextElementSibling;
+  drawing.setAttribute('role', 'img');
+  drawing.setAttribute('aria-label', placeholder.alt);
+  placeholder.remove();
   // The dial: the select sets --informal on the root, which site/notebook.css turns into every letter's
   // informality and bounce (STYLE.md §5). It starts at the page's own value, read from the stylesheet, so a
   // reload returns the page to it even where the browser would restore the select's last choice.

@@ -215,8 +215,8 @@
     return self;
 
     // Mounts a friend in box and returns it. label is its name as the page writes it; bg the mount's
-    // background (false by default: the page's paper); index its place, which offsets its idle cycles;
-    // stance 'stand' stands it up, as a clip may for a while.
+    // background (false by default: the page's paper; 'page' on a page that may turn dark); index its place,
+    // which offsets its idle cycles; stance 'stand' stands it up, as a clip may for a while.
     function add(box, name, { label = name, bg = false, index = records.length, interactive = true, stance = 'sit' } = {}) {
       const record = createFriend(box, name, { label, bg, phase: index * PHASE_STEP, interactive, stance });
       records.push(record);

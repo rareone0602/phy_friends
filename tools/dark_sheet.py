@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""Derive the dark sheet's inks and marks from the paper's (STYLE.md §4), and write them into the kit.
+
+  python3 tools/dark_sheet.py
+
+On the dark sheet the paper and the ink swap: the sheet is the graphite ink and the words are in
+the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3 and the red) keeps its
+CIELAB hue and chroma and moves to the lightness at which it has the same contrast with the dark
+sheet as it has with the paper. The marks in site/pencil.css hard-code their inks, since a data URI
+cannot read var(), so their dark set is the same marks with each ink replaced by its dark one.
+
+Run it after an ink or a mark changes. It rewrites the block between its markers in
+site/notebook.css and site/pencil.css, and prints each ink's contrast on both sheets.
+"""
+import re
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+NOTEBOOK = ROOT / 'site/notebook.css'
+PENCIL = ROOT / 'site/pencil.css'
+
+# A page turns to the dark sheet only where it declares both schemes, so that pages and films made
+# for paper alone keep it. Print always stays on paper.
+OPT_IN = ':root:has(meta[name="color-scheme"][content~="dark"])'
+MEDIA = '@media screen and (prefers-color-scheme: dark)'
+INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red']  # The inks that keep their contrast; ink and paper swap.
+
+INKS_BEGIN = ("/* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */")
+INKS_END = "/* The end of the dark sheet's inks. */"
+MARKS_BEGIN = ("/* The dark sheet's marks, written by `python3 tools/dark_sheet.py` from the marks above and the inks in\n"
+               "   site/notebook.css: edit those and run it. */")
+MARKS_END = "/* The end of the dark sheet's marks. */"
+
+
+# ---- Color: sRGB, CIELAB (D65) and WCAG contrast
+
+def to_linear(c):
+    return c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
+
+
+def to_gamma(c):
+    return 12.92 * c if c <= 0.0031308 else 1.055 * c ** (1 / 2.4) - 0.055
+
+
+def rgb_of(hex_color):
+    return [int(hex_color[i:i + 2], 16) / 255 for i in (1, 3, 5)]
+
+
+def hex_of(rgb):
+    return '#' + ''.join(f'{round(min(1, max(0, c)) * 255):02x}' for c in rgb)
+
+
+def luminance(hex_color):
+    r, g, b = (to_linear(c) for c in rgb_of(hex_color))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contrast(a, b):
+    la, lb = sorted((luminance(a), luminance(b)), reverse=True)
+    return (la + 0.05) / (lb + 0.05)
+
+
+WHITE = (0.95047, 1.0, 1.08883)
+M = [(0.4124564, 0.3575761, 0.1804375), (0.2126729, 0.7151522, 0.0721750), (0.0193339, 0.1191920, 0.9503041)]
+M_INV = [(3.2404542, -1.5371385, -0.4985314), (-0.9692660, 1.8760108, 0.0415560), (0.0556434, -0.2040259, 1.0572252)]
+
+
+def lab_of(hex_color):
+    rgb = [to_linear(c) for c in rgb_of(hex_color)]
+    xyz = [sum(m * c for m, c in zip(row, rgb)) / w for row, w in zip(M, WHITE)]
+    f = [t ** (1 / 3) if t > 216 / 24389 else (24389 / 27 * t + 16) / 116 for t in xyz]
+    return 116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])
+
+
+def rgb_of_lab(lightness, a, b):
+    fy = (lightness + 16) / 116
+    f = (fy + a / 500, fy, fy - b / 200)
+    xyz = [w * (t ** 3 if t ** 3 > 216 / 24389 else (116 * t - 16) * 27 / 24389) for t, w in zip(f, WHITE)]
+    return [to_gamma(sum(m * c for m, c in zip(row, xyz))) for row in M_INV]
+
+
+def in_gamut(rgb):
+    return all(-1e-6 <= c <= 1 + 1e-6 for c in rgb)
+
+
+def at_contrast(color, sheet, target):
+    """The color with color's hue and chroma, lighter than sheet, whose contrast with sheet is target.
+
+    Where that lightness is out of gamut, the chroma is reduced until it fits."""
+    _, a, b = lab_of(color)
+    for scale in [1 - i / 20 for i in range(21)]:
+        low, high = lab_of(sheet)[0], 100.0
+        for _ in range(60):
+            mid = (low + high) / 2
+            rgb = rgb_of_lab(mid, a * scale, b * scale)
+            if contrast(hex_of(rgb), sheet) < target:
+                low = mid
+            else:
+                high = mid
+        rgb = rgb_of_lab(high, a * scale, b * scale)
+        if in_gamut(rgb):
+            return hex_of(rgb)
+    raise ValueError(f'no color at contrast {target} with {sheet}')
+
+
+# ---- The kit
+
+def day_inks():
+    root = re.search(r':root \{(.*?)\n\}', NOTEBOOK.read_text(), re.S).group(1)
+    return dict(re.findall(r'--(paper|rule|margin|ink|ink-2|ink-3|red): (#[0-9a-f]{6});', root))
+
+
+def dark_inks(day):
+    dark = {'paper': day['ink'], 'ink': day['paper']}
+    for name in INKS:
+        dark[name] = at_contrast(day[name], dark['paper'], contrast(day[name], day['paper']))
+    return dark
+
+
+def replace_block(path, begin, end, body):
+    text = path.read_text()
+    start, stop = text.index(begin), text.index(end)
+    path.write_text(text[:start] + begin + '\n' + body + end + text[stop + len(end):])
+
+
+def write_inks(dark):
+    order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red']
+    tokens = ' '.join(f'--{name}: {dark[name]};' for name in order)
+    replace_block(NOTEBOOK, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
+
+
+def write_marks(day, dark):
+    text = PENCIL.read_text()
+    marks = re.search(r':root \{\n(.*?)\n\}', text, re.S).group(1)
+    swap = {day[name][1:]: dark[name][1:] for name in ('ink', 'ink-2', 'ink-3', 'red')}
+    lines = []
+    for name, uri in re.findall(r'^  (--mark-[a-z-]+): (url\(".*?"\));$', marks, re.M):
+        lines.append(f'    {name}: ' + re.sub(r'%23([0-9a-f]{6})', lambda m: '%23' + swap.get(m.group(1), m.group(1)), uri) + ';')
+    replace_block(PENCIL, MARKS_BEGIN, MARKS_END, f'{MEDIA} {{\n  {OPT_IN} {{\n' + '\n'.join(lines) + '\n  }\n}\n')
+
+
+def main():
+    day = day_inks()
+    dark = dark_inks(day)
+    write_inks(dark)
+    write_marks(day, dark)
+    print(f'{"ink":8} {"paper":>8} {"dark":>8}  contrast on paper / on the dark sheet')
+    for name in ['ink'] + INKS:
+        print(f'{name:8} {day[name]:>8} {dark[name]:>8}  {contrast(day[name], day["paper"]):.2f} / {contrast(dark[name], dark["paper"]):.2f}')
+
+
+if __name__ == '__main__':
+    main()

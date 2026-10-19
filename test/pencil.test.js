@@ -34,6 +34,20 @@
     });
   });
 
+  // A character drawn on the page has no background, so that the pencil shows the page's paper, and a sheet of paper
+  // cut to its outline that the kit shows only where the page's paper cannot show through: on the dark sheet and in
+  // forced colors (site/pencil.css).
+  test('a character drawn on the page carries a cut-out of paper and no background', () => {
+    const box = document.createElement('div');
+    box.innerHTML = PF.render('phy', { bg: 'page' });
+    assertEqual(box.querySelectorAll('use.pf-cutout').length, 1, 'cut-outs on the page');
+    assertEqual(box.querySelectorAll('svg > rect').length, 0, 'backgrounds on the page');
+    box.innerHTML = PF.render('phy', { bg: false });
+    assertEqual(box.querySelectorAll('use.pf-cutout').length, 0, 'cut-outs with no background');
+    box.innerHTML = PF.render('phy', { bg: '#1c1d21' });
+    assertEqual(box.querySelectorAll('use.pf-cutout').length, 0, 'cut-outs the page may hide, on a background of its own');
+  });
+
   // Safari masks each shape of a masked group on its own unless what the mask holds is an isolated
   // group, and the parts under a part then show through the pencil's gaps. Chrome, which runs these
   // tests, masks the group whole either way, so the structure is checked rather than the pixels.
