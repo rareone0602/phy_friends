@@ -44,7 +44,7 @@
 
   <article class="doc">
 <nav aria-label="contents of phy's style guide">
-<ul class="meta"><li><a href="#s1">1. who phy is</a></li><li><a href="#s2">2. principles</a></li><li><a href="#s3">3. words</a></li><li><a href="#s4">4. paper and ink</a></li><li><a href="#s5">5. type</a></li><li><a href="#s6">6. hand-drawn marks</a></li><li><a href="#s7">7. parts of a page</a></li><li><a href="#s8">8. charts, slides and a paper's diagram</a></li><li><a href="#s9">9. the avatar and characters</a></li><li><a href="#s10">10. code</a></li><li><a href="#s11">11. working with phy</a></li><li><a href="#s12">12. films and sound</a></li></ul>
+<ul class="meta"><li><a href="#s1">1. who phy is</a></li><li><a href="#s2">2. principles</a></li><li><a href="#s3">3. words</a></li><li><a href="#s4">4. paper and ink</a></li><li><a href="#s5">5. type</a></li><li><a href="#s6">6. hand-drawn marks</a></li><li><a href="#s7">7. parts of a page</a></li><li><a href="#s8">8. charts, slides and a paper's diagram</a></li><li><a href="#s9">9. the avatar and characters</a></li><li><a href="#s10">10. code</a></li><li><a href="#s11">11. working with phy</a></li><li><a href="#s12">12. pictures, films and sound</a></li></ul>
 </nav>
 <nav aria-label="contents of phy's fwiends: the gallery and its characters">
 <ul class="meta"><li><a href="#phy-s-fwiends-the-gallery-and-its-characters">phy's fwiends: the gallery and its characters</a></li><li><a href="#the-gallery-page">the gallery page</a></li><li><a href="#drawing-a-friend">drawing a friend</a></li><li><a href="#scenes-films-and-games">scenes: films and games</a></li></ul>
@@ -65,12 +65,12 @@
 <li><strong>Few rules (low Kolmogorov complexity).</strong> Derive values rather than pick them: shades from colours, every vertical measure from the rule spacing. When matching something, name the one reference and what is matched, and measure the difference at the size people will see. If special cases pile up, the rule is wrong.</li>
 <li><strong>Don't make it too artificial.</strong> Drawn, not designed: honest and quiet, with lines that wobble and spacing a little uneven (<a href="#s6">§6</a>). No gradients, glows, glass, drop shadows, emoji, stock icons, hero copy or template layouts such as a grid of cards.</li>
 <li><strong>Graphite on paper; colour for the subject.</strong> Everything is in paper and ink tones (<a href="#s4">§4</a>), graphite rather than black, except what the work is about: the characters on a page, the data in a figure, the things and places in a film. Red is only for an error.</li>
-<li><strong>One layer.</strong> Colour goes on in one layer: flat in a chart, in coloured pencil on a character or a thing (<a href="#s9">§9</a>). Each colour has at most one shade, the house step darker: CIELAB L* <code>−10</code> and chroma <code>×1.2</code> at the same hue, with a near-grey leaning to lavender, as <code>shadeOf</code> in <code>src/phyfriends.js</code> computes it. The shade only parts two neighbours of the same colour, such as a character's body under its head. No lighting, highlights or second steps, and nothing copied from a reference's light and shade. The pencil's texture is paper, and a scale of data values (<a href="#s8">§8</a>) is data: neither is shading.</li>
+<li><strong>One layer.</strong> Colour goes on in one layer: flat in a chart, in coloured pencil on a character or a thing (<a href="#s9">§9</a>). Each colour has at most one shade, the house step darker: CIELAB L* <code>−10</code> and chroma <code>×1.2</code> at the same hue, with a near-grey leaning to lavender, as <code>shadeOf</code> in <code>src/phyfriends.js</code> computes it. The shade only parts two neighbours of the same colour, such as a character's body under its head. No highlights or second steps, and nothing copied from a reference's light and shade. The pencil's texture is paper, a scale of data values (<a href="#s8">§8</a>) is data, and a piece's light (<a href="#s12">§12</a>) is a shape drawn on the place, never on what stands in it: none of them is shading.</li>
 <li><strong>Keep the set aligned.</strong> Within a set (a family of characters, a figure series, a deck), anything new matches what is there in look, size and structure, and in code where the set is code. When a rule changes, it changes everywhere at once.</li>
 <li><strong>Tell things apart first.</strong> If two parts can't be told apart, fix that before matching a reference any closer. Simplify only down to what makes a thing itself, never past it.</li>
 <li><strong>The owner decides.</strong> People and their characters appear only with their owners' say-so, and as the owners give them: the name in the owner's capitalisation, the species, colours and pronoun, and a credit linking to the owner. An owner's wish beats a house rule.</li>
 <li><strong>Make it cute.</strong> Characters are soft and round, with a big head on a small body. Cute comes before literal, but never at the cost of principle 7.</li>
-<li><strong>Not the mode.</strong> The most likely choice (the template, the stock phrase, the default chart, the formal tone put on for show) is the boring one; look for the way that fits this idea. phy's work stays consistent through its rules, not through sameness: inside them each piece is a fresh draw, as the face's letters are, though principle 6 still holds within a set.</li>
+<li><strong>Not the mode.</strong> The most likely choice (the template, the stock phrase, the default chart, the formal tone put on for show) is the boring one; look for the way that fits this idea. phy's work stays consistent through its rules, not through sameness: inside them each piece is a fresh draw, as the face's letters are, though principle 6 still holds within a set. A piece made to delight should surprise, and then, on a second look, seem the only way it could have gone.</li>
 </ol>
 <p class="lead">And the particulars:</p>
 <ul>
@@ -79,6 +79,7 @@
 <li><strong>Show phy first</strong>, and keep private things private (<a href="#s11">§11</a>).</li>
 <li><strong>A film is cut to its music</strong>, chosen first and free to set to pictures (<a href="#s12">§12</a>).</li>
 </ul>
+<p><strong>Fixed rules and defaults.</strong> A few things hold in everything phy makes: the owners' say (principle 8), pencil on paper, the characters as their specs draw them (<a href="#s9">§9</a>), the one face (<a href="#s5">§5</a>), the words in prose and in code (<a href="#s3">§3</a>, <a href="#s10">§10</a>), private things (<a href="#s11">§11</a>) and whose music a film may use (<a href="#s12">§12</a>). The rest of the look, from the ruled paper and the layout to the marks, colour, light and motion, is the house setting. A page, a chart or a deck keeps it, since there sameness is what makes it easy to use. A piece made to delight (a picture, a film, a game) may depart from whatever the idea needs, and says so: a line at the top of its source names each departure and why, and a series departs together (principle 6).</p>
 <h2 id="s3">3. words</h2>
 <p class="lead">The model is The Economist: opinionated, analytical and dry. Words are few, exact and honest, like a note in the margin.</p>
 <ul>
@@ -118,7 +119,7 @@
 <ul>
 <li>The rules and the margin line are decoration: nothing that carries meaning is drawn in them.</li>
 <li>The paper tooth is a fine fractal noise at <code>40%</code>, multiplied over everything.</li>
-<li>There is no dark theme: the page is paper (<code>&lt;meta name="color-scheme" content="light"&gt;</code>). On a dark host, a slide say, lay a sheet of paper on it rather than inverting the inks.</li>
+<li>There is no dark theme: the page is paper (<code>&lt;meta name="color-scheme" content="light"&gt;</code>). On a dark host, a slide say, lay a sheet of paper on it rather than inverting the inks. A piece's night is a darker sheet (<a href="#s12">§12</a>).</li>
 </ul>
 <h2 id="s5">5. type</h2>
 <p><strong>One hand on one dial.</strong> Everything is written in one face, <strong>Shantell Sans</strong>: a hand drawn with one even line, like a fine pen held lightly. The pencil is in the rest: the ink, the paper, the marks and the filter over the title. The face's informality axis lets the same hand be neat in a diagram and loose in a toy, so formality is a setting of the one voice, never another voice; above the neat end, a letter that repeats comes out a little differently each time. Only code (the system monospace) and words in a host that sets its own type (a paper's text and maths, a README on GitHub) are in anything else.</p>
@@ -155,7 +156,7 @@
 <li><strong>CJK text</strong> adds <code>'LXGW WenKai TC'</code> (Google Fonts, a pencil-like hand) after the face, loaded only on pages that need it, with the text marked by <code>lang</code>.</li>
 </ul>
 <h2 id="s6">6. hand-drawn marks</h2>
-<p class="lead">Every mark is a single pencil stroke: an SVG path with round caps, <code>1.1–1.5px</code> wide, in an ink, never filled. There are nine:</p>
+<p class="lead">Every mark is a single pencil stroke: an SVG path with round caps, <code>1.1–1.5px</code> wide, in an ink, never filled. A page has nine:</p>
 <ul>
 <li>a <strong>ground line</strong> along a rule, for a character to stand on, or in <code>--ink-2</code> going over a rule (under a table's head, under a field);</li>
 <li>a <strong>ring</strong>, one loose loop that doesn't quite close, round "this one": the current page, or the one thing that matters;</li>
@@ -167,7 +168,7 @@
 <li>a <strong>cross</strong>, in red, for errors;</li>
 <li>a <strong>caret</strong> on a select.</li>
 </ul>
-<p>If something needs a tenth mark, write a word instead. A mark may turn to point somewhere or grow to hold its own; it is still the same mark.</p>
+<p>If a page needs a tenth mark, write a word instead; a piece (<a href="#s12">§12</a>) draws whatever it needs, rain or speed lines, by the rule above. A mark may turn to point somewhere or grow to hold its own; it is still the same mark.</p>
 <ul>
 <li><strong>Focus</strong> is a dashed pencil outline, <code>1.5px</code> in <code>--ink-2</code>, <code>3–4px</code> clear of the thing.</li>
 <li><strong>Tilts</strong> are anticlockwise and never more than <code>2°</code>: the title <code>−1°</code>, a margin note <code>−2°</code>, the button's box <code>−0.8°</code>.</li>
@@ -265,7 +266,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <h2 id="s9">9. the avatar and characters</h2>
 <ul>
 <li><strong>phy's mark is phy</strong> (<a href="#s1">§1</a>): the head alone for a favicon or avatar, the whole character where there is room. It is drawn by <code>src/phyfriends.js</code> from <code>characters/phy/phy.js</code>, never by hand, so every copy matches.</li>
-<li>Every character is a small spec, about 100 lines, that a factory draws <strong>in coloured pencil</strong>: soft round shapes coloured in without an outline, pill eyes in the character's own eye colour, a soft blush, and no nose and no mouth by default. Each has exactly one shade layer (principle 5), which its body, under the head, always wears. The rules for drawing one, and the references a reviewer needs, are in <code>FWIENDS.md</code>, next to the factory.</li>
+<li>Every character is a small spec, about 100 lines, that a factory draws <strong>in coloured pencil</strong>: soft round shapes coloured in without an outline, pill eyes in the character's own eye colour, a soft blush, and no nose and no mouth by default. Each has exactly one shade layer (principle 5), which its body, under the head, always wears. The rules for drawing one, and the references a reviewer needs, are in <code>FWIENDS.md</code>, next to the factory. However free a piece is (<a href="#s12">§12</a>), it stages its characters and never redraws them.</li>
 <li><strong>The pencil is one texture over the whole character</strong>: strokes rising to the right, the paper's tooth, and patches where the hand pressed more lightly, with the paper, rules and all, showing through. The texture belongs to the paper: it stays put while the character breathes, turns or hops on the spot, and travels with it about a page, as a figure cut out of paper would. On a background of its own, such as a dark close-up, a character is drawn on paper cut to its outline, so the pencil shows paper, never the background. An icon too small to hold the texture, such as a favicon, is drawn flat.</li>
 <li><strong>Motion</strong> is calm and alive: eyes that follow the pointer, smoothed so they never jitter, over breathing, irregular blinks and a slow sway. Nothing bounces all the time. Under <code>prefers-reduced-motion</code> only the eyes move, and a page whose characters move of their own accord offers the same as a checkbox, "keep still".</li>
 </ul>
@@ -282,11 +283,31 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <li><strong>Show, don't describe.</strong> Render the options and put them side by side. Looks are settled by looking; once one is settled, write it down here, at the source.</li>
 <li><strong>phy reviews before anything is published.</strong> Pushing, posting and sharing are phy's call, each time.</li>
 <li><strong>Fanning out is welcome:</strong> a big job may go to several agents in parallel. Visual work then goes to an adversarial reviewer who knows the references. A review, whoever writes it, is a reference rather than an order: check each finding against the work, adopt what holds, and say what was rejected and why.</li>
-<li><strong>Ideas before the guide.</strong> For a film, a game or anything made to delight, think first of what the viewer will enjoy, without this guide in mind (brief an ideas agent without it), then draw the idea in the house style. Where a rule blocks a good idea, propose changing the rule rather than dropping the idea. The owners' say (principle 8) is not style, and always holds.</li>
+<li><strong>Three ideas first.</strong> For a piece, think first of what the viewer will enjoy, and sketch three ideas before choosing; an ideas agent is briefed with the fixed rules (<a href="#s2">§2</a>) alone. The first idea to come is presumed the mode (principle 10), and stays only if it beats the other two. Then draw the best in the house style, departing from a default rather than dropping the idea (<a href="#s2">§2</a>).</li>
 <li><strong>Private stays private.</strong> Personal references (photos of a real pet, say) live in a git-ignored folder and never reach a public page. Quote phy's own words only where a piece needs them.</li>
 </ul>
-<h2 id="s12">12. films and sound</h2>
-<p class="lead">A film is a page that moves, so everything above holds; this adds the sound and the pace.</p>
+<h2 id="s12">12. pictures, films and sound</h2>
+<p>A piece made to delight (a picture, a film, a game) is looked at before it is read. Everything above holds in it, except where this section, or a departure it declares (<a href="#s2">§2</a>), says otherwise.</p>
+<p class="lead"><strong>The picture.</strong> A frame is composed, not filled:</p>
+<ul>
+<li>One thing to look at first, and everything else quieter than it.</li>
+<li>Scale does the work: something large against something small, rather than everything at one size.</li>
+<li>The paper is part of the picture, and a frame may be mostly empty when the idea is small.</li>
+<li>Off centre and uneven. A row facing us, evenly spaced, is the gallery's picture; a piece needs its own.</li>
+<li>Turned grey (CIELAB L* alone), a frame still shows its one thing.</li>
+</ul>
+<p class="lead"><strong>The characters stay as drawn; the world is free.</strong> As in cel animation, the characters are drawn as they always are (<a href="#s9">§9</a>), and the place around them takes its own colours (principle 4) and its own light:</p>
+<ul>
+<li><strong>Light is drawn, never filtered:</strong> a beam, a lit window or a pool of lamplight is a pale shape in coloured pencil, laid on the set. It falls on the place, never on a character or a thing (principle 5).</li>
+<li><strong>Night is a darker sheet</strong> of paper, not a filter over the light one. On it the inks turn over: words and marks are in the paper's colour, like white pencil on black paper, and each character keeps its own paper (<a href="#s9">§9</a>).</li>
+</ul>
+<p class="lead"><strong>References</strong>, each for the one thing to take from it (principle 2), never its whole look:</p>
+<ul>
+<li>The Snowman (Raymond Briggs's book and the 1982 film): soft coloured pencil throughout, almost no words, and the pace set by Howard Blake's score.</li>
+<li>Ernest &amp; Celestine (2012): colour that stops short of the frame's edges, so the paper shows round every scene.</li>
+<li>Jon Klassen's hat books (2011–16): eyes without mouths doing all the acting, and menace stated flatly.</li>
+</ul>
+<p class="lead"><strong>Sound and pace:</strong></p>
 <ul>
 <li><strong>Music first.</strong> Choose the track before the story. Measure it once, into data beside the film (its bars and beats, or, where the tempo is free, its moments), and write every cue against that data, never by ear.</li>
 <li><strong>The pace is the music's.</strong> Motion lands on phrases, not on every beat, and a film may cut, pan and push in on the music's lifts, where a page stays calm (<a href="#s9">§9</a>).</li>
@@ -433,7 +454,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 <ul>
 <li><strong>A prop is a spec</strong> (<code>film/props.js</code>): a palette of the colours the thing really has, a box in head units whose bottom centre stands on the ground, and a few of the factory's shapes, coloured in with the fwiends' pencil, with no outline. Never a traced path or a picture. A prop that films share lives in <code>props/</code>, one to a file; one that a single film needs stays in its folder. A set (rock, soil, grass) is props too, laid on the sheet, whose rules show through the pencil.</li>
 <li><strong>A prop takes a fwiend's colour by override</strong> (<code>palette: { paper: PF.get('yuda').palette.scarf }</code>), never by copying the value, and its shade follows (<code>STYLE.md</code> principle 5).</li>
-<li><strong>A flame is a pale shape,</strong> never a glow or a halo.</li>
+<li><strong>Light is a pale shape:</strong> a flame, a beam or a lit window is a prop like any other (<code>STYLE.md</code> <a href="#s12">§12</a>), never a glow or a halo.</li>
 <li><strong>Ink is a stroke:</strong> a wick, a string, a vein or a rib is one pencil line in an ink, at <code>STYLE.md</code> <a href="#s6">§6</a>'s width, never filled.</li>
 <li><strong>A prop changes by its states,</strong> parts shown or hidden on cue (the candles lit, the needle down), never by a second drawing, and it may be drawn in, coloured in or rubbed out from the bottom or the left, as handwriting writes itself (<code>reveal</code>, <code>recolor</code>, <code>erase</code>).</li>
 </ul>

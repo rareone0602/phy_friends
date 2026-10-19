@@ -60,9 +60,10 @@ short, for a brief with no room for the rest.
    the house step darker: CIELAB L* `−10` and chroma `×1.2` at the same hue,
    with a near-grey leaning to lavender, as `shadeOf` in `src/phyfriends.js`
    computes it. The shade only parts two neighbours of the same colour, such
-   as a character's body under its head. No lighting, highlights or second
-   steps, and nothing copied from a reference's light and shade. The pencil's
-   texture is paper, and a scale of data values (§8) is data: neither is
+   as a character's body under its head. No highlights or second steps, and
+   nothing copied from a reference's light and shade. The pencil's texture is
+   paper, a scale of data values (§8) is data, and a piece's light (§12) is a
+   shape drawn on the place, never on what stands in it: none of them is
    shading.
 6. **Keep the set aligned.** Within a set (a family of characters, a figure
    series, a deck), anything new matches what is there in look, size and
@@ -82,6 +83,8 @@ short, for a brief with no room for the rest.
     look for the way that fits this idea. phy's work stays consistent through
     its rules, not through sameness: inside them each piece is a fresh draw,
     as the face's letters are, though principle 6 still holds within a set.
+    A piece made to delight should surprise, and then, on a second look,
+    seem the only way it could have gone.
 
 And the particulars:
 - **One hand on one dial:** everything is in Shantell Sans, set by one
@@ -92,6 +95,17 @@ And the particulars:
 - **Show phy first**, and keep private things private (§11).
 - **A film is cut to its music**, chosen first and free to set to pictures
   (§12).
+
+**Fixed rules and defaults.** A few things hold in everything phy makes: the
+owners' say (principle 8), pencil on paper, the characters as their specs
+draw them (§9), the one face (§5), the words in prose and in code (§3, §10),
+private things (§11) and whose music a film may use (§12). The rest of the
+look, from the ruled paper and the layout to the marks, colour, light and
+motion, is the house setting. A page, a chart or a deck keeps it, since there
+sameness is what makes it easy to use. A piece made to delight (a picture, a
+film, a game) may depart from whatever the idea needs, and says so: a line at
+the top of its source names each departure and why, and a series departs
+together (principle 6).
 
 ## 3. words
 
@@ -168,7 +182,8 @@ and text sits on them. The values are tokens in `site/notebook.css`:
   everything.
 - There is no dark theme: the page is paper
   (`<meta name="color-scheme" content="light">`). On a dark host, a slide
-  say, lay a sheet of paper on it rather than inverting the inks.
+  say, lay a sheet of paper on it rather than inverting the inks. A piece's
+  night is a darker sheet (§12).
 
 ## 5. type
 
@@ -241,7 +256,7 @@ intro step down one (in brackets); the rest of the print keeps its size.
 ## 6. hand-drawn marks
 
 Every mark is a single pencil stroke: an SVG path with round caps, `1.1–1.5px`
-wide, in an ink, never filled. There are nine:
+wide, in an ink, never filled. A page has nine:
 - a **ground line** along a rule, for a character to stand on, or in
   `--ink-2` going over a rule (under a table's head, under a field);
 - a **ring**, one loose loop that doesn't quite close, round "this one": the
@@ -255,7 +270,8 @@ wide, in an ink, never filled. There are nine:
 - a **cross**, in red, for errors;
 - a **caret** on a select.
 
-If something needs a tenth mark, write a word instead. A mark may turn to
+If a page needs a tenth mark, write a word instead; a piece (§12) draws
+whatever it needs, rain or speed lines, by the rule above. A mark may turn to
 point somewhere or grow to hold its own; it is still the same mark.
 
 - **Focus** is a dashed pencil outline, `1.5px` in `--ink-2`, `3–4px` clear of
@@ -459,6 +475,8 @@ carries it for TikZ, and `figures/diagram.tex` is an example.
   no mouth by default. Each has exactly one shade layer (principle 5), which
   its body, under the head, always wears. The rules for drawing one, and the
   references a reviewer needs, are in `FWIENDS.md`, next to the factory.
+  However free a piece is (§12), it stages its characters and never redraws
+  them.
 - **The pencil is one texture over the whole character**: strokes rising to
   the right, the paper's tooth, and patches where the hand pressed more
   lightly, with the paper, rules and all, showing through. The texture
@@ -502,20 +520,53 @@ the humour stop at its edge.
   references. A review, whoever writes it, is a reference rather than an
   order: check each finding against the work, adopt what holds, and say what
   was rejected and why.
-- **Ideas before the guide.** For a film, a game or anything made to delight,
-  think first of what the viewer will enjoy, without this guide in mind
-  (brief an ideas agent without it), then draw the idea in the house style.
-  Where a rule blocks a good idea, propose changing the rule rather than
-  dropping the idea. The owners' say (principle 8) is not style, and always
-  holds.
+- **Three ideas first.** For a piece, think first of what the viewer will
+  enjoy, and sketch three ideas before choosing; an ideas agent is briefed
+  with the fixed rules (§2) alone. The first idea to come is presumed the mode
+  (principle 10), and stays only if it beats the other two. Then draw the
+  best in the house style, departing from a default rather than dropping the
+  idea (§2).
 - **Private stays private.** Personal references (photos of a real pet, say)
   live in a git-ignored folder and never reach a public page. Quote phy's own
   words only where a piece needs them.
 
-## 12. films and sound
+## 12. pictures, films and sound
 
-A film is a page that moves, so everything above holds; this adds the sound
-and the pace.
+A piece made to delight (a picture, a film, a game) is looked at before it is
+read. Everything above holds in it, except where this section, or a departure
+it declares (§2), says otherwise.
+
+**The picture.** A frame is composed, not filled:
+- One thing to look at first, and everything else quieter than it.
+- Scale does the work: something large against something small, rather than
+  everything at one size.
+- The paper is part of the picture, and a frame may be mostly empty when the
+  idea is small.
+- Off centre and uneven. A row facing us, evenly spaced, is the gallery's
+  picture; a piece needs its own.
+- Turned grey (CIELAB L* alone), a frame still shows its one thing.
+
+**The characters stay as drawn; the world is free.** As in cel animation, the
+characters are drawn as they always are (§9), and the place around them takes
+its own colours (principle 4) and its own light:
+- **Light is drawn, never filtered:** a beam, a lit window or a pool of
+  lamplight is a pale shape in coloured pencil, laid on the set. It falls on
+  the place, never on a character or a thing (principle 5).
+- **Night is a darker sheet** of paper, not a filter over the light one. On
+  it the inks turn over: words and marks are in the paper's colour, like
+  white pencil on black paper, and each character keeps its own paper (§9).
+
+**References**, each for the one thing to take from it (principle 2), never
+its whole look:
+- The Snowman (Raymond Briggs's book and the 1982 film): soft coloured
+  pencil throughout, almost no words, and the pace set by Howard Blake's
+  score.
+- Ernest & Celestine (2012): colour that stops short of the frame's edges,
+  so the paper shows round every scene.
+- Jon Klassen's hat books (2011–16): eyes without mouths doing all the
+  acting, and menace stated flatly.
+
+**Sound and pace:**
 - **Music first.** Choose the track before the story. Measure it once, into
   data beside the film (its bars and beats, or, where the tempo is free, its
   moments), and write every cue against that data, never by ear.

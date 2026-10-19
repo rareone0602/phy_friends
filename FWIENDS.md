@@ -459,7 +459,8 @@ fwiend is, so that the sheet keeps one hand.
 - **A prop takes a fwiend's colour by override**
   (`palette: { paper: PF.get('yuda').palette.scarf }`), never by copying the
   value, and its shade follows (`STYLE.md` principle 5).
-- **A flame is a pale shape,** never a glow or a halo.
+- **Light is a pale shape:** a flame, a beam or a lit window is a prop
+  like any other (`STYLE.md` §12), never a glow or a halo.
 - **Ink is a stroke:** a wick, a string, a vein or a rib is one pencil line in
   an ink, at `STYLE.md` §6's width, never filled.
 - **A prop changes by its states,** parts shown or hidden on cue (the candles
