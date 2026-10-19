@@ -97,6 +97,8 @@
 <script src="../../src/cast.js"></script>
 <script src="../../characters/cast.js"></script>
 <script src="../../film/scene.js"></script>
+<script src="../../film/props.js"></script>
+<script src="../../props/cake.js"></script>
 <script src="../../film/film.js"></script>
 <script>
   // The film (film/scene.js): a card. A friend sits on a ruled page; phy, the host, hops in with a
@@ -124,7 +126,6 @@
   // The beats after phy lands, in seconds.
   const BEAT = { say: 0.3, words: 2.2, give: 1.4, handing: 0.8, surprise: 2.3, write: 2.5, song: 3.4, smile: [3.5, 4.7], end: 0.8 };
   const OBJECT_PRONOUN = { he: 'him', she: 'her', they: 'them', it: 'it' };  // As the owners give them (characters/cast.js).
-  const CAKE = cakeDrawing();
 
   const recipientName = chooseRecipient(filmPage.params.get('for'));
   const scene = PF.scene.create(document.querySelector('.stage'), { ...WORLD, ground: GROUND, boil: filmPage.boilRate() });
@@ -133,7 +134,7 @@
   const { friendX, phyX } = placePair(phy.extent(), friend.extent());
   friend.moveTo(friendX, { at: 0, duration: 0 });  // Measured where it was added, then set in its place before the film begins.
   const entrance = phyEntrance(phyX);
-  const cake = scene.prop(CAKE, { x: entrance.from, y: GROUND, at: ENTRY.at });
+  const cake = scene.prop('cake', { state: ['lit'], x: entrance.from, y: GROUND, at: ENTRY.at });  // The films' own cake (props/cake.js).
   carryAlong(cake, entrance);
   const duration = playBeats(entrance.land);
   describe();
@@ -203,27 +204,10 @@
     return at + seconds;
   }
 
-  // A small round cake with one candle, in quiet colors so that it does not outshine the friends. It
-  // needs no shade: no two neighbors share a color.
-  function cakeDrawing() {
-    const w = 130, h = 90, floor = h, top = floor - 44, mid = w / 2;
-    const color = { sponge: '#e5cda4', cream: '#ece0ca', jam: '#cf9d95', berry: '#c4847e', candle: '#a9bcd4', flame: '#e4ad62' };
-    const drips = Array.from({ length: 10 }, (_, i) => `L${15 + 10 * i} ${top + 2 + (i % 2) * 3}q5 ${7 + (i % 3)} 10 0`).join('');
-    const svg =
-      `<path d="M15 ${top}V${floor - 6}q0 6 6 6h88q6 0 6-6V${top}z" fill="${color.sponge}"/>` +
-      `<rect x="15" y="${floor - 24}" width="100" height="6" fill="${color.jam}"/>` +
-      `<path d="M15 ${top}${drips}L115 ${top}z" fill="${color.cream}"/>` +
-      `<ellipse cx="${mid}" cy="${top}" rx="50" ry="10" fill="${color.cream}"/>` +
-      [36, 94].map(x => `<circle cx="${x}" cy="${top - 1}" r="4.5" fill="${color.berry}"/>`).join('') +
-      `<rect x="${mid - 3}" y="${top - 26}" width="6" height="24" rx="2" fill="${color.candle}"/>` +
-      `<path d="M${mid} ${top - 44}c4 6 5 10 0 14c-5-4-4-8 0-14z" fill="${color.flame}"/>`;
-    return { w, h, svg };
-  }
-
   function describe() {
     const name = friend.displayName, them = OBJECT_PRONOUN[PF.cast.friend(recipientName).pronoun] || name;
-    scene.el.setAttribute('aria-label', `a short film on a ruled page. ${name} sits on the page. phy hops in with a small cake with one ` +
-      `candle, says: for you, ${name}, and hands ${them} the cake. ${name} is surprised, then hops with a song, and the card writes ` +
+    scene.el.setAttribute('aria-label', `a short film on a ruled page. ${name} sits on the page. phy hops in with a small cake with three ` +
+      `candles, says: for you, ${name}, and hands ${them} the cake. ${name} is surprised, then hops with a song, and the card writes ` +
       `itself across the top: a cake for ${name}, ${CARD.aside.text}.`);
   }
 
