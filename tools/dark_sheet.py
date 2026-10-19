@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Derive the dark sheet's inks and marks from the paper's (STYLE.md §4), and write them into the kit.
+"""Derive the dark sheet's inks and marks from the paper's (site/README.md), and write them into the kit.
 
   python3 tools/dark_sheet.py
 

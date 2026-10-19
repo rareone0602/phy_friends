@@ -32,7 +32,7 @@ The repository is laid out by what each part is for:
 
 ```
 index.html  style.html  specimen.html    the site (GitHub Pages serves it from the root)
-site/          the site's stylesheets, face, icons, link preview and title strokes
+site/          the kit, phy's CSS library: the stylesheets, face and graphite filter; and the icons, link preview and title strokes
 src/           the library: what a friend is and does
 film/          the film kit: friends together on a sheet, played in a page or filmed
 characters/    the fwiends: a spec each, and the cast
@@ -47,7 +47,7 @@ out/           generated output (git-ignored)
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn. `site/notebook.css` is the paper (and the dark sheet), `site/pencil.css` everything drawn on it, `site/fonts/` the face it is set in (a Latin subset of Shantell Sans, served from the site, not by a font service) and `site/title-pen.js` the strokes with which the gallery's title writes itself |
+| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn. `site/` is the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `site/phy.css` loads `site/notebook.css`, the paper (and the dark sheet), and `site/pencil.css`, everything drawn on it, with `site/graphite.svg` the filter a page pastes in, `site/fonts/` the face it is set in (a Latin subset of Shantell Sans, served from the site, not by a font service) and `site/title-pen.js` the strokes with which the gallery's title writes itself |
 | `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
@@ -67,14 +67,14 @@ out/           generated output (git-ignored)
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `figures/fonts/`, to the WOFF2 in `site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
-| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (STYLE.md §4) and writes them into `site/notebook.css` and `site/pencil.css` |
+| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (`site/README.md`) and writes them into `site/notebook.css` and `site/pencil.css` |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
 | `tools/feelings.html` | a review sheet of every friend in every feeling, with each feeling's mark, still or playing, seated or standing (`?stand`), or held at a moment of the feeling (`?at=1.5`) |
 | `tools/props.html` | a review sheet of every prop in each of its states, standing on the rules beside phy at the gallery's size (`?rules=10` for twice that), and the party hat in Yuda's cyan |
 | `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI`, `BODY` and `TURN`), with every friend that stands, seated, standing and moving, then side-on, from behind and turning round, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
-| `figures/` | matplotlib styles for charts in the house style; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
+| `figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
 | `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/props/` for the props' sheet, `out/tune.html` for the tuning page to send, `out/scratch/` for experiments |
@@ -374,7 +374,7 @@ Every character file is laid out the same way, so two specs read side by side:
 
 Fwiends share one scale: a reference drawn in the house template (a 1254 px close-up, the head tipped 20°) is matched at `scale: 5.5`, so the eyes come out the same size in every spec.
 
-Shades are derived (the one-layer rule: STYLE.md, principle 5, and FWIENDS.md): any `<name>Shade` a spec uses and leaves out of
+Shades are derived (the one-layer rule: STYLE.md §9, and FWIENDS.md): any `<name>Shade` a spec uses and leaves out of
 its palette is `<name>` one fixed step darker (`PhyFriends.shadeOf`: CIELAB L* −10,
 its hue a little richer, near-whites leaning to lavender), so every friend's one
 shade layer matches. Set one by hand only where the derived one looks wrong.
@@ -857,8 +857,9 @@ friends, in the cast's order, and the gallery's rows and slots, from the
 friends' reaches; `test` fails while either is stale, and `pages` writes no
 rows from a gallery that reports an error. `test` fails, too, while `style.html`
 or the dark sheet's blocks (`tools/dark_sheet.py`) are stale, while a page's
-theme colour is not the paper's (or the dark sheet's), and while
-`test/index.html` leaves out a `*.test.js`. Finally it opens every tool page
+theme colour is not the paper's (or the dark sheet's), while a page's pasted
+graphite filter is not `site/graphite.svg`'s, and while `test/index.html`
+leaves out a `*.test.js`. Finally it opens every tool page
 and every demo that `demo/index.html` lists, with requests to other hosts
 refused, so that a page that breaks shows up. Each page error names its page,
 and the gallery's its window's width. A test that hangs in an endless loop is

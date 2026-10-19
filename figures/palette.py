@@ -1,4 +1,4 @@
-"""Derive phy's data palette from the characters' own colors and test it (STYLE.md §8).
+"""Derive phy's data palette from the characters' own colors and test it (figures/README.md).
 
   python3 figures/palette.py        # Requires numpy.
 

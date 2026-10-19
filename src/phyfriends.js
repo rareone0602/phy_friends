@@ -39,7 +39,7 @@
     };
   }
 
-  // The house shade (STYLE.md principle 5; FWIENDS.md) is the single shade layer that every
+  // The house shade (STYLE.md §9; FWIENDS.md) is the single shade layer that every
   // friend shares. When a spec omits a palette role `<name>Shade`, it is derived from <name>:
   // one fixed step darker in CIELAB lightness, with its own hue at a higher chroma (x1.2, kept
   // inside the sRGB gamut). Near-whites have no hue of their own, so they shift toward lavender

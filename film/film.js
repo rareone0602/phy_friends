@@ -74,7 +74,7 @@
   }
 
   // Fills a list (ul.meta) with a credit for each friend, in the given order: the name as its owner
-  // writes it, and the owner's handle linking to their page (STYLE.md, principle 8).
+  // writes it, and the owner's handle linking to their page (the owners' say, STYLE.md §2).
   function listCredits(list, names) {
     for (const name of names) {
       const { name: written, credit } = root.PhyFriends.cast.friend(name);

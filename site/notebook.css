@@ -3,7 +3,7 @@
    with site/pencil.css, which styles everything drawn on it, and site/fonts/, which holds
    the face. Every vertical measure is a whole number of rules (--L), and text sits on the
    rules. A page that declares both color schemes turns to the dark sheet (at the end)
-   where the reader's system asks for dark. See STYLE.md §4. */
+   where the reader's system asks for dark. See site/README.md. */
 
 /* The face, served from site/fonts/ (a Latin subset made by tools/font_subset.py) with the
    three axes that the dial uses at their full ranges. The URL is relative to this file. A

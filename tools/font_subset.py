@@ -4,7 +4,7 @@
   python3 tools/font_subset.py          # Requires fontTools and brotli: pip install fonttools brotli
 
 The source is the full variable font in figures/fonts/. The axes the pages use (wght, BNCE and INFM;
-STYLE.md §5) keep their full ranges, and every other axis is pinned to its default, since the house style has
+site/README.md) keep their full ranges, and every other axis is pinned to its default, since the house style has
 no italics and keeps the face's spacing. The glyphs are those of UNICODE_RANGES, with the features the pages
 use: kerning, ligatures, the alternates for repeated letters (in rlig) and tabular figures. A character the face
 lacks, such as the eighth note, falls back to the system's faces, as it always has.

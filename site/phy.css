@@ -1,0 +1,5 @@
+/* phy's CSS library: the paper (notebook.css), then everything drawn on it (pencil.css). Link this file, or, to save a
+   round trip, the two files in that order. site/README.md says how to set a page up; specimen.html shows every part at
+   work. */
+@import url("notebook.css");
+@import url("pencil.css");

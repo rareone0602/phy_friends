@@ -252,7 +252,7 @@ private references in a git-ignored `private/` folder.
   Markings and clothes follow, named for what they paint, and `bg`
   (`#1c1d21`), the same for all, comes from the abstract friend that every
   spec extends.
-- **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
+- **Exactly one shade layer** (`STYLE.md` §9). `<name>Shade` is
   derived from `<name>` by `PhyFriends.shadeOf`, so shades match across
   fwiends, and nothing comes from a reference's lighting: no pale rim along an
   ear, no darker far side, no highlights.
@@ -505,7 +505,7 @@ fwiend is, so that the sheet keeps one hand.
   through the pencil.
 - **A prop takes a fwiend's colour by override**
   (`palette: { paper: PF.get('yuda').palette.scarf }`), never by copying the
-  value, and its shade follows (`STYLE.md` principle 5).
+  value, and its shade follows (`STYLE.md` §9).
 - **Light is a pale shape:** a flame, a beam or a lit window is a prop
   like any other (`STYLE.md` §12), never a glow or a halo.
 - **Ink is a stroke:** a wick, a string, a vein or a rib is one pencil line in

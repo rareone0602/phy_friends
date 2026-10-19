@@ -602,7 +602,7 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
 
     Frame i shows t = i / fps, for start * fps <= i < end * fps; each is screenshotted
     after seek(t) and two animation frames. A film with unagreed friends is refused
-    unless draft is set (STYLE.md, principle 8).
+    unless draft is set (the owners' say, STYLE.md §2).
     page: an HTML file, relative to the current directory and optionally with a query
     and a fragment of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
     still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio, so
@@ -846,6 +846,9 @@ PAGES_TEST = "the pages load every friend of the cast, in its order, and the gal
 STYLE_TEST = 'style.html is written from STYLE.md and FWIENDS.md'
 DARK_TEST = "the dark sheet's inks and marks, and every theme color, follow from the paper's inks"
 TEST_FILES_TEST = 'test/index.html loads every test file'
+GRAPHITE_TEST = 'every page pastes the graphite filter as site/graphite.svg holds it'
+GRAPHITE = ROOT / 'site' / 'graphite.svg'
+GRAPHITE_FILTER = re.compile(r'<filter id="graphite".*?</filter>', re.S)
 
 
 def run_tests(page=TEST_PAGE):
@@ -870,7 +873,8 @@ def run_tests(page=TEST_PAGE):
         results = {'passed': [], 'failed': []}
     checks = {LABEL_TEST: gallery.label_drift(cast),
               PAGES_TEST: unmeasured + (gallery.page_drift(cast, measures) if cast else []),
-              STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page)}
+              STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page),
+              GRAPHITE_TEST: graphite_drift()}
     for name, drift in checks.items():
         results['failed'] += [{'name': name, 'message': message} for message in drift]
         if not drift:
@@ -933,6 +937,18 @@ def dark_drift():
              for path, (text, new) in dark_sheet.written().items() if new != text]
     return stale + [f'{relative(page)}: {problem}' for page in THEMED_PAGES + demo_pages()
                     for problem in dark_sheet.theme_drift(page)]
+
+
+def graphite_drift():
+    """Every page (and the style guide's template) whose pasted graphite filter is not site/graphite.svg's, one line
+    each; the filter is compared without its whitespace."""
+    def filter_of(path):
+        match = GRAPHITE_FILTER.search(Path(path).read_text(encoding='utf-8'))
+        return match and ' '.join(match[0].split())
+    kept = filter_of(GRAPHITE)
+    pages = THEMED_PAGES + opened_pages() + [ROOT / 'tools' / 'style_page.py']
+    return [f'{relative(page)}: its graphite filter is not site/graphite.svg\'s; paste that file\'s filter in again'
+            for page in pages if filter_of(page) not in (None, kept)]
 
 
 def test_files_drift(page=TEST_PAGE):
