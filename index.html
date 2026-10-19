@@ -34,12 +34,14 @@
   // written, since the pen's copy would keep the page's ink rather than take the system's colors.
   (() => {
     const PEN_DEADLINE_MS = 5000;  // How long the pen has to start before the title is shown without it.
+    const OPENING_KEY = 'phy-friends-opening';  // Where the tab remembers that the opening has played.
+    const STILL_KEY = 'phy-friends-still';      // Where src/live.js remembers "keep still" (its STILL_KEY, which pf.py test checks).
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
     if (query.has('px') || query.has('hi') || query.has('feel') || location.hash.length > 1 || keepingStill()) return;
     if (navigation && navigation.type !== 'navigate') return;
     try {
-      if (sessionStorage.getItem('phy-friends-opening') !== null) return;
-      sessionStorage.setItem('phy-friends-opening', 'played');
+      if (sessionStorage.getItem(OPENING_KEY) !== null) return;
+      sessionStorage.setItem(OPENING_KEY, 'played');
     } catch {
       // Without storage, as in some private windows, the opening plays on every visit.
     }
@@ -52,7 +54,7 @@
     // remembered on this device, or else the system's reduced motion.
     function keepingStill() {
       try {
-        const chosen = localStorage.getItem('phy-friends-still');
+        const chosen = localStorage.getItem(STILL_KEY);
         if (chosen !== null) return chosen === '1';
       } catch {
         // Without storage, the system's setting decides.
@@ -63,19 +65,22 @@
 </script>
 <style>
   /* The stage (FWIENDS.md). --size is one rule-aligned box whose bottom edge is each
-     friend's ground (PhyFriends.groundOf) and which is 270 head units tall, so every friend is
+     friend's ground (PhyFriends.groundOf) and which is --box head units tall, so every friend is
      drawn at the same scale. Ears and tails may extend outside the box.
      --reach-left and --reach-right (in head units) widen a friend's slot where its body
      or tail extends past the box at ground level, so neighbors stand close without
-     overlapping a tail, and where its label is long, so neighboring labels keep apart. `python3 tools/pf.py pages` writes them into each slot, so that the
-     page is laid out as it will stand before the friends are drawn, and the page measures
-     them again on load. The stage is the one centered thing on the
-     page (FWIENDS.md). */
+     overlapping a tail, and where its label is long, so neighboring labels keep apart. Neighboring
+     slots overlap by --overlap of a box. `python3 tools/pf.py pages` writes the reaches into each slot,
+     for a wide screen (--wide-left, --wide-right) and for a phone (--phone-left, --phone-right), so that
+     the page is laid out as it will stand before the friends are drawn, and the page measures them
+     again (fitSlots). The page's script and tools/gallery.py read --box and --overlap from here. The
+     stage is the one centered thing on the page (FWIENDS.md). */
   :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
   /* The box is five rules, so that the second row stands on its rule 768px down the page: a window at
-     least that tall shows two rows of friends. */
+     least that tall shows two rows of friends. --reaching is 0 where the slots give up their reaches. */
   .stage { container-type: inline-size; }
-  .troupe { --size: calc(var(--L) * 5); }
+  .troupe { --size: calc(var(--L) * 5); --box: 270; --overlap: .06; --reaching: 1; }
+  .friend { --reach-left: var(--wide-left, 0); --reach-right: var(--wide-right, 0); }
   /* Friends stand in one row where all of them fit. Otherwise they stand eight to a row, and where eight
      do not fit, five, then four, then three, or in pairs, so that the same friends always share a row;
      Claude, the last, stands over the disclaimer about it, whichever row that is. Each row is grounded
@@ -86,12 +91,14 @@
      below the note are written from the friends' reaches by `python3 tools/pf.py pages`. */
   .friends { list-style: none; margin: 0 auto; padding: 0; display: flex; flex-wrap: wrap; row-gap: var(--L); justify-content: center;
     max-width: calc(var(--size) * var(--abreast)); }
-  /* A link to a friend (#yuda) leaves room above it for its ears. */
+  /* --past-left and --past-right are how far the slot reaches past the box on each side, as a share of the box.
+     A link to a friend (#yuda) leaves room above it for its ears. */
   .friend {
-    width: calc(var(--size) * (270 + var(--reach-left, 0) + var(--reach-right, 0)) / 270);
-    position: relative; margin: 0 calc(var(--size) * -0.03); z-index: 1; scroll-margin-top: calc(var(--L) * 2);
+    --past-left: calc(var(--reach-left) * var(--reaching) / var(--box)); --past-right: calc(var(--reach-right) * var(--reaching) / var(--box));
+    width: calc(var(--size) * (1 + var(--past-left) + var(--past-right)));
+    position: relative; margin: 0 calc(var(--size) * var(--overlap) * var(--reaching) / -2); z-index: 1; scroll-margin-top: calc(var(--L) * 2);
   }
-  .rig, figcaption { width: var(--size); margin-left: calc(var(--size) * var(--reach-left, 0) / 270); }
+  .rig, figcaption { width: var(--size); margin-left: calc(var(--size) * var(--past-left)); }
   .friend figure { margin: 0; }
   /* Each friend is a button: hovering over it or focusing it perks it up, and a click, a tap, Enter or Space greets it.
      A double-click or a long press on it selects nothing, and a quick second tap does not zoom the page; the labels
@@ -101,7 +108,7 @@
   .rig:focus { outline: none; }
   /* The ring goes round the friend's slot, so that it stays clear of a tail that reaches past the box (STYLE.md §6). */
   .rig:focus-visible::after { content: ''; position: absolute; pointer-events: none; border: 1.5px dashed var(--ink-2); border-radius: 3px;
-    inset: -5.5px calc(var(--size) * var(--reach-right, 0) / -270 - 4px) -5.5px calc(var(--size) * var(--reach-left, 0) / -270 - 4px); }
+    inset: -5.5px calc(var(--size) * var(--past-right) * -1 - 4px) -5.5px calc(var(--size) * var(--past-left) * -1 - 4px); }
   .rig svg { display: block; width: 100%; height: auto; overflow: visible; }
   /* The roll call (FWIENDS.md). A friend not yet called is invisible and ignores the pointer, though
      the keyboard can still reach it; one on its way is drawn over the empty places it crosses. While
@@ -117,7 +124,7 @@
      browsers leave out of a print with other background images. */
   .writing-title h1 { color: transparent; }
   @media print {
-    .writing-title h1 { color: inherit; } .pf-pen, .controls { display: none; }
+    .writing-title h1 { color: inherit; } .pf-pen { display: none; }
     [data-host] .name::after, .disclaimer .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   .friend.on-its-way { z-index: 2; }
@@ -131,11 +138,12 @@
      eraser, rubbed back and forth along the ground, has lifted the graphite in an oval pool to show the paper
      (#fbf9f3), in streaks, ragged at the edges and with some graphite left in. It lies on the sheet, under the friend
      and its ground; the friend keeps its own paper (STYLE.md §12). It lies about the ground, clear of the words
-     below, and across the friend's slot less the overlap with each neighbor's, so that it never lies over another
-     friend's tail. */
-  @media screen and (prefers-color-scheme: dark) {
+     below, and across the friend's slot less the overlap with each neighbor's (or half of it where the slots do not
+     overlap), so that it never lies over another friend's tail. Forced colors are not the dark sheet, so it has none. */
+  @media screen and (prefers-color-scheme: dark) and (forced-colors: none) {
     .rig::before { content: ''; position: absolute; z-index: -1; pointer-events: none; visibility: hidden;
-      left: calc(var(--size) * (.06 - var(--reach-left, 0) / 270)); right: calc(var(--size) * (.06 - var(--reach-right, 0) / 270));
+      left: calc(var(--size) * (var(--overlap) * (1 + var(--reaching)) / 2 - var(--past-left)));
+      right: calc(var(--size) * (var(--overlap) * (1 + var(--reaching)) / 2 - var(--past-right)));
       top: calc(var(--size) * .78); height: calc(var(--size) * .23);
       background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 78 100 23' preserveAspectRatio='none'><filter id='e' x='-5%' y='-5%' width='110%' height='110%'><feTurbulence type='fractalNoise' baseFrequency='.07' numOctaves='2' seed='4' result='t'/><feDisplacementMap in='SourceGraphic' in2='t' scale='2' xChannelSelector='R' yChannelSelector='G' result='d'/><feTurbulence type='fractalNoise' baseFrequency='1.5' numOctaves='2' seed='7' result='n'/><feColorMatrix in='n' type='matrix' values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.2 1.6' result='a'/><feComposite in='d' in2='a' operator='in'/></filter><g filter='url(%23e)' fill='none' stroke-linecap='round'><path stroke='%23fbf9f3' stroke-width='4.4' stroke-opacity='.32' stroke-linecap='butt' d='M29.2 81L71.7 82.6M25.8 98.6L74.9 100.2'/><path stroke='%23fbf9f3' stroke-width='.6' stroke-opacity='.14' d='M27.5 79.6L73.1 81.3M28.2 79.1L74.6 80.8M28.1 80.2L74.2 81.9M13.5 86.1L80.9 84.4M13.3 85.7L78.8 84.1M16.8 84.4L87.1 82.6M19.2 83.7L79.7 82.1M16.1 83.6L86 85.1M4.8 90.2L89.3 88.6M6.9 89.7L94.6 88M4.6 88.3L89.7 89.9M.4 89.5L90.6 91.1M3.1 87.9L100.7 89.7M8.9 91.8L84.7 90.2M10.2 95.5L91 93.8M14.8 96.1L86.1 97.7M10.6 92.8L89.4 94.5M16 94.6L86.5 96.2M8.7 95.8L86.2 97.5M15 99.3L84 97.7M13.4 99.2L82.8 97.6M18.5 96.6L87.4 95M16.3 98.1L88.1 96.5M22.8 96.4L77.2 98.1'/><path stroke='%233d3c39' stroke-width='.6' stroke-opacity='.25' d='M29.1 79.2L67.5 80.6M31.9 80.9L68 82.3M24.2 84.2L76 85.4M12.5 89.6L82.4 88.3M16.5 91.7L86.3 90.2M15.1 91.4L78.5 90.1M29.6 98.3L72.9 99.7M28.6 97.4L72.2 98.8'/><path stroke='%233d3c39' stroke-width='.6' stroke-opacity='.45' d='M31.5 81.1L69.5 82.5M19.1 84.3L79.5 82.8M17.2 87.7L90.3 86.3M11.6 88.1L87.7 86.6M17.7 90.9L89.8 92.2M23.6 98.3L77.4 97M26.8 100.8L73.8 102.3'/><path stroke='%23fbf9f3' stroke-width='4.4' stroke-opacity='.42' stroke-linecap='butt' d='M18.3 84.8L83.4 83.2M14.8 85.4L84.6 87M8 89.2L92.1 87.6M14 94.2L86.5 95.8M15.9 98L83.8 96.4'/><path stroke='%23fbf9f3' stroke-width='.6' stroke-opacity='.24' d='M19.4 83L80.9 81.4M13 86.6L91.8 88.3M9.2 84L86.4 85.7M8.5 85L83.7 86.7M8.2 85.8L85.8 87.5M8.2 87.5L92 85.8M6.3 89.7L99.8 91.4M10.6 90.5L89.2 91.9M9.4 95.2L92.8 93.5M15.4 94.5L93.8 92.9M16.8 92.8L85.5 94.3M16.5 93.7L91 95.4M17 96.3L90.2 94.6M21.6 99.5L78.5 101.3M22.4 96.3L78.3 98.1'/><path stroke='%23fbf9f3' stroke-width='4.4' stroke-opacity='.52' stroke-linecap='butt' d='M4.3 89.8L92.2 91.4M13.2 93.6L90.1 92'/></g></svg>") 0 0 / 100% 100% no-repeat; }
     .friend:hover .rig::before, .rig:focus-visible::before { visibility: visible; }
@@ -166,6 +174,10 @@
     font-size: 15px; color: var(--ink-2); white-space: nowrap; }
   .still { cursor: pointer; }
   .skip:not(:focus-visible) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  /* While the link is focused, the note steps aside, so that the two never meet on a narrow screen's rule. */
+  body:has(.skip:focus-visible) .note { visibility: hidden; }
+  /* Print leaves the controls out. This follows .controls so that it wins. */
+  @media print { .controls { display: none; } }
 
   /* Beside the margin line the stage spans the paper to the page's edge, keeping the 12px
      gutters that main keeps on a phone (its padding here is 28px and 40px). */
@@ -173,10 +185,15 @@
   /* Each split of the friends into rows takes over once the stage is as wide as its widest row; a phone's
      rules, and so its boxes, are smaller. A row of five leaves room for the whole note. Where every friend
      fits in one row the page stops growing, and the list's cap is lifted, so that rounding never sends the
-     last friend to a second row. */
+     last friend to a second row. Where even the pairs do not fit with their reaches, the slots give them up
+     (--reaching: 0): tails extend into the space beside the pair, the two in a pair stand a whole box apart
+     rather than overlapping, so that two long species never run together, the ring and the rubbed-out light
+     keep to the box, and phy's credit gives up "that's me", which the ring already says, so that every label
+     keeps to three rules without widening the page. */
   /* The rows (--abreast) and the page's width, written by `python3 tools/pf.py pages` from the friends' reaches. */
   .troupe { --abreast: 2.555; }
   main { max-width: 4089px; }
+  @container (width < 384px) { .troupe { --reaching: 0; } .credit .me { display: none; } }
   @container (width >= 566px) { .troupe { --abreast: 3.769; } }
   @container (width >= 778px) { .troupe { --abreast: 4.857; } }
   @container (width >= 971px) { .troupe { --abreast: 6.067; } .note .long { display: inline; } }
@@ -186,19 +203,9 @@
   /* Touch screens have no cursor to watch. This follows the container rule so that it wins. */
   @media (hover: none) { .note .long, .note .mouse { display: none; } .note .touch { display: inline; } }
 
-  /* On phones the names step down a size, so that neighboring labels keep apart. */
-  @media (max-width: 720px) { .name { font-size: 26px; } }
-  /* On narrow phones there is no room to reserve for tails, so they extend into the space
-     beside the pair; the two in a pair stand a whole box apart rather than overlapping, so that two long
-     species never run together; and phy's credit gives up "that's me", which the ring already says, so
-     that every label keeps to three rules without widening the page. */
-  @media (max-width: 419px) {
-    .friend { width: var(--size); margin: 0; }
-    .rig, figcaption { margin-left: 0; }
-    /* No reach is reserved here, so the ring and the rubbed-out light keep to the box. */
-    .rig:focus-visible::after { inset: -5.5px -4px; } .rig::before { left: 3%; right: 3%; }
-    .credit .me { display: none; }
-  }
+  /* On phones the names step down a size, so that neighboring labels keep apart, and the slots take the
+     reaches written for a phone. */
+  @media (max-width: 720px) { .name { font-size: 26px; } .friend { --reach-left: var(--phone-left, 0); --reach-right: var(--phone-right, 0); } }
   /* On the smallest phones everything steps down once more, so that two friends still fit side by side. */
   @media (max-width: 359px) {
     .troupe { --size: calc(var(--L) * 4); }
@@ -213,18 +220,22 @@
      kit's blank rule above the title, into which a portrait reaches on the specimen; the gallery has no
      portrait. The title still sits on the first rule. The tallest ears then reach into the note's rule, so
      the note moves up to the right of the nav's rule, clear of them, and "keep still" to the right end of the
-     title's rule. */
+     title's rule. There the link past the fwiends, while it is focused, takes the place of "keep still" rather
+     than push it onto the title, and the note, on another rule, stays. */
   @media (max-height: 500px) and (orientation: landscape) {
     :root { --band: 1; }
     body > header { padding-top: 0; }
-    .note { margin-bottom: 0; position: relative; top: calc(var(--L) * -1); }
+    .note { margin-bottom: 0; top: calc(var(--sit) - var(--L)); }
     .controls { left: auto; right: var(--column-right); top: calc(var(--L) + var(--sit)); }
+    .controls:has(.skip:focus-visible) .still { display: none; }
+    body:has(.skip:focus-visible) .note { visibility: visible; }
   }
   /* The mock disclaimer is about the last friend, Claude, the machine that made the page. It sits in small
      print on the rules under the last row, a blank rule below the labels, and its first line ends under
      Claude with the kit's arrow turned to point up at it, as the ring marks the host. --to-claude, set on
-     load and whenever the troupe changes size, is how far Claude's middle stands in from the troupe's
-     right edge. The disclaimer takes no part in the troupe's width, so it cannot move what it measures. */
+     load and whenever the slots are fitted or the stage changes size, is how far Claude's middle stands in
+     from the troupe's right edge. The disclaimer takes no part in the troupe's width, so it cannot move
+     what it measures. */
   .disclaimer { --arrow-width: 2.2em; contain: inline-size; margin: var(--L) 0 0; padding-right: max(0px, calc(var(--to-claude, 0px) - var(--arrow-width) / 2));
     font-size: 15px; color: var(--ink-2); text-align: right; text-wrap: balance; position: relative; top: var(--sit); }
   /* Each sentence is a line of its own, balanced where it wraps, and the arrow stays with its words. The
@@ -271,107 +282,107 @@
     <div class="troupe">
       <p class="note"><span class="long">psst: they watch your cursor. </span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
       <ul class="friends">
-        <li class="friend" id="howdi" data-friend="howdi" style="--reach-left: 54; --reach-right: 0"><figure>
+        <li class="friend" id="howdi" data-friend="howdi" style="--wide-left: 54; --wide-right: 0; --phone-left: 54; --phone-right: 0"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Howdi" aria-describedby="looks-howdi"></div>
           <p id="looks-howdi" hidden>a sky-blue wolf</p>
           <figcaption><span class="name hand">Howdi</span><span class="species">sky-blue wolf</span><span class="credit"><a href="https://x.com/howdi1129">@howdi1129</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yuanyuan" data-friend="yuanyuan" style="--reach-left: 28; --reach-right: 28"><figure>
+        <li class="friend" id="yuanyuan" data-friend="yuanyuan" style="--wide-left: 18; --wide-right: 18; --phone-left: 28; --phone-right: 28"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan" aria-describedby="looks-yuanyuan"></div>
           <p id="looks-yuanyuan" hidden>a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle</p>
           <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan" aria-label="@Milk_YuanYuan">@Milk_<wbr>YuanYuan</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="phy" data-friend="phy" data-host style="--reach-left: 25; --reach-right: 83"><figure>
+        <li class="friend" id="phy" data-friend="phy" data-host style="--wide-left: 16; --wide-right: 83; --phone-left: 25; --phone-right: 83"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to phy" aria-describedby="looks-phy"></div>
           <p id="looks-phy" hidden>an Eevee in tuxedo-cat colours, with Oreo crumbs on their ruff and tail</p>
           <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me <span class="dot" aria-hidden="true">· </span></span><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116" rel="me">linkedin</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="fruit" data-friend="fruit" style="--reach-left: 0; --reach-right: 49"><figure>
+        <li class="friend" id="fruit" data-friend="fruit" style="--wide-left: 0; --wide-right: 49; --phone-left: 0; --phone-right: 49"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Fruit" aria-describedby="looks-fruit"></div>
           <p id="looks-fruit" hidden>a navy-blue wolf with small cyan horns, a spiky royal-blue mop, grey-tipped ears, red eyes, little teal bat wings and a big navy tail with a lighter blue end</p>
           <figcaption><span class="name hand">Fruit</span><span class="species">navy-blue wolf</span><span class="credit"><a href="https://www.facebook.com/cheekullowo/" aria-label="fb/cheekullowo">fb/<wbr>cheekullowo</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yuda" data-friend="yuda" style="--reach-left: 0; --reach-right: 63"><figure>
+        <li class="friend" id="yuda" data-friend="yuda" style="--wide-left: 0; --wide-right: 63; --phone-left: 0; --phone-right: 63"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yuda" aria-describedby="looks-yuda"></div>
           <p id="looks-yuda" hidden>a slate-blue wolf with white eyebrow spots and a cyan bandana</p>
           <figcaption><span class="name hand">Yuda</span><span class="species">slate-blue wolf</span><span class="credit"><a href="https://x.com/YuDa_Hay">@YuDa_Hay</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="terry" data-friend="terry" style="--reach-left: 21; --reach-right: 21"><figure>
+        <li class="friend" id="terry" data-friend="terry" style="--wide-left: 12; --wide-right: 12; --phone-left: 21; --phone-right: 21"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Terry" aria-describedby="looks-terry"></div>
           <p id="looks-terry" hidden>a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles</p>
           <figcaption><span class="name hand">Terry</span><span class="species">yellow plush toy</span><span class="credit"><a href="https://x.com/FreshSnails_x_6" aria-label="@FreshSnails_x_6">@FreshSnails_<wbr>x_6</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="brian" data-friend="brian" style="--reach-left: 30; --reach-right: 66"><figure>
+        <li class="friend" id="brian" data-friend="brian" style="--wide-left: 21; --wide-right: 66; --phone-left: 30; --phone-right: 66"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian" aria-describedby="looks-brian"></div>
           <p id="looks-brian" hidden>a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue</p>
           <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/" aria-label="fb/brian.ren.856964">fb/<wbr>brian.<wbr>ren.856964</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="mumuyou" data-friend="mumuyou" style="--reach-left: 70; --reach-right: 16"><figure>
+        <li class="friend" id="mumuyou" data-friend="mumuyou" style="--wide-left: 70; --wide-right: 16; --phone-left: 70; --phone-right: 5"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou" aria-describedby="looks-mumuyou"></div>
           <p id="looks-mumuyou" hidden>a white fox with a blond mop, sky-blue ears, a blue diamond on his forehead, one blue eye and one yellow</p>
           <figcaption><span class="name hand">mumuyou</span><span class="species">white fox</span><span class="credit"><a href="https://www.facebook.com/MuMuYouo">fb/MuMuYouo</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="k3v1n" data-friend="kevin" style="--reach-left: 0; --reach-right: 74"><figure>
+        <li class="friend" id="k3v1n" data-friend="kevin" style="--wide-left: 0; --wide-right: 74; --phone-left: 0; --phone-right: 74"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N" aria-describedby="looks-kevin"></div>
           <p id="looks-kevin" hidden>an ice-blue cat with a yellow mark on his forehead, one eye blue over mint and the other orange over yellow, and a white-tipped tail</p>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="bardell" data-friend="bardell" style="--reach-left: 21; --reach-right: 41"><figure>
+        <li class="friend" id="bardell" data-friend="bardell" style="--wide-left: 12; --wide-right: 41; --phone-left: 21; --phone-right: 41"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell" aria-describedby="looks-bardell"></div>
           <p id="looks-bardell" hidden>a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail</p>
           <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="weiwei" data-friend="weiwei" style="--reach-left: 0; --reach-right: 64"><figure>
+        <li class="friend" id="weiwei" data-friend="weiwei" style="--wide-left: 0; --wide-right: 64; --phone-left: 0; --phone-right: 64"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to WeiWei" aria-describedby="looks-weiwei"></div>
           <p id="looks-weiwei" hidden>an orange fox with a white mop, white eyebrows, a white muzzle and a big white ruff, pink inner ears, one eye blue over mint and the other brown over yellow, and a bushy tail with a peach end</p>
           <figcaption><span class="name hand">WeiWei</span><span class="species">orange fox</span><span class="credit"><a href="https://www.facebook.com/Aawei1105/" aria-label="fb/Aawei1105">fb/<wbr>Aawei1105</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="mosing" data-friend="mosing" style="--reach-left: 57; --reach-right: 0"><figure>
+        <li class="friend" id="mosing" data-friend="mosing" style="--wide-left: 57; --wide-right: 0; --phone-left: 57; --phone-right: 0"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mosing" aria-describedby="looks-mosing"></div>
           <p id="looks-mosing" hidden>a black dragon with a spiky black mop, two cyan horns, big ears cyan inside and at the tips, a white diamond and cyan spots on his forehead, a white muzzle and a big white ruff, one eye green and the other amber, and a tail with cyan fins</p>
           <figcaption><span class="name hand">mosing</span><span class="species">black dragon</span><span class="credit"><a href="https://www.facebook.com/furry.QAQ" aria-label="fb/furry.QAQ">fb/<wbr>furry.QAQ</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yawei" data-friend="yawei" style="--reach-left: 23; --reach-right: 60"><figure>
+        <li class="friend" id="yawei" data-friend="yawei" style="--wide-left: 14; --wide-right: 60; --phone-left: 23; --phone-right: 60"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yawei" aria-describedby="looks-yawei"></div>
           <p id="looks-yawei" hidden>a sky-blue dragon with a big spiky white mane, two long white horns and a white crest between them, long pale grey-blue ears, dark red eyes under white spots, small teal wings with a yellow streak, and a tail banded in yellow and white with a white tuft</p>
           <figcaption><span class="name hand">Yawei</span><span class="species">sky-blue dragon</span><span class="credit"><a href="https://www.facebook.com/yaweithedragon" aria-label="fb/yaweithedragon">fb/<wbr>yaweithedragon</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="cowosus" data-friend="cowosus" style="--reach-left: 31; --reach-right: 51"><figure>
+        <li class="friend" id="cowosus" data-friend="cowosus" style="--wide-left: 21; --wide-right: 51; --phone-left: 31; --phone-right: 51"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to cowosus" aria-describedby="looks-cowosus"></div>
           <p id="looks-cowosus" hidden>a white Australian Shepherd like a pineapple, with golden thighs scaled in orange diamonds, a ruff and tail tipped with green leaves, a lime patch round one eye, one folded ear, a red-tipped curl, a mint band across his muzzle and blue eyes, the left one orange at the bottom</p>
           <figcaption><span class="name hand">cowosus</span><span class="species">australian shepherd</span><span class="credit"><a href="https://linktr.ee/cowosus" aria-label="linktr.ee/cowosus">linktr.ee/<wbr>cowosus</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="raze" data-friend="raze" style="--reach-left: 56; --reach-right: 27"><figure>
+        <li class="friend" id="raze" data-friend="raze" style="--wide-left: 56; --wide-right: 18; --phone-left: 56; --phone-right: 27"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Raze" aria-describedby="looks-raze"></div>
           <p id="looks-raze" hidden>a dark-teal dragon in a short-sleeved teal hoodie with white headphones round his neck, with one cyan horn, big ears tipped in teal and purple, a cyan fringe swept over one eye, one eye cyan and the other lavender, and a slim tail ending in a teal tuft</p>
           <figcaption><span class="name hand">Raze</span><span class="species">dark-teal dragon</span><span class="credit"><a href="https://www.facebook.com/huang.alan.9279/" aria-label="fb/huang.alan.9279">fb/<wbr>huang.<wbr>alan.9279</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="tanyuan" data-friend="tanyuan" style="--reach-left: 4; --reach-right: 44"><figure>
+        <li class="friend" id="tanyuan" data-friend="tanyuan" style="--wide-left: 1; --wide-right: 44; --phone-left: 4; --phone-right: 44"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan" aria-describedby="looks-tanyuan"></div>
           <p id="looks-tanyuan" hidden>a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear</p>
           <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU" aria-label="@tanyuan_UwU">@tanyuan_<wbr>UwU</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="alfie" data-friend="alfie" style="--reach-left: 0; --reach-right: 32"><figure>
+        <li class="friend" id="alfie" data-friend="alfie" style="--wide-left: 0; --wide-right: 32; --phone-left: 0; --phone-right: 32"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie" aria-describedby="looks-alfie"></div>
           <p id="looks-alfie" hidden>a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail</p>
           <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="teni" data-friend="teni" style="--reach-left: 32; --reach-right: 54"><figure>
+        <li class="friend" id="teni" data-friend="teni" style="--wide-left: 22; --wide-right: 54; --phone-left: 32; --phone-right: 54"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni" aria-describedby="looks-teni"></div>
           <p id="looks-teni" hidden>a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail</p>
           <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome" aria-label="@foxx_manome">@foxx_<wbr>manome</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="whitedeer" data-friend="whitedeer" style="--reach-left: 30; --reach-right: 30"><figure>
+        <li class="friend" id="whitedeer" data-friend="whitedeer" style="--wide-left: 30; --wide-right: 30; --phone-left: 18; --phone-right: 18"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to WhiteDeer" aria-describedby="looks-whitedeer"></div>
           <p id="looks-whitedeer" hidden>a pale blue deer with branched blue antlers and a white face, in a sailor suit with a navy collar and neckerchief and a white sailor hat with a gold anchor</p>
           <figcaption><span class="name hand">WhiteDeer</span><span class="species">ocean deer</span><span class="credit"><a href="https://www.facebook.com/bai.lu.149190/" aria-label="fb/bai.lu.149190">fb/<wbr>bai.<wbr>lu.149190</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="jiaoyue" data-friend="jiaoyue" style="--reach-left: 73; --reach-right: 13"><figure>
+        <li class="friend" id="jiaoyue" data-friend="jiaoyue" style="--wide-left: 73; --wide-right: 4; --phone-left: 73; --phone-right: 13"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to jiaoyue" aria-describedby="looks-jiaoyue"></div>
           <p id="looks-jiaoyue" hidden>a lavender dog with a white face and chest, pale blue eyes, white paws and a big purple tail with a white end</p>
           <figcaption><span class="name hand">jiaoyue</span><span class="species">lavender dog</span><span class="credit"><a href="https://github.com/Louis0325" aria-label="github/Louis0325">github/<wbr>Louis0325</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="claude" data-friend="claude" style="--reach-left: 5; --reach-right: 5"><figure>
+        <li class="friend" id="claude" data-friend="claude" style="--wide-left: 0; --wide-right: 0; --phone-left: 5; --phone-right: 5"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Claude" aria-describedby="looks-claude"></div>
           <p id="looks-claude" hidden>the machine that drew this page, as it appears in Claude Code: a small terracotta block with two tall eyes, a stub of an arm on each side and four short legs</p>
           <figcaption><span class="name hand">Claude</span><span class="species">language model</span><span class="credit"><a href="https://x.com/AnthropicAI">@AnthropicAI</a></span></figcaption>
@@ -429,7 +440,6 @@
   // the pencil texture is redrawn (0 keeps it still), and ?doze=<seconds> how long the friends wait for
   // input before they doze off.
   const SLOT_CLEARANCE = 6;              // Head units kept clear beside a body or tail that extends past its box.
-  const SLOT_OVERLAP = 0.06;             // How much neighboring slots overlap, as a share of a box (.friend's negative margins).
   const LABEL_GAP = 30;                  // Px kept clear between neighboring labels: two spaces of small print.
   const GROUND = { width: 200, height: 12, inset: 6, y: 6.5, wobble: 1.6, step: 50 };  // In the ground line's viewBox units.
   // The ground gives underfoot: where a friend lands, from the roll call or between the bounces of a hi, its line
@@ -465,7 +475,12 @@
   PhyFriends.live.keepStill(document.querySelector('.still input'));
   const params = new URLSearchParams(location.search);
   const opening = document.documentElement.classList.contains('opening');
-  let rollCall = null, finishTitle = null;  // While the opening lasts: the roll call, and what writes the title at once.
+  // While the opening lasts: the roll call, what writes the title at once, and what stops ending it on request.
+  let rollCall = null, finishTitle = null, stopEndingOnRequest = null;
+  // The slots' geometry, as the troupe's CSS declares it: a box's width in head units, and how much neighboring
+  // slots overlap, as a share of a box.
+  const troupeStyle = getComputedStyle(document.querySelector('.troupe'));
+  const SLOT = { box: Number(troupeStyle.getPropertyValue('--box')), overlap: Number(troupeStyle.getPropertyValue('--overlap')) };
 
   // Ears may reach up to a rule past the stage, so it counts as in view a rule early.
   const rule = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'));
@@ -488,9 +503,7 @@
   });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
   knowTheirPeople(friends);
-  widenSlots(friends);
-  document.fonts.ready.then(() => widenSlots(friends));  // The labels are measured again in their own face.
-  placeDisclaimerArrow(friends.find(friend => friend.name === 'claude'));
+  fitSlots(friends, disclaimerArrow(friends.find(friend => friend.name === 'claude')));
   stage.start();
   rollCall = opening ? callTheRoll() : null;
   if (opening) {
@@ -568,21 +581,42 @@
     return { x: box.left + box.width / 2, y: box.top + box.height / 2 };
   }
 
-  // Keeps the disclaimer's arrow under Claude, whichever row it stands in, and marks the disclaimer
-  // `alone` where Claude has a row to itself. Friends are measured by their labels, which stay put
-  // while they hop in.
-  function placeDisclaimerArrow(claude) {
+  // What keeps the disclaimer's arrow under Claude, whichever row it stands in, and marks the disclaimer
+  // `alone` where Claude has a row to itself (fitSlots calls it whenever the slots may have moved). Friends
+  // are measured by their labels, which stay put while they hop in.
+  function disclaimerArrow(claude) {
     const disclaimer = document.querySelector('.disclaimer');
-    if (!claude || !disclaimer) return;
+    if (!claude || !disclaimer) return () => {};
     const troupe = disclaimer.parentElement, caption = claude.element.querySelector('figcaption');
     const previous = claude.element.previousElementSibling.querySelector('figcaption');
-    const place = () => {
+    return () => {
       const labels = caption.getBoundingClientRect();
       disclaimer.classList.toggle('alone', Math.abs(previous.getBoundingClientRect().top - labels.top) > 1);
       disclaimer.style.setProperty('--to-claude', `${troupe.getBoundingClientRect().right - (labels.left + labels.width / 2)}px`);
     };
-    place();
-    new ResizeObserver(place).observe(troupe);
+  }
+
+  // Fits each slot to its friend (reachOf), and then places the disclaimer's arrow. The drawings are measured now,
+  // at rest, before the stage moves anyone. The labels are measured once their face has arrived, and again whenever
+  // the stage changes size, since the box, the size of the names and whether the slots keep their reaches change
+  // with the width. Until the face arrives each slot keeps the reaches that `python3 tools/pf.py pages` wrote for
+  // this size of screen, which the measure then finds again, so that the page does not shift as it loads.
+  function fitSlots(friends, placeArrow) {
+    let faceArrived = false;
+    for (const friend of friends) {
+      const written = getComputedStyle(friend.element);
+      friend.reach = { left: Number(written.getPropertyValue('--reach-left')), right: Number(written.getPropertyValue('--reach-right')) };
+      friend.drawnReach = drawnReach(friend);
+    }
+    const fit = () => {
+      if (faceArrived) widenSlots(friends);
+      placeArrow();
+    };
+    new ResizeObserver(fit).observe(document.querySelector('.stage'));
+    document.fonts.ready.then(() => {
+      faceArrived = true;
+      fit();
+    });
   }
 
   // Sets each slot's --reach-left and --reach-right. Every slot is measured before any is widened, so
@@ -599,23 +633,22 @@
   // How far the friend needs its slot widened on each side, in head units: as far as its body and tail
   // extend past the box, and far enough that its label, centered under the box, keeps LABEL_GAP from a
   // neighbor's that needs no more room than the box. Ears are left out, since they may overlap a neighbor.
-  // The drawing is measured once, at rest, before the stage moves anyone; the labels each time, since
-  // their face may load later.
-  function reachOf(friend) {
-    const { rig, view, element } = friend;
-    const boxRect = rig.el.getBoundingClientRect(), unit = rig.el.offsetWidth / view.w;
-    friend.drawnReach ??= drawnReach(rig, boxRect, unit);
+  // The drawing's part (drawnReach) is measured once, at rest (fitSlots); the labels each time, since their
+  // face may load later and their size changes with the width.
+  function reachOf({ rig, element, drawnReach }) {
+    const box = rig.el.offsetWidth, unit = box / SLOT.box;
     const lines = [...element.querySelector('figcaption').children].map(line => {
       const range = document.createRange();
       range.selectNodeContents(line);
       return range.getBoundingClientRect().width;
     });
-    const label = Math.max(0, (Math.max(...lines) + LABEL_GAP) / 2 - boxRect.width * (1 - SLOT_OVERLAP) / 2) / unit;
-    return { left: Math.round(Math.max(label, friend.drawnReach.left)), right: Math.round(Math.max(label, friend.drawnReach.right)) };
+    const label = Math.max(0, (Math.max(...lines) + LABEL_GAP) / 2 - box * (1 - SLOT.overlap) / 2) / unit;
+    return { left: Math.round(Math.max(label, drawnReach.left)), right: Math.round(Math.max(label, drawnReach.right)) };
   }
 
   // How far the friend's body and tail extend past its box on each side, in head units.
-  function drawnReach(rig, boxRect, unit) {
+  function drawnReach({ rig }) {
+    const boxRect = rig.el.getBoundingClientRect(), unit = rig.el.offsetWidth / SLOT.box;
     let left = boxRect.left, right = boxRect.right;
     for (const part of ['body', 'tail']) if (rig.parts[part]) {
       const partRect = rig.parts[part].getBoundingClientRect();
@@ -634,7 +667,7 @@
       `<svg class="ground" viewBox="0 0 ${GROUND.width} ${GROUND.height}" preserveAspectRatio="none" aria-hidden="true">` +
       `<path d="${d}" fill="none" stroke="currentColor" stroke-opacity=".7" stroke-width="1.4" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`);
     const svg = friend.element.lastElementChild;
-    friend.ground = { svg, path: svg.firstElementChild, d, points: null, landedAt: -Infinity, aloft: false, giving: false };
+    friend.ground = { svg, path: svg.firstElementChild, d, points: null, landedAt: -Infinity, aloft: false, giving: false, dip: null, dipFor: null };
   }
 
   // A friend back on the ground after being off it gives the ground a landing.
@@ -658,13 +691,20 @@
       return;
     }
     ground.points ??= pointsAlong(ground.path, GIVE.step);
-    const slot = 270 + friend.reach.left + friend.reach.right;  // The box is 270 head units wide.
-    const middle = (friend.reach.left + 135) / slot * GROUND.width, half = GIVE.width * 270 / slot * GROUND.width;
+    if (ground.dipFor !== ground.landedAt) Object.assign(ground, { dipFor: ground.landedAt, dip: dipUnder(friend) });
+    const { middle, half } = ground.dip;
     const depth = GIVE.depth * Math.exp(-since / GIVE.decay) * Math.sin(2 * Math.PI * since / GIVE.period);
     const bell = x => (Math.abs(x) < 1 ? Math.cos(Math.PI / 2 * x) ** 2 : 0);
     const points = ground.points.map(point => ({ x: point.x, y: point.y + depth * bell((point.x - middle) / half) }));
     ground.path.setAttribute('d', PhyFriends.shapes.pathD(points, false));
     ground.giving = true;
+  }
+
+  // Where the ground gives under the friend, in the ground line's viewBox units: the middle of the friend's box, and
+  // half the dip's width (GIVE.width of the box), as the slot is laid out at the landing. The ground spans the slot.
+  function dipUnder(friend) {
+    const box = friend.rig.el, slot = friend.element.clientWidth;
+    return { middle: (box.offsetLeft + box.offsetWidth / 2) / slot * GROUND.width, half: GIVE.width * box.offsetWidth / slot * GROUND.width };
   }
 
   // Points along a path, `step` units apart, from its start to its end.
@@ -710,18 +750,28 @@
   // A click or a tap anywhere, or Escape, ends the opening: the title is written at once and everyone
   // still to come is in place, as after a reload. Scrolling does not, since on a phone the lower rows
   // are meant to come in as they are scrolled to. The listeners capture, so that the click that ends
-  // the opening also reaches a friend already standing, which says hi.
+  // the opening also reaches a friend already standing, which says hi. They go once the opening is over
+  // (closeOpening), however it ends.
   function endOpeningOnRequest() {
     const end = event => {
       if (event.type === 'keydown' && event.key !== 'Escape') return;
-      removeEventListener('click', end, true);
-      removeEventListener('keydown', end, true);
       if (finishTitle) finishTitle();
       document.documentElement.classList.remove('writing-title');  // A pen yet to start does not.
       endRollCall();
     };
     addEventListener('click', end, true);
     addEventListener('keydown', end, true);
+    stopEndingOnRequest = () => {
+      removeEventListener('click', end, true);
+      removeEventListener('keydown', end, true);
+    };
+  }
+
+  // The opening is over once the title shows and everyone has come in.
+  function closeOpening() {
+    if (!stopEndingOnRequest || rollCall || document.documentElement.classList.contains('writing-title')) return;
+    stopEndingOnRequest();
+    stopEndingOnRequest = null;
   }
 
   // ---- The opening: the title
@@ -737,6 +787,7 @@
     const show = () => {
       document.documentElement.classList.remove('writing-title');
       begin(ROLL_CALL.first);
+      closeOpening();
     };
     if (!PhyFriends.pen || typeof TITLE_PEN === 'undefined') return show();
     const timeout = new Promise(resolve => setTimeout(resolve, FONT_TIMEOUT_MS, []));
@@ -744,7 +795,7 @@
       .then(faces => {
         // The title may already show: the head script's failsafe, or no writing at all.
         const hidden = document.documentElement.classList.contains('writing-title');
-        const writing = hidden && faces.length ? PhyFriends.pen.write(title, TITLE_PEN, { color: getComputedStyle(document.body).color }) : null;
+        const writing = hidden && faces.length ? PhyFriends.pen.write(title, TITLE_PEN, { color: 'var(--ink)' }) : null;
         if (writing) penTitle(title, writing, () => begin(0), show);
         else show();
       })
@@ -898,9 +949,9 @@
   }
 
   function endRollCall() {
-    if (!rollCall) return;
-    rollCall.finish();
+    if (rollCall) rollCall.finish();
     rollCall = null;
+    closeOpening();
   }
 
   // The friends grouped into rows as the page lays them out, top to bottom, each with the box of its

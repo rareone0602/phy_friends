@@ -723,7 +723,7 @@
       .then(faces => {
         // The title may already show: the head script's failsafe, or no writing at all.
         const hidden = document.documentElement.classList.contains('writing-title');
-        const writing = hidden && faces.length ? PhyFriends.pen.write(title, TITLE_PEN, { color: getComputedStyle(document.body).color }) : null;
+        const writing = hidden && faces.length ? PhyFriends.pen.write(title, TITLE_PEN, { color: 'var(--ink)' }) : null;
         if (writing) penTitle(title, writing, () => begin(0), show);
         else show();
       })

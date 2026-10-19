@@ -43,17 +43,21 @@ The page has five parts, in this order:
   of the box, as in a photo. A body or tail that sticks out at ground level
   widens the friend's slot (`--reach-left`, `--reach-right`), so neighbours
   stand close but never tread on a tail, and so does a long label, so that
-  neighbouring labels keep 30px apart; below 420px a pair stands a whole box
-  apart instead, so that two long species never run together.
+  neighbouring labels keep 30px apart. On the narrowest phones, where a pair
+  would not fit with its reaches, the two stand a whole box apart instead, so
+  that two long species never run together.
 - Narrower than one row, they stand eight to a row, then five, four and
   three, and in pairs on a phone, never a mix of pairs and threes, so that the
   same friends always share a row. In rows of eight or five the second row's
   rule is 768px down, so a window that tall shows two rows.
   `python3 tools/pf.py pages` works out from the reaches (neighbours overlap
-  by 0.06 of a box) how wide each split is and where the page stops, and
-  writes them, and each slot's reaches, into the page, so that it is laid
-  out before the friends are drawn; `python3 tools/pf.py test` fails while
-  they are stale.
+  by 0.06 of a box) how wide each split is, where the pairs give up their
+  reaches and where the page stops, and writes them, and each slot's reaches
+  on a wide screen and on a phone, into the page, so that it is laid out
+  before the friends are drawn and does not shift as they are. The page
+  measures the labels again once their face has arrived and whenever the
+  width changes. `python3 tools/pf.py test` fails while any of this is stale,
+  or while a split's rows break where it takes over.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
   every width; Fruit stands next to Yuda; K3V1N, BarDell, WeiWei, mosing
   and Yawei come between mumuyou and cowosus in that order; Raze stands between cowosus
@@ -92,14 +96,17 @@ The page has five parts, in this order:
   under the last row's labels: "this work was generated entirely by this
   machine", then "human intelligence was confined to the characters and the
   corrections." Its first line ends in the kit's arrow, turned to point up at
-  Claude's middle (measured on load); where Claude stands alone, the
-  disclaimer is centred under it and the arrow points up and in.
+  Claude's middle (measured whenever the stage is laid out); where Claude
+  stands alone, the disclaimer is centred under it and the arrow points up
+  and in.
 - At the left of the note's rule, a small-print checkbox, "keep still", keeps
   the fwiends as still as reduced motion does and skips the opening. It
   starts as the system's setting and is remembered on the device. It closes
   the header, so that it comes straight after the nav in the tab order, and
   after it comes "skip the fwiends", shown only when tabbed to, which goes to
-  the footer, some forty presses of Tab on. Without JavaScript "keep still"
+  the footer, some forty presses of Tab on. While it shows, the note steps
+  aside for it; on a phone held sideways it takes the place of "keep still"
+  instead, rather than push it onto the title. Without JavaScript "keep still"
   is hidden, and the stage reads "the fwiends are drawn live, so they need
   JavaScript to appear."
 - Each fwiend has a link of its own to send its owner, `index.html#yuda`, its
@@ -110,8 +117,8 @@ The page has five parts, in this order:
 `22px` on the smallest), a step above an h3, since it is read from further
 away; the species in small print, two or three lower-case words ("tuxedo
 eevee"); and the owner's handle in small print, linking to their page (phy's
-reads "that's me · linkedin", and "linkedin" alone on a phone, where the
-ring says the rest). On the smallest phones a long species or handle wraps
+reads "that's me · linkedin", and "linkedin" alone on the narrowest phones,
+where the ring says the rest). On the smallest phones a long species or handle wraps
 onto a second rule rather than run into a neighbour.
 
 Each friend is a button with a short name (`aria-label`), "say hi to Terry",

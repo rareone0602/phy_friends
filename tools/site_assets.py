@@ -48,21 +48,20 @@ POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so 
 # things (eyes, a bandana, a cheek) keep their colors beside the great areas of paper and fur.
 PALETTE = {'colors': 224, 'flatten': 0.2, 'refinements': 3}
 GRAPHITE = re.compile(r'<filter id="graphite".*?</filter>', re.S)
-OVERLAP = gallery.SLOT_OVERLAP / 2  # How far, in boxes, each side of a slot overlaps its neighbor's, as in the gallery.
-BOX_UNITS = gallery.BOX_UNITS       # A box's width in head units, as in the gallery.
 
 
 def gallery_slots():
-    """The friends in the gallery's order, each as (name, reach left, reach right) in head units, and the graphite
-    filter that the gallery textures its lines with, both read from index.html."""
+    """The friends in the gallery's order, each as (name, reach left, reach right) in head units, the slots' geometry
+    (gallery.slot_geometry) and the graphite filter that the gallery textures its lines with, all read from index.html."""
     text = gallery.GALLERY.read_text(encoding='utf-8')
-    return gallery.read_slots(text), GRAPHITE.search(text)[0]
+    return gallery.read_slots(text), gallery.slot_geometry(text), GRAPHITE.search(text)[0]
 
 
 def composition(layout=LAYOUT):
     """The link preview as a page: the title on the paper's top rule, and under it the friends in rows, each friend
     in a box five rules square standing on a rule, as in the gallery (index.html), with one size for all."""
-    slots, graphite = gallery_slots()
+    slots, geometry, graphite = gallery_slots()
+    box, overlap = geometry['box'], geometry['overlap'] / 2  # Each side of a slot overlaps its neighbor's by half.
     rule, rows, margin = layout['rule'], layout['rows'], layout['margin']
     if sum(rows) != len(slots):
         raise ValueError(f'the rows seat {sum(rows)} friends, but the gallery has {len(slots)}')
@@ -71,7 +70,7 @@ def composition(layout=LAYOUT):
     for index, count in enumerate(rows):
         ground = layout['top'] + (layout['first'] + index * (5 + EARS)) * rule  # The row's ground, on a rule.
         row = slots[first:first + count]
-        needed = 5 * rule * sum(gallery.slot_boxes(left, right) for _, left, right in row)  # The slots' widths, in px.
+        needed = 5 * rule * sum(gallery.slot_boxes(left, right, geometry) for _, left, right in row)  # The slots' widths, in px.
         if needed > width - layout['margin'] - 2 * SIDE:
             raise ValueError(f'row {index + 1} needs {needed:.0f} px, which is wider than the frame; use a smaller rule or fewer friends in it')
         if ground > height:
@@ -95,9 +94,9 @@ def composition(layout=LAYOUT):
      ground, and a slot a box wide plus the friend's reaches, so that neighbors stand close without overlapping. */
   .friends {{ position: absolute; left: calc(var(--margin-x) + {SIDE}px); right: {SIDE}px; margin: 0; padding: 0; list-style: none;
     display: flex; justify-content: space-between; transform: translateY(calc(var(--size) * -1)); }}
-  .friend {{ position: relative; margin: 0 calc(var(--size) * -{OVERLAP:g});
-    width: calc(var(--size) * ({BOX_UNITS} + var(--reach-left) + var(--reach-right)) / {BOX_UNITS}); }}
-  .rig {{ width: var(--size); height: var(--size); margin-left: calc(var(--size) * var(--reach-left) / {BOX_UNITS}); }}
+  .friend {{ position: relative; margin: 0 calc(var(--size) * -{overlap:g});
+    width: calc(var(--size) * ({box:g} + var(--reach-left) + var(--reach-right)) / {box:g}); }}
+  .rig {{ width: var(--size); height: var(--size); margin-left: calc(var(--size) * var(--reach-left) / {box:g}); }}
   .rig svg {{ display: block; width: 100%; height: auto; overflow: visible; }}
   .ground {{ position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; z-index: 5;
     color: var(--ink); filter: url(#graphite); }}

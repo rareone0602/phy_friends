@@ -5,13 +5,16 @@ decide how much room each takes. From them come, without anyone writing them by 
 
 - the script tags that load the friends, in each page that loads them all (PAGES), in the cast's order;
 - the gallery's rows (index.html): how wide in boxes each way of splitting the friends into rows is (--abreast),
-  the stage width from which each fits, and the page width at which every friend stands in one row (layout_css);
-- each friend's slot (index.html): its reaches past its box (--reach-left, --reach-right) in its tag, so that the
-  page is laid out as it will stand before its script has drawn and measured the friends (with_slots).
+  the stage width from which each fits, the stage width below which even the pairs fit only without their reaches,
+  and the page width at which every friend stands in one row (layout_css);
+- each friend's slot (index.html): its reaches past its box on a wide screen and on a phone (--wide-left,
+  --wide-right, --phone-left, --phone-right) in its tag, so that the page is laid out as it will stand before its
+  script has drawn and measured the friends (with_slots).
 
-`python3 tools/pf.py pages` writes both, and `python3 tools/pf.py test` fails while either is stale. The labels
-that the gallery repeats by hand (each friend's name, species and credit) are checked against the cast too
-(label_drift), since they are prose that a person words.
+`python3 tools/pf.py pages` writes both, and `python3 tools/pf.py test` fails while either is stale, or while the
+friends do not stand in the rows of the split that the page means for a window either side of where each split
+takes over (row_drift). The labels that the gallery repeats by hand (each friend's name, species and credit) are
+checked against the cast too (label_drift), since they are prose that a person words.
 """
 import html.parser
 import math
@@ -24,7 +27,7 @@ GALLERY = ROOT / 'index.html'
 # The pages that load every friend: the gallery, the tests and the tools that show any friend. The demos are one-offs
 # that keep the friends they were made with.
 PAGES = [GALLERY, ROOT / 'test' / 'index.html', ROOT / 'tools' / 'animate.html', ROOT / 'tools' / 'feelings.html',
-         ROOT / 'tools' / 'tune.html', ROOT / 'demo' / 'card' / 'index.html', ROOT / 'demo' / 'roll-call' / 'index.html']
+         ROOT / 'tools' / 'tune.html']
 SCRIPT_TAG = re.compile(r'^(?P<indent>[ \t]*)<script src="(?P<prefix>[^"]*?)characters/(?P<name>[\w-]+)/(?P=name)\.js"></script>[ \t]*$', re.M)
 
 # ---- The cast and the friends' reaches, read in Chrome -------------------------------------
@@ -45,8 +48,8 @@ READ_CAST_JS = """(() => {
     return null;
   }
 })()"""
-# Each friend's reach past its box on the gallery (index.html measures them on load, and again once its face has
-# arrived, since the labels count), in head units, in page order, and whether the page drew it at all.
+# Each friend's reach past its box on the gallery (index.html measures them once its face has arrived, since the
+# labels count), in head units, in page order, and whether the page drew it at all.
 READ_REACHES_JS = """document.fonts.ready.then(() => new Promise(requestAnimationFrame)).then(() =>
   [...document.querySelectorAll('.friend')].map(li => ({
     name: li.dataset.friend,
@@ -62,12 +65,24 @@ READ_BOX_JS = """(() => {
     ['marginLeft', 'marginRight'].reduce((sum, side) => sum + parseFloat(stage[side]), 0);
   return { box: document.querySelector('.rig').offsetWidth, less };
 })()"""
+# How many friends stand in each of the gallery's rows, top to bottom, once their slots are fitted.
+READ_ROWS_JS = """document.fonts.ready.then(() => new Promise(requestAnimationFrame)).then(() => {
+  const rows = [];
+  for (const li of document.querySelectorAll('.friend')) {
+    const top = Math.round(li.getBoundingClientRect().top), row = rows.find(r => Math.abs(r.top - top) < 2);
+    if (row) row.count++;
+    else rows.push({ top, count: 1 });
+  }
+  return rows.sort((a, b) => a.top - b.top).map(row => row.count);
+})"""
 # A window this wide or narrower is a phone's, on which the rules, and so the boxes, are smaller (site/notebook.css).
 PHONE_WINDOW = 720
 NARROW, WIDE = 700, 1600  # Windows at which the gallery's measures are read, one either side of PHONE_WINDOW.
 # The page rounds each reach to a whole head unit at the size it draws the friends, so a reach may differ by a unit
-# from one window to another; the rows are measured with each friend's largest reach over windows of every size.
+# from one window to another; each slot takes a friend's largest reach over the windows of a screen's size (a phone's,
+# or a wider one), and the rows its largest over windows of every size.
 REACH_WINDOWS = (360, NARROW, 900, 1200, WIDE, 2400, 3600)
+SCREENS = ('wide', 'phone')  # The sizes of screen for which each slot's reaches are written.
 
 
 def take_errors(chrome, page, errors):
@@ -91,10 +106,12 @@ def read_cast(chrome, errors):
 
 
 def measure_gallery(chrome, errors):
-    """The friends' reaches on the gallery, each the largest over windows of every size, and its box and stage at
-    a phone's window and at a wide one. A gallery that fails to draw a friend has no reach to give for it, so it is
-    an error rather than a reach of nothing. errors: a list to which the errors that the gallery reports at each
-    window's width are added, as take_errors() adds them."""
+    """The friends' reaches on the gallery, each the largest over the windows of each size of screen and over
+    windows of every size; its box and stage at a phone's window and at a wide one; and, where its rows and slots
+    are as layout_css and with_slots would write them, how many friends stand in each row in a window either side of
+    where each split takes over (rows, by window). A gallery that fails to draw a friend has no reach to give for it,
+    so it is an error rather than a reach of nothing. errors: a list to which the errors that the gallery reports at
+    each window's width are added, as take_errors() adds them."""
     sizes, reaches = {}, {}
     for width in REACH_WINDOWS:
         chrome.set_viewport(width, 900)
@@ -105,13 +122,26 @@ def measure_gallery(chrome, errors):
         if undrawn:
             raise ValueError(f'{GALLERY.name} drew no {", ".join(undrawn)}, so its rows cannot be measured: '
                              'load every friend (python3 tools/pf.py pages) and see the page errors')
+        screen = 'phone' if width <= PHONE_WINDOW else 'wide'
         for reach in measured:
-            kept = reaches.setdefault(reach['name'], reach)
-            kept['left'], kept['right'] = max(kept['left'], reach['left']), max(kept['right'], reach['right'])
+            kept = reaches.setdefault(reach['name'], {'name': reach['name'], 'left': 0, 'right': 0,
+                                                      **{s: {'left': 0, 'right': 0} for s in SCREENS}})
+            for side in ('left', 'right'):
+                kept[screen][side] = max(kept[screen][side], reach[side])
+                kept[side] = max(kept[side], reach[side])
         for label, size in (('narrow', NARROW), ('wide', WIDE)):
             if width == size:
                 sizes[label] = chrome.evaluate(READ_BOX_JS)
-    return {'reaches': list(reaches.values()), **sizes}
+    measures = {'reaches': list(reaches.values()), **sizes}
+    text = GALLERY.read_text(encoding='utf-8')
+    if layout_block(text) == layout_css(layout(measures)) and with_slots(text, measures['reaches']) == text:
+        measures['rows'] = {}
+        for width in boundary_windows(layout(measures)):
+            chrome.set_viewport(width, 900)
+            chrome.open(str(GALLERY))
+            measures['rows'][width] = chrome.evaluate(READ_ROWS_JS)
+            take_errors(chrome, f'{GALLERY.name} at {width} px', errors)
+    return measures
 
 
 # ---- The gallery's rows ---------------------------------------------------------------------
@@ -119,11 +149,13 @@ def measure_gallery(chrome, errors):
 # The friends stand in rows of the most of these that fit the stage: every friend in one row (None), else eight,
 # five, four, three or two, so that the same friends always share a row, and a phone never mixes pairs and threes.
 ROW_SIZES = (None, 8, 5, 4, 3, 2)
-BOX_UNITS = 270      # A box's width in head units (FWIENDS.md): five rules.
-SLOT_OVERLAP = 0.06  # Neighboring slots overlap by this much of a box (.friend's negative margins).
 LAYOUT_START = '  /* The rows (--abreast) and the page\'s width, written by `python3 tools/pf.py pages` from the friends\' reaches. */\n'
 LAYOUT_END = '  /* The end of the rows. */\n'
-REACH = re.compile(r'--reach-(left|right):\s*(-?\d+(?:\.\d+)?)')  # A reach in a friend's tag, in head units.
+# The slots' geometry, as the gallery's CSS declares it on the troupe: a box's width in head units (--box), and how
+# much neighboring slots overlap, as a share of a box (--overlap).
+SLOT_GEOMETRY = re.compile(r'\.troupe \{[^}]*--box: (?P<box>[\d.]+);[^}]*--overlap: (?P<overlap>[\d.]+);')
+# A friend's reach in its tag, in head units, on a size of screen (SCREENS).
+REACH = re.compile(r'--(wide|phone)-(left|right):\s*(-?\d+(?:\.\d+)?)')
 
 
 def rows(names, n):
@@ -132,19 +164,28 @@ def rows(names, n):
     return [names[i:i + n] for i in range(0, len(names), n)]
 
 
-def slot_boxes(left, right):
+def slot_geometry(text=None):
+    """The gallery's slot geometry as its CSS declares it, as {box, overlap} (SLOT_GEOMETRY)."""
+    match = SLOT_GEOMETRY.search(GALLERY.read_text(encoding='utf-8') if text is None else text)
+    if not match:
+        raise ValueError(f'{GALLERY.name} declares no --box and --overlap on .troupe')
+    return {'box': float(match['box']), 'overlap': float(match['overlap'])}
+
+
+def slot_boxes(left, right, geometry):
     """How wide a friend's slot is, in boxes: its box and its reaches past it (in head units), less the overlap with
-    its neighbors' slots."""
-    return (BOX_UNITS + left + right) / BOX_UNITS - SLOT_OVERLAP
+    its neighbors' slots, in the gallery's slot geometry (slot_geometry)."""
+    return (geometry['box'] + left + right) / geometry['box'] - geometry['overlap']
 
 
 def layout(measures):
     """For each way of splitting the friends into rows, the widest row in boxes, rounded up so that its friends
     always fit (--abreast), and the stage width in CSS px from which that split fits, with the window that has it.
 
-    A row's width in boxes is the sum of its slots (slot_boxes).
+    A row's width in boxes is the sum of its slots (slot_boxes), in the page's own geometry (--box and --overlap).
     """
-    slot = {r['name']: slot_boxes(r['left'], r['right']) for r in measures['reaches']}
+    geometry = slot_geometry()
+    slot = {r['name']: slot_boxes(r['left'], r['right'], geometry) for r in measures['reaches']}
     names, splits = list(slot), []
     for n in ROW_SIZES:
         widest = max(sum(slot[name] for name in row) for row in rows(names, n))
@@ -177,11 +218,14 @@ def number(value):
 def layout_css(splits):
     """The gallery's CSS for its rows: the narrowest split by default, then each wider one from the stage width at
     which it fits. Five abreast leave room for the whole note. Where every friend fits in one row, the page stops
-    growing, and the list's cap is lifted so that rounding never sends the last friend to a second row."""
+    growing, and the list's cap is lifted so that rounding never sends the last friend to a second row. Where even
+    the narrowest split does not fit, its friends stand without their reaches (--reaching: 0), a box apart, and
+    phy's credit gives up "that's me", so that its label fits its box."""
     narrowest, *wider = sorted(splits, key=lambda s: s['abreast'])
     one_row = next(s for s in splits if s['size'] is None)
     out = [LAYOUT_START, f"  .troupe {{ --abreast: {number(narrowest['abreast'])}; }}\n",
-           f"  main {{ max-width: {one_row['window']}px; }}\n"]
+           f"  main {{ max-width: {one_row['window']}px; }}\n",
+           f"  @container (width < {narrowest['stage']}px) {{ .troupe {{ --reaching: 0; }} .credit .me {{ display: none; }} }}\n"]
     for split in wider:
         rules = [f".troupe {{ --abreast: {number(split['abreast'])}; }}"]
         if split['size'] == 5:
@@ -193,26 +237,53 @@ def layout_css(splits):
     return ''.join(out)
 
 
+def stage_of(window, measures):
+    """The stage's width, in CSS px, in a window of the given width (below the width at which main stops growing)."""
+    return window - measures['narrow' if window <= PHONE_WINDOW else 'wide']['less']
+
+
+def boundary_windows(splits):
+    """The windows either side of where each split takes over, and either side of a phone's widest window."""
+    return sorted({w for split in splits for w in (split['window'] - 1, split['window'])} | {PHONE_WINDOW, PHONE_WINDOW + 1})
+
+
+def row_drift(measures):
+    """Every window measured (measures['rows']) in which the friends do not stand in the rows of the split that the
+    page means for it, all full but the last, one line each: the widest split that fits the stage, or else the
+    narrowest, whose friends then stand without their reaches."""
+    splits, problems = layout(measures), []
+    for window, counts in measures.get('rows', {}).items():
+        stage = stage_of(int(window), measures)
+        fitting = [split for split in splits if split['stage'] <= stage] or [min(splits, key=lambda s: s['abreast'])]
+        size = max(fitting, key=lambda s: s['abreast'])['size'] or sum(counts)
+        if any(count != size for count in counts[:-1]) or counts[-1] > size:
+            problems.append(f'{GALLERY.name}: in a {window}px window the friends stand in rows of '
+                            f'{", ".join(map(str, counts))}, not {size} to a row')
+    return problems
+
+
 def with_slots(text, reaches):
-    """The gallery's text with each friend's reaches (the largest over windows of every size, as the rows take
-    them) written in its tag, so that its slot is as wide before the page's script runs as after."""
+    """The gallery's text with each friend's reaches on each size of screen (the largest over its windows) written
+    in its tag, so that its slot is as wide before the page's script runs as after."""
     by_name = {reach['name']: reach for reach in reaches}
     for tag in reversed(FriendTags(text).tags):  # From the end, so that each tag's place in the text still holds.
         reach = by_name[tag['key']]
+        sides = '; '.join(f'--{screen}-{side}: {reach[screen][side]}' for screen in SCREENS for side in ('left', 'right'))
         slot = re.sub(r' style="[^"]*"', '', tag['text'])
-        slot = f'{slot[:-1]} style="--reach-left: {reach["left"]}; --reach-right: {reach["right"]}">'
-        text = text[:tag['start']] + slot + text[tag['start'] + len(tag['text']):]
+        text = text[:tag['start']] + f'{slot[:-1]} style="{sides}">' + text[tag['start'] + len(tag['text']):]
     return text
 
 
 def read_slots(text):
-    """Each friend's slot on the gallery, in page order, as (key, reach left, reach right) in head units, as
-    with_slots wrote them in its tag."""
+    """Each friend's slot on the gallery, in page order, as (key, reach left, reach right) in head units: the larger
+    of its reaches on the two sizes of screen, as with_slots wrote them in its tag, which are what the rows take."""
     slots = []
     for tag in FriendTags(text).tags:
-        reach = {side: float(value) for side, value in REACH.findall(tag['attrs'].get('style') or '')}
+        reach = {}
+        for screen, side, value in REACH.findall(tag['attrs'].get('style') or ''):
+            reach[side] = max(reach.get(side, float('-inf')), float(value))
         if set(reach) != {'left', 'right'}:
-            raise ValueError(f'{tag["key"]}: its tag on the gallery has no slot (--reach-left and --reach-right); '
+            raise ValueError(f'{tag["key"]}: its tag on the gallery has no slot (--wide-left and the rest); '
                              'run python3 tools/pf.py pages')
         left, right = (int(reach[side]) if reach[side].is_integer() else reach[side] for side in ('left', 'right'))
         slots.append((tag['key'], left, right))
@@ -294,9 +365,10 @@ def write_pages(cast, measures=None):
 
 
 def page_drift(cast, measures):
-    """Every page whose script tags or rows are stale, or that cannot be written, one line each. Without measures,
-    the rows are not checked."""
-    problems = []
+    """Every page whose script tags or rows are stale, or that cannot be written, every window in which the
+    gallery's rows break (row_drift), and a gallery whose head script looks for "keep still" under another key than
+    src/live.js keeps it under, one line each. Without measures, the rows are not checked."""
+    problems = (row_drift(measures) if measures else []) + still_key_drift()
     for page in PAGES:
         try:
             text, new = written(page, cast, measures)
@@ -309,6 +381,20 @@ def page_drift(cast, measures):
         stale = (["its friends' script tags"] if scripts != text else []) + (['its rows and slots'] if new != scripts else [])
         problems.append(f'{page.relative_to(ROOT)}: {" and ".join(stale)} are stale; run python3 tools/pf.py pages')
     return problems
+
+
+# How the gallery's head script and src/live.js name the key under which "keep still" is remembered: the head script
+# reads it before live.js loads.
+STILL_KEY = re.compile(r"const STILL_KEY = '([^']+)'")
+
+
+def still_key_drift(gallery=GALLERY, live=ROOT / 'src' / 'live.js'):
+    """A line if the gallery's head script and src/live.js name different keys for "keep still", or either names none."""
+    keys = {path: STILL_KEY.search(path.read_text(encoding='utf-8')) for path in (gallery, live)}
+    if all(keys.values()) and len({key[1] for key in keys.values()}) == 1:
+        return []
+    found = '; '.join(f'{path.relative_to(ROOT)} has {key[1] if key else "none"}' for path, key in keys.items())
+    return [f'the key under which "keep still" is remembered (const STILL_KEY) differs: {found}']
 
 
 # ---- The gallery's labels, checked against the cast -----------------------------------------
