@@ -1986,11 +1986,18 @@
       };
       return { col: paint, fill, extraShape, extras, part };
     };
-    // The palette's colors, and each one's house shade (shadeOf), in which a paw raised in front of the head is drawn.
-    const shades = new Map();
+    // The shade in which a paw raised in front of the head, or an ear turned to show its back, is drawn: its color's
+    // shade as the palette gives it (one the spec sets by hand wins over the house's), or else the house shade
+    // (shadeOf). A part already in a shade stays as it is, since a color has one shade at most.
+    const shades = new Map(), inShade = new Set();
+    for (const k in P) if (k.endsWith('Shade') && isHex(P[k])) inShade.add(P[k]);
+    const ownShade = k => (spec.palette || {})[`${k}Shade`] !== undefined;
+    for (const k of Object.keys(P).sort((a, b) => ownShade(b) - ownShade(a))) {
+      if (!k.endsWith('Shade') && isHex(P[k]) && isHex(P[`${k}Shade`]) && !shades.has(P[k])) shades.set(P[k], P[`${k}Shade`]);
+    }
     const shaded = c => {
       const hex = col(c);
-      if (!isHex(hex)) return hex;
+      if (!isHex(hex) || inShade.has(hex)) return hex;
       if (!shades.has(hex)) shades.set(hex, shadeOf(hex));
       return shades.get(hex);
     };
