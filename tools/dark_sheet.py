@@ -11,7 +11,11 @@ cannot read var(), so their dark set is the same marks with each ink replaced by
 
 Run it after an ink or a mark changes. It rewrites the block between its markers in
 site/notebook.css and site/pencil.css, and prints each ink's contrast on both sheets.
+The pages' theme colors (their theme-color metas) are kept by hand: the paper's, and
+the dark sheet's where a page has one; `python3 tools/pf.py test` checks them, and
+the blocks, with written() and theme_drift().
 """
+import html.parser
 import re
 from pathlib import Path
 
@@ -117,33 +121,69 @@ def dark_inks(day):
     return dark
 
 
-def replace_block(path, begin, end, body):
-    text = path.read_text()
+def replace_block(text, begin, end, body):
     start, stop = text.index(begin), text.index(end)
-    path.write_text(text[:start] + begin + '\n' + body + end + text[stop + len(end):])
+    return text[:start] + begin + '\n' + body + end + text[stop + len(end):]
 
 
-def write_inks(dark):
+def with_inks(text, dark):
+    """site/notebook.css's text with the dark sheet's inks written in."""
     order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red']
     tokens = ' '.join(f'--{name}: {dark[name]};' for name in order)
-    replace_block(NOTEBOOK, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
+    return replace_block(text, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
 
 
-def write_marks(day, dark):
-    text = PENCIL.read_text()
+def with_marks(text, day, dark):
+    """site/pencil.css's text with the dark sheet's marks written in."""
     marks = re.search(r':root \{\n(.*?)\n\}', text, re.S).group(1)
     swap = {day[name][1:]: dark[name][1:] for name in ('ink', 'ink-2', 'ink-3', 'red')}
     lines = []
     for name, uri in re.findall(r'^  (--mark-[a-z-]+): (url\(".*?"\));$', marks, re.M):
         lines.append(f'    {name}: ' + re.sub(r'%23([0-9a-f]{6})', lambda m: '%23' + swap.get(m.group(1), m.group(1)), uri) + ';')
-    replace_block(PENCIL, MARKS_BEGIN, MARKS_END, f'{MEDIA} {{\n  {OPT_IN} {{\n' + '\n'.join(lines) + '\n  }\n}\n')
+    return replace_block(text, MARKS_BEGIN, MARKS_END, f'{MEDIA} {{\n  {OPT_IN} {{\n' + '\n'.join(lines) + '\n  }\n}\n')
+
+
+def written(day=None):
+    """Each file's text now and as written, as {path: (text now, text as written)}."""
+    day = day or day_inks()
+    dark = dark_inks(day)
+    notebook, pencil = NOTEBOOK.read_text(), PENCIL.read_text()
+    return {NOTEBOOK: (notebook, with_inks(notebook, dark)), PENCIL: (pencil, with_marks(pencil, day, dark))}
+
+
+class ThemeColors(html.parser.HTMLParser):
+    """Reads a page's theme colors: each theme-color meta's content and media."""
+
+    def __init__(self, text):
+        super().__init__()
+        self.colors = []
+        self.feed(text)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'meta' and attrs.get('name') == 'theme-color':
+            self.colors.append((attrs.get('content') or '', attrs.get('media') or ''))
+
+
+def theme_drift(page):
+    """Every theme color of a page that is not the paper's, or the dark sheet's for a meta that is for a dark
+    scheme, one line each."""
+    day = day_inks()
+    sheets = {False: ('the paper', day['paper']), True: ('the dark sheet', dark_inks(day)['paper'])}
+    problems = []
+    for color, media in ThemeColors(Path(page).read_text(encoding='utf-8')).colors:
+        sheet, wanted = sheets['prefers-color-scheme: dark' in media]
+        if color.lower() != wanted:
+            problems.append(f'the theme color{f" for {media}" if media else ""} is {color}, not {sheet}\'s {wanted}')
+    return problems
 
 
 def main():
     day = day_inks()
     dark = dark_inks(day)
-    write_inks(dark)
-    write_marks(day, dark)
+    for path, (_, new) in written(day).items():
+        path.write_text(new)
     print(f'{"ink":8} {"paper":>8} {"dark":>8}  contrast on paper / on the dark sheet')
     for name in ['ink'] + INKS:
         print(f'{name:8} {day[name]:>8} {dark[name]:>8}  {contrast(day[name], day["paper"]):.2f} / {contrast(dark[name], dark["paper"]):.2f}')

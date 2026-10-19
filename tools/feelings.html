@@ -5,8 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>phy's fwiends · feelings</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shantell+Sans:wght,BNCE,INFM@300..800,-100..100,0..100&display=swap">
+<link rel="preload" href="../site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
+  @font-face {
+    font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;
+    src: url('../site/fonts/ShantellSans-Latin.woff2') format('woff2');
+  }
   :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --rule: #cfdbe8; --cell: 132px; }
   body { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
   p { margin: 0 0 16px; color: var(--ink-2); }

@@ -198,8 +198,18 @@ $body
 """)
 
 
-def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.html'):
-    """Render STYLE.md, then FWIENDS.md, to style.html.
+SOURCES = (ROOT / 'STYLE.md', ROOT / 'FWIENDS.md')
+STYLE_HTML = ROOT / 'style.html'
+
+
+def style_page(srcs=SOURCES, out=STYLE_HTML):
+    """Render STYLE.md, then FWIENDS.md, to style.html (see style_html), and return the path written."""
+    Path(out).write_text(style_html(srcs), encoding='utf-8')
+    return out
+
+
+def style_html(srcs=SOURCES):
+    """Return the style guide page's text, rendered from STYLE.md, then FWIENDS.md.
 
     The first file's # title becomes the <title>; each later file's # title heads
     its own part of the page. The page's own h1 and intro are written in STYLE_PAGE.
@@ -221,5 +231,4 @@ def style_page(srcs=(ROOT / 'STYLE.md', ROOT / 'FWIENDS.md'), out=ROOT / 'style.
     names = [Path(src).name for src in srcs]
     ids = {name: {id_ for id_, _ in doc} for name, doc in zip(names, headings)}
     body = [contents_lines(zip(titles, headings))] + [link_section_refs(part, name, ids) for part, name in zip(parts, names)]
-    Path(out).write_text(STYLE_PAGE.substitute(title=html.escape(titles[0], quote=False), body='\n'.join(body)), encoding='utf-8')
-    return out
+    return STYLE_PAGE.substitute(title=html.escape(titles[0], quote=False), body='\n'.join(body))

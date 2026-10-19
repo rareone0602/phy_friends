@@ -70,28 +70,37 @@ NARROW, WIDE = 700, 1600  # Windows at which the gallery's measures are read, on
 REACH_WINDOWS = (360, NARROW, 900, 1200, WIDE, 2400, 3600)
 
 
-def read_cast(chrome):
-    """The cast ({host, names, friends}), read in a page that installs it; a cast that fails to install is an error."""
+def take_errors(chrome, page, errors):
+    """Add the errors that a page has reported to errors, each as (the page, the message)."""
+    errors += [(page, error) for error in chrome.take_errors()]
+
+
+def read_cast(chrome, errors):
+    """The cast ({host, names, friends}), read in a page that installs it; a cast that fails to install is an error.
+    errors: a list to which the errors that the page reports are added, as take_errors() adds them."""
     with tempfile.TemporaryDirectory(prefix='pf-cast-') as work:
         page = Path(work) / 'cast.html'
         page.write_text('<!doctype html><meta charset="utf-8">' +
                         ''.join(f'<script src="{script.as_uri()}"></script>' for script in cast_scripts()))
         chrome.open(str(page))
         cast = chrome.evaluate(READ_CAST_JS)
+        take_errors(chrome, 'the cast (every friend, then characters/cast.js)', errors)
     if cast is None:
-        raise ValueError('characters/cast.js installed no cast: see the page errors above, or load it in a browser')
+        raise ValueError('characters/cast.js installed no cast: see the page errors, or load it in a browser')
     return cast
 
 
-def measure_gallery(chrome):
+def measure_gallery(chrome, errors):
     """The friends' reaches on the gallery, each the largest over windows of every size, and its box and stage at
     a phone's window and at a wide one. A gallery that fails to draw a friend has no reach to give for it, so it is
-    an error rather than a reach of nothing."""
+    an error rather than a reach of nothing. errors: a list to which the errors that the gallery reports at each
+    window's width are added, as take_errors() adds them."""
     sizes, reaches = {}, {}
     for width in REACH_WINDOWS:
         chrome.set_viewport(width, 900)
         chrome.open(str(GALLERY))
         measured = chrome.evaluate(READ_REACHES_JS)
+        take_errors(chrome, f'{GALLERY.name} at {width} px', errors)
         undrawn = [reach['name'] for reach in measured if not reach.pop('drawn')]
         if undrawn:
             raise ValueError(f'{GALLERY.name} drew no {", ".join(undrawn)}, so its rows cannot be measured: '
@@ -114,7 +123,7 @@ BOX_UNITS = 270      # A box's width in head units (FWIENDS.md): five rules.
 SLOT_OVERLAP = 0.06  # Neighboring slots overlap by this much of a box (.friend's negative margins).
 LAYOUT_START = '  /* The rows (--abreast) and the page\'s width, written by `python3 tools/pf.py pages` from the friends\' reaches. */\n'
 LAYOUT_END = '  /* The end of the rows. */\n'
-FRIEND_TAG = re.compile(r'<li class="friend"[^>]*>')
+REACH = re.compile(r'--reach-(left|right):\s*(-?\d+(?:\.\d+)?)')  # A reach in a friend's tag, in head units.
 
 
 def rows(names, n):
@@ -123,13 +132,19 @@ def rows(names, n):
     return [names[i:i + n] for i in range(0, len(names), n)]
 
 
+def slot_boxes(left, right):
+    """How wide a friend's slot is, in boxes: its box and its reaches past it (in head units), less the overlap with
+    its neighbors' slots."""
+    return (BOX_UNITS + left + right) / BOX_UNITS - SLOT_OVERLAP
+
+
 def layout(measures):
     """For each way of splitting the friends into rows, the widest row in boxes, rounded up so that its friends
     always fit (--abreast), and the stage width in CSS px from which that split fits, with the window that has it.
 
-    A row's width in boxes is the sum of its slots, each a box plus its reaches, less the slots' overlap.
+    A row's width in boxes is the sum of its slots (slot_boxes).
     """
-    slot = {r['name']: (BOX_UNITS + r['left'] + r['right']) / BOX_UNITS - SLOT_OVERLAP for r in measures['reaches']}
+    slot = {r['name']: slot_boxes(r['left'], r['right']) for r in measures['reaches']}
     names, splits = list(slot), []
     for n in ROW_SIZES:
         widest = max(sum(slot[name] for name in row) for row in rows(names, n))
@@ -178,24 +193,54 @@ def layout_css(splits):
     return ''.join(out)
 
 
-def one_row_window(gallery=GALLERY):
-    """The narrowest window in which every friend stands in one row, as the gallery's layout gives it."""
-    match = re.search(r'^  main \{ max-width: (\d+)px; \}$', layout_block(Path(gallery).read_text(encoding='utf-8')), re.M)
-    if not match:
-        raise ValueError(f'{gallery} has no page width in its rows; run python3 tools/pf.py pages')
-    return int(match[1])
-
-
 def with_slots(text, reaches):
     """The gallery's text with each friend's reaches (the largest over windows of every size, as the rows take
     them) written in its tag, so that its slot is as wide before the page's script runs as after."""
     by_name = {reach['name']: reach for reach in reaches}
+    for tag in reversed(FriendTags(text).tags):  # From the end, so that each tag's place in the text still holds.
+        reach = by_name[tag['key']]
+        slot = re.sub(r' style="[^"]*"', '', tag['text'])
+        slot = f'{slot[:-1]} style="--reach-left: {reach["left"]}; --reach-right: {reach["right"]}">'
+        text = text[:tag['start']] + slot + text[tag['start'] + len(tag['text']):]
+    return text
 
-    def slot(match):
-        tag = re.sub(r' style="[^"]*"', '', match[0])
-        reach = by_name[re.search(r'data-friend="([^"]+)"', tag)[1]]
-        return f'{tag[:-1]} style="--reach-left: {reach["left"]}; --reach-right: {reach["right"]}">'
-    return FRIEND_TAG.sub(slot, text)
+
+def read_slots(text):
+    """Each friend's slot on the gallery, in page order, as (key, reach left, reach right) in head units, as
+    with_slots wrote them in its tag."""
+    slots = []
+    for tag in FriendTags(text).tags:
+        reach = {side: float(value) for side, value in REACH.findall(tag['attrs'].get('style') or '')}
+        if set(reach) != {'left', 'right'}:
+            raise ValueError(f'{tag["key"]}: its tag on the gallery has no slot (--reach-left and --reach-right); '
+                             'run python3 tools/pf.py pages')
+        left, right = (int(reach[side]) if reach[side].is_integer() else reach[side] for side in ('left', 'right'))
+        slots.append((tag['key'], left, right))
+    return slots
+
+
+def is_friend(tag, attrs):
+    """Whether a start tag on the gallery is a friend's: an <li> of class friend, its attributes in any order."""
+    return tag == 'li' and 'friend' in (attrs.get('class') or '').split()
+
+
+class FriendTags(html.parser.HTMLParser):
+    """Finds every friend's tag in a page's text (is_friend): its key (data-friend), where it starts in the text,
+    its text as written, and its attributes."""
+
+    def __init__(self, text):
+        super().__init__()
+        self.tags = []
+        self._line_starts = [0] + [match.end() for match in re.finditer('\n', text)]
+        self.feed(text)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if is_friend(tag, attrs):
+            line, column = self.getpos()
+            self.tags.append({'key': attrs.get('data-friend'), 'start': self._line_starts[line - 1] + column,
+                              'text': self.get_starttag_text(), 'attrs': attrs})
 
 
 def layout_block(text):
@@ -214,32 +259,34 @@ def with_scripts(text, names):
     first, last = tags[0], tags[-1]
     run = text[first.start():last.end()]
     if len(run.splitlines()) != len(tags):
-        raise ValueError('its friends\' script tags are not in one run')
+        raise ValueError("its friends' script tags are not in one run, one to a line: move whatever lies between "
+                         'them (a comment, another tag) before or after them')
     lines = [f"{first['indent']}<script src=\"{first['prefix']}characters/{name}/{name}.js\"></script>" for name in names]
     return text[:first.start()] + '\n'.join(lines) + text[last.end():]
 
 
-def written(cast, measures):
-    """Each page's text as it should be: {path: (text now, text as written)}. Without measures, only the script
-    tags are written."""
-    out = {}
-    for page in PAGES:
-        text = page.read_text(encoding='utf-8')
+def written(page, cast, measures):
+    """A page's text now and as it should be, as (text now, text as written). Without measures, only the script
+    tags are written. A page that cannot be written raises ValueError, which names it."""
+    text = page.read_text(encoding='utf-8')
+    try:
         new = with_scripts(text, cast['names']) or text
         if page == GALLERY and measures:
             block = layout_block(new)
             if not block:
-                raise ValueError(f'{page} has no rows to write: mark them as layout_css() does')
+                raise ValueError('it has no rows to write: mark them as layout_css() does')
             new = with_slots(new.replace(block, layout_css(layout(measures))), measures['reaches'])
-        out[page] = (text, new)
-    return out
+    except ValueError as error:
+        raise ValueError(f'{page.relative_to(ROOT)}: {error}') from None
+    return text, new
 
 
 def write_pages(cast, measures=None):
     """Rewrites every page whose script tags or rows are stale (only the script tags, without measures), and returns
     the pages rewritten."""
     changed = []
-    for page, (text, new) in written(cast, measures).items():
+    for page in PAGES:
+        text, new = written(page, cast, measures)
         if new != text:
             page.write_text(new, encoding='utf-8')
             changed.append(page)
@@ -247,9 +294,15 @@ def write_pages(cast, measures=None):
 
 
 def page_drift(cast, measures):
-    """Every page whose script tags or rows are stale, one line each. Without measures, the rows are not checked."""
+    """Every page whose script tags or rows are stale, or that cannot be written, one line each. Without measures,
+    the rows are not checked."""
     problems = []
-    for page, (text, new) in written(cast, measures).items():
+    for page in PAGES:
+        try:
+            text, new = written(page, cast, measures)
+        except ValueError as error:
+            problems.append(str(error))
+            continue
         if new == text:
             continue
         scripts = with_scripts(text, cast['names']) or text
@@ -298,7 +351,7 @@ class GalleryLabels(html.parser.HTMLParser):
         elif tag == 'a' and 'data-credit' in attrs and not part:
             self.credits.append({'key': attrs['data-credit'], 'credit': '', 'credit link': attrs.get('href') or ''})
             part = 'other credit'
-        elif tag == 'li' and 'friend' in classes:
+        elif is_friend(tag, attrs):
             self.friends.append({'key': attrs.get('data-friend'), 'host': 'data-host' in attrs, 'aria-label': '',
                                  'name': '', 'species': '', 'credit': '', 'credit link': ''})
             part = 'friend'

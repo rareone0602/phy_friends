@@ -24,6 +24,7 @@ from PIL import Image
 import gallery
 import pf
 import shoot
+from cdp import ChromeError, exit_on_sigterm
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -41,21 +42,21 @@ PREVIEW = (1200, 630)        # The link preview's size.
 LAYOUT = {'rule': 27, 'rows': (7, 7, 7), 'first': 10, 'band': 2, 'top': 4, 'margin': 24, 'title': {'size': 88, 'rule': 3}}
 EARS = 1                     # Rules kept above each row's box for the tallest ears.
 SIDE = 16                    # Space between the margin line and the first slot, and between the last slot and the edge, in px.
-OVERLAP = 0.03               # How far, in boxes, each side of a slot overlaps its neighbor's, as in the gallery.
 POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so that they look out at the viewer.
 # The preview is saved as a palette PNG, which is half the size of a full-color one and keeps the pencil's grain. The
 # palette is trained on the colors with their populations flattened (count ** FLATTEN), so that the small bright
 # things (eyes, a bandana, a cheek) keep their colors beside the great areas of paper and fur.
 PALETTE = {'colors': 224, 'flatten': 0.2, 'refinements': 3}
-FRIEND_SLOT = re.compile(r'<li class="friend"[^>]* data-friend="([^"]+)"[^>]* style="--reach-left: (\d+); --reach-right: (\d+)"')
 GRAPHITE = re.compile(r'<filter id="graphite".*?</filter>', re.S)
+OVERLAP = gallery.SLOT_OVERLAP / 2  # How far, in boxes, each side of a slot overlaps its neighbor's, as in the gallery.
+BOX_UNITS = gallery.BOX_UNITS       # A box's width in head units, as in the gallery.
 
 
 def gallery_slots():
     """The friends in the gallery's order, each as (name, reach left, reach right) in head units, and the graphite
     filter that the gallery textures its lines with, both read from index.html."""
     text = gallery.GALLERY.read_text(encoding='utf-8')
-    return [(name, int(left), int(right)) for name, left, right in FRIEND_SLOT.findall(text)], GRAPHITE.search(text)[0]
+    return gallery.read_slots(text), GRAPHITE.search(text)[0]
 
 
 def composition(layout=LAYOUT):
@@ -70,7 +71,7 @@ def composition(layout=LAYOUT):
     for index, count in enumerate(rows):
         ground = layout['top'] + (layout['first'] + index * (5 + EARS)) * rule  # The row's ground, on a rule.
         row = slots[first:first + count]
-        needed = 5 * rule * sum((270 + left + right) / 270 - 2 * OVERLAP for _, left, right in row)  # The slots' widths, in px.
+        needed = 5 * rule * sum(gallery.slot_boxes(left, right) for _, left, right in row)  # The slots' widths, in px.
         if needed > width - layout['margin'] - 2 * SIDE:
             raise ValueError(f'row {index + 1} needs {needed:.0f} px, which is wider than the frame; use a smaller rule or fewer friends in it')
         if ground > height:
@@ -94,9 +95,9 @@ def composition(layout=LAYOUT):
      ground, and a slot a box wide plus the friend's reaches, so that neighbors stand close without overlapping. */
   .friends {{ position: absolute; left: calc(var(--margin-x) + {SIDE}px); right: {SIDE}px; margin: 0; padding: 0; list-style: none;
     display: flex; justify-content: space-between; transform: translateY(calc(var(--size) * -1)); }}
-  .friend {{ position: relative; margin: 0 calc(var(--size) * -{OVERLAP});
-    width: calc(var(--size) * (270 + var(--reach-left) + var(--reach-right)) / 270); }}
-  .rig {{ width: var(--size); height: var(--size); margin-left: calc(var(--size) * var(--reach-left) / 270); }}
+  .friend {{ position: relative; margin: 0 calc(var(--size) * -{OVERLAP:g});
+    width: calc(var(--size) * ({BOX_UNITS} + var(--reach-left) + var(--reach-right)) / {BOX_UNITS}); }}
+  .rig {{ width: var(--size); height: var(--size); margin-left: calc(var(--size) * var(--reach-left) / {BOX_UNITS}); }}
   .rig svg {{ display: block; width: 100%; height: auto; overflow: visible; }}
   .ground {{ position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; z-index: 5;
     color: var(--ink); filter: url(#graphite); }}
@@ -138,10 +139,10 @@ def quantize(image, colors=PALETTE['colors'], flatten=PALETTE['flatten'], refine
 
 def photograph(layout, out):
     """Photograph the composition of `layout` at the preview's size and save it into out as a palette PNG."""
-    with tempfile.TemporaryDirectory(prefix='pf-preview-') as work:
+    with pf.session() as shared, tempfile.TemporaryDirectory(prefix='pf-preview-') as work:
         page, shot = Path(work) / 'preview.html', Path(work) / 'shot.png'
         page.write_text(composition(layout), encoding='utf-8')
-        shoot.shoot(page, shot, *PREVIEW)
+        shoot.shoot(page, shot, *PREVIEW, chrome=shared.chrome)
         quantize(Image.open(shot)).save(out, optimize=True)
 
 
@@ -153,14 +154,19 @@ def still(view, out, bg=False):
 
 
 def main():
-    svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: 'i' }})")
-    (ROOT / 'site/icon.svg').write_text(svg)
-    print(ROOT / 'site/icon.svg')
-    still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
-    still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-    photograph(LAYOUT, ROOT / 'site/preview.png')
-    print(ROOT / 'site/preview.png')
+    with pf.session():  # One Chrome for the icon's drawing and every still's check.
+        svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: 'i' }})")
+        (ROOT / 'site/icon.svg').write_text(svg)
+        print(ROOT / 'site/icon.svg')
+        still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
+        still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
+        photograph(LAYOUT, ROOT / 'site/preview.png')
+        print(ROOT / 'site/preview.png')
 
 
 if __name__ == '__main__':
-    main()
+    exit_on_sigterm()
+    try:
+        main()
+    except ChromeError as error:  # The message names what failed in Chrome or the page; a traceback adds nothing.
+        raise SystemExit(f'error: {error}')

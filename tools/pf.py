@@ -15,13 +15,18 @@
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
   python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4
   python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4   # Twice the pixels each way, at a higher quality.
-  python3 tools/pf.py test                              # Runs test/index.html headless and checks the pages against the cast; exits non-zero on a failure.
+  python3 tools/pf.py test                              # Runs test/index.html headless, checks the pages and the derived files, and opens every tool and demo page; exits non-zero on a failure or a page error.
   python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows and slots (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
 view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
+
+A still is drawn in a page that loads the library, the characters and the --with
+scripts. A page that reports an error (a script that fails to load, or a drawing
+that throws) stops the command with the page's message, so that a broken working
+copy is never shot as the committed friend.
 
 `film` films any page that follows the film contract (see film() below) frame
 by frame, so a scene exports frame-exactly whatever the machine's speed. With
@@ -33,17 +38,20 @@ so that its colors match the page's; --crf sets its quality.
 
 `test` also checks the pages against the cast in characters/cast.js: the labels
 that index.html repeats by hand, and the script tags and rows that `pages` writes
-(tools/gallery.py).
+(tools/gallery.py); and the files derived from others: style.html, the dark
+sheet's blocks (tools/dark_sheet.py), the theme colors and the list of test files
+in test/index.html.
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
 out/design/ for page mockups, out/tune.html for the tuning page to send, and
 out/scratch/ for experiments.
 
-Requires Google Chrome (override the path with $CHROME) and Pillow; video
-output also requires ffmpeg, and a film's sound the ffprobe that comes with it.
+Requires Google Chrome (override the path with $CHROME) and Pillow; compare also
+requires numpy, video output ffmpeg, and a film's sound the ffprobe that comes
+with it.
 """
 import argparse
-import io
+import functools
 import json
 import math
 import re
@@ -52,14 +60,17 @@ import subprocess
 import sys
 import tempfile
 import time
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
 
 from PIL import Image
 
+import dark_sheet
 import gallery
 import style_page
-from cdp import CHROME, ChromeError, HeadlessChrome, PageError, kill_process_group, screenshot_once
+from cdp import (NEXT_PAINT_JS, ChromeError, ChromeTimeout, HeadlessChrome, PageError, exit_on_sigterm, page_url,
+                 split_page)
+from shoot import shoot as shoot_page
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/, out/tune.html and out/scratch/.
@@ -90,37 +101,107 @@ def scripts():
 
 
 def page(body_js, bg='transparent'):
+    """A page that loads the library, the characters and the --with scripts, then runs body_js, which may draw into
+    #root. An error in any of them is reported to Chrome (see Session), never drawn."""
     tags = '\n'.join(f'<script src="{p.as_uri()}"></script>' for p in scripts())
     return f"""<!doctype html><meta charset="utf-8">
 <style>html,body{{margin:0;padding:0;overflow:hidden;background:{bg}}}svg{{display:block}}
 #root{{display:flex;flex-wrap:wrap;align-content:flex-start}}</style>
 {tags}
 <div id="root"></div>
-<pre id="err" style="color:red;font:16px monospace;position:absolute;top:0;left:0;margin:0"></pre>
 <script>
-try {{ {body_js} }} catch (e) {{ document.getElementById('err').textContent = String(e.stack || e); }}
+{body_js}
 </script>"""
 
 
+# ---- One headless Chrome per command: evaluations and stills' checks ----------------
+
+_session = None  # The Session that evaluate() and shoot() share while session() is open.
+
+
+class Session:
+    """A headless Chrome that evaluate() and shoot() share, started when first needed: it evaluates expressions in
+    the library's page (page('')), and opens each still's page to check it for errors before it is shot."""
+
+    def __init__(self, stack):
+        self._stack = stack  # Closes Chrome, then removes its folder, when the session ends.
+        self._chrome = self._library = None
+
+    @property
+    def chrome(self):
+        if self._chrome is None:
+            work = Path(self._stack.enter_context(tempfile.TemporaryDirectory(prefix='pf-')))
+            self._library = work / 'library.html'
+            self._library.write_text(page(''), encoding='utf-8')
+            self._chrome = self._stack.enter_context(HeadlessChrome())
+        return self._chrome
+
+    def evaluate(self, js_expr, timeout):
+        chrome = self.chrome
+        if chrome.url != page_url(self._library):  # Opened first, and again after a still's page.
+            errors = chrome.visit(self._library, timeout=timeout)
+            if errors:
+                raise PageError('the library, the characters or a --with script reported errors', errors)
+        value = chrome.evaluate(f'JSON.stringify({js_expr})', timeout)
+        errors = chrome.take_errors()
+        if errors:
+            raise PageError('the page reported errors while evaluating an expression', errors)
+        if value is None:
+            raise PageError(f'the expression has no JSON value: {js_expr}')
+        return json.loads(value)
+
+
+@contextmanager
+def session():
+    """Share one headless Chrome among every evaluate() and shoot() in the block, and close it when the block ends,
+    however it ends. Outside a session, each of them starts a Chrome of its own."""
+    global _session
+    if _session is not None:
+        yield _session
+        return
+    with ExitStack() as stack:
+        _session = Session(stack)
+        try:
+            yield _session
+        finally:
+            _session = None
+
+
+def evaluate(js_expr, timeout=60):
+    """Evaluate a JS expression in a page that has the library loaded and return its JSON value.
+
+    A script that fails to load (a --with file with a syntax error, say) or an expression that throws raises
+    PageError with the page's message; an expression still running after timeout seconds raises ChromeTimeout.
+    """
+    with session() as shared:
+        return shared.evaluate(js_expr, timeout)
+
+
 def shoot(html, w, h, out_png, timeout=60):
-    """Screenshot an HTML string at w x h CSS pixels into out_png, on a transparent background, and return the image."""
-    work = Path(tempfile.mkdtemp(prefix='pf-'))
-    try:
-        src = work / 'page.html'
-        src.write_text(html)
-        png = screenshot_once(src.as_uri(), w, h, transparent=True, timeout=timeout)
-    finally:
-        shutil.rmtree(work, ignore_errors=True)
-    img = Image.open(io.BytesIO(png))
-    img.load()
-    img = img.crop((0, 0, w, h))
-    Path(out_png).parent.mkdir(parents=True, exist_ok=True)
-    img.save(out_png)
-    return img
+    """Screenshot an HTML string at w x h CSS pixels into out_png, on a transparent background, and return the image.
+    A page that reports an error is not shot (see shoot.shoot)."""
+    with session() as shared:
+        return shoot_page(html, out_png, w, h, budget=1000, timeout=timeout, transparent=True, fluid=False,
+                          chrome=shared.chrome)
+
+
+def check_friend(name, view=None):
+    """Stop with a one-line message unless the page defines a friend called name and, when view is a name, that
+    friend has a view of that name."""
+    found = evaluate(f"""(() => {{
+  const friends = PhyFriends.list(), name = {json.dumps(name)};
+  return {{ friends, views: friends.includes(name) ? Object.keys(PhyFriends.get(name).views || {{}}) : [] }};
+}})()""")
+    if name not in found['friends']:
+        raise SystemExit(f'no friend called {name!r} (have: {", ".join(found["friends"])})')
+    views = list(dict.fromkeys(['portrait', 'stand', *found['views']]))
+    if isinstance(view, str) and view not in views:
+        raise SystemExit(f'{name} has no view called {view!r} (have: {", ".join(views)})')
 
 
 def render(name, out_png, view='portrait', pose=None, size=None, bg=True, pencil=True):
     """Render one still and return the PIL image. pencil=False draws the flat shapes without the pencil texture."""
+    check_friend(name, view)
     opts = {'view': view, 'pose': pose or {}, 'pencil': pencil}
     if size:
         opts['size'] = size
@@ -130,43 +211,9 @@ def render(name, out_png, view='portrait', pose=None, size=None, bg=True, pencil
         opts['bg'] = bg
     js = f"""
 const spec = PhyFriends.get({json.dumps(name)});
-const v = PhyFriends.resolveView(spec, {json.dumps(view)}, {json.dumps(size)});
-document.getElementById('root').innerHTML = PhyFriends.render(spec, {json.dumps(opts)});
-document.title = v.w + 'x' + v.h;"""
+document.getElementById('root').innerHTML = PhyFriends.render(spec, {json.dumps(opts)});"""
     w, h = view_size(name, view, size)
     return shoot(page(js), w, h, out_png)
-
-
-def evaluate(js_expr, timeout=60):
-    """Evaluate a JS expression in a page that has the library loaded and return its JSON value."""
-    work = Path(tempfile.mkdtemp(prefix='pf-'))
-    try:
-        src = work / 'page.html'
-        src.write_text(page(f"document.getElementById('result').textContent = JSON.stringify({js_expr});")
-                       .replace('<div id="root"></div>', '<div id="root"></div><pre id="result"></pre>'))
-        cmd = [CHROME, '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
-               '--disable-extensions', f'--user-data-dir={work / "profile"}', '--allow-file-access-from-files',
-               '--dump-dom', src.as_uri()]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, start_new_session=True)
-        buf, deadline = b'', time.time() + timeout
-        while b'</html>' not in buf and time.time() < deadline:
-            chunk = proc.stdout.read1(1 << 16)
-            if not chunk:
-                break
-            buf += chunk
-        kill_process_group(proc)
-        html = buf.decode('utf-8', 'replace')
-        import html as htmlmod
-        import re
-        err = re.search(r'<pre id="err"[^>]*>(.*?)</pre>', html, re.S)
-        if err and err.group(1).strip():
-            raise RuntimeError('page error: ' + htmlmod.unescape(err.group(1)))
-        m = re.search(r'<pre id="result">(.*?)</pre>', html, re.S)
-        if not m:
-            raise RuntimeError('could not evaluate in Chrome')
-        return json.loads(htmlmod.unescape(m.group(1)))
-    finally:
-        shutil.rmtree(work, ignore_errors=True)
 
 
 def view_size(name, view='portrait', size=None):
@@ -221,7 +268,6 @@ ENCODERS = {
     '.mp4': [('libx264', ['-crf', '18']), ('h264_videotoolbox', ['-b:v', '6M'])],
     '.webm': [('libvpx-vp9', ['-b:v', '0', '-crf', '30']), ('libvpx', ['-b:v', '2M', '-crf', '10', '-auto-alt-ref', '0'])],
 }
-_have = None
 
 # A player turns a video's YUV back into RGB with the matrix that the stream names or, when it names none, with
 # the one its size suggests: BT.709 for HD, as browsers and YouTube assume. Left to itself, ffmpeg converts RGB
@@ -239,17 +285,11 @@ def pick_encoder(ext, crf=None):
     crf: a constant quality in place of the encoder's own (lower is better and larger), for the
     encoders that have one: libx264 for .mp4 and libvpx(-vp9) for .webm.
     """
-    global _have
     if ext not in ENCODERS:
         raise SystemExit(f'unknown output type {ext} (use .gif, .mp4, .webm or .apng)')
-    if _have is None:
-        if not shutil.which('ffmpeg'):
-            raise SystemExit('ffmpeg not found: install it (e.g. `brew install ffmpeg`) to export animations')
-        txt = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True).stdout
-        _have = {ln.split()[1] for ln in txt.splitlines() if ln.startswith(' V') and len(ln.split()) > 1}
     options = ENCODERS[ext]
     for name, args in options:
-        if name in _have:
+        if name in ffmpeg_encoders('V'):
             if name != options[0][0]:
                 print(f'note: ffmpeg has no {options[0][0]}; using {name}', file=sys.stderr)
             if crf is not None:
@@ -260,6 +300,24 @@ def pick_encoder(ext, crf=None):
             return name, args
     raise SystemExit(f'{ext} needs one of the ffmpeg encoders {", ".join(n for n, _ in options)}, '
                      'and this ffmpeg has none of them; try .gif or .apng')
+
+
+@functools.lru_cache(maxsize=None)
+def ffmpeg_encoders(kind):
+    """The names of the encoders of a kind, 'V' (video) or 'A' (audio), that this ffmpeg has."""
+    if not shutil.which('ffmpeg'):
+        raise SystemExit('ffmpeg not found: install it (e.g. `brew install ffmpeg`) to export animations and films')
+    listing = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True).stdout
+    return frozenset(line.split()[1] for line in listing.splitlines() if line.startswith(' ' + kind) and len(line.split()) > 1)
+
+
+def even_size(frame_path):
+    """The filters that make a frame's width and height even, as yuv420p requires: an odd one gains a column or a row
+    that repeats the frame's edge (fillborders' smear), where ffmpeg's pad alone would add a black line."""
+    with Image.open(frame_path) as frame:
+        width, height = frame.size
+    smear = f'fillborders=right={width % 2}:bottom={height % 2}:mode=smear,' if width % 2 or height % 2 else ''
+    return 'pad=ceil(iw/2)*2:ceil(ih/2)*2,' + smear
 
 
 def encode(frame_paths, out, fps=30, crf=None):
@@ -279,7 +337,7 @@ def encode(frame_paths, out, fps=30, crf=None):
         vf = 'split[a][b];[a]palettegen=reserve_transparent=1:stats_mode=full[p];[b][p]paletteuse=dither=none'
         cmd = base + ['-vf', vf, '-loop', '0', str(out)]
     elif ext == '.mp4':  # MP4 has no alpha channel, and yuv420p requires even dimensions.
-        cmd = base + ['-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2,' + TO_BT709.format('yuv420p'), '-c:v', codec, *args,
+        cmd = base + ['-vf', even_size(frame_paths[0]) + TO_BT709.format('yuv420p'), '-c:v', codec, *args,
                       '-pix_fmt', 'yuv420p', '-movflags', '+faststart', str(out)]
     elif ext == '.webm':
         cmd = base + ['-vf', TO_BT709.format('yuva420p'), '-c:v', codec, *args, '-pix_fmt', 'yuva420p', str(out)]
@@ -330,12 +388,12 @@ def anim(name, clip='idle', out=None, fps=30, seconds=None, view='portrait', siz
     zoom: a value below 1 zooms out about the bottom edge, for clips that travel upward (hop).
     Returns the output path.
     """
-    import re
     out = Path(out or OUT / name / 'anim' / f'{re.sub(r"[^A-Za-z0-9]+", "-", clip).strip("-")[:40]}.gif')
     if sheet is True:
         sheet = out.with_name(out.stem + '-sheet.png')
     ext = out.suffix.lower()
     pick_encoder(ext)  # Fail before the slow render if no encoder is available.
+    check_friend(name, view)
     clip_js = f'PhyFriends.anim.parse({json.dumps(clip)}, {{ spec: {json.dumps(name)} }})'
     if seconds is None:
         seconds = evaluate(f'{clip_js}.duration ?? null')
@@ -513,8 +571,6 @@ FILM_SOUND = {
     '.webm': ('libopus', ['-b:a', '192k', '-ar', '48000']),
 }
 
-# Resolves after two animation frames, by which time the DOM changes made before it have been painted.
-NEXT_PAINT_JS = 'new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))'
 READ_FILM_JS = """(async () => {
   const film = window.film;
   if (!film || typeof film.seek !== 'function') {
@@ -548,7 +604,7 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
     after seek(t) and two animation frames. A film with unagreed friends is refused
     unless draft is set (STYLE.md, principle 8).
     page: an HTML file, relative to the current directory and optionally with a query
-    of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
+    and a fragment of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
     still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio, so
     that a page laid out at 1920x1080 is filmed at 2560x1440 with scale 4/3, say.
     crf: the constant quality of an .mp4 or .webm (lower is better and larger; see
@@ -601,8 +657,7 @@ def probe_sound(path, ext, fade=None):
     if not path.is_file():
         raise SystemExit(f'no sound file at {path}')
     encoder = FILM_SOUND[ext][0]
-    listing = subprocess.run(['ffmpeg', '-hide_banner', '-encoders'], capture_output=True, text=True).stdout
-    if encoder not in {ln.split()[1] for ln in listing.splitlines() if ln.startswith(' A') and len(ln.split()) > 1}:
+    if encoder not in ffmpeg_encoders('A'):
         raise SystemExit(f'sound in {ext} needs the ffmpeg encoder {encoder}, and this ffmpeg lacks it')
     probe = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries',
                             'stream=sample_rate,duration:format=duration', '-of', 'json', str(path)],
@@ -649,15 +704,15 @@ def add_sound(video, sound, out, start, end, fade=None):
 
 
 def absolute_page(page):
-    """Return a page with its path made absolute from the current directory; a URL is returned as it is."""
+    """Return a page with its path made absolute from the current directory, keeping its query and fragment; a URL is
+    returned as it is."""
     page = str(page)
     if URL.match(page):
         return page
-    path, mark, query = page.partition('?')
-    path = Path(path).resolve()
+    path, query, fragment = split_page(page, Path.cwd())
     if not path.is_file():
         raise SystemExit(f'no page at {path}')
-    return str(path) + mark + query
+    return str(path) + (f'?{query}' if query else '') + (f'#{fragment}' if fragment else '')
 
 
 def film_still(page, out, at, size=None, scale=1, draft=False):
@@ -775,49 +830,141 @@ def shoot_frame(chrome, t):
     return chrome.screenshot()
 
 
-# ---- Tests: test/index.html, run headless -------------------------------------------
+# ---- Tests: test/index.html, run headless, the derived files, and every tool and demo page ----
 
 TEST_PAGE = ROOT / 'test' / 'index.html'
-TEST_TIMEOUT = 120  # Seconds for the whole run; the harness also stops any single test that hangs.
+TEST_TIMEOUT = 120  # Seconds for the whole run; the harness stops a test that waits too long, and pf.py one that hangs.
 TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testResults) : null'
+DEMOS = ROOT / 'demo' / 'index.html'  # Lists the demos, each as <a href="<folder>/index.html">.
+# The pages whose theme colors must be the paper's, and the dark sheet's where a page has one.
+THEMED_PAGES = [ROOT / 'index.html', ROOT / 'specimen.html', ROOT / 'style.html']
+OPENED_VIEWPORT = (1280, 800)  # The window in which the tool and demo pages are opened.
 
-
-# The checks of the pages against the cast (tools/gallery.py), each a test of its own.
+# The checks of the pages against the cast (tools/gallery.py) and of the derived files, each a test of its own.
 LABEL_TEST = "the gallery's labels agree with the cast"
 PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows and slots fit the friends' reaches"
+STYLE_TEST = 'style.html is written from STYLE.md and FWIENDS.md'
+DARK_TEST = "the dark sheet's inks and marks, and every theme color, follow from the paper's inks"
+TEST_FILES_TEST = 'test/index.html loads every test file'
 
 
 def run_tests(page=TEST_PAGE):
-    """Run the in-browser tests and the checks of the pages against the cast, print each failure and a
-    summary, and return the number of problems."""
+    """Run the in-browser tests and the checks of the pages and of the derived files, and open every tool and demo
+    page. Return (results, errors): results is {'passed': [names], 'failed': [{'name', 'message'}]}, and errors
+    lists what the pages reported as (page, message): the tests' page, the cast's, the gallery at each width at
+    which it is measured, and each tool and demo page."""
+    errors, unmeasured = [], []
     with HeadlessChrome(1024, 768) as chrome:
         chrome.open(page)
-        results = chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
-        errors = list(chrome.errors)
+        results = test_results(chrome)
+        errors += [(relative(page), error) for error in chrome.take_errors()]
         cast = measures = None
         try:
-            cast = gallery.read_cast(chrome)
-            measures = gallery.measure_gallery(chrome)
+            cast = gallery.read_cast(chrome, errors)
+            measures = gallery.measure_gallery(chrome, errors)
         except ValueError as error:
-            errors.append(str(error))
+            unmeasured.append(str(error))
+        errors += opening_errors(chrome, opened_pages())
     if results is None:
-        errors.append(f'{page} did not load test/harness.js: window.testsDone is missing')
+        errors.append((relative(page), 'it did not load test/harness.js: window.testsDone is missing'))
         results = {'passed': [], 'failed': []}
-    checks = {LABEL_TEST: gallery.label_drift(cast)}
-    checks[PAGES_TEST] = gallery.page_drift(cast, measures) if cast else ['no cast (characters/cast.js) was installed']
+    checks = {LABEL_TEST: gallery.label_drift(cast),
+              PAGES_TEST: unmeasured + (gallery.page_drift(cast, measures) if cast else []),
+              STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page)}
     for name, drift in checks.items():
         results['failed'] += [{'name': name, 'message': message} for message in drift]
         if not drift:
             results['passed'].append(name)
+    return results, errors
+
+
+def test_results(chrome):
+    """Wait for the harness's results, or None if the page has none. A test that hangs without waiting (an endless
+    loop) holds up the harness's timer too, so once the run has taken TEST_TIMEOUT seconds, it is stopped; the timer
+    then fails it, and the run goes on."""
+    while True:
+        try:
+            return chrome.evaluate(TEST_RESULTS_JS, timeout=TEST_TIMEOUT)
+        except ChromeTimeout as timeout:
+            chrome.send('Runtime.terminateExecution')
+            try:
+                running = chrome.evaluate('window.testRunning ?? null')
+            except PageError:  # No script was running, so the termination stopped this evaluation instead.
+                running = None
+            if running is None:
+                raise timeout
+            print(f'note: stopped "{running}", which was still running when the tests had taken {TEST_TIMEOUT} s',
+                  file=sys.stderr)
+
+
+def demo_pages():
+    """The demos' index, and each demo that it lists."""
+    listed = re.findall(r'<a href="([\w-]+/index\.html)"', DEMOS.read_text(encoding='utf-8'))
+    return [DEMOS] + [DEMOS.parent / link for link in listed]
+
+
+def opened_pages():
+    """The pages that `test` opens to see that they load and draw without errors: every tool page and demo page."""
+    return sorted((ROOT / 'tools').glob('*.html')) + demo_pages()
+
+
+def opening_errors(chrome, pages):
+    """Open each page and return the errors that it reports while it loads and first paints, as (page, message).
+    Requests to other hosts are refused, so that the check needs no network and does not wait for one."""
+    chrome.block('http://*', 'https://*')
+    chrome.set_viewport(*OPENED_VIEWPORT)
+    return [(relative(page), error) for page in pages for error in chrome.visit(page)]
+
+
+def style_drift():
+    """Whether style.html is as `pf.py style` would write it, as a list of problems."""
+    try:
+        written = style_page.style_html()
+    except SystemExit as error:  # STYLE.md or FWIENDS.md cannot be written out, and the message says why.
+        return [str(error)]
+    stale = written != style_page.STYLE_HTML.read_text(encoding='utf-8')
+    return ['style.html is stale; run python3 tools/pf.py style'] if stale else []
+
+
+def dark_drift():
+    """Whether the dark sheet's blocks are as tools/dark_sheet.py would write them, and every theme color is the
+    paper's or, for the dark sheet, its own, as a list of problems."""
+    stale = [f'{relative(path)}: the dark sheet\'s block is stale; run python3 tools/dark_sheet.py'
+             for path, (text, new) in dark_sheet.written().items() if new != text]
+    return stale + [f'{relative(page)}: {problem}' for page in THEMED_PAGES + demo_pages()
+                    for problem in dark_sheet.theme_drift(page)]
+
+
+def test_files_drift(page=TEST_PAGE):
+    """Every test file beside the tests' page that the page does not load, one line each."""
+    page = Path(page)
+    loaded ={(page.parent / src).resolve() for src in LOCAL_SCRIPT.findall(page.read_text(encoding='utf-8'))}
+    return [f'{relative(page)} does not load {test.name}: add <script src="{test.name}"></script>'
+            for test in sorted(page.parent.glob('*.test.js')) if test.resolve() not in loaded]
+
+
+def relative(path):
+    """A path as the messages give it: from the repository's root when it lies inside it."""
+    try:
+        return str(Path(path).resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
+def print_page_errors(errors):
+    for where, error in errors:
+        print(f'page error: {where}: {error}')
+
+
+def print_results(results, errors):
+    """Print each failure and page error, then a summary."""
     for failure in results['failed']:
         print(f'failed: {failure["name"]}: {failure["message"]}')
-    for error in errors:
-        print(f'page error: {error}')
+    print_page_errors(errors)
     summary = f'{len(results["passed"])} passed, {len(results["failed"])} failed'
     if errors:
         summary += f', {len(errors)} page error{"" if len(errors) == 1 else "s"}'
     print(summary)
-    return len(results['failed']) + len(errors)
 
 
 def one_file(page, out):
@@ -883,7 +1030,8 @@ def main(argv=None):
 
     f = sub.add_parser('film', help='film a page that defines window.film to .mp4 / .webm (with --audio, with sound) / '
                                     '.gif / .apng, or a still')
-    f.add_argument('page', help='an HTML file, optionally with a query (e.g. "scene.html?take=2"), or a URL')
+    f.add_argument('page', help='an HTML file, optionally with a query and a fragment (e.g. "scene.html?take=2"), '
+                                'or a URL')
     f.add_argument('-o', '--out', required=True)
     f.add_argument('--size', type=frame_size, help="WxH in CSS pixels; default: the film's own size")
     f.add_argument('--scale', type=float, default=1,
@@ -906,13 +1054,20 @@ def main(argv=None):
                         'better and larger, about 6 lower doubling the bit rate, which film prints; YouTube asks '
                         'for at least 8 Mb/s at 1080p30 and 16 Mb/s at 1440p30')
 
-    sub.add_parser('test', help="run the in-browser tests in test/index.html and check the pages against the cast")
+    sub.add_parser('test', help='run the in-browser tests in test/index.html, check the pages against the cast and '
+                                'the derived files, and open every tool and demo page')
     sub.add_parser('pages', help="write the friends' script tags and the gallery's rows and slots from the cast and the friends' reaches")
     u = sub.add_parser('tune', help='write the tuning page (tools/tune.html) out as one file, to send to an artist')
     u.add_argument('-o', '--out', default=OUT / 'tune.html')
 
     a = ap.parse_args(argv)
     EXTRA[:] = getattr(a, 'extra', [])
+    with session():  # One Chrome, started when first needed, for the command's evaluations and stills.
+        run(a)
+
+
+def run(a):
+    """Carry out the command that main() parsed."""
     if a.cmd == 'list':
         for n in characters():
             ex = examples(n)
@@ -934,20 +1089,40 @@ def main(argv=None):
         print(film(a.page, a.out, size=a.size, scale=a.scale, fps=a.fps, start=a.start, end=a.end, at=a.at,
                    draft=a.draft, sheet=a.sheet, audio=a.audio, fade=a.fade, crf=a.crf))
     elif a.cmd == 'test':
-        raise SystemExit(1 if run_tests() else 0)
+        results, errors = run_tests()
+        print_results(results, errors)
+        raise SystemExit(1 if results['failed'] or errors else 0)
     elif a.cmd == 'pages':
-        # The script tags first, so that the gallery measured for the rows draws every friend of the cast.
-        with HeadlessChrome(gallery.WIDE, 900) as chrome:
-            cast = gallery.read_cast(chrome)
-            changed = gallery.write_pages(cast)
-            changed += gallery.write_pages(cast, gallery.measure_gallery(chrome))
-        for page in dict.fromkeys(changed):
-            print(page)
+        run_pages()
     elif a.cmd == 'tune':
         print(one_file(TUNE_PAGE, a.out))
 
 
+def run_pages():
+    """Write the friends' script tags, then the gallery's rows and slots, and print each page written. Rows measured
+    on a gallery that reported errors could be wrong, so they are then not written, and the command fails."""
+    errors, changed = [], []
+    try:
+        # The script tags first, so that the gallery measured for the rows draws every friend of the cast.
+        with HeadlessChrome(gallery.WIDE, 900) as chrome:
+            cast = gallery.read_cast(chrome, errors)
+            changed += gallery.write_pages(cast)
+            measures = gallery.measure_gallery(chrome, errors)
+            if not errors:
+                changed += gallery.write_pages(cast, measures)
+    except ValueError as error:
+        problem = str(error)
+    else:
+        problem = "the pages reported errors, so the gallery's rows and slots were not written" if errors else None
+    for page in dict.fromkeys(changed):
+        print(page)
+    print_page_errors(errors)
+    if problem:
+        raise SystemExit(f'error: {problem}')
+
+
 if __name__ == '__main__':
+    exit_on_sigterm()
     try:
         main()
     except ChromeError as error:  # The message names what failed in Chrome or the page; a traceback adds nothing.

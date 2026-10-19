@@ -23,7 +23,7 @@ from scipy import ndimage
 from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import dijkstra
 
-from cdp import HeadlessChrome
+from cdp import HeadlessChrome, exit_on_sigterm
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -290,4 +290,5 @@ self.TITLE_PEN = Object.freeze({{
 
 
 if __name__ == '__main__':
+    exit_on_sigterm()
     main()

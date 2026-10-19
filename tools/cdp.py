@@ -14,9 +14,12 @@ as they do in a browser.
 
 A relative page path is resolved against the repository root. Errors the page
 reports (uncaught exceptions, console.error calls and resources that fail to
-load) collect in `errors`; `evaluate` raises PageError, carrying them, when the
-expression throws or its promise rejects. Chrome is killed and its profile
+load, bar those in is_optional) collect in `errors`; `evaluate` raises
+PageError, carrying them, when the expression throws or its promise rejects. Chrome is killed and its profile
 removed when the `with` block ends, however it ends.
+
+screenshot_once() takes one still with Chrome's own --screenshot instead, in
+virtual time, for a page that needs no driving.
 """
 import base64
 import fcntl
@@ -30,6 +33,7 @@ import subprocess
 import tempfile
 import threading
 import time
+import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -56,15 +60,25 @@ FLAGS = [
 ]
 CONSOLE_ERROR_TYPES = {'error', 'assert'}
 URL_SCHEME = re.compile(r'^[a-zA-Z][a-zA-Z0-9+.-]+:')
+OUT_URL = (ROOT / 'out').as_uri() + '/'  # The git-ignored output, which a fresh copy of the repository lacks.
+# Resolves after two animation frames, by which time the DOM changes made before it have been painted.
+NEXT_PAINT_JS = 'new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done)))'
 
 
 class ChromeError(RuntimeError):
     """Chrome could not be started, stopped answering, or refused a command."""
 
 
-def is_favicon(entry):
-    """Whether a log entry is the browser's own request for a favicon the page never asked for."""
-    return entry.get('url', '').split('?')[0].endswith('/favicon.ico')
+class ChromeTimeout(ChromeError):
+    """Chrome gave no answer in time, as when the page is stuck in a loop."""
+
+
+def is_optional(entry):
+    """Whether a log entry is a failed load that is no fault of the page: the favicon that the browser asks for
+    unbidden, or a file in out/, which a fresh copy lacks and which a page looks for only with a fallback (say hi's
+    music, say)."""
+    url = entry.get('url', '')
+    return url.split('?')[0].endswith('/favicon.ico') or url.startswith(OUT_URL)
 
 
 class PageError(ChromeError):
@@ -81,20 +95,32 @@ class PageError(ChromeError):
         return text
 
 
+def split_page(page, base=ROOT):
+    """Split a page given as a file path, optionally followed by ?query and #fragment, into (absolute path, query,
+    fragment); a relative path is taken from base. Since a folder's or file's name may hold a ? or a # too, the path
+    ends at the first ? or # before which it names a file, or else at the first ? or #."""
+    page = str(page)
+    marks = [i for i, mark in enumerate(page) if mark in '?#'] + [len(page)]
+    end = next((i for i in marks if Path(base, page[:i]).is_file()), marks[0])
+    query, _, fragment = page[end:].partition('#')
+    return Path(base, page[:end]).resolve(), query[1:], fragment
+
+
 def page_url(page, query=''):
     """Return the URL for a page: a URL as it is, or a path (relative to the repository root) as a file URL.
 
-    A query already on the page is kept, and `query` is appended to it.
+    A query already on the page is kept, `query` is added to it, and a fragment stays at the end.
     """
     page = str(page)
     if URL_SCHEME.match(page):
-        url = page
+        parts = urllib.parse.urlsplit(page)
+        own_query, fragment = parts.query, parts.fragment
+        url = urllib.parse.urlunsplit(parts._replace(query='', fragment=''))
     else:
-        path, _, own_query = page.partition('?')
-        url = (ROOT / path).resolve().as_uri() + (f'?{own_query}' if own_query else '')
-    if query:
-        url += ('&' if '?' in url else '?') + query
-    return url
+        path, own_query, fragment = split_page(page)
+        url = path.as_uri()
+    query = '&'.join(part for part in (own_query, query) if part)
+    return url + (f'?{query}' if query else '') + (f'#{fragment}' if fragment else '')
 
 
 def kill_process_group(process):
@@ -120,28 +146,28 @@ def screenshot_once(url, width, height, scale=1, budget=1000, transparent=False,
     timers settle at once: this is for a still of a page that needs no driving, where HeadlessChrome is for one
     that does. With transparent, the page's own background is all there is.
 
-    Chrome writes the file and lingers, so the file is taken once its size stops changing, and Chrome is killed.
+    Chrome writes the file and exits. The file is taken once Chrome has exited or, should it linger, once the
+    file's size stops changing; Chrome is killed however this ends. The flags are HeadlessChrome's, without which
+    a sheet of many drawings on a transparent page came out with parts of some drawings missing.
     """
     work = Path(tempfile.mkdtemp(prefix='pf-shot-'))
     try:
         shot = work / 'shot.png'
-        cmd = [CHROME, '--headless=new', '--disable-gpu', '--hide-scrollbars', '--no-first-run',
-               '--no-default-browser-check', '--disable-extensions', '--mute-audio',
-               f'--user-data-dir={work / "profile"}', f'--window-size={width},{height}',
+        cmd = [CHROME, *FLAGS, f'--user-data-dir={work / "profile"}', f'--window-size={width},{height}',
                f'--force-device-scale-factor={scale:g}', *(['--default-background-color=00000000'] if transparent else []),
-               '--allow-file-access-from-files', f'--virtual-time-budget={budget}', f'--screenshot={shot}', url]
+               f'--virtual-time-budget={budget}', f'--screenshot={shot}', url]
         proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        deadline, last = time.time() + timeout, -1
-        while time.time() < deadline:
-            if shot.exists():
-                size = shot.stat().st_size
-                if size and size == last:
-                    break
-                last = size
-            elif proc.poll() is not None:
-                break
-            time.sleep(SCREENSHOT_POLL)
-        kill_process_group(proc)
+        try:
+            deadline, last = time.time() + timeout, -1
+            while time.time() < deadline and proc.poll() is None:
+                if shot.exists():
+                    size = shot.stat().st_size
+                    if size and size == last:
+                        break
+                    last = size
+                time.sleep(SCREENSHOT_POLL)
+        finally:
+            kill_process_group(proc)
         if not shot.exists():
             raise ChromeError('Chrome produced no screenshot (see $CHROME / page errors)')
         return shot.read_bytes()
@@ -156,6 +182,7 @@ class HeadlessChrome:
         self.width, self.height, self.scale = width, height, scale
         self.timeout = timeout
         self.errors = []  # What the page reported, as text, in the order it happened.
+        self.url = None  # The page opened last.
         self._chrome, self._flags = chrome, list(flags)
         self._process = self._work = self._session = None
         self._command_write = self._reply_read = None
@@ -196,11 +223,31 @@ class HeadlessChrome:
     def open(self, page, query='', timeout=None):
         """Load a page (a URL, or a path relative to the repository root) and wait for its load event."""
         url = page_url(page, query)
-        self._loaded = False
+        self._loaded, self.url = False, url
         result = self.send('Page.navigate', {'url': url}, timeout)
         if result.get('errorText'):
             raise ChromeError(f'could not open {url}: {result["errorText"]}')
         self._wait_for_load(timeout)
+
+    def visit(self, page, query='', timeout=None):
+        """Open a page, wait until it has painted twice, and return the errors it reported meanwhile.
+
+        Errors reported before the visit are forgotten, and so are the visit's once returned.
+        """
+        self.errors.clear()
+        self.open(page, query, timeout)
+        self.evaluate(NEXT_PAINT_JS, timeout)
+        return self.take_errors()
+
+    def take_errors(self):
+        """Return the errors reported since they were last taken, and forget them."""
+        errors, self.errors = self.errors, []
+        return errors
+
+    def block(self, *patterns):
+        """Refuse every request whose URL matches one of the patterns, in which * stands for any text."""
+        self.send('Network.enable')
+        self.send('Network.setBlockedURLs', {'urls': list(patterns)})
 
     def reload(self, timeout=None):
         """Load the current page again from scratch and wait for its load event."""
@@ -326,7 +373,7 @@ class HeadlessChrome:
         elif method == 'Runtime.consoleAPICalled' and params.get('type') in CONSOLE_ERROR_TYPES:
             arguments = ' '.join(describe_value(value) for value in params.get('args', []))
             self.errors.append(f'console.{params["type"]}: {arguments}')
-        elif method == 'Log.entryAdded' and params['entry'].get('level') == 'error' and not is_favicon(params['entry']):
+        elif method == 'Log.entryAdded' and params['entry'].get('level') == 'error' and not is_optional(params['entry']):
             entry = params['entry']
             self.errors.append(entry.get('text', '') + (f' ({entry["url"]})' if entry.get('url') else ''))
         elif method in ('Inspector.targetCrashed', 'Target.targetCrashed'):
@@ -346,7 +393,7 @@ class HeadlessChrome:
             self._scanned = len(self._buffer)
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise ChromeError(f'Chrome gave no answer to {waiting_for} before the timeout')
+                raise ChromeTimeout(f'Chrome gave no answer to {waiting_for} before the timeout')
             ready, _, _ = select.select([self._reply_read], [], [], remaining)
             if not ready:
                 continue
@@ -367,10 +414,17 @@ class HeadlessChrome:
         return ('; its log ends:\n' + '\n'.join(lines)) if lines else ''
 
     def _stop_on_sigterm(self):
-        # SIGTERM would otherwise end Python without unwinding, leaving Chrome running and the profile behind.
+        # As exit_on_sigterm(), for as long as Chrome is open, for a script that has not called it itself.
         # Only the main thread may install signal handlers.
         if threading.current_thread() is threading.main_thread():
             self._previous_sigterm = signal.signal(signal.SIGTERM, _exit_on_sigterm)
+
+
+def exit_on_sigterm():
+    """Make SIGTERM raise SystemExit, as Ctrl-C raises KeyboardInterrupt, so that the `finally` blocks that kill Chrome
+    and ffmpeg and remove temporary folders run however a command is stopped; SIGTERM would otherwise end Python
+    without unwinding. Each command-line tool calls it once, as it starts."""
+    signal.signal(signal.SIGTERM, _exit_on_sigterm)
 
 
 def _exit_on_sigterm(signum, frame):

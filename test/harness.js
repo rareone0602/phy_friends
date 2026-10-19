@@ -6,11 +6,15 @@
  * test in the order registered, publishes window.testResults = { passed: [names],
  * failed: [{ name, message }] }, resolves window.testsDone, and lists the results on the
  * page. `python3 tools/pf.py test` runs test/index.html headless and reads the results.
+ * While a test runs, window.testRunning holds its name.
  */
 (function () {
   'use strict';
 
-  const TEST_TIMEOUT_MS = 10000;  // A test that runs longer fails, so that one hung test cannot stall the run.
+  // A test that runs longer fails, so that a test that waits forever cannot stall the run. One that hangs without
+  // waiting (an endless loop) holds this timer up too: `pf.py test` stops it once the whole run has taken too long,
+  // and the timer then fails it.
+  const TEST_TIMEOUT_MS = 10000;
   const registered = [];
   let finish;
 
@@ -96,6 +100,7 @@
   async function runAll() {
     const results = { passed: [], failed: [] };
     for (const { name, fn } of registered) {
+      window.testRunning = name;
       try {
         await withTimeout(Promise.resolve().then(fn));
         results.passed.push(name);
@@ -103,6 +108,7 @@
         results.failed.push({ name, message: describe(error) });
       }
     }
+    window.testRunning = null;
     window.testResults = results;
     showResults(results);
     finish(results);

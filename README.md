@@ -63,7 +63,7 @@ out/           generated output (git-ignored)
 | `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`, `say-hi/`), which are made with the film kit |
 | `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
-| `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for films and tests |
+| `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `figures/fonts/`, to the WOFF2 in `site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
@@ -778,11 +778,12 @@ python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One exa
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
 python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}), wave)"  # Made for howdi: the wave is away from its tail
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
+python3 tools/pf.py style                                   # style.html, written from STYLE.md and FWIENDS.md
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
 python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4  # A part, with its part of the sound
 python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4  # Twice the pixels each way, at a higher quality
-python3 tools/pf.py test                                    # The in-browser tests, and the pages against the cast
+python3 tools/pf.py test                                    # The in-browser tests, the pages against the cast, the derived files, and every tool and demo page
 python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows and slots, written from the cast
 python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
 ```
@@ -791,6 +792,12 @@ python3 tools/pf.py tune                                    # out/tune.html: the
 palette colour and paints the disagreements red in `compare/<example>-diff.png`; it prints
 the mismatch on a 4×4 grid and the per-colour overlap (IoU), which is a far
 better guide than the mean pixel error.
+
+`render`, `compare` and `anim` draw in a page that loads the library, the
+characters and any `--with` script. They refuse a friend or a view that does not
+exist, and a page that reports an error (a script that fails to load, a drawing
+that throws) stops them with the page's message, so a broken working copy is
+never drawn as the committed friend.
 
 `film` films any page that keeps the film contract (the docstring of `film` in
 `tools/pf.py`): opened with `?film`, the page fills the window (say hi keeps its
@@ -814,7 +821,9 @@ An `.mp4` or `.webm` is converted from the frames with the BT.709 matrix, in
 limited range, and tagged as such (primaries, transfer and matrix), because that
 is how browsers and YouTube decode HD video that says nothing about its colour;
 ffmpeg's own default, BT.601 and untagged, shifts every saturated colour a
-little (phy's green iris by about 4 ΔE). `--crf` sets the quality: 18 for an
+little (phy's green iris by about 4 ΔE). An `.mp4` must have an even width and
+height, so a frame that is odd either way gains a column or a row that repeats
+its edge. `--crf` sets the quality: 18 for an
 `.mp4` and 30 for a `.webm` unless given, lower being better and larger, with
 about 6 lower doubling the bit rate, which `film` prints. `--scale` films at
 more pixels than the page's own size: a 1920×1080 film with `--scale
@@ -833,10 +842,19 @@ A mismatch is a failure that names the friend and the field. What
 follows from the cast and the drawings is written, not typed: `pf.py pages`
 (`tools/gallery.py`) writes the script tags of every page that loads all the
 friends, in the cast's order, and the gallery's rows and slots, from the
-friends' reaches; `test` fails while either is stale.
+friends' reaches; `test` fails while either is stale, and `pages` writes no
+rows from a gallery that reports an error. `test` fails, too, while `style.html`
+or the dark sheet's blocks (`tools/dark_sheet.py`) are stale, while a page's
+theme colour is not the paper's (or the dark sheet's), and while
+`test/index.html` leaves out a `*.test.js`. Finally it opens every tool page
+and every demo that `demo/index.html` lists, with requests to other hosts
+refused, so that a page that breaks shows up. Each page error names its page,
+and the gallery's its window's width. A test that hangs in an endless loop is
+stopped once the run has taken two minutes, and fails by name.
 
-The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
-ffmpeg for video, with its ffprobe for a film's sound.
+The CLI needs Google Chrome (override the path with `$CHROME`) and Pillow;
+`compare` also needs numpy, video ffmpeg, and a film's sound the ffprobe that
+comes with it.
 
 ## Workflows
 

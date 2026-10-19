@@ -133,20 +133,12 @@ def problem(text, names):
 
 
 def run_tests():
-    """Run the tests as `pf.py test` does and return (passed names, failed names)."""
-    import gallery
+    """Run the tests as `pf.py test` does and return (passed names, failed names); a page that reports an error
+    counts as a failure of its own, named after the page."""
     import pf
-    from cdp import HeadlessChrome
-    with HeadlessChrome(1024, 768) as chrome:
-        chrome.open(pf.TEST_PAGE)
-        results = chrome.evaluate(pf.TEST_RESULTS_JS, timeout=pf.TEST_TIMEOUT)
-        cast = gallery.read_cast(chrome)
-        measures = gallery.measure_gallery(chrome)
-    if results is None:
-        raise SystemExit('test/index.html did not report its results')
-    passed, failed = list(results['passed']), [f['name'] for f in results['failed']]
-    for name, drift in {pf.LABEL_TEST: gallery.label_drift(cast), pf.PAGES_TEST: gallery.page_drift(cast, measures)}.items():
-        (failed if drift else passed).append(name)
+    results, errors = pf.run_tests()
+    passed = list(results['passed'])
+    failed = [f['name'] for f in results['failed']] + [f'{page} opens without errors' for page, _ in errors]
     return passed, sorted(set(failed), key=failed.index)
 
 
