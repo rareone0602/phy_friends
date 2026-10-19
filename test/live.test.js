@@ -219,6 +219,38 @@
     });
   });
 
+  test('keys pressed in turn at a steady pace keep a friend content, and it is told once', () => {
+    withStage(['terry'], moving, (stage, [terry], said) => {
+      stage.draw(0);
+      for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowRight']) terry.rig.el.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+      stage.draw(L.STROKE.linger + 0.2);
+      assertEqual(terry.feeling, 'content', 'a key stroke lingers for as long as the keys may take to turn');
+      terry.rig.el.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+      stage.draw(L.STROKE.linger + 0.3);
+      assertEqual(said, ['Terry looks content.']);
+      stage.draw(L.STROKE.linger + 0.3 + L.STROKE.keyWithin + 0.1);
+      assertEqual(terry.feeling, null, 'calm once the keys stop');
+    });
+  });
+
+  test('a click while a finger rests on a friend ends the press without an error', async () => {
+    const errors = [], onError = event => errors.push(event.message);
+    addEventListener('error', onError);
+    try {
+      await support.withBox(async box => {
+        const stage = L.stage({ ...moving });
+        stage.add(box, 'alfie', { label: 'Alfie' });
+        stage.draw(0);
+        box.dispatchEvent(new TouchEvent('touchstart', { touches: [new Touch({ identifier: 1, target: box, clientX: 80, clientY: 80 })], bubbles: true }));
+        box.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await new Promise(resolve => setTimeout(resolve, L.STROKE.press * 1000 + 100));
+      }, 160);
+    } finally {
+      removeEventListener('error', onError);
+    }
+    assertEqual(errors, []);
+  });
+
   test('a finger held still on a friend strokes it, and the tap that ends the press is not a hi', async () => {
     const box = document.createElement('div');
     Object.assign(box.style, { position: 'relative', width: '160px', height: '160px' });
@@ -336,6 +368,68 @@
       stage.draw(5);
       assert(yuda.rig.pose.y < 0 && yuda.rig.pose.eyes === 'happy', 'held in the air');
       assert(phy.rig.pose.lookY > 0.5, 'the others look at it, below them, rather than at the pointer above');
+    });
+  });
+
+  test('a feeling held by the feel option comes back after a hi', () => {
+    withStage(['phy'], { ...moving, pointer: { x: 0, y: 0 }, feel: 'sad' }, (stage, [phy]) => {
+      stage.draw(0.5);
+      assert(phy.hi(), 'a hi is answered');
+      stage.draw(0.6);
+      assertEqual(phy.rig.pose.eyes, 'happy', 'with a hop for joy');
+      stage.draw(4);
+      assertEqual([phy.feeling, phy.rig.pose.mouth], ['sad', 'frown'], 'and then the held feeling again');
+      assert(phy.rig.el.querySelector('.pf-live-mark'), 'with its mark');
+    });
+  });
+
+  test('messages that come together are said together, so that none is lost', async () => {
+    const region = document.createElement('div');
+    document.body.appendChild(region);
+    try {
+      await support.withBox(async first => support.withBox(async second => {
+        const stage = L.stage({ announcer: region, ...moving });
+        const phy = stage.add(first, 'phy', { label: 'phy' }), yuda = stage.add(second, 'yuda', { label: 'Yuda' });
+        stage.draw(0);
+        phy.hi();
+        yuda.hi();
+        await new Promise(resolve => setTimeout(resolve, 200));
+        assertEqual(region.textContent, 'phy hops twice. Yuda hops twice.');
+      }, 160), 160);
+    } finally {
+      region.remove();
+    }
+  });
+
+  test('a friend asleep does not perk up when hovered, and nobody leans on its way under reduced motion', () => {
+    withStage(['howdi', 'howdi'], { ...moving, pointer: { x: 0, y: 0 } }, (stage, [hovered, alone]) => {
+      hovered.rig.el.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+      stage.draw(0);
+      assert(hovered.rig.pose.earL < alone.rig.pose.earL, 'awake, it perks up');
+      hovered.feel('asleep');
+      alone.feel('asleep');
+      stage.draw(5);
+      assert(Math.abs(hovered.rig.pose.earL - alone.rig.pose.earL) < 1e-6, 'asleep, it does not');
+    });
+    withStage(['phy'], still, (stage, [phy]) => {
+      phy.travel = () => ({ dir: 1, squash: 0.08, lean: 4 });
+      stage.draw(0.1);
+      assertEqual([phy.rig.pose.squash, phy.rig.pose.tilt, phy.rig.pose.turnX], [0, 0, 0]);
+    });
+  });
+
+  test('the stage says when every gaze has settled, and a long jump in time makes no pile of marks', () => {
+    withStage(['phy'], moving, (stage, [phy]) => {
+      assert(stage.draw(0), 'settled with nothing to look at');
+      phy.rig.el.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+      assert(!stage.draw(0.05), 'perking up');
+      let t = 0.05;
+      while (!stage.draw(t += 0.05) && t < 3);
+      assert(t < 3, 'settled within a moment');
+      phy.feel('asleep');
+      stage.draw(t + 0.1);
+      stage.draw(t + 3600);
+      assert(phy.rig.el.querySelectorAll('.pf-live-mark').length <= 2, 'only the marks of the moment');
     });
   });
 

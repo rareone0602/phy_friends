@@ -60,13 +60,18 @@
   const TRAVEL = { look: 0.5, turn: 0.35 };
   const BOIL = 8;                        // Pencil texture redraws per second, as in a film (film/film.js).
   const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
+  // A longer gap between frames is a stall (a debugger, a laptop asleep with the page in view): the stage
+  // stands still through it, as it does while out of sight, rather than catching up all at once.
+  const MAX_FRAME_SECONDS = 0.25;
   // With no pointer to follow and no one reacting, the friends only breathe and glance about, slowly
   // enough to be drawn on fours, as hand-drawn animation often is: a frame at most every 1/15 s (a
   // little under, so that a 60 Hz screen draws every fourth frame). This quarters a phone's work, and
-  // the pencil, which boils at 8 a second, sets the pace anyway. While every friend that shows feelings
-  // is asleep, or while the friends keep still, a frame is drawn only as often as the pencil texture is
-  // redrawn (the boil), so that a page left open does little work.
+  // the pencil, which boils at 8 a second, sets the pace anyway. A pointer that has stopped counts as
+  // none once every gaze has settled on it. While every friend that shows feelings is asleep, or while
+  // the friends keep still, a frame is drawn only as often as the pencil texture is redrawn (the boil),
+  // so that a page left open does little work.
   const CALM_FRAME_SECONDS = 0.85 / 15;
+  const SETTLED = 0.005;                 // A gaze or a perk this close to where it is going has settled.
   const HI_FADE = 0.08;                  // The greeting starts and ends at rest, so it comes and goes quickly.
   const HELD_HI_SECONDS = 0.3;           // How far into its greeting the `hold` option holds a friend.
   const FEEL_FADE = 0.15;                // How long a feeling takes to come on or wear off, in seconds.
@@ -164,13 +169,18 @@
     'Shift', 'Control', 'Alt', 'Meta']);
 
   // Says a message in a live region. The region is emptied first, so that a second hop is announced
-  // even when its message is the same as the first.
+  // even when its message is the same as the first. Messages that come while one waits are said with it,
+  // so that none is lost (a key that wakes everyone and greets a friend says both).
   function liveRegion(element) {
-    let timer = 0;
+    let timer = 0, pending = '';
     return message => {
       clearTimeout(timer);
+      pending = pending ? `${pending} ${message}` : message;
       element.textContent = '';
-      timer = setTimeout(() => { element.textContent = message; }, ANNOUNCEMENT_GAP_MS);
+      timer = setTimeout(() => {
+        element.textContent = pending;
+        pending = '';
+      }, ANNOUNCEMENT_GAP_MS);
     };
   }
 
@@ -267,35 +277,34 @@
       frameRequest = requestAnimationFrame(animate);
     }
 
-    // With nothing to watch and nobody reacting, a frame is drawn only every CALM_FRAME_SECONDS, and
-    // while everyone who shows feelings is asleep, or while the friends keep still, only when the texture
-    // would be redrawn. The stage waits on a timer rather than a request for every refresh, so that the
-    // browser has nothing to do in between.
+    // Draws a frame, then waits for the next. With nothing to watch and nobody reacting, the next frame
+    // comes CALM_FRAME_SECONDS after this one, and while everyone who shows feelings is asleep, or while
+    // the friends keep still, when the texture would next be redrawn. The stage waits on a timer rather
+    // than a request for every refresh, so that the browser has nothing to do in between.
     function animate(time) {
       frameRequest = 0;
-      const elapsed = Math.max(0, (time - lastFrame) / 1000), t = clock + elapsed;
+      const elapsed = Math.min(MAX_FRAME_SECONDS, Math.max(0, (time - lastFrame) / 1000)), t = clock + elapsed;
+      lastFrame = time;
       if (o.beforeFrame) o.beforeFrame(t);
-      const quiet = isPointerGone(time) && !watchedAt(t) && !records.some(r => r.friend.watch && r.friend.watch(t)) &&
+      const settled = draw(t, elapsed, time);
+      const quiet = (settled || isPointerGone(time)) && !watchedAt(t) && !records.some(r => r.friend.watch && r.friend.watch(t)) &&
         !(o.busy && o.busy(t));
-      const wait = !quiet ? 0 : (doze && doze.asleep) || self.reduced ? untilRedrawn(t) : CALM_FRAME_SECONDS - elapsed;
-      if (wait > 0) {
-        frameTimer = setTimeout(() => {
-          frameTimer = 0;
-          frameRequest = requestAnimationFrame(animate);
-        }, wait * 1000);
+      const drawing = (now() - time) / 1000;
+      const wait = !quiet ? 0 : (doze && doze.asleep) || self.reduced ? untilRedrawn(t) : CALM_FRAME_SECONDS - drawing;
+      if (wait <= 0) {
+        frameRequest = requestAnimationFrame(animate);
         return;
       }
-      lastFrame = time;
-      draw(t, elapsed, time);
-      frameRequest = requestAnimationFrame(animate);
+      frameTimer = setTimeout(() => {
+        frameTimer = 0;
+        frameRequest = requestAnimationFrame(animate);
+      }, wait * 1000);
     }
 
-    // Seconds from t until the texture is next redrawn, or 0 if it has been since the last frame. Where
-    // the texture keeps still, the frames keep to the rate at which it would boil.
+    // Seconds from t until the texture is next redrawn.
     function untilRedrawn(t) {
       const rate = Number.isFinite(o.boil) && o.boil > 0 ? o.boil : BOIL;
-      const drawn = Math.floor(clock * rate);
-      return Math.floor(t * rate) > drawn ? 0 : (drawn + 1) / rate - t;
+      return (Math.floor(t * rate) + 1) / rate - t;
     }
 
     // Input brings the next frame forward, rather than leaving it until a calm wait ends.
@@ -309,7 +318,7 @@
     // Draws the stage at time t on its clock, elapsed seconds after the frame before. Each friend looks
     // at what its page gives it to watch, or at a friend reacting to the reader, or else at the pointer,
     // or, with no pointer, at the friend the keyboard is on, or else around; its idle motion, its
-    // feelings and any greeting play underneath.
+    // feelings and any greeting play underneath. Returns whether every gaze and perk has settled.
     function draw(t, elapsed = Math.max(0, t - clock), time = now()) {
       const dt = Math.min(MAX_EASING_SECONDS, elapsed);
       clock = t;
@@ -327,16 +336,18 @@
         gazeEase: simulated ? 1 : 1 - Math.exp(-dt * GAZE_RATE),
         perkEase: simulated ? 1 : 1 - Math.exp(-dt * PERK_RATE),
       };
+      let settled = true;
       for (const record of records) {
         const travel = record.friend.travel ? record.friend.travel(t) : null, watching = watches.get(record);
         const given = watching && (byFriend.has(watching) ? eyes.get(byFriend.get(watching)) : watching);
         const target = given || (watched && watched !== record ? eyes.get(watched) : !gone ? pointer
           : focus && focus !== record ? eyes.get(focus) : null);
-        record.pose(t, { ...frame, travel, target, eyes: eyes && eyes.get(record) });
+        if (record.pose(t, { ...frame, travel, target, eyes: eyes && eyes.get(record) }) > SETTLED) settled = false;
         if (o.afterPose) o.afterPose(record.friend, travel);
       }
       for (const record of records) record.drawMarks(t, reduced);
       boil(t, reduced);
+      return settled;
     }
 
     // The pencil texture "boils": every friend's is redrawn o.boil times a second, cycling through the
@@ -471,6 +482,7 @@
       const keyStrokes = strokeDetector({ within: STROKE.keyWithin });
       let lookX = 0, lookY = 0, glance = 1, perk = 0, hovered = false, focused = false;
       let run = null, feeling = null, attendedSince = null, stroking = null, pendingWake = null;
+      let pinned = null;  // The feeling the `feel` option holds, which nothing ends: a hi or a stroke plays over it.
       let keyX = 0, press = null;  // Where the arrow keys have moved an imaginary hand; a finger held on the friend.
 
       const friend = {
@@ -490,7 +502,7 @@
         record.reaction = { at: -Infinity, until: Infinity, watchedUntil: Infinity };
       }
       if (o.feel && fits) {
-        feeling = feelingOf(o.feel, layers.add(A.still(E.face(o.feel, { spec })), { at: -Infinity, fade: 0 }), Infinity);
+        pinned = feeling = feelingOf(o.feel, layers.add(A.still(E.face(o.feel, { spec })), { at: -Infinity, fade: 0 }), Infinity);
         const shown = E.mark(o.feel);
         if (shown) showMark(shown.text, { at: 0, lasting: Infinity });
       }
@@ -504,6 +516,7 @@
       function listen() {
         box.addEventListener('click', event => {
           const endsPress = press && press.held && !press.down && event.timeStamp - press.liftedAt <= STROKE.click * 1000;
+          if (press) clearTimeout(press.timer);
           press = null;
           if (!endsPress) hi();
         });
@@ -599,13 +612,13 @@
         return { name, layer, until, repeat: null, curious: false };
       }
 
-      // Lets the feeling wear off from t. The marks a repeating feeling left (the z of sleep) fade out
-      // with it, so that none lingers over what comes next.
+      // Lets the feeling wear off from t, back to the pinned one, if any. The marks a repeating feeling
+      // left (the z of sleep) fade out with it, so that none lingers over what comes next.
       function calm(t = clock) {
-        if (!feeling) return;
+        if (!feeling || feeling === pinned) return;
         layers.release(feeling.layer, t);
         if (feeling.repeat) for (const mark of marks) if (mark.drifting) mark.until = Math.min(mark.until, t + E.MARK.fade);
-        feeling = null;
+        feeling = pinned;
       }
 
       // Smiles (E.smile) from `at` for `lasting` seconds, as a friend landing after the gallery's roll
@@ -625,17 +638,19 @@
         record.reaction = { at: t, until: t + E.react('surprised').duration, watchedUntil: t };  // Nobody glances at it.
       }
 
+      // A stroke from the keyboard lingers for as long as the keys may take to turn, so that keys pressed
+      // at a steady pace stroke the friend without a break.
       function stroke(x, timeStamp, detector = strokes) {
-        if (detector.move(x, timeStamp / 1000)) strokeNow();
+        if (detector.move(x, timeStamp / 1000)) strokeNow(detector === keyStrokes ? STROKE.keyWithin : STROKE.linger);
       }
 
-      function strokeNow() {
+      function strokeNow(linger = STROKE.linger) {
         if (reacting(clock)) return;
         if (stroking) {
-          stroking.last = clock;
+          Object.assign(stroking, { last: clock, linger });
           return;
         }
-        stroking = { since: clock, last: clock };
+        stroking = { since: clock, last: clock, linger };
         if (feel('content')) o.announce(E.describe('content', label));
       }
 
@@ -665,9 +680,9 @@
           feel('surprised', { at: pendingWake, held: false });
           pendingWake = null;
         }
-        if (feeling && t >= feeling.until) feeling = null;
+        if (feeling && t >= feeling.until) feeling = pinned;
         if (stroking && press && press.held && press.down) stroking.last = t;  // The finger is still on it.
-        if (stroking && t - stroking.last > STROKE.linger) {
+        if (stroking && t - stroking.last > stroking.linger) {
           if (feeling && feeling.name === 'content') calm(t);
           stroking = null;
           attendedSince = t;  // Curiosity starts afresh once the stroking stops.
@@ -682,6 +697,8 @@
           if (free && t - attendedSince >= CURIOUS.after && feel('curious', { react: false, mark: false, fade: CURIOUS.fade })) feeling.curious = true;
         }
         const repeat = feeling && feeling.repeat;
+        // After a jump in time, the repeats that would have come and gone already are skipped.
+        if (repeat && repeat.next < t - E.MARK.seconds) repeat.next += Math.floor((t - E.MARK.seconds - repeat.next) / repeat.every) * repeat.every;
         while (repeat && repeat.next <= t && repeat.next < feeling.until) {
           showMark(repeat.text, { at: repeat.next, drifting: true });
           repeat.next += repeat.every;
@@ -692,25 +709,28 @@
       // The pose for this frame: the idle motion with its glances, the feelings and any greeting, then
       // the gaze, the perk and any travel. Under reduced motion only the eyes move and only the face
       // changes; with a simulated pointer the idle motion stops, so that a screenshot comes out the same
-      // every time.
+      // every time. A friend turned inward (asleep, in its routine) does not perk up. Returns how far the
+      // gaze and the perk still have to go.
       function pose(t, { target, eyes: own, travel, reduced, moving, gazeEase, perkEase }) {
         const absorbed = !!record.reaction && record.reaction.absorbed && reacting(t);  // In its routine.
         const inward = (!!feeling && E.inward(feeling.name) && t >= feeling.layer.at) || absorbed;
         const [toX, toY] = travel ? [travel.dir * TRAVEL.look, 0] : target && !inward ? gazeToward(own, target) : [0, 0];
+        const toGlance = target || inward || travel ? 0 : 1, toPerk = (hovered || focused) && !reduced && !inward ? 1 : 0;
         lookX += (toX - lookX) * gazeEase;
         lookY += (toY - lookY) * gazeEase;
-        glance += ((target || inward || travel ? 0 : 1) - glance) * gazeEase;
-        perk += (((hovered || focused) && !reduced ? 1 : 0) - perk) * perkEase;
+        glance += (toGlance - glance) * gazeEase;
+        perk += (toPerk - perk) * perkEase;
         const acc = { stance };  // The stance it was added in, which a clip may change for a while.
         if (moving) A.addIdle(acc, idle, t + phase, glance);
         A.combine(acc, layers.sample(t, { reduced }));
-        const turn = reduced ? 0 : HEAD_TURN;
+        const turn = reduced ? 0 : HEAD_TURN, going = travel && !reduced ? travel : null;
         A.combine(acc, {
-          lookX, lookY, turnX: lookX * turn + (travel ? travel.dir * TRAVEL.turn : 0), turnY: lookY * turn,
+          lookX, lookY, turnX: lookX * turn + (going ? going.dir * TRAVEL.turn : 0), turnY: lookY * turn,
           earL: -PERK.earDegrees * perk, earR: -PERK.earDegrees * perk, widen: PERK.widen * perk,
-          squash: travel ? travel.squash : 0, tilt: travel ? travel.lean : 0,
+          squash: going ? going.squash : 0, tilt: going ? going.lean : 0,
         });
         rig.setPose(A.sample(acc), true);
+        return Math.max(Math.abs(toX - lookX), Math.abs(toY - lookY), Math.abs(toGlance - glance), Math.abs(toPerk - perk));
       }
 
       // The on-screen position of the friend's eyes (the origin of head space), and its width.

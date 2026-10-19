@@ -599,22 +599,31 @@
   // How far the friend needs its slot widened on each side, in head units: as far as its body and tail
   // extend past the box, and far enough that its label, centered under the box, keeps LABEL_GAP from a
   // neighbor's that needs no more room than the box. Ears are left out, since they may overlap a neighbor.
-  function reachOf({ rig, view, element }) {
+  // The drawing is measured once, at rest, before the stage moves anyone; the labels each time, since
+  // their face may load later.
+  function reachOf(friend) {
+    const { rig, view, element } = friend;
     const boxRect = rig.el.getBoundingClientRect(), unit = rig.el.offsetWidth / view.w;
-    let left = boxRect.left, right = boxRect.right;
-    for (const part of ['body', 'tail']) if (rig.parts[part]) {
-      const partRect = rig.parts[part].getBoundingClientRect();
-      left = Math.min(left, partRect.left); right = Math.max(right, partRect.right);
-    }
+    friend.drawnReach ??= drawnReach(rig, boxRect, unit);
     const lines = [...element.querySelector('figcaption').children].map(line => {
       const range = document.createRange();
       range.selectNodeContents(line);
       return range.getBoundingClientRect().width;
     });
     const label = Math.max(0, (Math.max(...lines) + LABEL_GAP) / 2 - boxRect.width * (1 - SLOT_OVERLAP) / 2) / unit;
+    return { left: Math.round(Math.max(label, friend.drawnReach.left)), right: Math.round(Math.max(label, friend.drawnReach.right)) };
+  }
+
+  // How far the friend's body and tail extend past its box on each side, in head units.
+  function drawnReach(rig, boxRect, unit) {
+    let left = boxRect.left, right = boxRect.right;
+    for (const part of ['body', 'tail']) if (rig.parts[part]) {
+      const partRect = rig.parts[part].getBoundingClientRect();
+      left = Math.min(left, partRect.left); right = Math.max(right, partRect.right);
+    }
     return {
-      left: Math.round(Math.max(label, (boxRect.left - left) / unit + (left < boxRect.left ? SLOT_CLEARANCE : 0))),
-      right: Math.round(Math.max(label, (right - boxRect.right) / unit + (right > boxRect.right ? SLOT_CLEARANCE : 0))),
+      left: (boxRect.left - left) / unit + (left < boxRect.left ? SLOT_CLEARANCE : 0),
+      right: (right - boxRect.right) / unit + (right > boxRect.right ? SLOT_CLEARANCE : 0),
     };
   }
 

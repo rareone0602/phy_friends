@@ -730,7 +730,8 @@ stroking every friend that shows feelings, each at least once in one visit,
 opens the feelings sheet (`tools/feelings.html`) once the last one's ♪ has
 shown.
 Options fix a pointer, a hi or a feeling for screenshots (the
-gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`) and set how long
+gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`; a feeling so fixed
+returns after a hi or a stroke) and set how long
 the friends wait before they doze (`?doze=<seconds>`). Under reduced motion
 the friends keep still but for their eyes; `PhyFriends.live.keepStill(checkbox)`
 gives a reader the same choice ("keep still"), remembered on the device in

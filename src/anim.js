@@ -10,7 +10,8 @@
  * Partial poses stack like layers: numbers add onto the neutral POSE (blush
  * multiplies), strings (eyes, eyeL, eyeR, mouth, show) are last-wins, undefined
  * leaves the field to lower layers, and null selects the spec default.
- * Afterward, sample() clamps blink and lid to 0..1 and look/turn to -1..1.
+ * Afterward, sample() clamps each field to its range (RANGE): blink and lid to
+ * 0..1, look and turn to -1..1, and so on.
  *
  * The clips here are movements (idle, hop, bounce, nod, turn, ...), and the
  * movements of a friend standing (walk, wave, cheer, jump, standUp, sitDown,
@@ -249,7 +250,9 @@
 
   // -------------------------------------------------------------- Library
   // Factories in `make` take options; `clips` holds their default instances. Loop
-  // lengths divide 8 s, so any of them layered over idle still loops in 8 s.
+  // lengths divide 8 s, so any of them layered over idle still loops in 8 s, but for
+  // bounce's 1.1 s, the hi's hop, which keeps its own timing: a layer of it over idle
+  // does not loop seamlessly.
 
   const make = {};
 

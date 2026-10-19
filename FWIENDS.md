@@ -171,7 +171,7 @@ brings the fwiends to life, and their feelings come from the emotion library:
   types.", "Everyone but Claude falls asleep." (once a visit) and, once they
   had all fallen asleep, "Everyone wakes up.", which is not said when the
   reader only moves about the page, so that it never talks over the screen
-  reader's own account.
+  reader's own account. Two things that happen at once are said together.
 - A double-click or a long press selects nothing and opens no menu, and a
   quick second tap doesn't zoom the page. The labels stay selectable, so a
   handle can still be copied.
@@ -403,15 +403,18 @@ side and four short legs.
   leaves or rests a while, they drift back to centre or glance about, unless
   one has been tabbed to: then the others look at it. A pen is followed like
   a mouse, and a finger while it touches; there is no gyroscope.
-- The stage stops drawing while none of it is in view or the page is hidden,
-  to spare a phone's battery. Its clock stops with it, so everything picks up
-  where it left off.
+- The stage draws at the screen's rate only while something needs it (a
+  pointer on the move, the eyes catching up with it, a fwiend reacting) and
+  otherwise on fours, 15 frames a second. It stops drawing while none of it is
+  in view or the page is hidden, to spare a phone's battery. Its clock stops
+  with it, so everything picks up where it left off, and a stall (a laptop
+  asleep with the page open) is skipped rather than caught up.
 - Under `prefers-reduced-motion`, or with "keep still" ticked: eyes only, no
   idle motion and a still pencil; a hi or a feeling changes just the face
   (the eye and mouth shapes, the lids and the blush), and marks neither pop
-  nor drift. The stage draws only as often as the pencil would boil. A fwiend
-  that stands stays standing, since its stance belongs to the story rather
-  than the motion.
+  nor drift. Once the eyes have caught up with the pointer, the stage draws
+  only as often as the pencil would boil. A fwiend that stands stays
+  standing, since its stance belongs to the story rather than the motion.
 
 ## scenes: films and games
 
