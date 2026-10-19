@@ -1,6 +1,6 @@
 /*!
  * say hi: the shared components. A section module gets them as k.ui, each bound to the module, so
- * that what they draw is the module's own (see HANDOFF.md):
+ * that what they draw is the module's own (the context k: core.js, contextFor):
  *
  *   hand(layer, text, o)     words written in pencil, letter by letter, on a rule (phy's lines)
  *   label(layer, text, o)    words already written (a name, a note)
@@ -8,14 +8,16 @@
  *   leader(layer, o)         a graphite line drawn from one point to another
  *   mark(layer, kind, o)     one of the house's pencil marks (tick, ring, box, arrow, caret, line, ground)
  *
- * and the film's rules for words (DECISIONS.md and BUILD/FIXES.md, draft 2):
+ * and the film's rules for words:
  *
  *   SPEECH                   the least cap height on the 1080 frame of phy's lines, of Claude's typed
  *                            numbers and of labels a viewer must read
  *   sizeFor(kind, layer, t)  the font size, in the layer's units, that gives a kind its cap height
  *                            under the camera at t
- *   holdFor(text)            how long a must-read line stays whole before it goes or the shot cuts
  *   legible(el, kind, ...)   the size check, for a module's own drawers
+ *
+ * and the rule of holds (HOLD), which hand() and typed() keep: a must-read line stays whole for a
+ * while before it goes or the shot cuts.
  *
  * Positions are in the layer's units: head units on a page's world layers (under, over), frame pixels
  * on a page's screen layer. Times are cues (bar.beat, or seconds). Every drawing is a function of t.
@@ -343,7 +345,7 @@
       });
     }
 
-    return { hand, label, typed, leader, mark, letterTimes, sizeFor, holdFor: text => holdFor(text, BEAT), legible, scaleAt, capOf, HAND, SPEECH, HOLD, TYPED_BOX };
+    return { hand, label, typed, leader, mark, sizeFor, legible, scaleAt, capOf, HAND, SPEECH, TYPED_BOX };
   }
 
   // What a page's layout needs before any module is built (pages.js): the faces' cap heights and the rule.

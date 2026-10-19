@@ -21,7 +21,7 @@
  * This module also holds the era of the house's standing template (see below), since it is built
  * first and every other module may read it when it is built.
  *
- * The reference section for the others (see HANDOFF.md): a shot, a camera, drawers that are pure
+ * The reference section for the others (the context k: core.js, contextFor): a shot, a camera, drawers that are pure
  * functions of t, a friend drawn outside the scene through k.friend, and a hand-over to the next section
  * through exports.
  */
@@ -170,7 +170,7 @@ SayHi.section('intro', k => {
     const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
     return `rgb(${p(c0).map((v, i) => Math.round(lerp(v, p(c1)[i], u))).join(',')})`;
   };
-  // What the build module may decide for what this module leaves on the page after 5.1 (HANDOFF.md):
+  // What the build module may decide for what this module leaves on the page after 5.1 (its exports.intro):
   // how much of the line and of the tape still shows at t, from 1 to 0.
   const handOver = name => {
     const given = (k.exportsOf('build').intro || {})[name];
@@ -432,13 +432,11 @@ SayHi.section('intro', k => {
   });
 
   // What the later sections build on: the template's era (its numbers, and a way to work under them);
-  // the line and frame 0 (the finale draws frame 0 again with these painters, into a page with this
-  // page's camera at 0); and the eyes' pose at a time in bars 1-4 (the build starts from it).
+  // frame 0 (the finale draws it again with these painters, into a page with this page's camera at 0);
+  // and the eyes' pose at a time in bars 1-4 (the build starts from it).
   Object.assign(k.exports, {
     template: { entries: TEMPLATE.map(({ name, before, beforeAt, after, quantum }) => ({ name, before, beforeAt, after, quantum })), tuned: TUNED, under: underTemplate },
-    line: { n: LINE.n, text: LINE.text, size: LINE.size, y: LINE.y, geometry: () => geometry },
     frame0: { line: el => paintLine(el, 0), copy: el => paintCopy(el, 0) },
-    head,
     eyesAt,
   });
 });

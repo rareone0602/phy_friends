@@ -55,7 +55,9 @@
 <script>
   // The film owns window.film (the film contract in tools/pf.py). Opened by tools/pf.py film (?film), it
   // is filmed frame by frame; otherwise it fits the window and plays with the music, or holds the
-  // frame that ?at= names: a bar and beat (?at=25.4) or seconds (?at=45.69s).
+  // frame that ?at= names: a bar and beat (?at=25.4) or seconds (?at=45.69s). Nothing moves until play
+  // is pressed, under reduced motion as without it; once asked for, the film plays as it is filmed,
+  // since the same film with its friends held still and its camera moving would be neither.
   (function () {
     'use strict';
     const SH = window.SayHi, host = document.querySelector('.sh-host');
@@ -93,10 +95,15 @@
       requestAnimationFrame(tick);
     }
 
+    // A pause keeps the time it was made at, within the film, however often the music has looped.
     function play() {
       playing = !playing;
       button.textContent = playing ? 'pause' : 'play';
-      if (!playing) { music.pause(); offset = time(); return; }
+      if (!playing) {
+        offset = time() % SayHi.beats.DURATION;
+        music.pause();
+        return;
+      }
       started = performance.now();
       music.currentTime = offset;
       music.loop = true;

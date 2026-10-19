@@ -47,7 +47,6 @@ SayHi.section('gallery', k => {
   const ORDER = slots.filter(slot => slot.name).map(slot => slot.name);    // The gallery's order.
   const HOUSE = ORDER.filter(name => name !== CLAUDE);                      // Every friend drawn on the house template.
   const WHOLE = L.whole;                                                     // The title and the rows, as every module frames them (pages.js).
-  const NAME_RULE = floors.map(floor => floor + RULE);                     // The rule under each row, where names go.
   const BASELINE = 0.85;      // A line box of 1em puts the face's baseline this far below its top (components.js).
   const DESCENDER = 0.26;     // How far the hand's descenders reach below its baseline, as a share of its size.
   // How far a friend's face reaches either side of its place, in head units: no frame's edge may fall
@@ -984,8 +983,8 @@ SayHi.section('gallery', k => {
   });
 
   // What the others build on: "lo" (where, how large, and how much is written at t: shown(t), in head
-  // units from its left end) and the camera on it, which the crash keeps; the page whole; the camera
-  // the page is left at for the finale (76.1); where "you?" lies (its middle and width, in head units),
-  // so that a camera move keeps it whole.
-  Object.assign(k.exports, { lo: { ...LO, camera: PHY_WRITES }, whole: WHOLE, end: END.frame, you: { x: empty.x, width: youWidth } });
+  // units from its left end) and the camera on it, which the crash keeps; the camera the page is left
+  // at for the finale (76.1); where "you?" lies (its middle and width, in head units), so that a camera
+  // move keeps it whole.
+  Object.assign(k.exports, { lo: { ...LO, camera: PHY_WRITES }, end: END.frame, you: { x: empty.x, width: youWidth } });
 });

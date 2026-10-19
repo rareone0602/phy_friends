@@ -5,7 +5,7 @@
  *
  * A section module registers itself with SayHi.section(name, build). Once the cast, the fonts and
  * the source data are in, the core calls each build(k) in turn with a context k through which the
- * module adds what it draws and when (see HANDOFF.md):
+ * module adds what it draws and when (contextFor, below):
  *
  *   SayHi.section('gallery', k => {
  *     k.shot('B', '13.1', '21.1');                                         // Page B is on screen.
@@ -17,7 +17,9 @@
  * page shown and calls every drawer whose window holds t, whatever was shown before. A module that
  * throws, at its build or at a seek, is reported and the others carry on; with ?strict its failure
  * fails the filming. A broken rule of the cast (friends too close, a name or a word that must not be
- * shown) always does.
+ * shown: an error whose code is PhyFriends.cast.BROKEN) always does. The film ignores the viewer's
+ * reduced-motion setting, so that it plays live as it is filmed; the page decides what that setting
+ * means (index.html).
  *
  * Queries: ?film (tools/pf.py film), ?strict, ?debug (bar.beat, section and shot over the frame),
  * ?draft (allows friends outside the film's cast, stamped as a draft), ?at=<bar.beat or seconds>.
@@ -34,7 +36,6 @@
   const FRAME = Object.freeze({ width: 1920, height: 1080, fps: 30 });
   const RULE = PF.scene.RULE;
   const BOIL = 4 / B.BEAT;                     // Texture redraws a second: four a beat (8.67), derived from the tempo.
-  const VARIANTS = PF.pencil.settings.variants;
   const MEDIUM = 'video';
   // Strings that no text on screen may hold, besides the names of friends whose owners have not agreed to video.
   const FORBIDDEN_STRINGS = Object.freeze(['examples/', '.png', '.jpg', 'views', 'generated']);
@@ -48,8 +49,8 @@
   });
 
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-  const lerp = (a, b, u) => a + (b - a) * u;
   const easeOf = e => (typeof e === 'function' ? e : A.ease[e || 'inOut']);
+  const isBrokenRule = error => !!error && error.code === PF.cast.BROKEN;
 
   // ----------------------------------------------------------- Failures
 
@@ -58,9 +59,10 @@
   const reported = new Set();
 
   // Reports a module's failure, once per owner, phase and message: loudly on the console, and in the
-  // frame. A broken rule of the cast, or any failure under ?strict, is reported as an error, which
-  // tools/pf.py film treats as fatal; anything else as a warning, so that the other modules go on.
-  function fail(owner, phase, error, t = null, { rule = false } = {}) {
+  // frame. A broken rule of the cast (by its code, unless rule says), or any failure under ?strict, is
+  // reported as an error, which tools/pf.py film treats as fatal; anything else as a warning, so that
+  // the other modules go on.
+  function fail(owner, phase, error, t = null, { rule = isBrokenRule(error) } = {}) {
     const message = String((error && error.message) || error);
     const entry = { owner, phase, message, t, rule };
     const key = `${owner}|${phase}|${message}`;
@@ -119,10 +121,11 @@
     return Object.keys(loaded.cast.friends).filter(id => PF.cast.agreed(id, MEDIUM));
   }
 
-  // Every name and id that must not be shown: those of the friends outside the film's cast.
+  // Every id, name, handle and link that must not be shown: those of the friends outside the film's
+  // cast, each handle also without its '@' or site ('fb/'), as it might be written.
   function forbiddenNames() {
     return Object.entries(loaded.cast.friends).filter(([id]) => !PF.cast.agreed(id, MEDIUM))
-      .flatMap(([id, entry]) => [id, entry.name]);
+      .flatMap(([id, { name, credit }]) => [id, name, credit.handle, credit.handle.replace(/^(@|[\w.-]+\/)/, ''), credit.href]);
   }
 
   // ---------------------------------------------------------------- Era
@@ -349,9 +352,11 @@
     page.el.querySelector('.sh-scenes').appendChild(holder);
     // No frame of the film carries credits: a link in a video cannot be followed, so the roll call writes
     // the owners' handles large and the video's post links them (FWIENDS.md).
+    // Every frame is drawn as it is filmed, whatever the viewer's reduced-motion setting (the page decides
+    // what that means for the film as a whole: index.html).
     const scene = PF.scene.create(holder, {
       width: page.world.width, height: page.world.height, ground: page.ground, paper: false, margin: false,
-      boil: BOIL, medium: MEDIUM, credits: false, strict: true,
+      boil: BOIL, medium: MEDIUM, credits: false, strict: true, reducedMotion: { matches: false },
     });
     // A scene without a duration is a live one, which forgets the cues that ended two seconds before
     // the time of any frame it draws itself (film/scene.js, pruneCues); a browser frame can come
@@ -388,19 +393,10 @@
   // The camera at t: where its cues have taken it, each easing from where the last left it, as
   // film/scene.js moves its own (which the page's scenes are given too).
   function cameraAt(page, t) {
-    let state = { x: page.world.width / 2, y: page.world.height / 2, zoom: 1 };
-    for (const cue of page.cameraCues) {
-      if (t < cue.at) break;
-      const u = cue.duration > 0 ? clamp((t - cue.at) / cue.duration, 0, 1) : 1, k = easeOf(cue.ease)(u);
-      state = {
-        x: lerp(state.x, cue.to.x ?? state.x, k), y: lerp(state.y, cue.to.y ?? state.y, k),
-        zoom: lerp(state.zoom, cue.to.zoom ?? state.zoom, k),
-      };
-    }
-    return state;
+    return PF.scene.cameraAt(page.cameraCues, { x: page.world.width / 2, y: page.world.height / 2, zoom: 1 }, t);
   }
 
-  // The film's one rule for a frame (DECISIONS.md): what a shot shows, from its top to its bottom in a
+  // The film's one rule for a frame: what a shot shows, from its top to its bottom in a
   // page's world units, lies with the same paper above and below it, lifted by LIFT of the frame's
   // height to the frame's optical center. Returns the camera that frames it so at a zoom, centered on x.
   function frameBox(page, { top, bottom, x = page.world.width / 2, zoom = 1 }) {
@@ -431,12 +427,13 @@
 
   // Draws the frame at t. Returns a promise that resolves once every texture the frame shows has
   // been decoded, so that tools/pf.py films the frame complete. The film loops, so a time past its end
-  // (the end itself included) draws the frame it runs back into.
+  // (the end itself included) draws the frame it runs back into. A frame filmed is painted from its
+  // markup alone (fresh); one played live is not, which keeps the film playing at its pace.
   function seek(t) {
     t = Number(t) || 0;
     t = t >= B.DURATION ? t % B.DURATION : Math.max(0, t);
     now = t;
-    fresh();
+    if (MODE.filming) fresh();
     const values = frameValues();
     applyEra(values);
     const shown = pagesShownAt(t);
@@ -514,7 +511,7 @@
     try {
       built.scene.seek(t);
     } catch (error) {
-      fail(page.owner, `page ${page.id}`, error, t, { rule: /stand .* apart|may not|not agreed/.test(String(error.message)) });
+      fail(page.owner, `page ${page.id}`, error, t);
     }
     showParts(page, built, t);
   }
@@ -676,7 +673,7 @@
   // Throws if a string may not be shown; for components to check their text when they are made.
   function ensureShowable(text, what = 'text') {
     const problem = textProblem(text);
-    if (problem) throw new Error(`say hi: ${what} may not be shown: ${problem}`);
+    if (problem) throw PF.cast.broken(`say hi: ${what} may not be shown: ${problem}`);
     return text;
   }
 
@@ -701,7 +698,7 @@
   function friend(owner, name) {
     PF.cast.friend(name);
     if (!PF.cast.agreed(name, MEDIUM) && !MODE.draft) {
-      throw new Error(`say hi: ${owner} draws a friend outside the film's cast; only friends whose owners agreed to video may be drawn`);
+      throw PF.cast.broken(`say hi: ${owner} draws a friend outside the film's cast; only friends whose owners agreed to video may be drawn`);
     }
     drawnFriends.add(name);
     const mounts = new WeakMap();
@@ -743,10 +740,9 @@
     };
   }
 
-  // The pencil texture's boil variant at t.
-  function variantAt(t) {
-    return Math.floor(t * BOIL + 1e-9) % VARIANTS;
-  }
+  // The pencil texture's boil variant at t, and how many times the film has boiled by then (film/scene.js).
+  const variantAt = t => PF.pencil.variantAt(t, BOIL);
+  const boilStep = t => PF.pencil.boilStep(t, BOIL);
 
   // An SVG string with its pencil texture redrawn in the boil variant for t.
   function withVariant(svg, t) {
@@ -789,8 +785,8 @@
 
   // ------------------------------------------------------- Module context
 
-  // What a module's build is given (see HANDOFF.md). Everything it adds is owned by it, so that a
-  // failure is reported under its name and keeps to its own drawings.
+  // What a module's build is given. Everything it adds is owned by it, so that a failure is reported
+  // under its name and keeps to its own drawings.
   function contextFor(module) {
     const owner = module.name;
     const span = (from, to) => [B.time(from), to === undefined ? Infinity : B.time(to)];
@@ -801,7 +797,7 @@
     };
     const k = {
       name: owner,
-      beats: B, at: B.at, time: B.time, FRAME, RULE, BOIL, MODE, pattern, during,
+      beats: B, at: B.at, time: B.time, FRAME, RULE, BOIL, MODE, pattern, during, variantAt, boilStep,
       page: pageOf,
       get pages() { return [...pages.keys()]; },
       // Defines another page (see definePage); its id must be new.
@@ -1016,7 +1012,7 @@
   }
 
   // Notes every must-read line that goes, or whose page is cut away, before it has been held whole for
-  // its time (DECISIONS.md, the rule of holds). A note, not a failure: the film still runs.
+  // its time (the rule of holds, components.js). A note, not a failure: the film still runs.
   function checkHolds() {
     for (const read of reads) {
       const pageEl = read.layer && read.layer.closest && read.layer.closest('.sh-page');
@@ -1030,10 +1026,7 @@
   }
 
   // Shared with pages.js and components.js.
-  const internals = {
-    FRAME, RULE, BOIL, MODE, ROOT, B, definePage, frameBox, pages, friend, filmCast, eraValues, applyEra, underEra, eraSpec, eraKey, withEraSpecs,
-    defineEra, cameraAt, layerScale, reads, fail, ensureShowable, variantAt, withVariant, applyParts, stage, notes, get now() { return now; },
-  };
+  const internals = { FRAME, definePage, frameBox, filmCast, layerScale, reads, stage, notes };
 
   // Starts the film in host and makes the page filmable (the film contract in tools/pf.py): the page
   // owns window.film itself, since film/scene.js's own film() would take over the whole page.

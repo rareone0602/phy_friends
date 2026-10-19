@@ -136,7 +136,19 @@
       scene.seek(6);
       assertEqual(yuda.rig.pose.eyes, 'closed', 'asleep');
       assertEqual(shown(), ['z'], 'one z at a time');
-      assertEqual(el.querySelectorAll('.pf-mark').length, 1 + 3, 'a z every 2 s while asleep');
+      const zAt = t => { scene.seek(t); return shown().includes('z'); };
+      assertEqual([2.9, 3.1, 4.5, 5.1, 7.1, 8.5, 9.1].map(zAt), [false, true, false, true, true, false, false], 'a z every 2 s while asleep');
+      assertEqual(el.querySelectorAll('.pf-mark').length, 2, 'drawn in one node');
+    });
+  });
+
+  test('a mark that repeats for as long as a feeling is held is drawn as it comes round, not laid out ahead', () => {
+    withScene({}, (scene, el) => {
+      const yuda = scene.add('yuda', { x: 800 });
+      yuda.feel('asleep', { at: 0, until: Infinity });
+      assertEqual(el.querySelectorAll('.pf-mark').length, 1, 'one node, whatever the hold');
+      const zAt = t => { scene.seek(t); return [...el.querySelectorAll('.pf-mark')].some(node => node.style.display !== 'none'); };
+      assertEqual([3600.5, 3601.5, 10.5, 3602.5].map(zAt), [true, false, true, true], 'an hour on, and back');
     });
   });
 
@@ -155,6 +167,35 @@
     withScene({}, scene => {
       scene.add('kevin', { x: 700 });
       assertThrows(() => scene.add('brian', { x: 860 }), /K3V1N and Brian stand -?\d+ head units apart, but strangers keep at least 40/);
+    });
+  });
+
+  test('strangers who turn keep their distance in the outlines they are drawn in', () => {
+    withScene({}, scene => {
+      const howdi = scene.add('howdi', { x: 400 }), front = howdi.extent(), back = howdi.extent({ facing: 180 });
+      assert(Math.abs(back.right - front.right) > 1, "from behind, Howdi's tail is on his other side");
+      // Terry as close as the outlines facing the viewer allow, then both turn their backs.
+      const terry = scene.add('terry', { x: 1500 });
+      terry.moveTo(400 + front.right + PhyFriends.cast.gap('howdi', 'terry') + terry.extent().left, { at: 0, duration: 0 });
+      const away = PhyFriends.anim.still({ facing: 180 });
+      howdi.play(away, { at: 1, fade: 0 });
+      terry.play(away, { at: 1, fade: 0 });
+      scene.check({ to: 0.9 });
+      const error = assertThrows(() => scene.check({ to: 1.5 }), /Howdi and Terry stand -?\d+ head units apart/);
+      assertEqual(error.code, PhyFriends.cast.BROKEN, "a broken rule carries the cast's code");
+    });
+  });
+
+  test("a broken rule carries the cast's code, and a mistake does not", () => {
+    withScene({}, scene => {
+      const yuda = scene.add('yuda', { x: 400 }), terry = scene.add('terry', { x: 1100 });
+      const broken = [
+        assertThrows(() => yuda.say('hello'), /no voice/),
+        assertThrows(() => yuda.say('!', { to: terry }), /may not talk to/),
+        assertThrows(() => scene.add('brian', { x: 1000 }), /stand -?\d+ head units apart/),
+      ];
+      assertEqual(broken.map(error => error.code), [1, 2, 3].map(() => PhyFriends.cast.BROKEN));
+      assertEqual(assertThrows(() => scene.add('nobody'), /not in the cast/).code, undefined);
     });
   });
 
@@ -225,6 +266,69 @@
       assertEqual(handOf(mark.node), ['600', INK_2], 'a fwiend writes in the hand pressed harder, in ink-2');
       assert(heart.node.querySelector('svg') && !heart.node.textContent.includes('heart'), 'a mark written is drawn, as said');
     });
+  });
+
+  test('a writing set to another mark is drawn as that mark, and words set by the host are written', () => {
+    withScene({}, scene => {
+      const phy = scene.add('phy', { x: 400 }), yuda = scene.add('yuda', { x: 1100 });
+      const note = scene.write('!', { by: yuda, at: 0 });
+      note.set({ text: 'heart' });
+      assert(note.node.dataset.mark === 'heart' && note.node.querySelector('svg') && !note.node.textContent.includes('heart'), 'a heart, not the word');
+      note.set({ text: '?' });
+      assertEqual([note.node.dataset.mark, note.node.textContent], ['?', '?'], 'a written mark');
+      assertThrows(() => note.set({ text: 'hello' }), /Yuda has no voice/, 'still no words');
+      const line = scene.write('♪', { by: phy, at: 0 });
+      assert(line.node.querySelector('svg'), "the host's ♪ is drawn");
+      line.set({ text: 'hello' });
+      assertEqual([line.node.dataset.mark, line.node.textContent], [undefined, 'hello'], 'and its words written');
+    });
+  });
+
+  test('moves cued out of time order make the frames of the same moves cued in order', () => {
+    const film = order => withScene({}, (scene, el) => {
+      const phy = scene.add('phy', { x: 300 }), yuda = scene.add('yuda', { x: 1300 });
+      const cues = [
+        () => yuda.stand({ at: 0.5 }), () => phy.moveTo(100, { at: 1 }), () => yuda.moveTo(1100, { at: 2 }),
+        () => phy.leap({ at: 3 }), () => phy.moveTo(500, { at: 5 }), () => yuda.exit({ at: 6 }),
+      ];
+      for (const i of order) cues[i]();
+      return [0, 1.5, 2.5, 3.2, 4.99, 5.05, 5.5, 7, 12].map(t => `${snapshot(scene.seek(t).el)}|${phy.state(t).x}|${yuda.visibleAt(t)}`);
+    });
+    const inOrder = film([0, 1, 2, 3, 4, 5]);
+    assertEqual(film([5, 4, 3, 2, 1, 0]), inOrder, 'backward');
+    assertEqual(film([4, 2, 5, 0, 3, 1]), inOrder, 'shuffled');
+  });
+
+  test('a move cut short by a later one stays cut short when a third begins', () => {
+    withScene({}, scene => {
+      const phy = scene.add('phy', { x: 300 });
+      phy.moveTo(1300, { at: 0, duration: 10 }).moveTo(700, { at: 2, duration: 1 }).moveTo(500, { at: 5, duration: 1 });
+      assertEqual([phy.state(4).x, phy.state(7).x], [700, 500]);
+    });
+  });
+
+  test('a live scene forgets the cues that have ended, and draws on as it would have', async () => {
+    const el = document.createElement('div');
+    Object.assign(el.style, { position: 'fixed', left: '0', top: '0', width: '800px', opacity: '0' });
+    document.body.appendChild(el);
+    const scene = S.create(el, { width: 1600, height: 900, strict: true });
+    try {
+      const yuda = scene.add('yuda', { x: 500 });
+      yuda.stand({ at: 0.5 }).moveTo(700, { at: 1 }).exit({ at: 4 }).enter({ from: 'right', to: 600, at: 6 });
+      const cake = scene.prop('cake', { x: 1200 }).moveTo({ x: 1300 }, { at: 1, duration: 1, arc: 30 }).state('lit', true, { at: 2 });
+      const note = scene.write('hello', { at: 0, until: 3 });
+      const now = () => [cake.at(20), yuda.state(20).x, yuda.stanceAt(20), yuda.visibleAt(20)];
+      const before = now();
+      scene.seek(20).play();
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      scene.pause();
+      assert(!note.node.isConnected, 'the writing that ended is gone');
+      assertEqual(now(), before, 'the rest is as it was');
+      assert([...cake.node.querySelectorAll('[data-pf-show="lit"]')].every(g => g.getAttribute('display') === null), 'the cake is still lit');
+    } finally {
+      scene.destroy();
+      el.remove();
+    }
   });
 
   test('the host may talk to anyone and hand them things', () => {

@@ -739,7 +739,7 @@ SayHi.section('method', k => {
       }
       // The render: the drawing at the render's time, in the boil of the frame shown, with every part but
       // the paws and feet left out.
-      const variant = String(Math.floor(t * k.BOIL + 1e-9) % PF.pencil.settings.variants), card = el.firstChild;
+      const variant = String(k.variantAt(t)), card = el.firstChild;
       if (card.dataset.variant !== variant) {
         if (!drawn.has(variant)) drawn.set(variant, phyDrawn.svg(t, { era: when, view: cardView, pose: {}, uid }));
         card.dataset.variant = variant;
@@ -907,10 +907,8 @@ SayHi.section('method', k => {
   const ONIGIRI = SayHi.source.onigiri;
   const [, onigiriName, onigiriObject] = ONIGIRI.text.match(/^(.*?=)\s*(\{.*)$/) || [];
   if (!onigiriObject || !/square: [\d.]+/.test(onigiriObject) || !/taper: [\d.]+/.test(onigiriObject)) throw new Error('say hi: the ONIGIRI line has no square or taper');
-  // Where the box goes on the frame: the gallery's choice (exports.gallery.rice, frame pixels: the box's
-  // middle), else the middle of the frame's top.
-  const ricePlace = k.exportsOf('gallery').rice || {};
-  const RICE = { from: at('38.3'), to: at('40.1'), settled: at('40.1'), x: ricePlace.x ?? k.FRAME.width / 2, y: ricePlace.y ?? 200,
+  // Where the box goes on the frame (frame pixels: the box's middle): the middle of the frame's top.
+  const RICE = { from: at('38.3'), to: at('40.1'), settled: at('40.1'), x: k.FRAME.width / 2, y: 200,
     typing: [at('38.3.5'), at('38.4')], size: k.ui.sizeFor('typed', pageB.screen, 0), name: k.ui.sizeFor('label', pageB.screen, 0, 'mono') };
   // A number as the source writes it.
   const numeral = v => String(Math.round(v * 1000) / 1000);

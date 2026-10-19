@@ -70,7 +70,6 @@
 
   SayHi.section('owners', k => {
     const A = PF.anim, E = PF.emotion, BOX = PF.scene.BOX, RULE = k.RULE, BEAT = k.beats.BEAT;
-    const VARIANTS = PF.pencil.settings.variants;
     const time = k.time;
     const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
     const lerp = (a, b, u) => a + (b - a) * u;
@@ -384,7 +383,7 @@
         const pose = { stance: 'sit' };
         A.addIdle(pose, idle, t + phase, 0);
         rig.setPose(A.sample(pose), true);
-        rig.setTexture(Math.floor(t * k.BOIL + 1e-9) % VARIANTS);
+        rig.setTexture(k.variantAt(t));
       });
     }
 

@@ -33,7 +33,7 @@
   // rows (phy's lines, Claude's numbers, the test run, the address), from the rule `below` rules under
   // row 2's floor, its second line `next` rules under that.
   const BANDS = { above: 8, below: 4, next: 4 };
-  // Page B's composition (DECISIONS.md, the frame rule; BUILD/FIXES.md and FIXES2.md). The gallery's
+  // Page B's composition, by the film's rule for a frame (core.js, frameBox). The gallery's
   // title, "phy's fwiends", heads the rows: it sits TITLE.above rule over the band rule above row 1 (nine
   // rules over row 1's floor, about its own capitals' height above the tallest ears), left-aligned with
   // row 1, its capitals TITLE.cap frame pixels tall at zoom 1. (The finale's leaps, which would reach
@@ -48,7 +48,6 @@
   // The wides keep this many frame pixels between the rows' outermost reaches and the frame's sides: the
   // rows fill the frame's width but for them, which sets the wides' zoom.
   const SIDES = 34;
-  const OUTLINE_PARTS = ['base', 'face', 'hair', 'body', 'tail'];   // As film/scene.js measures an outline.
   const FACINGS = [0, 90, 180, 270];
   const STANCES = ['sit', 'stand'];
   // The empty place, the viewer's: a place as wide as a friend's (its reach either side is the mean of
@@ -191,10 +190,10 @@
           const poses = turns ? posesToMeasure() : FACINGS.map(facing => ({ ...laptopPose(spec), facing }));
           for (const pose of poses) {
             rig.setPose(pose, true);
-            const r = outlineReach(rig, OUTLINE_PARTS), kept = facings[pose.facing];
+            const r = PF.scene.reach(rig), kept = facings[pose.facing];
             kept.left = Math.max(kept.left, r.left);
             kept.right = Math.max(kept.right, r.right);
-            if (!turns) beyond = Math.max(beyond, outlineReach(rig, ['ground']).right);
+            if (!turns) beyond = Math.max(beyond, PF.scene.reach(rig, ['ground']).right);
           }
           host.replaceChildren();
         }
@@ -211,21 +210,6 @@
   // Every facing in both stances: the poses a friend that turns is measured in.
   function posesToMeasure() {
     return FACINGS.flatMap(facing => STANCES.map(stance => ({ facing, stance })));
-  }
-
-  // How far a rig's named parts reach left and right of the drawing's middle, in head units.
-  function outlineReach(rig, parts) {
-    const box = rig.svg.getBoundingClientRect(), unit = box.width / BOX, middle = box.left + box.width / 2;
-    let left = 0, right = 0;
-    for (const part of parts) {
-      const node = rig.parts[part];
-      if (!node) continue;
-      const r = node.getBoundingClientRect();
-      if (!r.width) continue;
-      left = Math.max(left, (middle - r.left) / unit);
-      right = Math.max(right, (r.right - middle) / unit);
-    }
-    return { left, right };
   }
 
   // Claude's pose at its laptop, from its own routine.

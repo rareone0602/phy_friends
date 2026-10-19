@@ -330,7 +330,7 @@ SayHi.section('finale', k => {
       }
     }
     if (showsPage) {
-      const size = RESULT.bottom - RESULT.top, variant = String(Math.floor(t * k.BOIL + 1e-9));
+      const size = RESULT.bottom - RESULT.top, variant = String(k.boilStep(t));
       if (page.dataset.variant !== variant) {
         page.innerHTML = phyDrawn.svg(t, { ...RENDER, uid: 'sh-finale-hello' });
         const svg = page.firstElementChild;
@@ -545,7 +545,9 @@ SayHi.section('finale', k => {
     });
   });
 
-  // Frame 0's panel: where it lies in the frame at t, then growing to fill it, exactly, by the last frame.
+  // Frame 0's panel: where it lies in the frame at t, then growing until it would fill the frame exactly at
+  // the film's end, which no frame reaches: the last frame shows it three quarters grown, and the loop's
+  // first frame, frame 0 itself, completes it.
   function panelRect(t) {
     const corner = onPage(PANEL.x, PANEL.y), p = gallery.toFrame(corner.x, corner.y, t);
     const small = { x: p.x, y: p.y, w: PANEL.w * COLO.scale * p.scale, h: PANEL.h * COLO.scale * p.scale };

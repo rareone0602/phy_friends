@@ -439,8 +439,9 @@ checks these rules and refuses to break them.
 | touch, compete head to head, tease | no | only if both owners opt in |
 
 - Strangers keep a strip of paper between them, 40 head units between
-  outlines (ears apart); fwiends who know each other may stand side by side.
-  Choreograph so that nobody hops past anybody.
+  outlines (ears apart), whichever way they face and whether they sit or
+  stand; fwiends who know each other may stand side by side. Choreograph so
+  that nobody hops past anybody.
 - **Only phy speaks in words,** said or written on the sheet. The others
   speak in marks, since only their owners know how they talk: ! ? !? … z ??,
   and drawn ones, a ♪, a heart, a bead of sweat, a sparkle, a light bulb and a
@@ -482,7 +483,8 @@ checks these rules and refuses to break them.
 - Films boil as the gallery does, 8 times a second. Under
   reduced motion a scene plays as the motion rules above say; travel becomes a
   glide, a fwiend stands up or sits down in a cut, and a film shows its last
-  frame and waits to be played.
+  frame and waits to be played. A music video (say hi) waits too, and once
+  played, plays as it is filmed: half of it held still would be another film.
 
 **Props and sets.** Everything in a scene that is not a fwiend is drawn as a
 fwiend is, so that the sheet keeps one hand.

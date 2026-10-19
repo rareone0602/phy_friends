@@ -17,8 +17,10 @@
  * The cast rules (src/cast.js) are checked where friends meet: a friend without a voice may only use
  * marks, said or written, unless the scene is made for its owner alone (madeFor), which may draft it a
  * few lines; words aimed at another friend need the two to know each other, and friends never stand
- * closer than their relation allows (checked on every frame; see check()). A scene that shows a
- * friend whose owner has not agreed to its medium is stamped as a draft.
+ * closer than their relation allows, in the outlines of the facings and stances they are drawn in
+ * (checked on every frame; see check()). A broken rule throws an error whose code is
+ * PhyFriends.cast.BROKEN. A scene that shows a friend whose owner has not agreed to its medium is
+ * stamped as a draft.
  *
  * Example:
  *
@@ -59,6 +61,25 @@
   const lerp = (a, b, u) => a + (b - a) * u;
   const smooth = A.ease.smooth;
 
+  const { variantAt } = PF.pencil;  // The texture's variant at a time, for a boil rate: a function of time alone.
+
+  // Where a camera is at t: from base ({ x, y, zoom }), each cue ({ to, at, duration, ease }, in time order) eases it
+  // from where the cues before it left it to cue.to (any of x, y and zoom) over cue.duration, by cue.ease (a function,
+  // or the name of one in PhyFriends.anim.ease; inOut if none).
+  function cameraAt(cues, base, t) {
+    let state = base;
+    for (const cue of cues) {
+      if (t < cue.at) break;
+      const ease = typeof cue.ease === 'function' ? cue.ease : A.ease[cue.ease || 'inOut'];
+      const u = cue.duration > 0 ? clamp((t - cue.at) / cue.duration, 0, 1) : 1, k = ease(u);
+      state = {
+        x: lerp(state.x, cue.to.x ?? state.x, k), y: lerp(state.y, cue.to.y ?? state.y, k),
+        zoom: lerp(state.zoom, cue.to.zoom ?? state.zoom, k),
+      };
+    }
+    return state;
+  }
+
   // --------------------------------------------------------------- Scene
 
   // Options: width and height (the frame, in head units), ground (the y of the floor rule), paper
@@ -66,16 +87,22 @@
   // margin line, or false), boil (texture redraws per second; 0 keeps it still),
   // medium ('video' or 'games', for the draft stamp), credits (true shows the owners of the friends
   // in frame), loop (a live scene with a duration starts again at the end), strict (throw rather
-  // than warn when friends stand too close; always on while filming), and madeFor (the name of the
-  // friend whose owner alone the film is made for, which may then say and write words; src/cast.js).
+  // than warn when friends stand too close; always on while filming), madeFor (the name of the
+  // friend whose owner alone the film is made for, which may then say and write words; src/cast.js),
+  // and reducedMotion (a MediaQueryList, or anything with `matches`: the viewer's setting by default;
+  // { matches: false } draws every frame as it is filmed, for a page that decides itself what reduced
+  // motion means).
   function create(el, opts = {}) {
-    const o = { width: 1600, height: 900, ground: null, paper: true, margin: false, boil: 0, medium: 'video', credits: true, loop: false, strict: false, madeFor: null, ...opts };
+    const o = {
+      width: 1600, height: 900, ground: null, paper: true, margin: false, boil: 0, medium: 'video', credits: true, loop: false, strict: false, madeFor: null,
+      reducedMotion: typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null, ...opts,
+    };
     if (o.madeFor != null) PF.cast.friend(o.madeFor);
     const ground = o.ground ?? Math.floor((o.height - RULE * 1.5) / RULE) * RULE;
-    const reducedQuery = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
     const dom = buildStage(el, o);
     const actors = [], props = [], writings = [], cameraCues = [], steps = [], endHandlers = [];
     let cameraBase = { x: o.width / 2, y: o.height / 2, zoom: 1 };
+    const cameraNow = t => cameraAt(cameraCues, cameraBase, t);
     const warned = new Set();
     let time = 0, duration = null, playing = false, filming = false, destroyed = false, frameRequest = 0, lastFrame = 0;
     let inView = true, pointer = null, layout = { fit: 1, width: 0, height: 0 }, boilVariant = 0, creditsText = null;
@@ -89,11 +116,11 @@
       set duration(d) { duration = d; },
       get playing() { return playing; },
       get filming() { return filming; },
-      get reduced() { return !filming && !!(reducedQuery && reducedQuery.matches); },
+      get reduced() { return !filming && !!(o.reducedMotion && o.reducedMotion.matches); },
       get madeFor() { return o.madeFor; },
       get actors() { return actors.slice(); },
       get pointer() { return pointer; },
-      add, prop, write, camera, team, rivals, seek, play, pause, onStep, onEnd, film, check, toWorld, cameraAt, destroy,
+      add, prop, write, camera, team, rivals, seek, play, pause, onStep, onEnd, film, check, toWorld, cameraAt: cameraNow, destroy,
     };
 
     // ---- Building
@@ -146,20 +173,25 @@
     // from left to right, or stroke by stroke with pen: strokes made for the text (src/pen.js), such as
     // TITLE_PEN (site/title-pen.js). graphite: true puts the graphite filter over it, which STYLE.md §6
     // keeps for a title. by (an actor, or a friend's name) is the friend writing: its words are checked
-    // as say() checks them, whenever they are set, and a mark is drawn as said; a friend other than the
-    // host writes as its marks are, in the hand pressed harder, in ink-2.
+    // as say() checks them, whenever they are set, and a mark is drawn as said, set() included; a friend
+    // other than the host writes as its marks are, in the hand pressed harder, in ink-2.
     function write(text, w = {}) {
       if (w.pen && !PF.pen) throw new Error('phy_friends/scene: write() with a pen needs src/pen.js');
       const by = w.by == null ? null : typeof w.by === 'string' ? w.by : w.by.name;
       const vet = words => { if (by != null) PF.cast.ensureVoice(by, words, { madeFor: o.madeFor }); };
+      const isMark = words => by != null && VOICED_MARKS.includes(words);
       vet(text);
       const hand = by != null && by !== PF.cast.host ? { tone: 'ink-2', pressed: true } : {};
       const item = createWriting(dom, text, {
         x: RULE, y: ground, size: 40, at: -Infinity, seconds: 0, until: Infinity, rotate: -1, tone: 'ink', align: 'left', graphite: false, pen: null,
-        ...w, ...hand, mark: by != null && VOICED_MARKS.includes(text),
+        ...w, ...hand, mark: isMark(text),
       });
       const set = item.set;
-      item.set = values => { if ('text' in values) vet(values.text); return set(values); };
+      item.set = values => {
+        if (!('text' in values)) return set(values);
+        vet(values.text);
+        return set({ ...values, mark: isMark(values.text) });
+      };
       writings.push(item);
       redraw();
       return item;
@@ -196,7 +228,7 @@
     }
 
     function draw() {
-      const t = time, cam = cameraAt(t);
+      const t = time, cam = cameraNow(t);
       // A rule stays at least one device pixel thick however small the stage is drawn, or whole bands drop out.
       const ruleWidth = `${Math.max(1.4, 1 / (layout.fit * cam.zoom * (devicePixelRatio || 1)))}px`;
       if (ruleWidth !== dom.ruleWidth) dom.world.style.setProperty('--pf-rule-width', dom.ruleWidth = ruleWidth);
@@ -209,23 +241,10 @@
       updateCredits(t, cam);
     }
 
-    function cameraAt(t) {
-      let state = cameraBase;
-      for (const cue of cameraCues) {
-        if (t < cue.at) break;
-        const u = cue.duration > 0 ? clamp((t - cue.at) / cue.duration, 0, 1) : 1, k = cue.ease(u);
-        state = {
-          x: lerp(state.x, cue.to.x ?? state.x, k), y: lerp(state.y, cue.to.y ?? state.y, k),
-          zoom: lerp(state.zoom, cue.to.zoom ?? state.zoom, k),
-        };
-      }
-      return state;
-    }
-
     // Redraws every pencil texture with another seed a few times a second, as hand-drawn animation
-    // does; the variant is a function of time, so a filmed scene boils identically every time.
+    // does; the variant is a function of time (variantAt), so a filmed scene boils identically every time.
     function updateBoil(t) {
-      const variant = o.boil > 0 ? Math.floor(t * o.boil) % BOIL_VARIANTS : 0;
+      const variant = variantAt(t, o.boil);
       if (variant === boilVariant) return;
       boilVariant = variant;
       for (const image of el.querySelectorAll('image[data-pf-texture]')) {
@@ -237,22 +256,24 @@
     // ---- The cast rules on the page
 
     // Friends whose drawings could overlap (floors less than a cut-out apart) keep at least their
-    // relation's gap between their outlines; one standing a rule behind another counts.
+    // relation's gap between their outlines, as they are drawn at t (each in its facing and stance);
+    // one standing a rule behind another counts. Called once every friend is drawn at t.
     function checkSpacing(t) {
       const standing = actors.filter(actor => actor.visibleAt(t) && actor.extent());
+      const reaches = new Map(standing.map(actor => [actor, actor.extentAsDrawn()]));
       for (let i = 0; i < standing.length; i++) {
         for (let j = i + 1; j < standing.length; j++) {
-          const problem = spacingProblem(standing[i], standing[j], t);
+          const problem = spacingProblem(standing[i], standing[j], t, reaches);
           if (problem) report(problem);
         }
       }
     }
 
-    function spacingProblem(a, b, t) {
+    function spacingProblem(a, b, t, reaches) {
       const sa = a.state(t), sb = b.state(t);
       if (Math.abs(sa.y - sb.y) >= BOX) return null;
       const [left, right, sl, sr] = sa.x <= sb.x ? [a, b, sa, sb] : [b, a, sb, sa];
-      const gap = (sr.x - right.extent().left) - (sl.x + left.extent().right), need = PF.cast.gap(a.name, b.name);
+      const gap = (sr.x - reaches.get(right).left) - (sl.x + reaches.get(left).right), need = PF.cast.gap(a.name, b.name);
       if (gap >= need - 0.5) return null;
       const relation = PF.cast.relation(a.name, b.name);
       return {
@@ -264,7 +285,7 @@
     }
 
     function report(problem) {
-      if (filming || o.strict) throw new Error(problem.message);
+      if (filming || o.strict) throw PF.cast.broken(problem.message);
       if (warned.has(problem.key)) return;
       warned.add(problem.key);
       console.warn(problem.message);
@@ -373,9 +394,14 @@
     // A live scene keeps only the cues that can still show; a film keeps them all, to seek back.
     function pruneCues() {
       if (duration != null) return;
-      for (const actor of actors) actor.prune(time - PRUNE_AFTER);
+      const before = time - PRUNE_AFTER;
+      for (const actor of actors) actor.prune(before);
+      for (const item of props) item.prune(before);
+      for (let i = writings.length - 1; i >= 0; i--) {
+        if (writings[i].until < before) { writings[i].node.remove(); writings.splice(i, 1); }
+      }
       // A finished camera move becomes where the camera starts from.
-      while (cameraCues.length && cameraCues[0].at + cameraCues[0].duration < time - PRUNE_AFTER) {
+      while (cameraCues.length && cameraCues[0].at + cameraCues[0].duration < before) {
         const { to } = cameraCues.shift();
         cameraBase = { x: to.x ?? cameraBase.x, y: to.y ?? cameraBase.y, zoom: to.zoom ?? cameraBase.zoom };
       }
@@ -437,7 +463,7 @@
 
     // The world point under a client (CSS px) position.
     function toWorld(clientX, clientY) {
-      const rect = el.getBoundingClientRect(), cam = cameraAt(time), scale = layout.fit * cam.zoom;
+      const rect = el.getBoundingClientRect(), cam = cameraNow(time), scale = layout.fit * cam.zoom;
       return { x: (clientX - rect.left - layout.width / 2) / scale + cam.x, y: (clientY - rect.top - layout.height / 2) / scale + cam.y };
     }
 
@@ -571,15 +597,21 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     const rig = PF.mount(node, spec, { bg: false, view, bitmap: false });
     const idle = A.idleOf(name, { energy: a.energy });
     const home = { x: a.x, y: a.y };
-    const moves = [], layers = A.stack(), gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
+    const layers = A.stack(), gazes = [{ at: -Infinity, target: a.look }], marks = [], words = [];
+    // The moves as cued, in the order cued, and the moves they make (resolvedMoves()): each starts where the moves
+    // before it in time leave the friend, however the cues were ordered.
+    const moveCues = [];
+    let moves = null;
     // The friend's stance over time, as its cues change it: the stance from each `at` on, under the clips that ease it
     // up or down (rise). A friend that never stands (stand: false) keeps its one shape: it sits, and is never lifted.
     // `changes` holds each change of stance as cued: when its clip starts and ends, and the stance it ends in.
     const lift = PF.standLift(spec), legRest = restingLeg(spec), stances = [{ at: -Infinity, stance: lift ? a.stance : 'sit' }];
     const changes = [{ at: -Infinity, end: -Infinity, stance: stances[0].stance }];
-    // Entrances and exits, in time order: the friend is shown after an entrance until the next exit.
+    // Entrances and exits, in time order: the friend is shown after an entrance until the next exit. An exit's time
+    // is its move's end (exit: the move's cue). seen is the first time shown among those a live scene has forgotten.
     const showings = [{ at: a.at, shown: true, placed: true }];
-    let extent = null;
+    let seen = Infinity;
+    const extents = new Map();  // "stance facing" -> the outline's reach in that pose (extent()).
     const displayName = PF.cast.friend(name).name;
 
     const actor = {
@@ -589,50 +621,45 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       // ---- Where the friend is
 
       visibleAt(t) {
+        resolvedMoves();
         let shown = false;
         for (const s of showings) { if (s.at <= t) shown = s.shown; else break; }
         return shown;
       },
       firstSeen() {
+        resolvedMoves();
         const first = showings.find(s => s.shown);
-        return first ? first.at : Infinity;
+        return Math.min(seen, first ? first.at : Infinity);
       },
 
       // { x, y (its floor), lift (height above it), moving, dir, travel } at time t.
       state(t) {
-        let x = moves.length ? moves[0].from : home.x;
-        for (const m of moves) {
-          if (t < m.at) break;
-          if (t >= moveEnd(m)) { x = moveFinalX(m, glides(m)); continue; }
-          return { ...hopAlong(m, (t - m.at) / m.duration, glides(m)), y: home.y, moving: true };
-        }
-        return { x, y: home.y, lift: 0, squash: 0, lean: 0, dir: 0, moving: false };
+        return placeAt(resolvedMoves(), t);
       },
 
-      // How far the outline (OUTLINE_PARTS) reaches left and right of center, in head units, measured
-      // once the stage has been laid out.
-      extent() {
-        if (extent) return extent;
-        const hidden = node.style.display === 'none';
-        if (hidden) node.style.display = '';  // A friend that has not entered yet is measured all the same.
-        const svgRect = rig.svg.getBoundingClientRect();
-        if (!svgRect.width) {
-          if (hidden) node.style.display = 'none';
-          return null;
-        }
-        const unit = svgRect.width / BOX, center = svgRect.left + svgRect.width / 2, pose = rig.pose;
-        rig.setPose({}, true);  // Measured in the neutral pose, so that a hop or a turn does not count.
-        let left = 0, right = 0;
-        for (const part of OUTLINE_PARTS) {
-          if (!rig.parts[part]) continue;
-          const r = rig.parts[part].getBoundingClientRect();
-          left = Math.max(left, (center - r.left) / unit);
-          right = Math.max(right, (r.right - center) / unit);
-        }
-        rig.setPose(pose, true);
-        if (hidden) node.style.display = 'none';
-        extent = { left, right };
-        return extent;
+      // How far the outline (OUTLINE_PARTS) reaches left and right of center, in head units, in a stance and a
+      // facing (its quarter turn): seated and facing the viewer unless given. It is measured in that pose alone, so
+      // that a hop or a glance does not count, once the stage has been laid out (null until then). A friend that
+      // never stands never turns either, and has the one outline.
+      extent({ stance = 'sit', facing = 0 } = {}) {
+        const key = lift ? `${stance} ${PF.quarterOf(facing)}` : 'sit 0';
+        if (extents.has(key)) return extents.get(key);
+        const front = key === 'sit 0' ? measureOwn() : actor.extent();
+        if (!front) return null;
+        // Any other pose is measured on a copy, so that the drawing on the stage is left as it is drawn.
+        const measured = key === 'sit 0' ? front : measureCopy(spec, view, { stance, facing });
+        extents.set(key, measured);
+        return measured;
+      },
+
+      // The outline's reach as the friend is drawn now, in its facing and its stance, and while it stands up or sits
+      // down, as far as either stance reaches.
+      extentAsDrawn() {
+        const pose = rig.pose, up = clamp((pose.stance === 'stand' ? 1 : 0) + (pose.rise || 0), 0, 1);
+        const stancesNow = up <= 0 ? ['sit'] : up >= 1 ? ['stand'] : ['sit', 'stand'];
+        const reaches = stancesNow.map(stance => actor.extent({ stance, facing: pose.facing || 0 }));
+        if (reaches.includes(null)) return null;
+        return { left: Math.max(...reaches.map(r => r.left)), right: Math.max(...reaches.map(r => r.right)) };
       },
 
       // ---- Cues
@@ -650,8 +677,8 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       // Hops off the frame, and is gone once it is off.
       exit({ to = 'right', at = scene.time, duration } = {}) {
         const end = to === 'left' ? -OFFSTAGE : to === 'right' ? scene.width + OFFSTAGE : to;
-        const m = addMove(end, { at, duration });
-        addShowing(m.at + m.duration, false);
+        const cue = addMove(end, { at, duration });
+        showings.push({ at, shown: false, exit: cue });  // Its time is set as the moves are resolved.
         return actor;
       },
 
@@ -678,8 +705,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       // Jumps in place, the whole cut-out leaving the floor (for games). A leap is the player's own
       // motion, so it leaves the floor under reduced motion too.
       leap({ at = scene.time, height = 90, duration = 0.6 } = {}) {
-        const x = actor.state(at).x;
-        addMove(x, { at, duration, hops: 1, height, from: x, glide: false, leap: true });
+        addMove(null, { at, duration, hops: 1, height, glide: false, leap: true });
         return actor;
       },
 
@@ -707,7 +733,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         if (!shown) return actor;
         const end = until ?? at + clip.duration;
         if (!shown.every) return actor.emote(shown.text, { at });
-        for (let t = at; t < end; t += shown.every) addMark(shown.text, { at: t, seconds: Math.min(E.MARK.seconds, end - t), drifting: true });
+        addMark(shown.text, { at, seconds: E.MARK.seconds, until: end, every: shown.every });
         return actor;
       },
 
@@ -760,19 +786,29 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         return actor;
       },
 
-      // Forgets cues that ended before t (live scenes only).
+      // Forgets cues that ended before t (live scenes only): a list of stances, gazes or showings keeps the last
+      // entry before t, which holds from then on.
       prune(t) {
         const keep = list => {
           for (let i = list.length - 1; i >= 0; i--) {
-            if (list[i].until < t) { list[i].node.remove(); list.splice(i, 1); }
+            if (list[i].until < t) { nodesOf(list[i]).forEach(n => n.remove()); list.splice(i, 1); }
           }
         };
         keep(marks); keep(words);
         layers.prune(t);
         while (gazes.length > 1 && gazes[1].at < t) gazes.shift();
-        while (moves.length && moveEnd(moves[0]) < t) {
-          const m = moves.shift();
+        const list = resolvedMoves();
+        while (list.length && moveEnd(list[0]) < t) {
+          const m = list.shift();
           home.x = moveFinalX(m, glides(m));
+          moveCues.splice(moveCues.indexOf(m.cue), 1);
+        }
+        for (const m of list) m.cue.at = m.at;  // A move held back for a landing keeps its start once the leap is forgotten.
+        while (stances.length > 1 && stances[1].at < t) stances.shift();
+        while (changes.length > 1 && changes[1].at < t) changes.shift();
+        while (showings.length > 1 && showings[1].at < t) {
+          const s = showings.shift();
+          if (s.shown) seen = Math.min(seen, s.at);
         }
       },
 
@@ -805,23 +841,75 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       return A.sample(acc);
     }
 
+    // The outline seated and facing the viewer, measured on the friend's own drawing in the neutral pose, or null
+    // while the stage has no layout.
+    function measureOwn() {
+      const hidden = node.style.display === 'none';
+      if (hidden) node.style.display = '';  // A friend that has not entered yet is measured all the same.
+      let measured = null;
+      if (rig.svg.getBoundingClientRect().width) {
+        const pose = rig.pose;
+        rig.setPose({}, true);
+        measured = reach(rig);
+        rig.setPose(pose, true);
+      }
+      if (hidden) node.style.display = 'none';
+      return measured;
+    }
 
+    // Cues a move to x (null: a leap where the friend is then). Where it starts, and whether it walks or hops, are
+    // worked out once every move is cued (resolvedMoves()).
     function addMove(x, { at = scene.time, duration, hops, height = HOP.height, from, glide = null, leap = false, hop = false } = {}) {
+      const cue = { x, at, duration, hops, height, from, glide, leap, hop, move: null };
+      moveCues.push(cue);
+      moves = null;
+      return cue;
+    }
+
+    // The moves, worked out from their cues in time order (cues for the same time in the order cued), each as it
+    // would be had the cues been written in that order; and each exit's time, its move's end.
+    function resolvedMoves() {
+      if (moves) return moves;
+      moves = [];
+      for (const cue of moveCues.slice().sort((p, q) => p.at - q.at)) {
+        moves.push(cue.move = resolveMove(cue));
+        moves.sort((p, q) => p.at - q.at);
+      }
+      const exits = showings.filter(s => s.exit);
+      for (const s of exits) s.at = s.exit.move.at + s.exit.move.duration;
+      if (exits.length) showings.sort((p, q) => p.at - q.at);
+      return moves;
+    }
+
+    // A move from its cue, after the moves before it in time (moves): one that starts mid-leap waits for the landing,
+    // it starts where they leave the friend, and it cuts short any of them still under way.
+    function resolveMove(cue) {
+      const { x, duration, hops, height, from, glide, leap, hop } = cue;
+      let at = cue.at;
+      const stay = x === null ? placeAt(moves, at).x : null;  // A leap goes up and comes down where it is.
       const landing = moves.find(m => m.leap && m.at <= at && at < moveEnd(m));
       if (landing) at = moveEnd(landing);
-      const start = from ?? actor.state(at).x;
+      const start = from ?? stay ?? placeAt(moves, at).x, to = stay ?? x;
       // A standing friend walks, in steps of STRIDE; a seated one hops, in hops of HOP.length.
       const walk = !leap && !hop && hops == null && stanceAt(at) === 'stand';
-      const n = walk ? Math.max(2, Math.ceil(Math.abs(x - start) / STRIDE))
-        : hops ?? Math.max(1, Math.round(Math.abs(x - start) / HOP.length));
-      for (const m of moves) if (m.at + m.duration > at && m.at <= at) m.cut = at;
-      const move = {
-        at, from: start, to: x, hops: n, height, duration: duration ?? n * (walk ? A.WALK.seconds : HOP.seconds), cut: Infinity, glide, leap,
-        walk: walk && { leg: legRest },
+      const n = walk ? Math.max(2, Math.ceil(Math.abs(to - start) / STRIDE))
+        : hops ?? Math.max(1, Math.round(Math.abs(to - start) / HOP.length));
+      for (const m of moves) if (m.at <= at && moveEnd(m) > at) m.cut = at;
+      return {
+        at, from: start, to, hops: n, height, duration: duration ?? n * (walk ? A.WALK.seconds : HOP.seconds), cut: Infinity, glide, leap,
+        walk: walk && { leg: legRest }, cue,
       };
-      moves.push(move);
-      moves.sort((p, q) => p.at - q.at);
-      return move;
+    }
+
+    // Where the friend is at t along moves (resolved, in time order): { x, y, lift, squash, lean, dir, moving, walk }.
+    function placeAt(list, t) {
+      let x = list.length ? list[0].from : home.x;
+      for (const m of list) {
+        if (t < m.at) break;
+        if (t >= moveEnd(m)) { x = moveFinalX(m, glides(m)); continue; }
+        return { ...hopAlong(m, (t - m.at) / m.duration, glides(m)), y: home.y, moving: true };
+      }
+      return { x, y: home.y, lift: 0, squash: 0, lean: 0, dir: 0, moving: false };
     }
 
     // Whether a move glides: as it was cued, or else as reduced motion says when it is drawn.
@@ -867,6 +955,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       stances.sort((p, q) => p.at - q.at);
       changes.push({ at, end: at + clip.duration, stance });
       changes.sort((p, q) => p.at - q.at);
+      moves = null;  // A move walks or hops as the friend stands or sits where it starts.
       return actor;
     }
 
@@ -905,21 +994,52 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
       return { x: s.x, y: s.y - rigGround - s.lift - liftAt(t) };
     };
 
-    // Adds a mark (one of PhyFriends.cast.MARKS) shown from `at` for `seconds`; a drifting one rises as it goes.
-    function addMark(mark, { at, seconds, drifting = false }) {
+    // Adds a mark (one of PhyFriends.cast.MARKS) shown from `at` for `seconds`. Given `every`, it shows again every
+    // that many seconds while it is held, until `until`, each time for `seconds` or until then, rising as it goes;
+    // its repeats are found as they are drawn (repeatsAt), each in one of as few nodes as can show at once.
+    function addMark(mark, { at, seconds, every = null, until = Infinity }) {
       if (!VOICED_MARKS.includes(mark)) throw new Error(`phy_friends/scene: "${mark}" is not a mark; use one of ${VOICED_MARKS.join(' ')}`);
-      const node = markNode(dom, 'pf-mark hand', mark);
-      node.setAttribute('aria-hidden', 'true');  // A mark is a drawing, not words; a game says what happened in words.
-      marks.push({ text: mark, at, until: at + seconds, node, drifting });
+      const count = every ? Math.ceil(seconds / every) : 1;
+      const nodes = Array.from({ length: count }, () => {
+        const node = markNode(dom, 'pf-mark hand', mark);
+        node.setAttribute('aria-hidden', 'true');  // A mark is a drawing, not words; a game says what happened in words.
+        return node;
+      });
+      marks.push(every ? { text: mark, at, until, seconds, every, starts: [at], nodes } : { text: mark, at, until: at + seconds, nodes });
     }
 
     function drawMark(m, t, eyes) {
-      const active = t >= m.at && t < m.until;
-      m.node.style.display = active ? '' : 'none';
+      if (!m.every) { drawRepeat(m.nodes[0], m.at, m.until, false, t, eyes); return; }
+      const last = repeatsAt(m, t);
+      m.nodes.forEach((node, slot) => {
+        const i = last - ((((last - slot) % m.nodes.length) + m.nodes.length) % m.nodes.length);  // The latest repeat in this node.
+        if (i < 0) { node.style.display = 'none'; return; }
+        const start = m.starts[i];
+        drawRepeat(node, start, start + Math.min(m.seconds, m.until - start), true, t, eyes);
+      });
+    }
+
+    // The index of the last repeat of a repeating mark that has started by t (-1 before the first), its start times
+    // found as far as t needs, each `every` after the last, as they would have been laid out one by one.
+    function repeatsAt(m, t) {
+      const s = m.starts;
+      while (s[s.length - 1] <= t && s[s.length - 1] + m.every < m.until) s.push(s[s.length - 1] + m.every);
+      let lo = -1, hi = s.length - 1;  // The last start at or before t lies in (lo, hi].
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (s[mid] <= t) lo = mid; else hi = mid - 1;
+      }
+      return lo;
+    }
+
+    // Shows a mark from `at` until `until` in a node; a drifting one rises as it goes.
+    function drawRepeat(node, at, until, drifting, t, eyes) {
+      const active = t >= at && t < until;
+      node.style.display = active ? '' : 'none';
       if (!active) return;
-      const look = E.markAt(t - m.at, m.until - t, { reduced: scene.reduced, drifting: m.drifting });
-      m.node.style.opacity = String(look.opacity);
-      m.node.style.transform = `translate(${eyes.x + MARK.x}px, ${eyes.y + MARK.y - look.rise}px) translate(-50%, -100%) ` +
+      const look = E.markAt(t - at, until - t, { reduced: scene.reduced, drifting });
+      node.style.opacity = String(look.opacity);
+      node.style.transform = `translate(${eyes.x + MARK.x}px, ${eyes.y + MARK.y - look.rise}px) translate(-50%, -100%) ` +
         `scale(${look.scale}) rotate(-2deg)`;
     }
 
@@ -935,6 +1055,38 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     }
 
     return actor;
+  }
+
+  // How far the named parts of a friend's drawing (a rig, as PhyFriends.mount makes it, BOX head units wide) reach
+  // left and right of its middle, in head units: by default its outline, all but the ears. A part not drawn counts
+  // for nothing.
+  function reach(rig, parts = OUTLINE_PARTS) {
+    const box = rig.svg.getBoundingClientRect(), unit = box.width / BOX, middle = box.left + box.width / 2;
+    let left = 0, right = 0;
+    for (const part of parts) {
+      const node = rig.parts[part];
+      if (!node) continue;
+      const r = node.getBoundingClientRect();
+      if (!r.width) continue;
+      left = Math.max(left, (middle - r.left) / unit);
+      right = Math.max(right, (r.right - middle) / unit);
+    }
+    return { left, right };
+  }
+
+  // A friend's outline (reach()) in a pose, measured on a copy of its drawing in a cut-out of its own, outside any
+  // stage, so that neither the stage's drawing nor its camera has a part in it.
+  function measureCopy(spec, view, pose) {
+    const host = document.createElement('div');
+    host.style.cssText = `position:absolute;left:0;top:0;width:${BOX}px;height:${BOX}px;visibility:hidden;pointer-events:none`;
+    document.body.appendChild(host);
+    try {
+      const rig = PF.mount(host, spec, { bg: false, view, bitmap: false, uid: 'pf-measure' });
+      rig.setPose(pose, true);
+      return reach(rig);
+    } finally {
+      host.remove();
+    }
   }
 
   // A move ends when it arrives, or where a later move cut it short.
@@ -970,8 +1122,11 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     return [leg.spread, stand.ground - ankle - leg.hip[1]];
   }
 
+  // The nodes a mark (nodes) or words (node) are drawn in.
+  const nodesOf = item => item.nodes || [item.node];
+
   function hideAll(list) {
-    for (const item of list) item.node.style.display = 'none';
+    for (const item of list) for (const node of nodesOf(item)) node.style.display = 'none';
   }
 
   function textNode(dom, className, text, { graphite = false } = {}) {
@@ -987,9 +1142,19 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
   // A node for a mark (src/cast.js MARKS), written or drawn as the emotion library has it (markMarkup()).
   function markNode(dom, className, mark) {
     const node = textNode(dom, className, '');
-    node.innerHTML = E.markMarkup(mark);
-    node.dataset.mark = mark;
+    fill(node, mark, true);
     return node;
+  }
+
+  // Puts text in a node, or a mark as the emotion library writes or draws it.
+  function fill(node, text, mark) {
+    if (mark) {
+      node.innerHTML = E.markMarkup(text);
+      node.dataset.mark = text;
+    } else {
+      node.textContent = text;
+      delete node.dataset.mark;
+    }
   }
 
   // ---------------------------------------------------------------- Props
@@ -1033,6 +1198,15 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     });
   }
 
+  // Where a prop's move takes it from pos ({ x, y, rotate }), u (0 to 1) of the way.
+  function along(pos, m, u) {
+    const k = m.ease(u);
+    return {
+      x: lerp(pos.x, m.to.x ?? pos.x, k), y: lerp(pos.y, m.to.y ?? pos.y, k) - m.arc * Math.sin(Math.PI * u),
+      rotate: lerp(pos.rotate, m.to.rotate ?? pos.rotate, k),
+    };
+  }
+
   // Shows an svg cut by a clip path, or hides it (clip null).
   function showClipped(svg, clip) {
     svg.style.display = clip === null ? 'none' : '';
@@ -1059,7 +1233,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     const moves = [];
     const state = { x: p.x, y: p.y, rotate: p.rotate, visible: true };
     const own = node.firstElementChild, toggles = togglesIn(own);
-    const drawnOn = toggles.filter(toggle => toggle.shows === toggle.shown).map(toggle => toggle.name), stateCues = [];
+    const drawnOn = new Set(toggles.filter(toggle => toggle.shows === toggle.shown).map(toggle => toggle.name)), stateCues = [];
     // How the prop is drawn in and rubbed out ({ at, seconds, from }), and its colorings, in the order they start: each
     // the drawing in other colors ({ svg, at, seconds, from, amount }).
     let reveal = null, erase = null;
@@ -1148,7 +1322,9 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         stateCues.sort((a, b) => a.at - b.at);
         return item;
       },
-      moveTo(to, { at = 0, duration = 0.5, ease = 'inOut', arc = 0 } = {}) {
+      // Moves the prop to `to` ({ x, y, rotate }, any of them) from `at` over `duration`, eased, lifted `arc` head units
+      // at its middle.
+      moveTo(to, { at = clock(), duration = 0.5, ease = 'inOut', arc = 0 } = {}) {
         moves.push({ to, at, duration, ease: A.ease[ease] || ease, arc });
         moves.sort((a, b) => a.at - b.at);
         return item;
@@ -1157,13 +1333,17 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
         let pos = { x: state.x, y: state.y, rotate: state.rotate };
         for (const m of moves) {
           if (t < m.at) break;
-          const u = m.duration > 0 ? clamp((t - m.at) / m.duration, 0, 1) : 1, k = m.ease(u);
-          pos = {
-            x: lerp(pos.x, m.to.x ?? pos.x, k), y: lerp(pos.y, m.to.y ?? pos.y, k) - m.arc * Math.sin(Math.PI * u),
-            rotate: lerp(pos.rotate, m.to.rotate ?? pos.rotate, k),
-          };
+          pos = along(pos, m, m.duration > 0 ? clamp((t - m.at) / m.duration, 0, 1) : 1);
         }
         return pos;
+      },
+      // Forgets the moves and state cues that ended before t, where they left it (live scenes only).
+      prune(t) {
+        while (moves.length && moves[0].at + moves[0].duration < t) Object.assign(state, along(state, moves.shift(), 1));
+        while (stateCues.length && stateCues[0].at < t) {
+          const cue = stateCues.shift();
+          if (cue.on) drawnOn.add(cue.name); else drawnOn.delete(cue.name);
+        }
       },
       draw(t) {
         const rubbed = erase ? progress(erase, t) : 0;
@@ -1191,7 +1371,7 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
   // ------------------------------------------------------------- Writing
 
   // Handwriting whose baseline starts at (x, y). It writes itself out, left to right, over `seconds`;
-  // pressed writes it in the hand pressed harder, and mark draws it as a mark (src/cast.js MARKS).
+  // pressed writes it in the hand pressed harder, and mark draws it as a mark (src/cast.js MARKS), set() included.
   function createWriting(dom, text, w) {
     const className = `pf-writing hand${w.tone === 'ink-2' ? ' ink-2' : ''}${w.pressed ? ' pf-pressed' : ''}`;
     const node = w.mark ? markNode(dom, className, text) : textNode(dom, className, text, { graphite: w.graphite });
@@ -1199,10 +1379,11 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
     let writing = null;  // The pen's copy of the text, laid over it the first time it is shown.
     const item = {
       node,
+      get until() { return w.until; },
       set(values) {
         Object.assign(w, values);
         if ('text' in values) {
-          node.textContent = values.text;  // This also takes away the pen's copy, which no longer fits.
+          fill(node, values.text, !!w.mark);  // This also takes away the pen's copy, which no longer fits.
           writing = null;
           w.pen = null;
           node.style.color = '';
@@ -1238,6 +1419,6 @@ html.pf-filming .pf-stage { position: fixed !important; inset: 0 !important; wid
 
   // ----------------------------------------------------------------- API
 
-  const api = { create, RULE, BOX, HOP, MARK, WORDS };
+  const api = { create, cameraAt, reach, RULE, BOX, HOP, MARK, WORDS, OUTLINE_PARTS };
   PF.scene = api;
 })(typeof self !== 'undefined' ? self : this);

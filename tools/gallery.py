@@ -24,7 +24,7 @@ GALLERY = ROOT / 'index.html'
 # The pages that load every friend: the gallery, the tests and the tools that show any friend. The demos are one-offs
 # that keep the friends they were made with.
 PAGES = [GALLERY, ROOT / 'test' / 'index.html', ROOT / 'tools' / 'animate.html', ROOT / 'tools' / 'feelings.html',
-         ROOT / 'tools' / 'tune.html']
+         ROOT / 'tools' / 'tune.html', ROOT / 'demo' / 'card' / 'index.html', ROOT / 'demo' / 'roll-call' / 'index.html']
 SCRIPT_TAG = re.compile(r'^(?P<indent>[ \t]*)<script src="(?P<prefix>[^"]*?)characters/(?P<name>[\w-]+)/(?P=name)\.js"></script>[ \t]*$', re.M)
 
 # ---- The cast and the friends' reaches, read in Chrome -------------------------------------

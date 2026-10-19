@@ -558,15 +558,18 @@ far, at a little under half a hop's speed. `moveTo(x, { hop: true })` hops all
 the same.
 `src/cast.js` holds the rules for friends together (FWIENDS.md, "scenes"), and
 the scene enforces them: two friends are strangers unless `characters/cast.js`
-says their owners know each other, strangers keep a strip of paper between them
-and neither talk to nor hand things to each other, and only a friend with a
+says their owners know each other, strangers keep a strip of paper between
+their outlines as drawn (whichever way they face, sitting or standing) and
+neither talk to nor hand things to each other, and only a friend with a
 voice says or writes words (`scene.write(text, { by: yuda })` checks a friend's
 writing as `say()` checks its speech); a friend other than phy uses the hand its
 marks are written in. A film made for one owner alone
 (`PhyFriends.scene.create(el, { madeFor: 'yuda' })`) lets that owner's friend
 say and write a few drafted lines as well. A broken rule throws, saying what
-would allow it. Each frame credits the owners of the friends in it, and a
-friend whose owner has not agreed to films or games marks the scene "draft".
+would allow it, and its error's `code` is `PhyFriends.cast.BROKEN`, which tells
+it from a slip in a page's own code. Each frame credits the owners of the
+friends in it, and a friend whose owner has not agreed to films or games marks
+the scene "draft".
 `credits: false` turns the frame's credits off: a game that runs only in the
 page then links each owner in the page's small print, and a film names the
 owners once, written large, and leaves the links to its post, since a link in a
@@ -587,6 +590,11 @@ last and from the same side, and only one placed by name or by spec can be
 coloured in at all. A drawing of a film's own (`{ w, h, svg }`) is placed as
 before, and a scene that names props loads `film/props.js` and the props it
 names after `film/scene.js`.
+A scene follows the viewer's reduced-motion setting unless given its own
+`reducedMotion` (anything with `matches`): say hi passes `{ matches: false }`,
+so that it plays live as it is filmed, and decides itself what the setting means
+(it never starts by itself). A friend's moves may be cued in any order: each
+starts where the moves before it in time leave the friend.
 `paper: false` leaves the scene's ruled paper out so the page's own shows
 through, and `write(text, { graphite: true })` is for a title only (STYLE.md
 §6); `write(text, { pen: TITLE_PEN })` writes the gallery's title stroke by
@@ -785,11 +793,13 @@ the mismatch on a 4×4 grid and the per-colour overlap (IoU), which is a far
 better guide than the mean pixel error.
 
 `film` films any page that keeps the film contract (the docstring of `film` in
-`tools/pf.py`): opened with `?film`, the page fills the window, and `pf.py` seeks
-it to each frame's time in turn and takes a screenshot. The video is therefore
-frame-exact however slow the machine, and filming a page twice gives the same
-frames, byte for byte. A film with a friend whose owner has not agreed to video
-is refused unless `--draft` is given, in which case the page marks it as a draft.
+`tools/pf.py`): opened with `?film`, the page fills the window (say hi keeps its
+own 1920×1080 frame, so film it at another size with `--scale`, never `--size`,
+which crops it), and `pf.py` seeks it to each frame's time in turn and takes a
+screenshot. The video is therefore frame-exact however slow the machine, and
+filming a page twice gives the same frames, byte for byte. A film with a friend
+whose owner has not agreed to video is refused unless `--draft` is given, in
+which case the page marks it as a draft.
 
 With `--audio`, `film` puts a sound file under an `.mp4` or `.webm` film. The
 frames are copied rather than encoded again, so they are the same with sound as

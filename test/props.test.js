@@ -48,6 +48,16 @@
     }
   });
 
+  test("a prop keeps its shape however the friends' bodies are tuned", () => {
+    const drawings = () => P.list().map(name => P.drawing(name).svg), saved = { ...PF.ONIGIRI }, before = drawings();
+    try {
+      Object.assign(PF.ONIGIRI, { taper: 0.5, square: 0.4 });
+      assertEqual(drawings(), before);
+    } finally {
+      Object.assign(PF.ONIGIRI, saved);
+    }
+  });
+
   test('a part that a state shows is hidden until it is on, and one that it hides is drawn until then', () => {
     assertEqual(P.states('cake'), ['lit']);
     assertEqual(groupsOf(P.drawing('cake')), ['none', 'none', 'none'], "the cake's flames, out");
@@ -131,6 +141,29 @@
       cake.state('lit');  // At the scene's time.
       assertEqual([litAt(19.9), litAt(20)], [false, true]);
       assertThrows(() => cake.state('lti', true, { at: 1 }), 'this prop has no state "lti"');
+    });
+  });
+
+  test("a prop moved without a time sets off at the scene's time, as its other cues do", () => {
+    withScene(scene => {
+      const cake = scene.prop('cake', { x: 200 });
+      scene.seek(10);
+      cake.moveTo({ x: 1400 });
+      const x = cake.at(10.25).x;
+      assertEqual([cake.at(10).x, x > 200 && x < 1400, cake.at(10.5).x], [200, true, 1400]);
+    });
+  });
+
+  test('a prop forgets the moves and state cues that have ended where they left it', () => {
+    withScene(scene => {
+      const cake = scene.prop('cake', { x: 200 });
+      cake.moveTo({ x: 600, rotate: 5 }, { at: 1, duration: 1, arc: 40, ease: 'out' }).moveTo({ y: 500 }, { at: 3 }).moveTo({ x: 900 }, { at: 10 });
+      cake.state('lit', true, { at: 2 }).state('lit', false, { at: 4 }).state('lit', true, { at: 5 });
+      const times = [6, 10.2, 11], before = times.map(t => cake.at(t));
+      cake.prune(6);
+      assertEqual(times.map(t => cake.at(t)), before);
+      scene.seek(6);
+      assertEqual(flamesOf(cake), [null, null, null], 'lit, as last cued');
     });
   });
 

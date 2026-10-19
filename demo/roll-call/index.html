@@ -93,13 +93,15 @@
 <script src="../../film/film.js"></script>
 <script>
   // The film (film/scene.js): the register, taken on a ruled page. The title writes itself stroke by
-  // stroke, as in the gallery, then the seven fwiends hop in to their places in the gallery's order.
+  // stroke, as in the gallery, then the seven fwiends hop in to their places in a row (ROW).
   // The one whose place is farthest from its own side of the frame comes first, so nobody hops past
   // anybody already standing. Each greets the viewer as it lands, its name is written under it, and
   // the friend beside its place watches it come in. phy, the host and the only one with words, has
   // the last word.
   const PF = PhyFriends, RULE = PF.scene.RULE;
-  const ROW = ['howdi', 'phy', 'yuda', 'terry', 'mumuyou', 'kevin', 'brian'];  // Left to right, as in the gallery.
+  // Left to right, as the gallery stood when these seven were all of it (it has since put Brian before mumuyou and
+  // K3V1N); the film is composed for this order.
+  const ROW = ['howdi', 'phy', 'yuda', 'terry', 'mumuyou', 'kevin', 'brian'];
   const GAP = 40;                                // Paper between neighbors' outlines: what strangers need (src/cast.js).
   // The sheet is as small as the row allows, so that the fwiends are drawn as large as they can be:
   // the row and a little paper either side, 16:9, and a whole number of rules tall (25).

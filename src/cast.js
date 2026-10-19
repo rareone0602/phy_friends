@@ -20,7 +20,7 @@
  *
  * The data lives in characters/cast.js. film/scene.js checks these rules wherever friends meet, and
  * a game calls ensure() before anything the scene cannot see, such as putting two friends on one
- * side. A broken rule throws, with a message that says what would make it allowed.
+ * side. A broken rule throws, with a message that says what would make it allowed and the code BROKEN.
  *
  * Loads as a classic script after phyfriends.js (PhyFriends.cast), or through require().
  */
@@ -54,6 +54,11 @@
   // Strangers keep a strip of paper between them; friends who know each other may stand side by side.
   // Only an opt-in to touch lets outlines meet.
   const GAP = { strangers: 40, know: 4, touch: -Infinity };
+
+  // The code (error.code) of the error a broken rule throws, which tells it from a mistake in a page's own code;
+  // broken(message) makes one, for a rule that a scene checks itself (how far apart friends stand).
+  const BROKEN = 'PF_CAST_RULE';
+  const broken = message => Object.assign(new Error(message), { code: BROKEN });
 
   let installed = null;
 
@@ -126,7 +131,7 @@
       const why = rule.needs === 'know'
         ? `${A} and ${B} are strangers, so ${A} may not ${rule.phrase} ${B}. Add ['${a}', '${b}'] to know in characters/cast.js once their owners know each other.`
         : `${A} may not ${rule.phrase} ${B} unless both owners opt in. Add { pair: ['${a}', '${b}'], verbs: ['${rule.needs}'] } to optIn in characters/cast.js once they have.`;
-      throw new Error(`phy_friends/cast: ${why}`);
+      throw broken(`phy_friends/cast: ${why}`);
     }
 
     // The least gap between the outlines of a and b, in head units.
@@ -145,7 +150,7 @@
     function ensureVoice(name, words, { madeFor } = {}) {
       known(name);  // A name the cast lacks is refused whatever it says, a mark included.
       if (MARKS.includes(words) || canSpeak(name, { madeFor })) return;
-      throw new Error(`phy_friends/cast: ${friend(name).name} has no voice and speaks in marks (${MARKS.join(' ')}), ` +
+      throw broken(`phy_friends/cast: ${friend(name).name} has no voice and speaks in marks (${MARKS.join(' ')}), ` +
         `not in words ("${words}"). Set voice: true for ${name} in characters/cast.js only if its owner has given it lines; ` +
         `a film made for its owner alone may draft a few (madeFor: '${name}').`);
     }
@@ -165,7 +170,7 @@
   // The installed cast's rules, under the same names (see rules()).
   const delegate = method => (...args) => current()[method](...args);
   const api = {
-    VERBS, MARKS, GAP, MEDIA, define, rules,
+    VERBS, MARKS, GAP, MEDIA, BROKEN, broken, define, rules,
     get host() { return current().host; },
   };
   for (const method of ['friend', 'names', 'relation', 'allows', 'ensure', 'gap', 'canSpeak', 'ensureVoice', 'agreed']) api[method] = delegate(method);
