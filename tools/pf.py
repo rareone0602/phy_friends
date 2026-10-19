@@ -16,7 +16,7 @@
   python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4
   python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4   # Twice the pixels each way, at a higher quality.
   python3 tools/pf.py test                              # Runs test/index.html headless and checks the pages against the cast; exits non-zero on a failure.
-  python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows (tools/gallery.py).
+  python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows and slots (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
 Each character lives in characters/<name>/, which holds the spec <name>.js and
@@ -784,7 +784,7 @@ TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testRes
 
 # The checks of the pages against the cast (tools/gallery.py), each a test of its own.
 LABEL_TEST = "the gallery's labels agree with the cast"
-PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows fit the friends' reaches"
+PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows and slots fit the friends' reaches"
 
 
 def run_tests(page=TEST_PAGE):
@@ -907,7 +907,7 @@ def main(argv=None):
                         'for at least 8 Mb/s at 1080p30 and 16 Mb/s at 1440p30')
 
     sub.add_parser('test', help="run the in-browser tests in test/index.html and check the pages against the cast")
-    sub.add_parser('pages', help="write the friends' script tags and the gallery's rows from the cast and the friends' reaches")
+    sub.add_parser('pages', help="write the friends' script tags and the gallery's rows and slots from the cast and the friends' reaches")
     u = sub.add_parser('tune', help='write the tuning page (tools/tune.html) out as one file, to send to an artist')
     u.add_argument('-o', '--out', default=OUT / 'tune.html')
 

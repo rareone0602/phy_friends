@@ -719,7 +719,10 @@ A box that is a button takes `role="button"`, `tabindex="0"`, a short
 `hidden` element that says what the friend looks like. That element stands
 beside the box, not in it, since mounting replaces what the box holds. The
 page keeps its own layout; the gallery's roll call moves its friends and
-turns their eyes through two hooks on each friend, `travel` and `watch`.
+turns their eyes through two hooks on each friend, `travel` and `watch`
+(another friend to look at, or a point on the screen), and a friend's
+`smile()` lasts until the function it returns is called, as on the gallery
+while a friend's owner's credit is pointed at.
 The stage's `onStroke(friend, seconds)` tells a page how long a friend has
 been stroked; on the gallery, stroking Terry for five seconds opens the
 tuning page (`tools/tune.html`), on which his owner chose the proportions, and
@@ -753,7 +756,7 @@ python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.pn
 python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4  # A part, with its part of the sound
 python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4  # Twice the pixels each way, at a higher quality
 python3 tools/pf.py test                                    # The in-browser tests, and the pages against the cast
-python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows, written from the cast
+python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows and slots, written from the cast
 python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
 ```
 
@@ -800,8 +803,8 @@ host, the owner's agreement to the gallery, the footer's credit to Terry's owner
 A mismatch is a failure that names the friend and the field. What
 follows from the cast and the drawings is written, not typed: `pf.py pages`
 (`tools/gallery.py`) writes the script tags of every page that loads all the
-friends, in the cast's order, and the gallery's rows, from the friends' reaches;
-`test` fails while either is stale.
+friends, in the cast's order, and the gallery's rows and slots, from the
+friends' reaches; `test` fails while either is stale.
 
 The CLI needs Google Chrome (override the path with `$CHROME`), Pillow, and
 ffmpeg for video, with its ffprobe for a film's sound.

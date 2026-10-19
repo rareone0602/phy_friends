@@ -169,30 +169,30 @@ STYLE_PAGE = Template("""<!doctype html>
   </filter>
 </svg>
 
-<main>
-  <header>
-    <h1>style guide</h1>
-    <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
-    <nav aria-label="pages">
-      <ul>
-        <li><a href="index.html">fwiends</a></li>
-        <li><span aria-current="page">style guide</span></li>
-        <li><a href="specimen.html">specimen</a></li>
-      </ul>
-    </nav>
-  </header>
+<header>
+  <h1>style guide</h1>
+  <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
+  <nav aria-label="pages">
+    <ul>
+      <li><a href="index.html">fwiends</a></li>
+      <li><span aria-current="page">style guide</span></li>
+      <li><a href="specimen.html">specimen</a></li>
+    </ul>
+  </nav>
+</header>
 
+<main>
   <article class="doc">
 $body
   </article>
-
-  <footer>
-    <ul>
-      <li><a href="index.html">back to the fwiends</a></li>
-      <li>source: <a href="https://github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
-    </ul>
-  </footer>
 </main>
+
+<footer>
+  <ul>
+    <li><a href="index.html">back to the fwiends</a></li>
+    <li>source: <a href="https://github.com/rareone0602/phy_friends" aria-label="github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
+  </ul>
+</footer>
 </body>
 </html>
 """)

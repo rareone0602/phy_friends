@@ -62,8 +62,9 @@ short, for a brief with no room for the rest.
    computes it. The shade only parts two neighbours of the same colour, such
    as a character's body under its head. No highlights or second steps, and
    nothing copied from a reference's light and shade. The pencil's texture is
-   paper, a scale of data values (§8) is data, and light (§12) is a shape
-   drawn on the place, never on what stands in it: none of them is shading.
+   paper, a scale of data values (§8) is data, and light (§12) is drawn on
+   the place, or rubbed out of it, never on what stands in it: none of them
+   is shading.
 6. **Keep the set aligned.** Within a set (a family of characters, a figure
    series, a deck), anything new matches what is there in look, size and
    structure, and in code where the set is code. When a rule changes, it
@@ -268,7 +269,8 @@ intro step down one (in brackets); the rest of the print keeps its size.
 Every mark is a single pencil stroke: an SVG path with round caps, `1.1–1.5px`
 wide, in an ink, never filled. A page has nine:
 - a **ground line** along a rule, for a character to stand on, or in
-  `--ink-2` going over a rule (under a table's head, under a field);
+  `--ink-2` going over a rule (under a table's head, under a field) or under
+  a link;
 - a **ring**, one loose loop that doesn't quite close, round "this one": the
   current page, or the one thing that matters;
 - an **arrow** from a note to what it's about;
@@ -313,9 +315,10 @@ the classes), `site/fonts/` (the face, which stays beside `notebook.css`),
 turn. A page is put together as the specimen is: `<html lang="en-GB">` with
 the colour-scheme meta (§4); in the head a preload of the face, then
 `notebook.css`, then `pencil.css`, and `--informal` on `:root` where the work
-is not at `50`; the graphite filter first in the body; and a `main` holding a
-`header` (the title, the intro and any nav), the writing inside `.doc`, and a
-`footer`.
+is not at `50`; the graphite filter first in the body; then, side by side,
+a `header` (the title, the intro and any nav), a `main` holding the writing
+inside `.doc`, and a `footer`, so that a screen reader finds the page's
+banner and footer.
 
 **Layout.** One column, `42em` at most, left-aligned against the margin
 line: a title in the hand, one line of intro, the content and a small
@@ -331,8 +334,10 @@ footer.
   no #. A long page opens its writing with a contents line of its headings,
   each a link.
 
-**Links** are the text itself, underlined like a pencil line (`1px`, `3px`
-below), darkening to `--ink` when hovered.
+**Links** are the text itself, underlined in pencil with the ground line in
+`--ink-2`, just under the text, and darkening to `--ink` when hovered. Print
+and forced colours, which drop the pencil, keep a plain underline (`1px`,
+`3px` below).
 
 **Lists, quotes and code.** A list item starts with a dash in `--ink-3`, and
 a numbered one with its number in the hand. A quote is indented, in
@@ -496,8 +501,10 @@ carries it for TikZ, and `figures/diagram.tex` is an example.
   hops on the spot, and travels with it about a page, as a figure cut out of
   paper would. On a background of its own, such as a dark close-up or the
   dark sheet (§4), a character is drawn on paper cut to its outline, so the
-  pencil shows paper, never the background. An icon too small to hold the
-  texture, such as a favicon, is drawn flat.
+  pencil shows paper, never the background; on the dark sheet the cut runs
+  a pencil's width wide, as a sticker's does, so that a dark character keeps
+  its edge. An icon too small to hold the texture, such as a favicon, is
+  drawn flat.
 - **Motion** is calm and alive: eyes that follow the pointer, smoothed so
   they never jitter, over breathing, irregular blinks and a slow sway.
   Nothing bounces all the time. Under `prefers-reduced-motion` only the eyes
@@ -562,8 +569,10 @@ it declares (§2), says otherwise.
 characters are drawn as they always are (§9), and the place around them takes
 its own colours (principle 4) and its own light:
 - **Light is drawn, never filtered:** a beam, a lit window or a pool of
-  lamplight is a pale shape in coloured pencil, laid on the set. It falls on
-  the place, never on a character or a thing (principle 5).
+  lamplight is a pale shape in coloured pencil, laid on the set. On a dark
+  sheet it is rubbed out of the graphite instead, as an eraser leaves it:
+  streaked, ragged at the edges and never quite clean. It falls on the place,
+  never on a character or a thing (principle 5).
 - **Night is a darker sheet** of paper, not a filter over the light one. On
   it the inks turn over, as on the dark sheet (§4), and each character keeps
   its own paper (§9).

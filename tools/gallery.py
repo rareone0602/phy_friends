@@ -5,7 +5,9 @@ decide how much room each takes. From them come, without anyone writing them by 
 
 - the script tags that load the friends, in each page that loads them all (PAGES), in the cast's order;
 - the gallery's rows (index.html): how wide in boxes each way of splitting the friends into rows is (--abreast),
-  the stage width from which each fits, and the page width at which every friend stands in one row (layout_css).
+  the stage width from which each fits, and the page width at which every friend stands in one row (layout_css);
+- each friend's slot (index.html): its reaches past its box (--reach-left, --reach-right) in its tag, so that the
+  page is laid out as it will stand before its script has drawn and measured the friends (with_slots).
 
 `python3 tools/pf.py pages` writes both, and `python3 tools/pf.py test` fails while either is stale. The labels
 that the gallery repeats by hand (each friend's name, species and credit) are checked against the cast too
@@ -43,14 +45,15 @@ READ_CAST_JS = """(() => {
     return null;
   }
 })()"""
-# Each friend's reach past its box on the gallery (index.html measures them on load), in head units, in page order, and
-# whether the page drew it at all.
-READ_REACHES_JS = """[...document.querySelectorAll('.friend')].map(li => ({
-  name: li.dataset.friend,
-  drawn: !!li.querySelector('.rig svg'),
-  left: +getComputedStyle(li).getPropertyValue('--reach-left') || 0,
-  right: +getComputedStyle(li).getPropertyValue('--reach-right') || 0,
-}))"""
+# Each friend's reach past its box on the gallery (index.html measures them on load, and again once its face has
+# arrived, since the labels count), in head units, in page order, and whether the page drew it at all.
+READ_REACHES_JS = """document.fonts.ready.then(() => new Promise(requestAnimationFrame)).then(() =>
+  [...document.querySelectorAll('.friend')].map(li => ({
+    name: li.dataset.friend,
+    drawn: !!li.querySelector('.rig svg'),
+    left: +getComputedStyle(li).getPropertyValue('--reach-left') || 0,
+    right: +getComputedStyle(li).getPropertyValue('--reach-right') || 0,
+  })))"""
 # The size of a friend's box at the window's size, and how much narrower the stage is than a window that main does not
 # cap: main's padding, less the stage's reach past it; in CSS px.
 READ_BOX_JS = """(() => {
@@ -111,6 +114,7 @@ BOX_UNITS = 270      # A box's width in head units (FWIENDS.md): five rules.
 SLOT_OVERLAP = 0.06  # Neighboring slots overlap by this much of a box (.friend's negative margins).
 LAYOUT_START = '  /* The rows (--abreast) and the page\'s width, written by `python3 tools/pf.py pages` from the friends\' reaches. */\n'
 LAYOUT_END = '  /* The end of the rows. */\n'
+FRIEND_TAG = re.compile(r'<li class="friend"[^>]*>')
 
 
 def rows(names, n):
@@ -182,6 +186,18 @@ def one_row_window(gallery=GALLERY):
     return int(match[1])
 
 
+def with_slots(text, reaches):
+    """The gallery's text with each friend's reaches (the largest over windows of every size, as the rows take
+    them) written in its tag, so that its slot is as wide before the page's script runs as after."""
+    by_name = {reach['name']: reach for reach in reaches}
+
+    def slot(match):
+        tag = re.sub(r' style="[^"]*"', '', match[0])
+        reach = by_name[re.search(r'data-friend="([^"]+)"', tag)[1]]
+        return f'{tag[:-1]} style="--reach-left: {reach["left"]}; --reach-right: {reach["right"]}">'
+    return FRIEND_TAG.sub(slot, text)
+
+
 def layout_block(text):
     """The gallery's layout as written in its CSS, or '' if it has none."""
     start, end = text.find(LAYOUT_START), text.find(LAYOUT_END)
@@ -214,7 +230,7 @@ def written(cast, measures):
             block = layout_block(new)
             if not block:
                 raise ValueError(f'{page} has no rows to write: mark them as layout_css() does')
-            new = new.replace(block, layout_css(layout(measures)))
+            new = with_slots(new.replace(block, layout_css(layout(measures))), measures['reaches'])
         out[page] = (text, new)
     return out
 
@@ -237,7 +253,7 @@ def page_drift(cast, measures):
         if new == text:
             continue
         scripts = with_scripts(text, cast['names']) or text
-        stale = (["its friends' script tags"] if scripts != text else []) + (['its rows'] if new != scripts else [])
+        stale = (["its friends' script tags"] if scripts != text else []) + (['its rows and slots'] if new != scripts else [])
         problems.append(f'{page.relative_to(ROOT)}: {" and ".join(stale)} are stale; run python3 tools/pf.py pages')
     return problems
 

@@ -362,8 +362,9 @@
   // The roll call B: the friends rise through their rules one after another, in reading order, each
   // overshooting a little before it settles. A friend smiles as it lands, and its neighbors in the row
   // watch it. It begins as the title's pen reaches "fwiends", or `first` seconds in if the title is not
-  // written, and a row is called once most of its first friend's box is in view.
-  const ROLL_CALL = { first: 0.2, seconds: 0.5, cadence: 0.3, smile: 0.8, inView: 0.6, watch: { before: 0.3, after: 0.9 } };
+  // written, and a row is called once most of its first friend's box is in view. A friend's ground is drawn, from
+  // the left, over the `pen` seconds before it rises through it, as on the gallery.
+  const ROLL_CALL = { first: 0.2, seconds: 0.5, cadence: 0.3, smile: 0.8, inView: 0.6, watch: { before: 0.3, after: 0.9 }, pen: 0.3 };
   const TRAVEL = { look: 0, turn: 0 };  // A friend rising looks straight ahead.
   const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
   const NOT_TRAVELING = { squash: 0, lean: 0, dir: 0 };
@@ -409,7 +410,7 @@
       element, rig, view, lookX: 0, lookY: 0, phase: index * PHASE_STEP,
       blinkAt: randomIn(BLINK.first), flickAt: randomIn(EAR_FLICK.first), flickEar: 'earL',
       greetedAt: -Infinity, hovered: false, focused: false, perk: 0, reach: null, arrival: null, landedAt: -Infinity,
-      neighbors: [] };
+      neighbors: [], ground: element.querySelector('svg.ground') };
     listenForGreetings(box, friend);
     return friend;
   }
@@ -597,7 +598,7 @@
       friend.perk += ((perked ? 1 : 0) - friend.perk) * perkEase;
       scheduleIdle(friend, seconds);
       friend.rig.setPose(poseAt(friend, seconds, travel ?? NOT_TRAVELING));
-      if (friend.arrival) showOnItsWay(friend, travel);
+      if (friend.arrival) showOnItsWay(friend, travel, seconds);
     }
     boil(seconds);
     frameRequest = requestAnimationFrame(animate);
@@ -777,6 +778,7 @@
     for (const friend of friends) {
       friend.arrival = { start: Infinity, land: Infinity };
       friend.element.classList.add('waiting');
+      penGround(friend, 0);
     }
     const observer = new IntersectionObserver(entries => {
       for (const entry of entries) {
@@ -902,6 +904,12 @@
     friend.arrival = null;
     friend.element.classList.remove('waiting', 'on-its-way');
     friend.rig.svg.style.transform = '';
+    friend.ground.style.clipPath = '';
+  }
+
+  // Shows as much of a friend's ground as the pen has drawn (`drawn`, from 0 to 1), from the left.
+  function penGround(friend, drawn) {
+    friend.ground.style.clipPath = `inset(0 ${((1 - drawn) * 100).toFixed(2)}% 0 0)`;
   }
 
   function isWaiting(friend, seconds) {
@@ -938,11 +946,14 @@
     return { depth: arrival.depth * (1 - PhyFriends.anim.ease.back(u)), squash: -0.06 * Math.sin(Math.PI * u), lean: 0, dir: 0 };
   }
 
-  // Shows a friend once its way up has begun and raises it, paper and all (STYLE.md §9).
-  function showOnItsWay(friend, travel) {
+  // Shows a friend once its way up has begun and raises it, paper and all (STYLE.md §9), and draws its ground
+  // in the moments before (ROLL_CALL.pen).
+  function showOnItsWay(friend, travel, seconds) {
     friend.element.classList.toggle('waiting', !travel);
     friend.element.classList.toggle('on-its-way', !!travel);
     friend.rig.svg.style.transform = travel ? `translateY(${travel.depth}px)` : '';
+    const drawn = Math.min(1, Math.max(0, (seconds - friend.arrival.start + ROLL_CALL.pen) / ROLL_CALL.pen));
+    penGround(friend, 1 - (1 - drawn) ** 2);
   }
 
   // A half sine wave that rises from 0 to 1 and falls back over the given duration, and is 0 outside it.

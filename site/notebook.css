@@ -64,7 +64,15 @@ body::before {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .34  0 0 0 0 .3  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   opacity: .4; mix-blend-mode: multiply;
 }
-main { padding: calc(var(--L) * 2) 40px var(--L) calc(var(--margin-x) + 28px); max-width: 1280px; }
+/* The column beside the margin line. main keeps it, and so do a header and a footer that stand beside main in the
+   body, where a screen reader finds them as the page's banner and footer; a header or footer inside main keeps to
+   main's. */
+:root { --column-left: calc(var(--margin-x) + 28px); --column-right: 40px; }
+main, body > header { max-width: 1280px; padding-left: var(--column-left); padding-right: var(--column-right); }
+main { padding-top: calc(var(--L) * 2); padding-bottom: var(--L); }
+body > header { padding-top: calc(var(--L) * 2); }
+body > header + main { padding-top: 0; }
+main:has(+ footer) { padding-bottom: 0; }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--ink); }
 a:focus-visible { outline: 1.5px dashed var(--ink-2); outline-offset: 3px; border-radius: 3px; }
@@ -87,6 +95,8 @@ header > .intro { margin-top: var(--L); }
    has empty alternative text, so that screen readers pass over it; a browser without
    that syntax keeps the first declaration. */
 footer { margin: calc(var(--L) * 2) -4px 0; padding: 0 4px; min-height: var(--L); font-size: 15px; color: var(--ink-2); position: relative; top: var(--sit); overflow: hidden; overflow-wrap: anywhere; }  /* The padding leaves room for a focus ring. */
+body > footer { margin-left: calc(var(--column-left) - 4px); margin-right: calc(var(--column-right) - 4px); padding-bottom: var(--L);
+  max-width: calc(1280px - var(--column-left) - var(--column-right) + 8px); }
 footer ul { list-style: none; margin: 0 0 0 -1.4em; padding: 0; display: flex; flex-wrap: wrap; }
 footer li { padding-left: 1.4em; text-indent: -1.4em; text-wrap: balance; }  /* A wrapped item indents its second line under its text. */
 footer li::before { content: '\b7'; content: '\b7' / ''; display: inline-block; width: 1.4em; text-indent: 0; text-align: center; }
@@ -94,7 +104,7 @@ footer a:hover { color: var(--ink); }
 
 @media (max-width: 720px) {
   :root { --L: 30px; --margin-x: 22px; --band: 3; }
-  main { padding: calc(var(--L) * 2) 12px var(--L) calc(var(--margin-x) + 12px); }
+  :root { --column-left: calc(var(--margin-x) + 12px); --column-right: 12px; }
   /* The title stays on one line; the smallest phones get a smaller size instead. */
   h1 { font-size: min(54px, 13vw); white-space: nowrap; height: calc(var(--L) * 2); line-height: calc(var(--L) * 2); top: calc(var(--sit) + var(--L) / 2); }
   .intro { min-height: calc(var(--L) * 2); font-size: 18px; line-height: var(--L); }
@@ -105,7 +115,7 @@ footer a:hover { color: var(--ink); }
    give its descenders room, so the intro follows at once. */
 @media (max-height: 500px) and (orientation: landscape) {
   :root { --band: 2; }
-  main { padding-top: var(--L); }
+  main, body > header { padding-top: var(--L); }
   h1 { font-size: 54px; height: calc(var(--L) * 2); line-height: calc(var(--L) * 2); top: calc(var(--sit) + var(--L) / 2); }
   .intro { font-size: 18px; }
   header > .intro { margin-top: 0; }

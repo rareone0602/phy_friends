@@ -151,6 +151,22 @@
     });
   });
 
+  test('a page may give a friend a point to watch, and a smile that ends when the page says', () => {
+    withStage(['howdi', 'phy'], moving, (stage, [howdi, phy], said) => {
+      const box = howdi.rig.el.getBoundingClientRect();
+      howdi.watch = () => ({ x: box.left + box.width / 2, y: box.bottom + 400 });
+      for (let t = 0; t <= 1.2; t += 0.1) stage.draw(t);
+      assert(howdi.rig.pose.lookY > 0.3, 'it looks down at the point');
+      const stopSmiling = phy.smile({ fade: 0.1 });
+      stage.draw(1.5);
+      assertEqual(phy.rig.pose.eyes, 'happy', 'it smiles');
+      stopSmiling();
+      stage.draw(1.8);
+      assert(phy.rig.pose.eyes !== 'happy', 'and stops when asked');
+      assertEqual(said, [], 'saying nothing');
+    });
+  });
+
   test('stroking a friend makes it content until a moment after the stroking stops', () => {
     withStage(['phy'], moving, (stage, [phy], said) => {
       stage.draw(0);
@@ -294,6 +310,19 @@
       assertEqual(said.length, 1, 'and not told again');
       stage.noteInput({ x: 0, y: 0 });
       assertEqual(said.at(-1), 'Everyone wakes up.', 'a click or the pointer wakes them aloud');
+    });
+  });
+
+  test('waking is not told after a doze that stopped short of everyone falling asleep', () => {
+    withStage(['howdi', 'phy'], { ...moving, doze: 1 }, (stage, [howdi, phy], said) => {
+      stage.draw(0);
+      stage.draw(1);
+      stage.draw(1 + L.DOZE.spread + L.DOZE.asleep - 1);
+      assert(stage.dozing && [howdi, phy].some(friend => friend.feeling === 'asleep'), 'someone is asleep');
+      assert([howdi, phy].some(friend => friend.feeling !== 'asleep'), 'and someone is not');
+      stage.noteInput({ x: 0, y: 0 });
+      assert(!stage.dozing, 'the pointer wakes them');
+      assertEqual(said, [], 'without a word, since no doze was told');
     });
   });
 

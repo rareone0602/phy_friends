@@ -19,7 +19,7 @@
      .mark.arrow|ring|squiggle|tick|cross|caret    A mark inside running text.
      .titleline, .portrait              A character beside the title; role="button" makes it one to say hi to (src/live.js).
      .announcer           A live region (role="status") that says what happened, for screen readers only.
-     .pf-cutout           The paper under a character drawn on the page (bg: 'page'), shown on the dark sheet. */
+     .pf-cutout           The paper under a character drawn on the page (bg: 'page'), shown on the dark sheet with a sticker's edge. */
 
 /* The marks, defined once. A data URI cannot read var(), so each one hard-codes its ink
    as a hex value; update them here if an ink changes, and run tools/dark_sheet.py, which
@@ -124,6 +124,16 @@ header nav { font-size: 15px; color: var(--ink-2); min-height: var(--L); positio
 header nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; column-gap: 1.4em; }
 header nav a { text-decoration-line: none; }
 header nav a:hover { text-decoration-line: underline; }
+/* Links, and a quiet button, are underlined in pencil: the line mark, in --ink-2, under the text, stretched to its
+   length. Print and forced colors, which drop or recolor background images, keep the plain underline. */
+@media screen and (forced-colors: none) {
+  a, .btn.quiet { text-decoration-line: none; background: var(--mark-line) 0 calc(100% + 3px) / 100% 8px no-repeat; }
+  h1 a, header nav a, header nav a:hover { text-decoration-line: none; background: none; }
+  header nav a:hover { background: var(--mark-line) 0 calc(100% + 3px) / 100% 8px no-repeat; }
+}
+/* Small print is small to hit, so each of its links takes a touch more room than its text (WCAG 2.5.8). */
+:is(header nav, footer, .meta) a { position: relative; }
+:is(header nav, footer, .meta) a::after { content: ''; position: absolute; inset: -6px -3px; }
 nav [aria-current] { position: relative; color: var(--ink); }
 nav [aria-current]::after { content: ''; position: absolute; inset: -8px -16px -9px -14px; pointer-events: none; background: var(--mark-ring) 0 0 / 100% 100% no-repeat; }  /* The ring marks the current page. */
 
@@ -189,8 +199,9 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 
 /* A character drawn on the page (bg: 'page', src/phyfriends.js) shows the page's paper through its pencil. On the dark
    sheet, or in forced colors, it is drawn on paper cut to its outline instead, so that the pencil shows paper and
-   never the background (STYLE.md §9). */
-.pf-cutout { display: none; }
+   never the background (STYLE.md §9). The paper is cut a pencil's width wide of the outline (5 head units), as a
+   sticker is, so that a dark friend keeps its edge on the dark sheet. */
+.pf-cutout { display: none; stroke: var(--pf-cut); stroke-width: 5; stroke-linejoin: round; }
 @media screen and (prefers-color-scheme: dark) { :root:has(meta[name="color-scheme"][content~="dark"]) .pf-cutout { display: inline; } }
 @media (forced-colors: active) { .pf-cutout { display: inline; } }
 
@@ -219,5 +230,6 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 @media print {
   html, body { background: none; }
   body::before, header nav, .portrait { display: none; }
-  main { padding: 0; max-width: none; }
+  main, body > header { padding: 0; max-width: none; }
+  body > footer { margin-inline: -4px; max-width: none; }
 }

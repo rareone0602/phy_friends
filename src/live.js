@@ -23,7 +23,8 @@
  * smile. A reader may ask for the same with a page's "keep still" checkbox (keepStill()), a choice
  * remembered on the device (still). The page keeps its own layout and says aloud what happens in its
  * live region (announcer). It may drive a friend's travel and gaze through hooks on the
- * friend (travel, watch), as the gallery's roll call does, and keep fields of its own on a friend.
+ * friend (travel, watch), as the gallery's roll call does, have it smile, and keep fields of its own
+ * on a friend.
  *
  * Example:
  *
@@ -60,12 +61,12 @@
   const BOIL = 8;                        // Pencil texture redraws per second, as in a film (film/film.js).
   const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
   // With no pointer to follow and no one reacting, the friends only breathe and glance about, slowly
-  // enough that 30 frames a second look as smooth as more, so a frame is drawn at most every 1/30 s
-  // (a little under, so that a 60 Hz screen draws every other frame). This halves a phone's work.
-  // While every friend that shows feelings is asleep, or while the friends keep still, a frame is drawn
-  // only as often as the pencil texture is redrawn (the boil), so that a page left open does little
-  // work.
-  const CALM_FRAME_SECONDS = 0.85 / 30;
+  // enough to be drawn on fours, as hand-drawn animation often is: a frame at most every 1/15 s (a
+  // little under, so that a 60 Hz screen draws every fourth frame). This quarters a phone's work, and
+  // the pencil, which boils at 8 a second, sets the pace anyway. While every friend that shows feelings
+  // is asleep, or while the friends keep still, a frame is drawn only as often as the pencil texture is
+  // redrawn (the boil), so that a page left open does little work.
+  const CALM_FRAME_SECONDS = 0.85 / 15;
   const HI_FADE = 0.08;                  // The greeting starts and ends at rest, so it comes and goes quickly.
   const HELD_HI_SECONDS = 0.3;           // How far into its greeting the `hold` option holds a friend.
   const FEEL_FADE = 0.15;                // How long a feeling takes to come on or wear off, in seconds.
@@ -316,7 +317,7 @@
       updateDoze(t);
       for (const record of records) record.update(t);
       const watched = watchedAt(t), focus = gone ? records.find(r => r.friend.focused) : null;
-      const watches = new Map(records.map(r => [r, r.friend.watch ? byFriend.get(r.friend.watch(t)) : null]));
+      const watches = new Map(records.map(r => [r, r.friend.watch ? r.friend.watch(t) : null]));
       // Every friend's eyes are found before any friend is posed, since finding them after a pose would
       // make the browser lay out the page again, once for each friend.
       const measure = watched || focus || [...watches.values()].some(Boolean) || !gone;
@@ -327,9 +328,10 @@
         perkEase: simulated ? 1 : 1 - Math.exp(-dt * PERK_RATE),
       };
       for (const record of records) {
-        const travel = record.friend.travel ? record.friend.travel(t) : null, newcomer = watches.get(record);
-        const target = newcomer ? eyes.get(newcomer) : watched && watched !== record ? eyes.get(watched) : !gone ? pointer
-          : focus && focus !== record ? eyes.get(focus) : null;
+        const travel = record.friend.travel ? record.friend.travel(t) : null, watching = watches.get(record);
+        const given = watching && (byFriend.has(watching) ? eyes.get(byFriend.get(watching)) : watching);
+        const target = given || (watched && watched !== record ? eyes.get(watched) : !gone ? pointer
+          : focus && focus !== record ? eyes.get(focus) : null);
         record.pose(t, { ...frame, travel, target, eyes: eyes && eyes.get(record) });
         if (o.afterPose) o.afterPose(record.friend, travel);
       }
@@ -438,10 +440,11 @@
     }
 
     // Wakes the friends: those asleep with a start, the nearest to point first (all at once for a key),
-    // and those only sleepy by opening their eyes. Unless quiet, it says so.
+    // and those only sleepy by opening their eyes. Unless quiet, it says so, but only once everyone who
+    // shows feelings had fallen asleep, since a screen reader heard of no doze short of that.
     function wake(point = null, { quiet = false } = {}) {
       if (!doze) return;
-      const t = clock, woken = [];
+      const t = clock, woken = [], told = doze.asleep;
       for (const entry of doze.entries) {
         if (entry.asleep) {
           const eyes = point ? entry.record.eyes() : null;
@@ -451,7 +454,7 @@
         } else if (entry.sleepy) entry.record.friend.calm(t);
       }
       doze = null;
-      if (woken.length && !quiet) o.announce(wakeAnnouncement(woken, records.filter(record => record.friend.fits).length));
+      if (woken.length && told && !quiet) o.announce(wakeAnnouncement(woken, records.filter(record => record.friend.fits).length));
     }
 
     // ---- A friend
@@ -473,7 +476,7 @@
       const friend = {
         name, label, spec, rig, view, fits,
         travel: null,  // Set by the page: t => null, or { dir, squash, lean } while the friend is on its way.
-        watch: null,   // Set by the page: t => null, or another friend to look at.
+        watch: null,   // Set by the page: t => null, another friend to look at, or a point ({ x, y }, client px).
         get hovered() { return hovered; },
         get focused() { return focused; },
         get feeling() { return feeling ? feeling.name : null; },
@@ -606,9 +609,10 @@
       }
 
       // Smiles (E.smile) from `at` for `lasting` seconds, as a friend landing after the gallery's roll
-      // call does.
-      function smile({ at = clock, lasting }) {
-        layers.add(A.still(E.smile(spec)), { at, until: at + lasting, fade: 0 });
+      // call does, or until the function it returns is called; the smile comes and goes over `fade`.
+      function smile({ at = clock, lasting = Infinity, fade = 0 } = {}) {
+        const layer = layers.add(A.still(E.smile(spec)), { at, until: at + lasting, fade });
+        return (t = clock) => { layers.release(layer, t); hurry(); };
       }
 
       function reacting(t) {

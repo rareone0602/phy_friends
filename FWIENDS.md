@@ -41,18 +41,19 @@ The page has five parts, in this order:
   bottom edge is its ground (`PhyFriends.groundOf`): 5 rules, or 4 below
   360px, so that two still stand side by side. Ears and tails may reach out
   of the box, as in a photo. A body or tail that sticks out at ground level
-  widens the friend's slot (`--reach-left`, `--reach-right`, measured on
-  load), so neighbours stand close but never tread on a tail; below 420px a
-  pair stands a whole box apart instead, so that two long species never run
-  together.
+  widens the friend's slot (`--reach-left`, `--reach-right`), so neighbours
+  stand close but never tread on a tail, and so does a long label, so that
+  neighbouring labels keep 30px apart; below 420px a pair stands a whole box
+  apart instead, so that two long species never run together.
 - Narrower than one row, they stand eight to a row, then five, four and
   three, and in pairs on a phone, never a mix of pairs and threes, so that the
   same friends always share a row. In rows of eight or five the second row's
   rule is 768px down, so a window that tall shows two rows.
   `python3 tools/pf.py pages` works out from the reaches (neighbours overlap
   by 0.06 of a box) how wide each split is and where the page stops, and
-  writes them into the page; `python3 tools/pf.py test` fails while they are
-  stale.
+  writes them, and each slot's reaches, into the page, so that it is laid
+  out before the friends are drawn; `python3 tools/pf.py test` fails while
+  they are stale.
 - The order is phy's. Howdi, YuanYuan and phy come first, side by side at
   every width; Fruit stands next to Yuda; K3V1N, BarDell, WeiWei, mosing
   and Yawei come between mumuyou and cowosus in that order; Raze stands between cowosus
@@ -62,19 +63,23 @@ The page has five parts, in this order:
   any change of order is checked at every width.
 - A phone held sideways, if at least 390px tall, shows the first row and its
   names on the first screen: the gallery gives up the blank rule above the
-  title, and the note the one below it.
+  title, and the note the one below it. The tallest ears then reach into the
+  note's rule, so the note moves up to the nav's, and "keep still" to the
+  title's.
 - Each friend's ground is its own patch of rule, gone over in pencil (a
   seeded wobble, `PhyFriends.rng(5)`, ink at 70%, 1.4px, through the graphite
   filter). Each friend is drawn on the page (`bg: 'page'`): on the dark
   sheet and in forced colours, on paper cut to its outline instead
-  (`STYLE.md` §9). In forced colours its ground is in the system's text
-  colour.
-- **A spotlight** comes on, on the dark sheet, over the friend you point at,
-  tap or focus: a beam from the tips of its ears and a pool on its ground,
-  in warm light drawn in pale coloured pencil (`STYLE.md` §12). It is the
-  one light on the site's pages, since the gallery is a stage, and it lights
-  one friend at a time, so that the page still has one thing to look at. It
-  stays within the friend's slot, clear of the words above and below.
+  (`STYLE.md` §9), a pencil's width wide of it, as a sticker is cut, so
+  that a dark friend keeps its edge. In forced colours its ground is in the
+  system's text colour.
+- **A light is rubbed out** of the dark sheet at the feet of the friend you
+  point at, tap or focus: an eraser, rubbed back and forth along its ground,
+  lifts the graphite in an oval pool, streaked, ragged at the edges and never
+  quite clean (`STYLE.md` §12). It is the one light on the site's pages,
+  since the gallery is a stage, and it lights one friend at a time, so that
+  the page still has one thing to look at. It stays within the friend's slot,
+  clear of the words below and of its neighbours' tails.
 - The ring circles the host's name, phy's: "this one" is the one whose page
   it is.
 - **Two winks**, both in corners of the stage (`STYLE.md` §3). A pencilled
@@ -91,10 +96,12 @@ The page has five parts, in this order:
   disclaimer is centred under it and the arrow points up and in.
 - At the left of the note's rule, a small-print checkbox, "keep still", keeps
   the fwiends as still as reduced motion does and skips the opening. It
-  starts as the system's setting, is remembered on the device, and on a phone
-  held sideways moves up to the nav's rule. Without JavaScript it is hidden,
-  and the stage reads "the fwiends are drawn live, so they need JavaScript to
-  appear."
+  starts as the system's setting and is remembered on the device. It closes
+  the header, so that it comes straight after the nav in the tab order, and
+  after it comes "skip the fwiends", shown only when tabbed to, which goes to
+  the footer, some forty presses of Tab on. Without JavaScript "keep still"
+  is hidden, and the stage reads "the fwiends are drawn live, so they need
+  JavaScript to appear."
 - Each fwiend has a link of its own to send its owner, `index.html#yuda`, its
   name in lower case (`#k3v1n`): it skips the opening, brings the fwiend into
   view and focus, and the fwiend says hi.
@@ -103,8 +110,9 @@ The page has five parts, in this order:
 `22px` on the smallest), a step above an h3, since it is read from further
 away; the species in small print, two or three lower-case words ("tuxedo
 eevee"); and the owner's handle in small print, linking to their page (phy's
-reads "that's me · linkedin"). On the smallest phones a long species or
-handle wraps onto a second rule rather than run into a neighbour.
+reads "that's me · linkedin", and "linkedin" alone on a phone, where the
+ring says the rest). On the smallest phones a long species or handle wraps
+onto a second rule rather than run into a neighbour.
 
 Each friend is a button with a short name (`aria-label`), "say hi to Terry",
 so that a screen reader or a voice gets to the point; what it looks like is a
@@ -131,8 +139,13 @@ brings the fwiends to life, and their feelings come from the emotion library:
 - Hovering over a friend, or tabbing to it, perks it up: ears in, eyes a touch
   wider. Kept there a moment, it grows curious and tilts its head one way,
   then the other.
+- A fwiend knows its person: pointing at its owner's handle, or tabbing to
+  it, makes that fwiend look at the handle and smile until the pointer
+  leaves. Terry does the same for the footer's credit to his owner, and
+  Claude for "this machine".
 - A click, a tap, Enter or Space says hi, with the hop for joy: happy eyes, a
-  small mouth, two bounces, while the others glance at it. A friend in
+  small mouth, two bounces, while the others glance at it. Its ground gives
+  under each landing, dipping a little and springing back. A friend in
   mid-air ignores another hi until it lands, since starting the hop again
   would drop it to the ground in one frame, and a key held down says hi once.
 - A third hi within six seconds makes it shy instead: it blushes, ducks and
@@ -155,9 +168,10 @@ brings the fwiends to life, and their feelings come from the emotion library:
 - A hidden status line tells a screen reader what happened in one flat
   sentence: "Howdi hops twice." ("Howdi smiles." under reduced motion),
   "Howdi goes shy.", "Howdi looks content.", "Claude gets out its laptop and
-  types.", "Everyone but Claude falls asleep." (once a visit) and "Everyone
-  wakes up.", which is not said when the reader only moves about the page, so
-  that it never talks over the screen reader's own account.
+  types.", "Everyone but Claude falls asleep." (once a visit) and, once they
+  had all fallen asleep, "Everyone wakes up.", which is not said when the
+  reader only moves about the page, so that it never talks over the screen
+  reader's own account.
 - A double-click or a long press selects nothing and opens no menu, and a
   quick second tap doesn't zoom the page. The labels stay selectable, so a
   handle can still be copied.
@@ -178,7 +192,11 @@ preview show everything in place.
   first, so that nobody hops past anybody standing. The hops are a little
   lower than a scene's, so that ears clear the labels above, and neighbours
   watch each one land. The labels are there from the start, so the empty
-  places read as the names still to be called.
+  places read as the names still to be called; each fwiend's ground is
+  drawn as it sets off, from the side it comes from, so that the line is
+  there before the fwiend lands on it, and gives as it does. (The roll call
+  kept in `design/backup/roll-call-rise.html` draws each ground just before
+  its fwiend rises through it.)
 - A row is called once any of it is in view; one just below the fold comes in
   with only its ears showing, which draws the eye down, and on a phone the
   lower rows come in as they are scrolled to. A row scrolled past unseen is

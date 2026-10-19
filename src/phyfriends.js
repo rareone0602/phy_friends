@@ -1736,10 +1736,33 @@
   });
 
   // A sheet of paper cut to the character's outline, for a render with a background of its own: the
-  // pencil lets paper through, never the background (STYLE.md §4, on a dark host).
-  function paperSheet(id) {
-    return `<filter id="${id}" x="-10%" y="-10%" width="120%" height="120%">` +
-      `<feFlood flood-color="${PENCIL.paper}"/><feComposite in2="SourceAlpha" operator="in"/></filter>`;
+  // pencil lets paper through, never the background (STYLE.md §9). It is a copy of the drawing (use) in
+  // which every ink turns to paper: the drawing writes each fill and stroke as var(--pf-cut, ink)
+  // (cuttable), and the copy sets --pf-cut, which its shapes inherit. Shapes without a stroke of their
+  // own inherit the copy's, so a page may cut the paper wider than the outline by giving the copy a
+  // stroke (site/pencil.css does on the dark sheet). The copy draws no filter, since one more filtered
+  // copy of every friend on every frame is what a page can least afford.
+  function paperSheet(drawingId, className) {
+    return `<use href="#${drawingId}"${className ? ` class="${className}"` : ''} style="--pf-cut:${PENCIL.paper};fill:${PENCIL.paper}"/>`;
+  }
+
+  // Writes each fill and stroke in markup, other than none, as a property that a paper sheet (paperSheet)
+  // can turn to paper. A presentation attribute would not do, since a copy keeps the attributes of what
+  // it copies.
+  function cuttable(markup) {
+    return markup.replace(/<([a-zA-Z]+)\b([^>]*?)(\/?)>/g, (tag, name, attrs, end) => {
+      let inks = '';
+      const rest = attrs.replace(/\s(fill|stroke)="([^"]*)"/g, (all, property, value) => {
+        if (value === 'none') return all;
+        inks += `${property}:var(--pf-cut,${value});`;
+        return '';
+      });
+      if (!inks) return tag;
+      const styled = /\sstyle="/.test(rest)
+        ? rest.replace(/\sstyle="([^"]*)"/, (all, style) => ` style="${style.replace(/;?$/, ';')}${inks}"`)
+        : `${rest} style="${inks}"`;
+      return `<${name}${styled}${end}>`;
+    });
   }
 
   // The mask that holds the texture over a view: white keeps the color and transparent lets the paper through.
@@ -2215,9 +2238,9 @@
   function drawSheet(ctx, opts, figure) {
     const { spec, uid, view, P, g, extras, defs, turn } = ctx;
     // opts.bg: false draws no background, so that the pencil shows the page's paper. 'page' does the same, and adds a
-    // sheet of paper cut to the outline (class pf-cutout) that a page shows only where its own paper cannot show
-    // through: on the kit's dark sheet and in forced colors (site/pencil.css). Any other value is a background, laid
-    // under a drawing that always has the sheet.
+    // sheet of paper cut to the outline (paperSheet, class pf-cutout) that a page shows only where its own paper
+    // cannot show through: on the kit's dark sheet and in forced colors, where site/pencil.css also cuts it a
+    // pencil's width wider. Any other value is a background, laid under a drawing that always has the sheet.
     const onPage = opts.bg === 'page';
     const bg = opts.bg === false || onPage ? null : opts.bg || view.bg || P.bg;
     const size = opts.fluid ? '' : ` width="${num(view.w)}" height="${num(view.h)}"`;
@@ -2231,12 +2254,12 @@
     const props = extras('ground', null, false), drop = bodyHeight(spec).drop, back = !!(turn && turn.back);
     const ground = drop && props ? `<g transform="translate(0 ${num(drop)})">${props}</g>` : props, onGround = ground && g('ground', ground);
     const root = g('root', back ? `<g transform="scale(-1 1)">${figure}</g>` : figure);
-    let drawing = `<g id="${uid}-drawing" transform="${cam}">${back ? onGround + root : root + onGround}</g>`;
+    const sheet = opts.pencil !== false && (bg || onPage);
+    const figured = back ? onGround + root : root + onGround;
+    let drawing = `<g id="${uid}-drawing" transform="${cam}">${sheet ? cuttable(figured) : figured}</g>`;
     if (opts.pencil !== false) {
       defs.push(pencilMask(`${uid}-pencil`, view));
-      const sheet = bg || onPage ? `<use href="#${uid}-drawing" filter="url(#${uid}-paper)"${onPage ? ' class="pf-cutout"' : ''}/>` : '';
-      if (bg || onPage) defs.push(paperSheet(`${uid}-paper`));
-      drawing = sheet + penciled(`${uid}-pencil`, drawing);
+      drawing = (sheet ? paperSheet(`${uid}-drawing`, onPage && 'pf-cutout') : '') + penciled(`${uid}-pencil`, drawing);
     }
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${num(view.w)} ${num(view.h)}"${size} data-pf-uid="${uid}">` +
       `<defs>${defs.join('')}</defs>` +
