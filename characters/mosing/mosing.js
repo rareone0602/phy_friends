@@ -7,8 +7,8 @@
 // and give the colors below.
 // Colors are taken from the sheet's swatches where it has them, and from the drawing otherwise.
 PhyFriends.define('mosing', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#383838',        // The charcoal of the sheet and of its charcoal swatch (L* 24): the head, ears, arms, tail and feet. Its house shade (furShade, L* about 15) fills the body, which sits under the head, and the legs; it stays a dark gray rather than black on paper, since the pencil lets the paper through.
     head: 'fur',
     face: '#efeef3',       // The white of the sheet (#f6fdff, a cool white), deepened to mumuyou's depth to stay visible on paper: the muzzle and cheeks, the diamond, the tufts in the ears and the ruff. Its house shade (faceShade) fills the back layer of the ruff, under the chin.
@@ -24,13 +24,12 @@ PhyFriends.define('mosing', {
     tail: 'fur',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     cyan: '#00e9ff',       // The cyan of the sheet's cyan swatch: the inside of the ears, the horns, the ear stripes, the brows, the hip stripes and the tail's fins.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears, and whose crown is spiky too.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks, under the eyes, so that the eyes sit on the charcoal and a glance down reaches the
@@ -38,7 +37,7 @@ PhyFriends.define('mosing', {
   // eyes into the white; it is kept as a moderate V notched in the top of the muzzle (an n: 1 range with len < 0 and
   // straight sides), since a band down the whole muzzle cut the white too sharply.
   face: {
-    cx: 0, cy: 24, rx: 70, ry: 30,
+    cy: 24, rx: 70, ry: 30,
     fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true },
       { from: 252, to: 288, n: 1, len: -20, b1: 0, b2: 0, jit: 0 }],
   },
@@ -55,7 +54,7 @@ PhyFriends.define('mosing', {
   // each side of the forehead, as on the sheet. The valleys over the eyes sit high, so that the brows and the diamond
   // show on the head below them. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -62, rx: 44, ry: 30,
+    cy: -62, rx: 44, ry: 30,
     tips: [
       [-50, -90, -8, -6, [-44, -76]],
       [-28, -120, -8, -8, [-16, -102]],
@@ -67,9 +66,8 @@ PhyFriends.define('mosing', {
     ],
   },
   // The eyes are plain tall pills in his two colors, as on the sheet: his right eye (the viewer's left) green and his
-  // left amber, without the sheet's pupils, whites or highlights. Setting arc: 1 draws the happy, closed and squint
-  // strokes at the full eye width.
-  eyes: { x: 34, y: 4, w: 13, h: 32, stroke: 4.8, arc: 1 },
+  // left amber, without the sheet's pupils, whites or highlights.
+  eyes: { x: 34, y: 4, h: 32, stroke: 4.8 },
   // The blush sits on the white muzzle under each eye, tipped up to follow the cheek.
   blush: { x: 46, y: 32, rx: 10, ry: 5.5, tilt: 8 },
   // There is no mouth by default (the sheet's open grin is omitted); when open, it shows the pink tongue and a fang.
@@ -78,7 +76,7 @@ PhyFriends.define('mosing', {
   // base. It is in the house shade of the charcoal. Small hip tufts sit at its base. The sheet's white belly stripe,
   // and the cyan spot beside it, are left out: under the big ruff, the stripe showed only as a thin stem to the ground.
   body: {
-    cx: 0, cy: 84, rx: 64, ry: 48, onigiri: 1,
+    cy: 84, rx: 64, ry: 48,
     fluff: [{ from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a slim dragon's tail rising behind his right hip (the viewer's left), as on the sheet, its tip curling
@@ -138,9 +136,7 @@ PhyFriends.define('mosing', {
     { feature: 'tailMarks', on: 'tail', clip: true, kind: 'ellipse', fill: 'cyan', cx: 0, cy: -30, rx: 60, ry: 3.4 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20 degrees). There is no house-style reference for mosing yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

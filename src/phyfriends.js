@@ -404,6 +404,9 @@
   // ------------------------------------------------------------------ Specs
 
   const registry = new Map();
+  // Each registered spec as its file writes it, before what it extends is laid under it, for the order of what it
+  // gives (check).
+  const written = new WeakMap();
   const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
 
   function merge(a, b) {
@@ -414,19 +417,34 @@
   }
 
   // Registers a spec under a name, which is its name whatever name the spec carries (a copy of another friend's, or
-  // the friend it extends), so that a friend's seeds follow the name it is registered under.
+  // the friend it extends), so that a friend's seeds follow the name it is registered under. A spec that extends
+  // another (a friend, or an abstract one: ABSTRACT) gives only where it differs from it.
   function define(name, spec) {
     let s = { name, ...spec };
-    if (s.extends) { s = merge(resolve(s.extends), s); delete s.extends; }
+    if (s.extends) { s = inherit(resolve(s.extends), s); delete s.extends; }
     s.name = name;
     registry.set(name, s);
+    written.set(s, spec);
     return s;
   }
   function resolve(s) {
     if (typeof s !== 'string') return s;
-    const r = registry.get(s);
+    const r = registry.get(s) || ABSTRACT.get(s);
     if (!r) throw new Error(`phy_friends: unknown character "${s}"`);
     return r;
+  }
+  // A spec laid over the one it extends (merge), with its sections, and its palette's roles, in the house order
+  // (ANATOMY), as a spec's file writes them.
+  function inherit(base, spec) {
+    const s = merge(base, spec);
+    if (isObj(s.palette)) s.palette = ordered(s.palette, Object.keys(ANATOMY.roles));
+    return ordered(s, ['name', ...Object.keys(ANATOMY.sections)]);
+  }
+  // An object with its keys in the given order, and the others after them in their own.
+  function ordered(o, order) {
+    const rank = k => (order.includes(k) ? order.indexOf(k) : order.length);
+    return Object.fromEntries(Object.entries(o).map((entry, i) => [entry, i])
+      .sort(([[a], i], [[b], j]) => rank(a) - rank(b) || i - j).map(([entry]) => entry));
   }
   // The palette role that colors a part (ANATOMY.roles): the role itself where the spec's palette gives it, else
   // `legacy`, the color that the part takes in a spec without the role (Claude's, and specs written before the roles).
@@ -502,6 +520,21 @@
       legs: ['hip', 'spread', 'ankle', 'bow', 'knees', 'width', 'taper', 'bands', 'foot', 'right'],
     },
   };
+  // The abstract friends, which a spec extends as a class extends an abstract one, and which are never listed: `friend`,
+  // what every friend shares, and `house`, what every friend drawn to the house template shares besides (ANATOMY).
+  const ABSTRACT = new Map([['friend', {
+    palette: { bg: '#1c1d21' },
+    eyes: { arc: 1 },  // The happy, closed and squint strokes span the whole eye.
+  }]]);
+  ABSTRACT.set('house', inherit(ABSTRACT.get('friend'), {
+    palette: { leg: 'furShade' },  // The hind legs take the house shade, behind the forelegs and paws.
+    eyes: { w: 13 },
+    body: { onigiri: 1 },  // A rice ball: narrow under the chin, broad and round at the base.
+    rig: { ground: 131 },  // Where the rig meets the ground (groundOf).
+    // The close-up through which a friend is compared with a close-up of its reference (tools/pf.py compare).
+    views: { closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 } },
+  }));
+
   // The parts whose color is a role's, by the path of their own `color` (or tongue) in a spec. The right one of a pair
   // (`right`) takes the pair's role, or its own where the palette gives one (earRight, irisRight, pawRight).
   const ROLE_COLORS = {
@@ -522,7 +555,9 @@
 
   // The sections: each one the house knows, the required ones given, in the house order.
   function checkSections(spec) {
-    const out = [], { sections } = ANATOMY, order = Object.keys(sections), given = Object.keys(spec).filter(k => k !== 'name');
+    const own = written.get(spec) || spec;  // What the spec's file gives, in its order; what it extends fills the rest.
+    const out = [], { sections } = ANATOMY, order = Object.keys(sections);
+    const given = Object.keys(own).filter(k => k !== 'name' && k !== 'extends');
     for (const k of given) if (!(k in sections)) out.push(`"${k}" is not a section of the house anatomy`);
     for (const k of order) if (sections[k] && spec[k] === undefined) out.push(`no ${k}: give it, or false if the friend has none`);
     const known = given.filter(k => k in sections);
@@ -535,8 +570,9 @@
     const out = [], { roles } = ANATOMY, palette = spec.palette || {}, P = withShades(palette), names = Object.keys(palette);
     const needed = Object.entries(roles).filter(([, need]) => need === '' || (need && valueAt(spec, need)));
     for (const [role] of needed) if (!(role in palette)) out.push(`the palette has no ${role}`);
-    const rolesGiven = names.filter(k => k in roles), others = names.filter(k => !(k in roles));
-    if (names.join() !== [...Object.keys(roles).filter(k => rolesGiven.includes(k)), ...others].join()) {
+    const own = Object.keys((written.get(spec) || spec).palette || {});  // The palette as the spec's file writes it.
+    const rolesGiven = own.filter(k => k in roles), others = own.filter(k => !(k in roles));
+    if (own.join() !== [...Object.keys(roles).filter(k => rolesGiven.includes(k)), ...others].join()) {
       out.push(`the palette's roles do not come first, in the house order (${Object.keys(roles).join(', ')})`);
     }
     for (const k of names) if (!isHex(P[k])) out.push(`palette.${k} names no color ("${palette[k]}")`);
@@ -650,9 +686,9 @@
   }
 
   const LID_CLEARANCE = 2;     // How far above the eye the lid rests while it is up, in head units.
-  // Where the rig meets the ground, in head units, for a spec without rig.ground: the house's, that of every friend on
-  // the house template. groundOf lowers it by the drop of a taller body (bodyHeight).
-  const DEFAULT_GROUND = 131;
+  // Where the rig meets the ground, in head units, for a spec without rig.ground: the house's (ABSTRACT), that of every
+  // friend on the house template. groundOf lowers it by the drop of a taller body (bodyHeight).
+  const DEFAULT_GROUND = ABSTRACT.get('house').rig.ground;
   const DEFAULT_NECK = [0, 50];  // The point about which the head tilts, for a spec without rig.neck.
   // Extras on these are drawn on both of the pair, in each one's own space.
   const BOTH = { ears: ['earL', 'earR'], paws: ['pawL', 'pawR'], feet: ['footL', 'footR'] };

@@ -8,8 +8,8 @@
 // on it) are taken from sheet.png, which fills its markings with the icon's colors. He is one figure, which sits and
 // stands on the same limbs.
 PhyFriends.define('bardell', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#f0d7bf',        // The pinker cream of the body, arms, legs and tail on sheet.png, whose head is the paler cream of the icon's muzzle; the strip under the chin at the foot of the icon is pinker too. Its house shade (furShade) fills the body, which sits under the head.
     head: '#eeb26c',       // The tan-orange of the icon's upper face: the head above the muzzle.
     face: '#f8e9d4',       // The cream of the icon's muzzle: muzzle, cheeks, cheek tufts and the base of the inner ears.
@@ -24,7 +24,6 @@ PhyFriends.define('bardell', {
     tail: 'fur',
     arm: 'fur',
     paw: 'brown',
-    leg: 'furShade',
     foot: 'brown',
     fringe: '#e3573e',     // The orange-red of the icon's lower locks.
     brown: '#684128',      // The chocolate of the icon's ears, which the sheet also gives the stripes on the upper arms, the forepaws and the hind feet.
@@ -32,14 +31,14 @@ PhyFriends.define('bardell', {
   },
   // The head is a round dome in the tan of the upper face, with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The cream muzzle and cheeks. On the icon the cream starts halfway down the eyes; here it rises to their tops, as
   // for Howdi and Brian, so that each amber eye sits on one color, since amber on tan is too faint at gallery size.
   // Its sides are cut into spiky tufts. Setting len < 0 flattens the top, under the fringe.
   face: {
-    cx: 0, cy: 16, rx: 84, ry: 38,
+    cy: 16, rx: 84, ry: 38,
     fluff: [
       { from: -24, to: 30, n: 3, len: 9, lean: 3, depth: 0.1, b1: -28, b2: 8, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -57,7 +56,7 @@ PhyFriends.define('bardell', {
   // that the head keeps its round outline. The orange-red lower locks (an extra) show below them.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -62, rx: 80, ry: 40,
+    cy: -62, rx: 80, ry: 40,
     tips: [
       [92, -30, -20, 20, [80, -52]],
       [70, -20, 24, -28, [52, -54]],
@@ -72,8 +71,8 @@ PhyFriends.define('bardell', {
     ],
   },
   // The eyes are plain tall pills in his own amber, which the sheet and the sticker draw (the icon's dark pills are
-  // the template's). Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1 },
+  // the template's).
+  eyes: { x: 34, y: 3, h: 32, stroke: 5 },
   // The blush sits on the cream beside the lower half of each eye, as on the icon, tipped up to follow the cheek.
   blush: { x: 54, y: 25, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default (the sheet's nose and mouth are omitted); when open, it shows the pink tongue of
@@ -83,7 +82,7 @@ PhyFriends.define('bardell', {
   // the base. It is in the house shade of the body's cream. Shoulder tufts sit under the cheeks, and small hip tufts
   // below them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, onigiri: 1,
+    cy: 86, rx: 64, ry: 46,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -161,7 +160,6 @@ PhyFriends.define('bardell', {
       fluff: [{ from: 215, to: 325, n: 3, len: 4, depth: 0.05, b1: -10, b2: 10, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The icon, which frames the head larger and lower than the house close-up: the origin sits between its eyes and
     // the scale sets its eyes as far apart as the spec's, so that the two line up (pf.py compare). Its crown and ears

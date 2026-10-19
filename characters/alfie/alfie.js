@@ -3,8 +3,8 @@
 // Pictures: examples/sheet.jpg (the color standard), envelope.png and glasses.png.
 // Colors are taken from the color bar on examples/sheet.jpg; those it does not show are taken from the drawing.
 PhyFriends.define('alfie', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#fe8568',        // The coral of the color bar. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#efeef3',       // The white of the color bar, deepened to mumuyou's depth to stay visible on paper: muzzle, cheeks, eyebrow spots, inner ears, chest and paws.
@@ -19,20 +19,19 @@ PhyFriends.define('alfie', {
     tail: 'fur',
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'face',
     stripe: '#b23f27',     // The darker red-orange of the color bar (#d75639), one house step (L* -10) deeper so that it parts from furShade, with its chroma kept at the pictures' (C* ~60) rather than raised: the forehead mark, inner ears, hip stripes and ankles.
   },
   // The head is a round dome with two spiky tufts down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -30, to: -2, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks. On the sheet the coral comes down beside each eye; here the white rises to the
   // eyes' tops, so that each pill eye sits on one color. Its sides are cut into spiky tufts. Setting len < 0
   // flattens the top.
   face: {
-    cx: 0, cy: 16, rx: 80, ry: 38,
+    cy: 16, rx: 80, ry: 38,
     fluff: [
       { from: -24, to: 30, n: 3, len: 9, lean: 3, depth: 0.1, b1: -28, b2: 8, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -48,7 +47,7 @@ PhyFriends.define('alfie', {
   // stops above the eyebrow spots, so that the white between the eyes and the glasses stay clear of it.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -62, rx: 74, ry: 40,
+    cy: -62, rx: 74, ry: 40,
     tips: [
       [14, -114, -10, -6, [40, -86]],
       [88, -40, -6, -4, [70, -40]],
@@ -58,9 +57,8 @@ PhyFriends.define('alfie', {
       [-12, -104, -6, -10, [0, -92]],
     ],
   },
-  // The eyes are plain tall pills in Alfie's own amber. Setting arc: 1 draws the happy, closed and squint strokes at
-  // the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 4.8, arc: 1 },
+  // The eyes are plain tall pills in Alfie's own amber.
+  eyes: { x: 34, y: 3, h: 32, stroke: 4.8 },
   // The blush sits on the white below each lens, clear of the ring, tipped up to follow the cheek.
   blush: { x: 48, y: 40, rx: 10, ry: 6, tilt: 10 },
   // There is no mouth by default (the sheet's nose and small mouth are omitted); when open, it shows the pink tongue
@@ -69,7 +67,7 @@ PhyFriends.define('alfie', {
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base. It is in the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 87, rx: 64, ry: 45, onigiri: 1,
+    cy: 87, rx: 64, ry: 45,
     fluff: [{ from: -65, to: -25, n: 2, len: 8, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -144,9 +142,7 @@ PhyFriends.define('alfie', {
     { feature: 'soles', on: 'feet', sole: true, kind: 'ellipse', fill: 'blush', cx: -1, cy: 1, rx: 8, ry: 6, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Alfie yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

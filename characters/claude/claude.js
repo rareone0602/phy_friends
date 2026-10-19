@@ -7,8 +7,8 @@
 // the legs are one wide and two tall. Its routine (below) follows examples/claude-claude-code.gif, the animated mascot
 // getting out its laptop.
 PhyFriends.define('claude', {
+  extends: 'friend',
   palette: {
-    bg: '#1c1d21',
     body: '#d77757',       // The mascot's one color (clawd_body in Claude Code's themes, rgb(215, 119, 87)).
     eye: '#29231c',        // Near-black, faintly warm: the notches show the terminal's black through the body.
     laptop: '#888888',     // The gray of the laptop in the animated mascot's GIF.
@@ -32,7 +32,7 @@ PhyFriends.define('claude', {
   ears: { base: [-40, 32], angle: 90, width: 30, length: 30, tip: 14, color: 'body' },
   // The eyes are 4 units either side of the middle, 1 wide and 2 tall. They look as far as the glyphs move the
   // notches to look aside, one unit, where the house's eyes move 6 head units.
-  eyes: { x: 64, y: 0, w: 16, h: 32, stroke: 5.5, arc: 1, color: 'eye', range: 16 },
+  eyes: { x: 64, y: 0, w: 16, h: 32, stroke: 5.5, color: 'eye', range: 16 },
   // The blush sits below and outside each eye, level with the arms, low enough that the eyes clear it when they
   // look down.
   blush: { x: 86, y: 32, rx: 12, ry: 7, tilt: 10 },

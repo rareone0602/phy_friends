@@ -11,6 +11,14 @@
     for (const name of houseFriends()) assertEqual(PF.check(name), [], name);
   });
 
+  test('every friend takes what it shares from the abstract friends it extends, which are never listed', () => {
+    assert(!PF.list().some(name => name === 'house' || name === 'friend'), 'the abstract friends are not listed');
+    const house = PF.get('house'), friend = PF.get('friend');
+    assertEqual(house.palette.bg, friend.palette.bg, 'the house extends the friend');
+    for (const name of PF.list()) assertEqual(PF.get(name).palette.bg, friend.palette.bg, name);
+    for (const name of houseFriends()) assertEqual(PF.get(name).rig.ground, house.rig.ground, name);
+  });
+
   test('Claude is the one friend outside the house anatomy', () => {
     assertEqual(PF.list().filter(name => PF.check(name).length), EXCEPTIONS);
   });

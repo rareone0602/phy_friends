@@ -3,8 +3,8 @@
 // Pictures: examples/PENUP_20261001_192151.png (seated, the color standard) and work_9.png (a happy head and paws).
 // Colors are taken from PENUP_20261001_192151.png, deepened where the pictures' pale ones would vanish on paper.
 PhyFriends.define('jiaoyue', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#d6cce4',        // The pale lavender of the head and body (#eae6f5), deepened so that it holds on paper. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#efeef3',       // The white, deepened to mumuyou's depth to stay visible on paper: the muzzle and cheeks, the chest, the paws and feet, and the tail's end.
@@ -19,20 +19,19 @@ PhyFriends.define('jiaoyue', {
     tail: '#9688c6',       // The purple of the tail.
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'face',
     brow: '#a6a5ab',       // The neutral gray of the eyebrow dots (#e7e7e7), deepened so that the dots show on the lavender.
   },
   // The head is a broad dome, with a short tuft down each side under the ears.
   head: {
-    cx: 0, cy: -20, rx: 85, ry: 68,
+    cy: -20, rx: 85, ry: 68,
     fluff: [{ from: -22, to: 20, n: 2, len: 8, lean: 4, depth: 0.07, b1: -26, b2: 8, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks. In the pictures the lavender comes down around the top of each eye; here the white
   // rises to the eyes' tops, so that each pill eye sits on one color. Its sides are cut into small tufts. Setting
   // len < 0 flattens the top.
   face: {
-    cx: 0, cy: 16, rx: 75, ry: 42,
+    cy: 16, rx: 75, ry: 42,
     fluff: [
       { from: -26, to: 25, n: 2, len: 4, lean: 3, depth: 0.08, b1: -20, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -47,7 +46,7 @@ PhyFriends.define('jiaoyue', {
   // The shaggy fur of the crown and cheeks, in the fur color: spikes around the top of the head and a ragged tuft on
   // each cheek, as both pictures draw them. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -66, rx: 70, ry: 36,
+    cy: -66, rx: 70, ry: 36,
     tips: [
       [-69, -82, -8, -9, [-36, -99]], [-9, -110, -10, -10, [17, -99]],
       [62, -88, -6, -10, [82, -51]], [80, -34, 5, -9, [69, -29]],
@@ -56,9 +55,8 @@ PhyFriends.define('jiaoyue', {
       [-80, -37, -8, 6, [-79, -70]],
     ],
   },
-  // The eyes are plain tall pills in jiaoyue's own blue. Setting arc: 1 draws the happy, closed and squint strokes at
-  // the full eye width.
-  eyes: { x: 34, y: 4, w: 13, h: 32, stroke: 5.2, arc: 1 },
+  // The eyes are plain tall pills in jiaoyue's own blue.
+  eyes: { x: 34, y: 4, h: 32, stroke: 5.2 },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 55, y: 26, rx: 11, ry: 6, tilt: 10 },
   // There is no mouth by default; when open, it shows the red-pink tongue of PENUP_20261001_192151.png.
@@ -66,7 +64,7 @@ PhyFriends.define('jiaoyue', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade. Shoulder tufts sit under the cheeks.
   body: {
-    cx: 0, cy: 81, rx: 66, ry: 50, onigiri: 1,
+    cy: 81, rx: 66, ry: 50,
     fluff: [{ from: -60, to: -25, n: 2, len: 11, depth: 0.04, b1: -15, b2: -22, jit: 0, sym: true }],
   },
   // The tail is a big plume rising behind jiaoyue's right hip (the viewer's left) and curling in, purple with a white
@@ -93,12 +91,10 @@ PhyFriends.define('jiaoyue', {
       fluff: [{ from: 25, to: 155, n: 5, len: 9, depth: 0.07, b1: -22, b2: 6, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The pictures, matched by their eyes: the seated one, and the happy head, tipped 10° to its left.
     PENUP_20261001_192151: { w: 674, h: 823, x: 358, y: 318, scale: 2.7 },
     work_9: { w: 512, h: 512, x: 293, y: 252, scale: 1.9, rotate: -10, pose: { eyes: 'happy' } },
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for jiaoyue yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

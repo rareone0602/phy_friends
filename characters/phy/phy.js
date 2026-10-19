@@ -3,8 +3,8 @@
 // Colors are taken from examples/icon.png (views.icon); those the icon does not show are taken
 // from ref.png.
 PhyFriends.define('phy', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#8c7979',        // The cat's black, as the icon draws it. Its house shade (furShade) fills the body, the folded ear tips and the top of the crest.
     head: 'fur',
     face: '#f5ede6',       // The cat's warm white (#fcf5ef), deepened to mumuyou's depth to stay visible on paper.
@@ -19,7 +19,6 @@ PhyFriends.define('phy', {
     tail: '#f1e5da',       // The cream of the tail, one step deeper than the ruff so that its tip can be white.
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'face',
     almond: '#f9bcaa',     // The lighter almond in the ear. Its house shade (almondShade) fills the rim around it.
     marble: '#d8bab0',     // The cookies-and-cream marbling and the pale bands on the crest.
@@ -29,13 +28,13 @@ PhyFriends.define('phy', {
   // A broad leaf-shaped tuft of fur runs down each side, under the ears. The cheek fluff (an extra)
   // draws the lower outline.
   head: {
-    cx: 0, cy: -15.1, rx: 70, ry: 55,
+    cy: -15.1, rx: 70, ry: 55,
     fluff: [{ from: -30, to: 10, n: 2, len: 13, lean: 4, depth: 0.1, b1: -35, b2: 10, jit: 0, sym: true }],
   },
   // The white mask covers the muzzle, the cheeks and a chin that blends into the cream ruff. Its top
   // runs flat under the eyes, where the blaze takes over, and each cheek ends in round scallops.
   face: {
-    cx: 0, cy: 24.1, rx: 64.6, ry: 18.6,
+    cy: 24.1, rx: 64.6, ry: 18.6,
     fluff: [
       { from: 236, to: 304, n: 1, len: -3.4, b1: 0, b2: 0, jit: 0 }, // Setting len < 0 flattens the top.
       { from: -54, to: -10, n: 2, len: 3.5, depth: 0.03, b1: -40, b2: -40, jit: 0, sym: true }, // Cheek tops.
@@ -51,9 +50,8 @@ PhyFriends.define('phy', {
   // The crest is one large lock rising to a point left of center, with a dome for its right side;
   // the second tip is hidden inside the head. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: { cx: -5, cy: -62, rx: 30, ry: 15, tips: [[-31.1, -97.4, -20.6, -37.4, [19, -69.3]], [0, -45, 0, 0, [-35.3, -60.9]]] },
-  // The eyes are plain tall pills in phy's own green, their tops leaning in slightly. Setting arc: 1
-  // draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 31, y: 0.6, w: 13, h: 33, tilt: 2, stroke: 4.5, arc: 1 },
+  // The eyes are plain tall pills in phy's own green, their tops leaning in slightly.
+  eyes: { x: 31, y: 0.6, h: 33, tilt: 2, stroke: 4.5 },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 48.1, y: 21.3, rx: 9.6, ry: 5.5, tilt: 20 },
   // There is no mouth by default; when open (as in the icon), it shows one fang.
@@ -61,7 +59,7 @@ PhyFriends.define('phy', {
   // The body is broad, and an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits
   // under the head, so it takes the house shade. Shoulder tufts sit under the cheeks, and hip tufts below the ruff.
   body: {
-    cx: 0, cy: 80, rx: 74, ry: 51, onigiri: 1,
+    cy: 80, rx: 74, ry: 51,
     fluff: [{ from: -65, to: -25, n: 2, len: 18, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -136,7 +134,6 @@ PhyFriends.define('phy', {
     { feature: 'crumbs', on: 'pawR', fill: 'crumb', polys: [[5, -3, 3.5, 4, 110, 0.7]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The close-up in examples/ref.png, lying with the head tipped onto the ruff. The body shifts up
     // and to the left under the head (x, y), and headX, headY undo that shift for the head.

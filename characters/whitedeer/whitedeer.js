@@ -11,8 +11,8 @@
 // pale blues beside it (the inner ears, the hands and hooves, the forehead spot) by the same step, so that each stays
 // as far from the fur as on the sheet.
 PhyFriends.define('whitedeer', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#b6def3',        // The pale blue of the head, body, arms and legs (#cae8f8), deepened to stay visible on paper. Its house shade (furShade) fills the body, which sits under the head, and the legs.
     head: 'fur',
     face: '#efeef3',       // The white of the face and the tail's underside (#ffffff), and of the sailor shirt and hat (#eff2f1), deepened to mumuyou's depth to stay visible on paper. Its house shade (faceShade) fills the short sleeves, so that they show against the shirt's front.
@@ -27,7 +27,6 @@ PhyFriends.define('whitedeer', {
     tail: 'fur',
     arm: 'fur',
     paw: 'hoof',
-    leg: 'furShade',
     foot: 'hoof',
     antler: '#3c8af7',     // The blue of the antlers.
     hoof: '#74bff1',       // The deeper blue of the hands and hooves (#8cc9f6), deepened by the fur's step. Its house shade (hoofShade) fills the cleft of each hoof.
@@ -39,13 +38,13 @@ PhyFriends.define('whitedeer', {
   },
   // The head is a broad dome, a little wider than tall.
   head: {
-    cx: 0, cy: -20, rx: 86, ry: 68,
+    cy: -20, rx: 86, ry: 68,
   },
   // The white muzzle and cheeks. As on the sheet, the white rises well above the eyes, so that the fringe and the
   // forehead spot lie on its edge; the blaze (an extra) divides its top. Setting len < 0 flattens the top, and the
   // range before it lifts the white under the fringe.
   face: {
-    cx: 0, cy: 8, rx: 76, ry: 52,
+    cy: 8, rx: 76, ry: 52,
     fluff: [{ from: 190, to: 250, n: 1, len: 10, b1: -22, b2: -22, jit: 0 },
       { from: 250, to: 305, n: 1, len: -6, b1: 0, b2: 0, jit: 0 }],
   },
@@ -58,7 +57,7 @@ PhyFriends.define('whitedeer', {
   // right brow (the viewer's left) toward the blaze. It lies on the white, which shows its edge, and stops short of
   // the blaze, so that the white parts the two. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -64, rx: 66, ry: 34,
+    cy: -64, rx: 66, ry: 34,
     tips: [
       [-60, -86, -8, -8, [-26, -104]], [8, -112, -10, -8, [30, -98]],
       [62, -84, -8, -6, [66, -60]], [56, -54, 6, 4, [-16, -52]],
@@ -68,9 +67,8 @@ PhyFriends.define('whitedeer', {
   },
   // The eyes are tall pills in his own blue, with the sheet's cyan lower iris, its lower three-eighths, as a flat
   // mark clipped to each, so that it follows every glance and blink; the blue above holds the eye's shape on the
-  // white. The dark lash over each eye and the highlights are line work and lighting, and are left out. Setting
-  // arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 4, w: 13, h: 32, stroke: 5, arc: 1,
+  // white. The dark lash over each eye and the highlights are line work and lighting, and are left out.
+  eyes: { x: 34, y: 4, h: 32, stroke: 5,
     shine: { x: 0, y: 22, rx: 30, ry: 18, color: 'eyeLow' } },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 56, y: 28, rx: 11, ry: 6.5, tilt: 8 },
@@ -80,7 +78,7 @@ PhyFriends.define('whitedeer', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade.
   body: {
-    cx: 0, cy: 82, rx: 64, ry: 49, onigiri: 1,
+    cy: 82, rx: 64, ry: 49,
   },
   // The tail is a deer's short flag, behind his left hip (the viewer's right), as the back view draws it: it
   // sticks out to the side and curls up to a pale blue point, and its underside is white, cut into tufts that reach
@@ -181,9 +179,7 @@ PhyFriends.define('whitedeer', {
     { feature: 'hooves', on: 'feet', fill: 'hoofShade', round: 0.4, nodes: [[-1.5, 2, 1], [1.5, 2, 1], [2.5, 11, 1], [-2.5, 11, 1]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for WhiteDeer yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

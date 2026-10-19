@@ -2,8 +2,8 @@
 // Pictures: examples/icon.png, waving.png, card.png, teacup.png, bandana.png, snowman.webp.
 // Colors are taken from examples/icon.png; those the icon does not show are taken from waving.png.
 PhyFriends.define('yuda', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#6c7ba7',        // The slate blue of the icon. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#efeef3',       // The white, deepened to mumuyou's depth to stay visible on paper: the muzzle, cheeks, eyebrow spots, chest, forearms and forepaws, and the lower legs and feet.
@@ -18,7 +18,6 @@ PhyFriends.define('yuda', {
     tail: 'fur',
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'face',
     scarf: '#98f0ff',      // The bandana. Its house shade (scarfShade) fills the band and the knot.
     tailMid: '#94a1d9',    // The periwinkle band on the tail, drawn in both waving.png and teacup.png.
@@ -26,13 +25,13 @@ PhyFriends.define('yuda', {
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and plump round cheeks are edged with small shingles; the fur ruff behind them
   // (an extra) makes the long cheek spikes. Setting len < 0 flattens the top, under the forehead locks.
   face: {
-    cx: 0, cy: 14, rx: 80, ry: 38,
+    cy: 14, rx: 80, ry: 38,
     fluff: [
       { from: -40, to: 20, n: 3, len: 4, lean: 3, depth: 0.1, b1: -18, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -49,7 +48,7 @@ PhyFriends.define('yuda', {
   // The valleys sit high enough to clear the eyes as they look around.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -58, rx: 72, ry: 40,
+    cy: -58, rx: 72, ry: 40,
     tips: [
       [-34, -132, 2, 12, [0, -96]],
       [22, -110, -6, -10, [52, -76]],
@@ -61,9 +60,8 @@ PhyFriends.define('yuda', {
       [-76, -30, 0, 0, [-50, -80]],
     ],
   },
-  // The eyes are plain tall pills in Yuda's own blue, set wide and low. Setting arc: 1 draws the happy,
-  // closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1 },
+  // The eyes are plain tall pills in Yuda's own blue, set wide and low.
+  eyes: { x: 34, y: 3, h: 33, stroke: 4.5 },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek. It
   // sits low enough that an eye looking down and outward does not land on it.
   blush: { x: 53, y: 24.5, rx: 11, ry: 6.5, tilt: 10 },
@@ -72,7 +70,7 @@ PhyFriends.define('yuda', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 70, ry: 50, onigiri: 1,
+    cy: 82, rx: 70, ry: 50,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -132,9 +130,7 @@ PhyFriends.define('yuda', {
       fluff: [{ from: 60, to: 120, n: 3, len: 10, depth: 0.04, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Yuda yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

@@ -6,8 +6,8 @@
 // Colors are taken from ramen.jpg, whose fills are flat; those it does not show are taken from bust.jpg, and the
 // hoodie's from hoodie.jpg.
 PhyFriends.define('tanyuan', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#eab27f',        // The tan of every picture. Its house shade (furShade) fills the folded ear below its tip.
     head: 'fur',
     face: '#efeef3',       // The white, deepened to mumuyou's depth to stay visible on paper: the mop, muzzle, eyebrow spots, drawstrings, hind feet and the tail's underside.
@@ -23,7 +23,6 @@ PhyFriends.define('tanyuan', {
     tail: 'fur',
     arm: 'hoodieShade',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'face',
     streak: '#b85a4b',     // The brick red of the streaks in the mop, also used for the marks on the cheeks.
     hoodie: '#698296',     // The blue-gray of the hoodie in hoodie.jpg (poster.jpg's is the same). Its house shade (hoodieShade) fills the body, which sits under the head; only the front, which lies over the ribbed hem, takes this color, and the sleeves take the shade, so that they show against it.
@@ -31,14 +30,14 @@ PhyFriends.define('tanyuan', {
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and cheeks, with spiky tufts on the lower cheeks. The tan band across the eyes (an extra)
   // covers its top, so that the white starts under the eyes, as in every picture. It is tall enough for its top
   // edge to lie under the mop, since an edge under the band would show as a pale seam across the forehead.
   face: {
-    cx: 0, cy: -2, rx: 86, ry: 62,
+    cy: -2, rx: 86, ry: 62,
     fluff: [{ from: 16, to: 52, n: 3, len: 10, lean: 3, depth: 0.1, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The ears are pointed dog ears with soft tips. His right ear (the viewer's left) stands; the other folds over,
@@ -56,7 +55,7 @@ PhyFriends.define('tanyuan', {
   // spots are.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -60, rx: 76, ry: 42,
+    cy: -60, rx: 76, ry: 42,
     tips: [
       [36, -122, -12, -12, [54, -100]],
       [84, -104, -8, -8, [80, -76]],
@@ -72,9 +71,8 @@ PhyFriends.define('tanyuan', {
       [-4, -134, -12, -10, [14, -112]],
     ],
   },
-  // The eyes are plain tall pills in his own red, set wide and low on the tan. Setting arc: 1 draws the happy,
-  // closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1 },
+  // The eyes are plain tall pills in his own red, set wide and low on the tan.
+  eyes: { x: 34, y: 3, h: 32, stroke: 5 },
   // The blush sits on the white under each eye, inside the cheek mark, tipped up to follow the cheek.
   blush: { x: 41, y: 34, rx: 9.5, ry: 6, tilt: 8 },
   // There is no mouth by default (the pictures' nose and mouth are omitted). It sits on the white, below the tan
@@ -84,7 +82,7 @@ PhyFriends.define('tanyuan', {
   // the base. It wears the hoodie, so it has no fur tufts. It sits under the head, so it takes the hoodie's house
   // shade. Below the front of the hoodie (an extra) it shows as the ribbed hem of hoodie.jpg, which lies under the
   // front where the front blouses over it. The paw print on the chest in poster.jpg is too small to keep.
-  body: { cx: 0, cy: 84, rx: 66, ry: 48, onigiri: 1 },
+  body: { cy: 84, rx: 66, ry: 48 },
   // The tail is a bushy tan plume rising behind his left hip (the viewer's right), its tip curling in. Its
   // underside is white (an extra); no picture gives it a white end.
   tail: {
@@ -160,9 +158,7 @@ PhyFriends.define('tanyuan', {
       fluff: [{ from: -60, to: 60, n: 3, len: 10, lean: 4, depth: 0.05, b1: -25, b2: 5, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for tanyuan yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

@@ -5,8 +5,8 @@
 // by other artists, by_yuda.png and gurumin1.png.
 // Colors are taken from the color bar on examples/sheet.png; those it does not show are taken from the drawing.
 PhyFriends.define('kevin', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#9ee8fa',        // The ice blue of the color bar (#adeffd), deepened slightly to hold its own on paper. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#e8f0f3',       // The white, deepened to mumuyou's depth to stay visible on paper: muzzle, dots, chest, paws and tail end.
@@ -22,7 +22,6 @@ PhyFriends.define('kevin', {
     tail: 'fur',
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'band',
     band: '#4db5ca',       // The darker cyan of the ear tips and cuffs, one house step deeper than the sheet's (#80cfe0), which matches furShade.
     eyeMint: '#94fcb7',    // The lower half of his right eye: the mint of the color bar.
@@ -30,12 +29,12 @@ PhyFriends.define('kevin', {
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 92, ry: 71,
+    cy: -22, rx: 92, ry: 71,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The white muzzle and lower cheeks, edged with small shingles. Setting len < 0 flattens the top, under the fringe.
   face: {
-    cx: 0, cy: 16, rx: 80, ry: 38,
+    cy: 16, rx: 80, ry: 38,
     fluff: [
       { from: -22, to: 26, n: 3, len: 5, lean: 3, depth: 0.1, b1: -20, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -53,7 +52,7 @@ PhyFriends.define('kevin', {
   // out, because the two points of fur beside it would cover the eyes as they look inward. The valleys
   // sit high enough to clear the eyes as they look around. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -58, rx: 74, ry: 44,
+    cy: -58, rx: 74, ry: 44,
     tips: [
       [36, -84, 0, 0, [72, -62]],
       [90, -34, -6, -4, [70, -26]],
@@ -68,9 +67,8 @@ PhyFriends.define('kevin', {
   // eye (the viewer's left) blue over mint, and his left orange over yellow, split at the middle, as on the sheet
   // and in by_yuda.png. Each lower half is a flat mark clipped to the eye, level-edged like the sheet's, so that it
   // follows every glance and blink. The sheet's darker lid and upper iris, its pale crescent at the bottom and its
-  // highlights are shading and are left out. Setting arc: 1 draws the happy, closed and squint strokes at the full
-  // eye width, in the upper colors.
-  eyes: { x: 34, y: 5, w: 13, h: 33, stroke: 4.8, arc: 1,
+  // highlights are shading and are left out. The happy, closed and squint strokes take the upper colors.
+  eyes: { x: 34, y: 5, h: 33, stroke: 4.8,
     shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'eyeMint' },
     right: { shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'mark' } } },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek. It
@@ -81,7 +79,7 @@ PhyFriends.define('kevin', {
   // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 87, rx: 64, ry: 45, onigiri: 1,
+    cy: 87, rx: 64, ry: 45,
     fluff: [{ from: -65, to: -25, n: 2, len: 7, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -142,9 +140,7 @@ PhyFriends.define('kevin', {
     { feature: 'toes', on: 'feet', kind: 'ellipse', fill: 'face', cx: 0, cy: 5, rx: 17, ry: 8, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for K3V1N yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

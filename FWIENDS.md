@@ -250,7 +250,8 @@ private references in a git-ignored `private/` folder.
   and `foot`, with `earRight`, `irisRight` or `pawRight` where a pair
   differs. Each is a colour or the name of the role it shares (`paw: 'face'`).
   Markings and clothes follow, named for what they paint, and `bg`
-  (`#1c1d21`) is the same for all.
+  (`#1c1d21`), the same for all, comes from the abstract friend that every
+  spec extends.
 - **Exactly one shade layer** (`STYLE.md`, principle 5). `<name>Shade` is
   derived from `<name>` by `PhyFriends.shadeOf`, so shades match across
   fwiends, and nothing comes from a reference's lighting: no pale rim along an

@@ -7,8 +7,8 @@
 // the yukata's from EVE HP/2508.png. The works serve for colors, markings and fur shapes only. YuanYuan is one figure,
 // which sits and stands on the same limbs.
 PhyFriends.define('yuanyuan', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#efeef3',        // The white, deepened to mumuyou's depth to stay visible on paper; the icon's warm white (#fff6f4) merges with the paper's cream. It fills the face, the ear tufts, the paws, the tail and the white of the cord. Its house shade (furShade) fills the chest in the collar of the yukata, under the white chin.
     head: 'hair',
     face: 'fur',
@@ -23,18 +23,17 @@ PhyFriends.define('yuanyuan', {
     tail: 'fur',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     cord: '#ae4e48',       // The red of the twisted cord in EVE HP/2507.png.
     yukata: '#5c5c74',     // The dusky navy of the yukata in EVE HP/2508.png (its most common color, #5a5a72), which holds on paper as it is. The yukata is the body, which sits under the head, so its house shade (yukataShade) fills it; only the top panel of the robe, which lies over the other, takes this color.
     pattern: '#c4d4f4',    // The pale blue of the round dots on the yukata in EVE HP/2508.png, also used for the collar bands and the sash, so that they add no color of their own and stay clear of the red cord. Its house shade (patternShade) fills the parts that lie behind a band of the same blue: the under panel's collar band and the bow behind the sash.
   },
   // The head is a broad dome in the hair's lavender; the mop covers all of it but the face.
-  head: { cx: 0, cy: -20, rx: 84, ry: 60 },
+  head: { cy: -20, rx: 84, ry: 60 },
   // The white face is a broad, low mask, as on the icon: its bottom is a wide, flat curve, and at each lower corner
   // a spiky cheek ruff sticks out sideways, with a smaller tuft below it pointing down.
   face: {
-    cx: 0, cy: -17, rx: 86, ry: 64,
+    cy: -17, rx: 86, ry: 64,
     fluff: [
       { from: 12, to: 36, n: 1, len: 16, lean: -2, depth: 0, b1: -10, b2: 10, jit: 0, sym: true },
       { from: 38, to: 56, n: 1, len: 11, lean: 0, depth: 0, b1: -10, b2: 10, jit: 0, sym: true },
@@ -58,7 +57,7 @@ PhyFriends.define('yuanyuan', {
   // the brow locks inside them.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -56, rx: 80, ry: 48,
+    cy: -56, rx: 80, ry: 48,
     tips: [
       [0, -114, -40, -40, [86, -34]],
       [94, -12, -4, 0, [58, -62]],
@@ -68,9 +67,8 @@ PhyFriends.define('yuanyuan', {
       [-94, -12, 0, 4, [-86, -34]],
     ],
   },
-  // The eyes are plain tall pills in his own red-brown, set wide and low. Setting arc: 1 draws the happy, closed and
-  // squint strokes at the full eye width.
-  eyes: { x: 34, y: 4, w: 13, h: 32, stroke: 5, arc: 1 },
+  // The eyes are plain tall pills in his own red-brown, set wide and low.
+  eyes: { x: 34, y: 4, h: 32, stroke: 5 },
   // The blush sits on the white beside the lower half of each eye, as on the icon, tipped up to follow the cheek. It
   // sits far enough out that an eye looking down and outward does not land on it. The icon's strokes across the
   // blush are left out.
@@ -82,7 +80,7 @@ PhyFriends.define('yuanyuan', {
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It wears the yukata, so it has no fur tufts. It sits under the head, so it takes the yukata's house
   // shade.
-  body: { cx: 0, cy: 84, rx: 64, ry: 47, onigiri: 1 },
+  body: { cy: 84, rx: 64, ry: 47 },
   // The tail is a slim white cat's tail, as in every work before 2026. It leaves his left hip (the viewer's right) above
   // the hind foot, so that it does not read as a leg, and curls up in a C, as a sitting cat's does, beside the body
   // rather than behind the head.
@@ -195,11 +193,9 @@ PhyFriends.define('yuanyuan', {
     { feature: 'anklet', on: 'footL', fill: 'fur', nodes: [[5, -23.8, 1], [9.5, -23.8, 1], [5.5, -13.2, 1], [1, -13.2, 1]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The icon, whose eyes are set as far apart as the spec's, so that the two line up (pf.py compare).
     icon: { w: 1679, h: 1629, x: 859, y: 1023, scale: 4.53, rotate: 0 },
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for YuanYuan yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

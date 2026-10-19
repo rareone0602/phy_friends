@@ -8,8 +8,8 @@
 // lighting and shading, so they are not colors here. His long muzzle becomes the house face, since the house has no
 // nose, and the feral four-legged body becomes the house figure.
 PhyFriends.define('yawei', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#5dc6e6',        // The sky blue of the first swatch: the head, arms, tail and bones of the wings. Its house shade (furShade) fills the body, which sits under the head, and the legs.
     head: 'fur',
     face: 'fur',           // The close-up's face is sky blue throughout, so the face is the head's own color and has no mask (face: false below).
@@ -24,14 +24,13 @@ PhyFriends.define('yawei', {
     tail: 'fur',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     wing: '#145f7f',       // The teal of the color bar, the wings' membranes.
     yellow: '#f3d37c',     // The yellow of the color bar: the streaks on the wings and the bands on the flank and the tail.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The face is the head's own sky blue, as in the close-up, with no muzzle of another color.
@@ -44,7 +43,7 @@ PhyFriends.define('yawei', {
   // The crest tuft between the horns: a small crown of white spikes, kept above the forehead so that his brows and
   // eyes stay clear. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -78, rx: 24, ry: 16,
+    cy: -78, rx: 24, ry: 16,
     tips: [
       [-26, -104, -6, -4, [-14, -96]],
       [-8, -132, -6, -6, [0, -104]],
@@ -54,9 +53,8 @@ PhyFriends.define('yawei', {
       [-22, -64, 4, -4, [-8, -70]],
     ],
   },
-  // The eyes are plain tall pills in his dark red, without the close-up's whites and pupils. Setting arc: 1 draws the
-  // happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.8, arc: 1 },
+  // The eyes are plain tall pills in his dark red, without the close-up's whites and pupils.
+  eyes: { x: 34, y: 3, h: 33, stroke: 4.8 },
   // The blush sits under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 58, y: 27, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default; when open, it shows a fang, as the sheet's open jaws do.
@@ -64,7 +62,7 @@ PhyFriends.define('yawei', {
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base, in the house shade of the sky blue. Small hip tufts sit at its base.
   body: {
-    cx: 0, cy: 84, rx: 64, ry: 47, onigiri: 1,
+    cy: 84, rx: 64, ry: 47,
     fluff: [{ from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a slim dragon's tail rising behind his left hip (the viewer's right), its tip curling in, ending in
@@ -119,9 +117,7 @@ PhyFriends.define('yawei', {
     { feature: 'tailMarks', on: 'tail', clip: true, kind: 'ellipse', fill: 'yellow', cx: 0, cy: -64, rx: 60, ry: 3.2 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20 degrees). There is no house-style reference for Yawei yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

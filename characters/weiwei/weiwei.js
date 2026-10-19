@@ -8,8 +8,8 @@
 // Colors are taken from the close-up, and from the sheet's color bar for the parts that only the sheet shows,
 // deepened only where noted.
 PhyFriends.define('weiwei', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#f58d3e',        // The orange of the color bar, which the close-up's matches: the head, ears, arms, body and tail. Its house shade (furShade) fills the body, which sits under the head, and the legs.
     head: 'fur',
     face: '#efeef3',       // The white of the close-up (#ffffff, the hair #f2f2f2), deepened to mumuyou's depth to stay visible on paper: the hair, the muzzle and cheeks, the eyebrows and the ruff. Its house shade fills the partings in the hair (hairShade) and the back layer of the ruff, under the chin (faceShade).
@@ -25,7 +25,6 @@ PhyFriends.define('weiwei', {
     tail: 'fur',
     arm: 'fur',
     paw: 'peach',
-    leg: 'furShade',
     foot: 'peach',
     peach: '#fbd0a9',      // The peach of the sheet's color bar: the forearms and paws, the lower legs and feet, and the end of the tail.
     eyeMint: '#b2f6b9',    // His right eye's lower half: the mint of the close-up.
@@ -33,14 +32,14 @@ PhyFriends.define('weiwei', {
   },
   // The head is a broad dome. Its fluffy cheeks are the ruff under it (an extra).
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
   },
   // The white muzzle and cheeks, under the eyes, as in the close-up, so that the eyes sit on the orange; an eye
   // looking down just reaches it. Its sides are cut into the spiky tufts of the close-up's white cheeks. An n: 1 range
   // with len < 0 dips its top in the middle, where the orange comes down between the eyes to the nose. Its chin lies
   // over the ruff's shaded back layer (an extra), which parts it from the white ruff.
   face: {
-    cx: 0, cy: 34, rx: 68, ry: 20,
+    cy: 34, rx: 68, ry: 20,
     fluff: [{ from: -10, to: 40, n: 3, len: 10, lean: 4, depth: 0.08, b1: -24, b2: 8, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -8, b1: 0, b2: 0, jit: 0 }],
   },
@@ -56,7 +55,7 @@ PhyFriends.define('weiwei', {
   // clear as they look round; the close-up's long locks over the eyes are shortened to clear them. Each tip is [x, y,
   // bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -60, rx: 76, ry: 42,
+    cy: -60, rx: 76, ry: 42,
     tips: [
       [92, -24, -8, 6, [80, -8]],
       [80, 12, -6, 10, [36, -42]],
@@ -72,11 +71,11 @@ PhyFriends.define('weiwei', {
   },
   // The eyes are tall pills in his own colors, split at the middle as in the close-up: his right eye (the viewer's
   // left) blue over mint, and his left brown over yellow (the sheet's bar gives a paler sky, a stronger green and an
-  // apricot). Each lower half is a flat mark clipped to the eye, so that
-  // it follows every glance and blink; the color above holds the eye's shape on the orange. The pictures' pupils,
-  // dark lids and highlights are line work and lighting, and are left out. An eye looking down reaches the white.
-  // Setting arc: 1 draws the happy, closed and squint strokes at the full eye width, in the upper colors.
-  eyes: { x: 34, y: -4, w: 13, h: 32, stroke: 5, arc: 1,
+  // apricot). Each lower half is a flat mark clipped to the eye, so that it follows every glance and blink; the
+  // color above holds the eye's shape on the orange. The pictures' pupils, dark lids and highlights are line work
+  // and lighting, and are left out. An eye looking down reaches the white. The happy, closed and squint strokes take
+  // the upper colors.
+  eyes: { x: 34, y: -4, h: 32, stroke: 5,
     shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'eyeMint' },
     right: { shine: { x: 0, y: 24, rx: 30, ry: 24, color: 'eyeYellow' } } },
   // The blush sits on the white muzzle under each eye, tipped up to follow the cheek, in the pads' pink.
@@ -87,7 +86,7 @@ PhyFriends.define('weiwei', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the house
   // shade. Small hip tufts sit at its base.
   body: {
-    cx: 0, cy: 82, rx: 66, ry: 50, onigiri: 1,
+    cy: 82, rx: 66, ry: 50,
     fluff: [{ from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a large bushy brush rising behind his left hip (the viewer's right), its tip curling in. Its peach
@@ -146,12 +145,10 @@ PhyFriends.define('weiwei', {
     { feature: 'soles', on: 'feet', sole: true, fill: 'blush', round: 0.5, polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The pictures, matched by their eyes: the close-up, with the tongue out, and the sheet's front view, standing.
     IMG_7740: { w: 1000, h: 1000, x: 606, y: 574, scale: 4.6, pose: { mouth: 'open' } },
     148: { w: 4724, h: 1772, x: 684, y: 470, scale: 2.5, pose: { stance: 'stand' } },
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for WeiWei yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

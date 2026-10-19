@@ -9,8 +9,8 @@
 // flower and sunglasses; backup/accessories.js).
 // Colors are taken from the sheet's palette bar and swatches; those they do not show are taken from the drawing.
 PhyFriends.define('cowosus', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#efeef3',        // The white of the palette bar (#fdffff), deepened to mumuyou's depth to stay visible on paper. Its house shade (furShade) fills the body, which sits under the head, and the neck under the chin.
     head: 'fur',
     face: 'peach',
@@ -25,7 +25,6 @@ PhyFriends.define('cowosus', {
     tail: 'goldShade',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     lime: '#b8dc79',       // The lime green of the palette bar: the patch over his right eye, the ears, the tips of the ruff and the tip of the tail.
     green: '#81a34d',      // The dark green of the palette bar: the tips of the ears.
@@ -39,13 +38,13 @@ PhyFriends.define('cowosus', {
   },
   // The head is a round white dome with two spiky tufts down each side.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -30, to: -2, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The peach cheeks, from the mint band to the jaw, their sides cut into spiky tufts; the white muzzle between them is
   // an extra. They start low enough that an eye looking down stays clear of the band. Setting len < 0 flattens the top.
   face: {
-    cx: 0, cy: 42, rx: 84, ry: 17,
+    cy: 42, rx: 84, ry: 17,
     fluff: [
       { from: -24, to: 40, n: 3, len: 11, lean: 3, depth: 0.1, b1: -30, b2: 10, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -66,7 +65,7 @@ PhyFriends.define('cowosus', {
   // patch, as on the sheet. On the white side its locks lie on the white and do not show.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -76, rx: 60, ry: 30,
+    cy: -76, rx: 60, ry: 30,
     tips: [
       [-18, -110, -8, -8, [-4, -102]],
       [12, -118, -8, -8, [28, -104]],
@@ -80,9 +79,8 @@ PhyFriends.define('cowosus', {
   },
   // The eyes are plain tall pills in his own blue, without the sheet's paler lower iris or highlight. The lower quarter
   // of his left eye (the viewer's right) is orange, as the owner asked and the eye swatch shows; it is a flat mark
-  // clipped to the eye, so it follows every glance and blink. Setting arc: 1 draws the happy, closed and squint strokes
-  // at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5, arc: 1,
+  // clipped to the eye, so it follows every glance and blink.
+  eyes: { x: 34, y: 3, h: 32, stroke: 5,
     right: { shine: { x: 0, y: 16, rx: 13, ry: 8, color: 'eyeOrange' } } },
   // The blush sits on the peach under the mint band, beside the muzzle, tipped up to follow the cheek.
   blush: { x: 52, y: 44, rx: 10, ry: 6, tilt: 8 },
@@ -93,7 +91,7 @@ PhyFriends.define('cowosus', {
   // the base. It is in the house shade of the white. Shoulder tufts sit under the cheeks, and small hip tufts below
   // them.
   body: {
-    cx: 0, cy: 86, rx: 64, ry: 46, onigiri: 1,
+    cy: 86, rx: 64, ry: 46,
     fluff: [{ from: -65, to: -25, n: 2, len: 10, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -182,12 +180,10 @@ PhyFriends.define('cowosus', {
     { feature: 'soles', on: 'feet', sole: true, fill: 'yellow', round: 0.5, polys: [[-10, -6, 3.4, 8], [0, -9, 3.4, 8], [10, -6, 3.4, 8]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The sheet at a quarter of its size, with the origin between the eyes of the front view and its eyes set as far
     // apart as the spec's, so that the heads line up (pf.py compare). The sheet stands him up; the spec sits.
     sheet: { w: 1733, h: 841, x: 331.8, y: 233.5, scale: 0.96, rotate: 0 },
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for cowosus yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

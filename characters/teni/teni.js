@@ -4,8 +4,8 @@
 // Colors are taken from examples/keychain.jpg; those it does not show are taken from headshot.jpeg and skeb.png,
 // which serve for colors and markings only.
 PhyFriends.define('teni', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#ace1e0',        // The pale teal of the keychain (#c3e5e4), deepened and made a little richer to stay visible on paper: ears, face, chest, tail, arms and forepaws. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: 'fur',
@@ -20,16 +20,15 @@ PhyFriends.define('teni', {
     tail: 'fur',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'diamond',
     diamond: '#057291',    // The dark teal of the diamonds at the ends of the side locks and the tail, and of the hind feet.
   },
   // The head is a round dome. The hair covers all of it but the face.
-  head: { cx: 0, cy: -20, rx: 80, ry: 64 },
+  head: { cy: -20, rx: 80, ry: 64 },
   // The cheeks and jaw, in the fur's pale teal, end in a few tufts at the corners of the jaw, as in headshot.jpeg and
   // skeb.png; the chin sits on the shaded body. Setting len < 0 flattens the top, under the fringe.
   face: {
-    cx: 0, cy: 14, rx: 76, ry: 38,
+    cy: 14, rx: 76, ry: 38,
     fluff: [
       { from: 0, to: 50, n: 2, len: 9, lean: 4, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -48,7 +47,7 @@ PhyFriends.define('teni', {
   // the eyes, and its valleys sit high enough to clear them as they look around.
   // Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -56, rx: 76, ry: 44,
+    cy: -56, rx: 76, ry: 44,
     tips: [
       [112, 24, -10, 4, [96, 16]],
       [86, 40, -4, 12, [40, -34]],
@@ -58,9 +57,8 @@ PhyFriends.define('teni', {
       [0, -104, -34, -34, [96, -50]],
     ],
   },
-  // The eyes are plain tall pills in Teni's own teal, set wide and low. Setting arc: 1 draws the happy, closed
-  // and squint strokes at the full eye width.
-  eyes: { x: 33, y: 4, w: 13, h: 32, stroke: 4.6, arc: 1 },
+  // The eyes are plain tall pills in Teni's own teal, set wide and low.
+  eyes: { x: 33, y: 4, h: 32, stroke: 4.6 },
   // The blush sits on the pale teal under the outer corner of each eye, tipped up to follow the cheek. It sits
   // low enough that an eye looking down and outward does not land on it.
   blush: { x: 52, y: 26, rx: 11, ry: 6.5, tilt: 10 },
@@ -71,7 +69,7 @@ PhyFriends.define('teni', {
   // base. It is in the house shade. Short shoulder tufts sit under the cheeks, low enough not to rise beside the chin
   // like a collar, and small hip tufts below them.
   body: {
-    cx: 0, cy: 84, rx: 68, ry: 47, onigiri: 1,
+    cy: 84, rx: 68, ry: 47,
     fluff: [{ from: -65, to: -25, n: 2, len: 8, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -118,9 +116,7 @@ PhyFriends.define('teni', {
     { feature: 'tailTip', on: 'tail', fill: 'diamond', polys: [[0, -112, 36, 4, 90, 0.6]] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Teni yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

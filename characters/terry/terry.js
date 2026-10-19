@@ -5,8 +5,8 @@
 // As a stuffed toy, Terry is drawn with soft round shapes, without fur tufts or seams. Terry is one figure, which sits
 // and stands on the same limbs.
 PhyFriends.define('terry', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#fce08e',        // Butter yellow, used throughout. Its house shade (furShade) fills the ears.
     head: 'fur',
     face: 'fur',
@@ -20,16 +20,15 @@ PhyFriends.define('terry', {
     tail: 'cream',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     cream: '#fef0c8',      // The bib and the tail (white in front.png), as one pale cream that stays visible on paper.
     pad: '#6f573f',        // The dark felt soles of the hind feet.
   },
   // The head is large, round and plush, widest at eye level. The ears cover its upper sides.
-  head: { cx: 0, cy: -24, rx: 94, ry: 78 },
+  head: { cy: -24, rx: 94, ry: 78 },
   // The cheeks and muzzle, in the head's yellow, are drawn in front of the lower half of the ears so that
   // the ears hang behind the face.
-  face: { cx: 0, cy: 16, rx: 81, ry: 38 },
+  face: { cy: 16, rx: 81, ry: 38 },
   // The ears are very large and floppy: soft lobes that reach from beside the cheek to a little above the crown,
   // drawn over the upper sides of the head (over); the face, the blush, the eyes and the mouth stay on top of them.
   // Each lobe grows from a root low beside the cheek, where its dark inside shows, so the ear itself is a stub on that
@@ -37,9 +36,8 @@ PhyFriends.define('terry', {
   ears: { base: [-82, 12], angle: 0, width: 6, length: 6, over: true },
   // As a stuffed toy, Terry has no hair.
   hair: false,
-  // The eyes are plain tall pills, set wide and low. Setting arc: 1 draws the happy, closed and squint
-  // strokes at the full eye width.
-  eyes: { x: 33, y: 2, w: 13, h: 32, stroke: 4.5, arc: 1 },
+  // The eyes are plain tall pills, set wide and low.
+  eyes: { x: 33, y: 2, h: 32, stroke: 4.5 },
   // The blush sits under the outer corner of each eye, tipped up to follow the cheek, below the dark insides of the ears.
   blush: { x: 52, y: 26, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default (the nose and small mouth in the pictures are omitted); when open, it is
@@ -47,7 +45,7 @@ PhyFriends.define('terry', {
   mouth: { y: 22, size: 3.8 },
   // The body is small under the large head, and an onigiri (a rice ball): narrow under the chin, broad and round at
   // the base. It sits behind the limbs, which share its yellow, so it takes the house shade.
-  body: { cx: 0, cy: 80, rx: 63, ry: 40, onigiri: 1 },
+  body: { cy: 80, rx: 63, ry: 40 },
   // The tail is small and curly, behind the right hip: a thin plume bent all the way around into a
   // spiral. Setting step: 4 keeps it smooth.
   tail: { base: [56, 100], angle: 10, length: 70, width: 16, bend: 330, taper: 0.3, root: 0, step: 4, fluff: [] },
@@ -77,9 +75,7 @@ PhyFriends.define('terry', {
     { feature: 'soles', on: 'feet', sole: true, kind: 'ellipse', fill: 'pad', cx: -2, cy: 1, rx: 12, ry: 12.5 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Terry yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

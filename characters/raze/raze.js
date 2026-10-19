@@ -7,8 +7,8 @@
 // Colors are taken from the color bar on the sheet; those it does not show are taken from the drawing.
 // His owner chose this version, in his hoodie, over the plain sheet (backup/no-hoodie.js).
 PhyFriends.define('raze', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#174052',        // The dark teal of the color bar. Its house shade (furShade, L* 15) fills the legs, below the hoodie; it is about as dark as Fruit's (L* 17), so it still reads as fur rather than black. Both sheets draw the fur flat, so there is no lighter tint of it to take instead.
     head: 'fur',
     hair: '#42c8ee',       // The cyan of the color bar: the fringe, the horn, the streaks in the tuft and his right eye.
@@ -23,7 +23,6 @@ PhyFriends.define('raze', {
     tail: 'fur',
     arm: 'fur',
     paw: 'fur',
-    leg: 'furShade',
     foot: 'fur',
     teal: '#11809e',       // The teal of the color bar: the inside and tip of his right ear, the locks at the root of the fringe, the marks on his right side and the tail's tuft.
     purple: '#745cd4',     // The purple of the color bar: the tip of his left ear and the marks on his left side.
@@ -33,7 +32,7 @@ PhyFriends.define('raze', {
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears, and whose crown is spiky too.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true },
       { from: 236, to: 304, n: 3, len: 9, lean: 4, depth: 0.04, b1: -25, b2: 8, jit: 0 }],
   },
@@ -66,12 +65,11 @@ PhyFriends.define('raze', {
       [-46, -34, 16, -10, [-50, -58]],
     ],
   },
-  // The eyes are plain tall pills, one of each of his colors, as on the sheet: his right eye (the viewer's left)
-  // cyan and his left lavender. The sheet's irises are a deeper teal and purple inside a cyan and a lavender rim; on
-  // the dark teal those deeper colors are faint (about 2.3:1), so each eye takes its lighter tint instead (5.7:1 and
-  // 3.6:1). The whites, pupils and highlights are left out. Setting arc: 1 draws the happy, closed and squint strokes
-  // at the full eye width.
-  eyes: { x: 34, y: 4, w: 13, h: 33, stroke: 4.8, arc: 1 },
+  // The eyes are plain tall pills, one of each of his colors, as on the sheet: his right eye (the viewer's left) cyan
+  // and his left lavender. The sheet's irises are a deeper teal and purple inside a cyan and a lavender rim; on the
+  // dark teal those deeper colors are faint (about 2.3:1), so each eye takes its lighter tint instead (5.7:1 and
+  // 3.6:1). The whites, pupils and highlights are left out.
+  eyes: { x: 34, y: 4, h: 33, stroke: 4.8 },
   // The blush sits under the outer corner of each eye, beyond the cheek marks, tipped up to follow the cheek.
   blush: { x: 61, y: 30, rx: 9.5, ry: 6, tilt: 10 },
   // There is no mouth by default (the sheet's grin is omitted); when open, it shows the cyan tongue and the fang of
@@ -81,7 +79,7 @@ PhyFriends.define('raze', {
   // the base. It wears the hoodie down to the hips, so only the small hip tufts show; below the hoodie's hem it is his
   // legs, in the house shade of his fur. The hoodie's pocket is only line work on the sheet, so it is left out.
   body: {
-    cx: 0, cy: 85, rx: 64, ry: 46, onigiri: 1,
+    cy: 85, rx: 64, ry: 46,
     fluff: [{ from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
   // The tail is a slim dragon's tail rising behind his right hip (the viewer's left), as on the sheet, its tip curling
@@ -167,9 +165,7 @@ PhyFriends.define('raze', {
     { feature: 'headphones', on: 'body', kind: 'ellipse', fill: 'hoodie', cx: 13.5, cy: 57, rx: 8.5, ry: 10.5, rot: -12 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Raze yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

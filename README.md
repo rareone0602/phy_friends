@@ -310,6 +310,7 @@ quarter at a time, each turn landing with a small hop.
 
 ```js
 PhyFriends.define('name', {
+  extends: 'house',                                                    // What it is: the abstract house or friend (below), or another friend (a variant)
   palette: { bg, fur, head, face, hair, ear, earRight, earInner, iris, irisRight, ink, blush, tongue, body, tail, arm, paw, pawRight, leg, foot, ...others },  // The roles first (see Anatomy); shades such as furShade are derived
   head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // Fluffy ellipse
   face:  { ... same as head ... },                                     // Pale mask (false: none)
@@ -338,7 +339,6 @@ PhyFriends.define('name', {
   emotions: false,                                                     // Only off the house template (Claude): no feelings
   routine: { says, saysStill, duration, keys: { field: [[t, value, ease]] } },  // Its third hi plays it, if it shows no feelings (Claude's laptop)
   views: { ref: { w, h, x, y, scale, rotate, pose, bg } },             // bg: the view's background, in place of the palette's (a render's own bg overrides it)
-  extends: 'other-character',                                          // Variants
 });
 ```
 
@@ -354,9 +354,21 @@ still draws it rather than swapping it for a bitmap, for a page that must come
 out the same every time, such as a film. A pose field given as `undefined`
 counts as not given.
 
+A spec extends what it is, as a class extends an abstract one, and gives only
+where it differs. Every friend extends `friend`, the abstract friend: the dark
+background (`palette.bg`) and eye strokes that span the whole eye (`eyes.arc:
+1`). Every friend on the house template extends `house`, which extends `friend`
+with what they all share besides: the legs in the house shade (`palette.leg:
+'furShade'`), the eyes' width (`eyes.w: 13`), the rice-ball body
+(`body.onigiri: 1`), the ground (`rig.ground: 131`) and the close-up view
+(`views.closeup`). Claude, off the template, extends `friend` alone. The
+abstract friends are never listed (`PhyFriends.list()`), and `PhyFriends.get`
+reads them like any friend.
+
 Every character file is laid out the same way, so two specs read side by side:
 - a one-line header comment naming the character and its reference pictures;
-- the keys in the order above;
+- `extends` first, then the keys in the order above, of which a spec gives only
+  those it does not take from what it extends;
 - extras grouped by the part they sit on (`base`, `face`, `ears`, `hair`, `body`, `scarf`, `tail`, `paws`, `feet`, `ground`), each with a short comment saying what it depicts;
 - `views` last, with `ref` first.
 

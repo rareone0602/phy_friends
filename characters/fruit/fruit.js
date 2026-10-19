@@ -9,8 +9,8 @@
 // The design is the one his owner chose from the first sketches: the first draft, with the chest edged in dark red
 // and two stripes around each ankle, and without the dark-red marks under the eyes.
 PhyFriends.define('fruit', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#283e74',        // The navy of moon.png. The navy of the other three pictures (#162959) is a house step darker, and its house shade would read as black through the pencil. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#8da9b2',       // The blue-gray of the muzzle: muzzle, cheeks, chest and the tips of the ears.
@@ -25,7 +25,6 @@ PhyFriends.define('fruit', {
     tail: 'fur',
     arm: 'fur',
     paw: '#1c6996',        // The steel blue of the forearms and the lower legs.
-    leg: 'furShade',
     foot: 'paw',
     horn: '#23fbfd',       // The bright cyan of the horns, lighter than the inner ears.
     band: '#531710',       // The dark red of the bands on the ears and the edge of the chest, as moon.png draws it; sitting.png's (#380706) reads as black.
@@ -35,14 +34,14 @@ PhyFriends.define('fruit', {
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The blue-gray muzzle and cheeks. In icon.png the blue-gray starts halfway down the eyes; here it rises to their
   // tops, as for Howdi, BarDell and Alfie, because red on navy is too faint (about 1:1). The cheeks end in spiky tufts
   // that point outward, as in sitting.png. Setting len < 0 flattens the top.
   face: {
-    cx: 0, cy: 16, rx: 80, ry: 38,
+    cy: 16, rx: 80, ry: 38,
     fluff: [
       { from: -24, to: 40, n: 3, len: 12, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -61,7 +60,7 @@ PhyFriends.define('fruit', {
   // left (the viewer's right), as in sitting.png, and its jagged lower edge stops above the eyebrow dots, so that the
   // navy forehead shows. Each tip is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -80, rx: 34, ry: 22,
+    cy: -80, rx: 34, ry: 22,
     tips: [
       [-30, -114, -6, -6, [-14, -106]],
       [-6, -126, -8, -6, [4, -112]],
@@ -77,8 +76,8 @@ PhyFriends.define('fruit', {
   // The eyes are plain tall pills in his own red, without the pictures' whites, yellow lower half, star highlight or
   // lids. The marks that every picture draws around each eye are left out: the yellow one at the outer corner reads as
   // a slanted eyebrow at gallery size, and his owner asked for the small dark-red one under the lower outer corner to
-  // go. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.6, arc: 1 },
+  // go.
+  eyes: { x: 34, y: 3, h: 33, stroke: 4.6 },
   // The blush sits on the blue-gray under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 56, y: 28, rx: 11, ry: 6.5, tilt: 10 },
   // There is no mouth by default (the pictures' nose and mouth are omitted); when open, it shows the cyan tongue and
@@ -87,7 +86,7 @@ PhyFriends.define('fruit', {
   // The body is small, and an onigiri (a rice ball): narrow under the chin, broad and round at the base. It is in the
   // house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 84, rx: 66, ry: 48, onigiri: 1,
+    cy: 84, rx: 66, ry: 48,
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -165,7 +164,6 @@ PhyFriends.define('fruit', {
     { feature: 'socks', on: 'feet', under: true, kind: 'ellipse', fill: 'stripe', cx: 0, cy: -7, rx: 19, ry: 9, rot: -8 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The two front pictures, each framed so that the origin sits between its eyes and its eyes lie as far apart as the
     // spec's, so that the two line up (pf.py compare). Both draw a smaller crown, smaller ears and a taller body than

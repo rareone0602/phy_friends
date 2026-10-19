@@ -5,8 +5,8 @@
 // Colors are taken from the color circles on examples/sheet.png; the pink of the cap band, which the
 // circles do not show, is taken from the front view beside them.
 PhyFriends.define('brian', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#ffe5b8',        // The cream of the sheet. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#fceed6',       // The sheet's pale cream (#fff8ea), deepened to show on paper but kept paler than the fur.
@@ -21,7 +21,6 @@ PhyFriends.define('brian', {
     tail: 'fur',
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'boot',
     cap: '#f6760a',        // The orange cap. Its house shade (capShade) fills the peak, under the front of the crown.
     band: '#f96b8b',       // The thin pink band around the cap, also used for the tongue.
@@ -31,14 +30,14 @@ PhyFriends.define('brian', {
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The pale muzzle and cheeks. On the sheet the pale stops halfway up the eyes; here it rises to their tops, so
   // that each pill eye sits on one color. Its sides are cut into shingles, and one tuft hangs from the chin over
   // the bandana.
   face: {
-    cx: 0, cy: 14, rx: 80, ry: 38,
+    cy: 14, rx: 80, ry: 38,
     fluff: [
       { from: -40, to: 20, n: 3, len: 5, lean: 3, depth: 0.1, b1: -18, b2: 5, jit: 0, sym: true },
       { from: 78, to: 102, n: 1, len: 9, depth: 0, b1: -10, b2: -10, jit: 0 },
@@ -54,13 +53,12 @@ PhyFriends.define('brian', {
   // whose foot (an n: 1 range with len < 0) sags gently across the head and is as wide as the head there, so that
   // it sits on the head rather than floating above it.
   hair: {
-    cx: 0, cy: -62, rx: 74, ry: 52,
+    cy: -62, rx: 74, ry: 52,
     fluff: [{ from: 0, to: 180, n: 1, len: -48, b1: -3, b2: -3, jit: 0 }],
   },
   // The eyes are plain tall pills, set wide and low, in his own colors as his owner asked: brown-orange on his right
-  // (the viewer's left) and blue on his left, both from the sheet. Setting arc: 1 draws the happy, closed and
-  // squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 32, stroke: 5.2, arc: 1 },
+  // (the viewer's left) and blue on his left, both from the sheet.
+  eyes: { x: 34, y: 3, h: 32, stroke: 5.2 },
   // The blush sits on the pale cream under the outer corner of each eye, tipped up to follow the cheek. It
   // sits low enough that an eye looking down and outward does not land on it.
   blush: { x: 54, y: 27, rx: 11, ry: 6.5, tilt: 10 },
@@ -70,7 +68,7 @@ PhyFriends.define('brian', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the
   // head, so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 68, ry: 50, onigiri: 1,
+    cy: 82, rx: 68, ry: 50,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -131,9 +129,7 @@ PhyFriends.define('brian', {
     { feature: 'boots', on: 'feet', under: true, kind: 'ellipse', fill: 'bootShade', cx: 0, cy: -9, rx: 18, ry: 15 },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for Brian yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

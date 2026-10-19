@@ -5,8 +5,8 @@
 // Colors are taken from the color bar on examples/sheet.png; the newer pictures fill their shapes with the
 // same colors. The house shade of the white marks the parts that lie under his white face.
 PhyFriends.define('mumuyou', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#efeef3',        // The white, deepened slightly to stay visible on paper. Its house shade (furShade) fills the cheek ruff and body, under his white face.
     head: 'fur',
     face: 'fur',
@@ -23,7 +23,6 @@ PhyFriends.define('mumuyou', {
     arm: 'fur',
     paw: 'fur',
     pawRight: 'earInner',
-    leg: 'furShade',
     foot: 'sky',
     hairShade: '#efcf8a',  // The hair's one shade, set by hand: the warm gold of the back locks, the partings and the ponytail.
     sky: '#98d4f8',        // The ears, the socks, the diamond on the forehead, the ring of the mark on the shoulder and the dot on the tail.
@@ -32,12 +31,12 @@ PhyFriends.define('mumuyou', {
   },
   // The head is a round dome with a soft tuft down each side, under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -26, to: -2, n: 1, len: 9, lean: 4, depth: 0, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The cheeks are plump and white, with their sides cut into tufts against the shaded ruff behind them.
   face: {
-    cx: 0, cy: 16, rx: 82, ry: 40,
+    cy: 16, rx: 82, ry: 40,
     fluff: [
       { from: -40, to: 25, n: 3, len: 9, lean: 4, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 }, // Setting len < 0 flattens the top, under the fringe.
@@ -54,7 +53,7 @@ PhyFriends.define('mumuyou', {
   // that parting bow out less than the others, so that it is wide enough for the diamond. Each tip
   // is [x, y, bendIn, bendOut, following valley].
   hair: {
-    cx: 0, cy: -58, rx: 74, ry: 46,
+    cy: -58, rx: 74, ry: 46,
     tips: [
       [-36, -116, -14, -10, [-6, -112]],
       [28, -116, -14, -12, [62, -90]],
@@ -71,9 +70,8 @@ PhyFriends.define('mumuyou', {
   // The eyes are plain tall pills, set wide and low, in his own colors: blue on his right (the
   // viewer's left) and yellow on his left, as in every picture. The yellow ring that badge.png draws
   // round the yellow eye is its outline, so it is left out, as are the pale dots that badge.png and
-  // blond.png alone set above the eyes. Setting arc: 1 draws the happy, closed and squint strokes at
-  // the full eye width.
-  eyes: { x: 34, y: 5, w: 13, h: 32, tilt: -3, stroke: 5.2, arc: 1 },
+  // blond.png alone set above the eyes.
+  eyes: { x: 34, y: 5, h: 32, tilt: -3, stroke: 5.2 },
   // The blush sits on the white under the outer corner of each eye, tipped up to follow the cheek.
   blush: { x: 53, y: 26, rx: 12, ry: 7, tilt: 12 },
   // There is no mouth by default; when open, it shows one fang.
@@ -81,7 +79,7 @@ PhyFriends.define('mumuyou', {
   // The body is small, in the house shade, and an onigiri (a rice ball): narrow under the chin, broad and round at the
   // base; the white chest is an extra. Shoulder tufts sit under the cheeks, and hip tufts below them.
   body: {
-    cx: 0, cy: 86, rx: 62, ry: 46, onigiri: 1,
+    cy: 86, rx: 62, ry: 46,
     fluff: [{ from: -65, to: -25, n: 2, len: 12, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 6, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -166,9 +164,7 @@ PhyFriends.define('mumuyou', {
     { feature: 'socks', on: 'feet', fill: 'fur', cx: -1, cy: -9, rx: 15, ry: 5, fluff: [{ from: 20, to: 160, n: 4, len: 4, depth: 0.05, b1: -20, b2: 20, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up (1254 px, head tipped 20°). There is no house-style reference for mumuyou yet.
-    closeup: { w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20 },
   },
 });

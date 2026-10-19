@@ -6,8 +6,8 @@
 // Colors are taken from the color bar on examples/IMG_3308.png; those it does not show are taken from the
 // drawings on the same sheet.
 PhyFriends.define('howdi', {
+  extends: 'house',
   palette: {
-    bg: '#1c1d21',
     fur: '#6ec7ff',        // The sky blue of the color bar. Its house shade (furShade) fills the body, which sits under the head.
     head: 'fur',
     face: '#d5f0ff',       // The pale blue of the color bar: muzzle, cheeks, ruff, paws and tail end. Its house shade (faceShade) fills the back layer of the ruff.
@@ -22,13 +22,12 @@ PhyFriends.define('howdi', {
     tail: 'fur',
     arm: 'fur',
     paw: 'face',
-    leg: 'furShade',
     foot: 'face',
     belly: '#a7deff',      // The mid blue of the color bar: the belly in all three newer pictures.
   },
   // The head is a round dome whose sides are cut into spiky tufts under the ears.
   head: {
-    cx: 0, cy: -22, rx: 90, ry: 68,
+    cy: -22, rx: 90, ry: 68,
     fluff: [{ from: -34, to: -4, n: 2, len: 10, lean: 4, depth: 0.05, b1: -30, b2: 10, jit: 0, sym: true }],
   },
   // The pale muzzle and cheeks. In the pictures the pale starts at the lower lids, so the eyes sit on sky blue;
@@ -36,7 +35,7 @@ PhyFriends.define('howdi', {
   // (about 2:1) at gallery size. The cheeks end in spiky pale tufts that point outward and down. Setting
   // len < 0 flattens the top, under the fringe.
   face: {
-    cx: 0, cy: 14, rx: 80, ry: 38,
+    cy: 14, rx: 80, ry: 38,
     fluff: [
       { from: -24, to: 40, n: 3, len: 12, lean: 5, depth: 0.1, b1: -25, b2: 5, jit: 0, sym: true },
       { from: 235, to: 305, n: 1, len: -4, b1: 0, b2: 0, jit: 0 },
@@ -58,7 +57,7 @@ PhyFriends.define('howdi', {
   // Each tip is [x, y, bendIn, bendOut, following valley]. The pictures' eyebrow marks are left out: at gallery
   // size they merge into the fringe.
   hair: {
-    cx: 0, cy: -62, rx: 70, ry: 42,
+    cy: -62, rx: 70, ry: 42,
     tips: [
       [-70, -108, -8, -26, [-38, -106]],
       [-16, -142, -30, -6, [18, -112]],
@@ -74,8 +73,8 @@ PhyFriends.define('howdi', {
   },
   // The eyes are plain tall pills in Howdi's own blue, which every newer picture draws (ref.jpg draws them
   // black), without the pictures' darker ring, pupil, mint crescent, highlight or heavy lids. They are set
-  // wide and low. Setting arc: 1 draws the happy, closed and squint strokes at the full eye width.
-  eyes: { x: 34, y: 3, w: 13, h: 33, stroke: 4.5, arc: 1 },
+  // wide and low.
+  eyes: { x: 34, y: 3, h: 33, stroke: 4.5 },
   // The blush sits on the pale under the outer corner of each eye, tipped up to follow the cheek. It sits low
   // enough that an eye looking down and outward does not land on it.
   blush: { x: 54, y: 26, rx: 11, ry: 6.5, tilt: 10 },
@@ -85,7 +84,7 @@ PhyFriends.define('howdi', {
   // The body is an onigiri (a rice ball): narrow under the chin, broad and round at the base. It sits under the head,
   // so it takes the house shade. Shoulder tufts sit under the cheeks, and small hip tufts below them.
   body: {
-    cx: 0, cy: 82, rx: 68, ry: 50, onigiri: 1,
+    cy: 82, rx: 68, ry: 50,
     fluff: [{ from: -65, to: -25, n: 2, len: 14, depth: 0, b1: 0, b2: -25, jit: 0, sym: true },
       { from: 8, to: 40, n: 2, len: 7, lean: 6, depth: 0.08, b1: -25, b2: 5, jit: 0, sym: true }],
   },
@@ -125,7 +124,6 @@ PhyFriends.define('howdi', {
         { from: 215, to: 325, n: 4, len: 5, depth: 0.05, b1: -20, b2: 10, jit: 0 }] },
   ],
   // The paws reach y ~131, so squash and stretch pivot about that height.
-  rig: { ground: 131 },
   views: {
     // The house close-up of examples/ref.jpg, drawn with the ears relaxed outward.
     ref: { w: 1254, h: 1254, x: 470, y: 837, scale: 5.5, rotate: 20, pose: { earL: 30, earR: 30 } },
