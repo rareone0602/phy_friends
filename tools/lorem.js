@@ -31,8 +31,8 @@ PhyFriends.define('lorem', {
   mouth: { y: 21, size: 3.8 },
   // The body is the house's onigiri (a rice ball), its base on the ground.
   body: { cx: 0, cy: 85, rx: 66, ry: 46, onigiri: 1 },
-  // The house's default tail: a bushy plume behind the left side of the body, with a white tip.
-  tail: { tip: { at: 0.72 } },
+  // The house's default tail: a bushy plume behind the left side of the body, with a white tip of two short tufts.
+  tail: { tip: { at: 0.72, fluff: [{ from: 60, to: 120, n: 2, len: 10, depth: 0.02 }] } },
   // Seated, the white forepaws rest on the ground between the hind feet, which point at us at either side.
   stand: { seat: { paw: { cx: 18, cy: 121, rx: 12.5, ry: 10 }, foot: { cx: 50, cy: 120, rx: 19, ry: 11, rot: -8 } } },
   extras: [

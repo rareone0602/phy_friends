@@ -143,6 +143,7 @@
 
     // Throws unless the friend may say or write these words (see canSpeak): a mark must be one of MARKS.
     function ensureVoice(name, words, { madeFor } = {}) {
+      known(name);  // A name the cast lacks is refused whatever it says, a mark included.
       if (MARKS.includes(words) || canSpeak(name, { madeFor })) return;
       throw new Error(`phy_friends/cast: ${friend(name).name} has no voice and speaks in marks (${MARKS.join(' ')}), ` +
         `not in words ("${words}"). Set voice: true for ${name} in characters/cast.js only if its owner has given it lines; ` +

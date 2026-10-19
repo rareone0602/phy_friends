@@ -93,7 +93,7 @@ PhyFriends.define('mumuyou', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 195, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
-    tip: { at: 0.7, color: 'tailTip', fluff: [{ from: 50, to: 130, n: 3, len: 16, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.7, color: 'tailTip', len: 16 },
   },
   // The limbs, on the house template. Seated, the forepaws rest on the ground between the hind feet, which
   // are in sky-blue socks and turned out slightly, as in sitting.png. Standing, as on the sheet and in uniform.png,

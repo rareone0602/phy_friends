@@ -84,7 +84,7 @@ PhyFriends.define('yuda', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 18, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 1, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
-    tip: { at: 0.34, n: 3, len: 8, color: 'tailMid' },
+    tip: { at: 0.34, color: 'tailMid', fluff: [{ from: 60, to: 120, n: 3, len: 8, depth: 0.02 }] },
   },
   // The limbs, on the house template. Seated, the white forepaws rest on the ground under the bib (paw), and the large
   // round white hind feet point at us at either side (foot), as in waving.png and card.png. Standing, as in those

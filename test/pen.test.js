@@ -61,6 +61,22 @@
     });
   });
 
+  test('a text with nothing to write takes no time, and is written at once', () => {
+    assertEqual(P.duration([], PACE), 0);
+    for (const text of ['', '  ']) {
+      withLine(text, (el, pen) => {
+        const writing = P.write(el, { ...pen, strokes: [] }, { pace: PACE });
+        assert(writing === null || writing.duration === 0, `"${text}" takes time to write`);
+        if (writing) {
+          writing.at(1);
+          assertEqual(writing.reaches(0), Infinity, `the pen reaches nothing in "${text}"`);
+          writing.remove();
+        }
+      });
+    }
+    withLine('', (el, pen) => assert(P.write(el, { ...pen, strokes: [] }), 'an empty text fits an empty pen'));
+  });
+
   test('a pen that does not fit the text is refused', () => {
     withLine('ab c', (el, pen) => {
       assertEqual(P.write(el, { ...pen, text: 'ab d' }), null, 'another text');

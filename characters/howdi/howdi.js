@@ -98,7 +98,7 @@ PhyFriends.define('howdi', {
     fluff: [{ from: 300, to: 350, n: 2, len: 10, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 8, lean: 6, b1: -25, b2: 5, jit: 0 }],
-    tip: { at: 0.65, color: 'face', fluff: [{ from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.65, color: 'face' },
   },
   // The limbs, on the house template. Seated, the pale forepaws rest on the ground between the pale hind feet, which
   // are turned out slightly. Standing, as in IMG_3308.png, the sky-blue arms end in pale paws, and the legs in pale

@@ -58,7 +58,7 @@
   const PERK = { earDegrees: 6, widen: 0.06 };
   // A friend on its way somewhere looks and turns where it is going, about as far as in a scene (film/scene.js).
   const TRAVEL = { look: 0.5, turn: 0.35 };
-  const BOIL = 8;                        // Pencil texture redraws per second, as in a film (film/film.js).
+  const BOIL = PF.pencil.settings.boil;  // Pencil texture redraws per second, as in a film.
   const MAX_EASING_SECONDS = 0.1;        // After a long frame, the gaze and the perk ease by at most this much time.
   // A longer gap between frames is a stall (a debugger, a laptop asleep with the page in view): the stage
   // stands still through it, as it does while out of sight, rather than catching up all at once.
@@ -304,7 +304,7 @@
     // Seconds from t until the texture is next redrawn.
     function untilRedrawn(t) {
       const rate = Number.isFinite(o.boil) && o.boil > 0 ? o.boil : BOIL;
-      return (Math.floor(t * rate) + 1) / rate - t;
+      return (PF.pencil.boilStep(t, rate) + 1) / rate - t;
     }
 
     // Input brings the next frame forward, rather than leaving it until a calm wait ends.
@@ -355,7 +355,7 @@
     // pointer, it keeps still.
     function boil(t, reduced) {
       const still = reduced || simulated || !(Number.isFinite(o.boil) && o.boil > 0);
-      const variant = still ? 0 : Math.floor(t * o.boil) % PF.pencil.settings.variants;
+      const variant = still ? 0 : PF.pencil.variantAt(t, o.boil);
       for (const record of records) record.friend.rig.setTexture(variant);
     }
 

@@ -72,7 +72,7 @@ PhyFriends.define('yawei', {
   // fwiends' tails.
   tail: {
     base: [54, 118], angle: 84, length: 128, width: 62, bend: -80, taper: 0.6, root: 0.9,
-    tip: { at: 0.68, color: 'hair', fluff: [{ from: 50, to: 130, n: 3, len: 20, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.68, color: 'hair', len: 20 },
   },
   // The limbs, on the house template. Seated, his forepaws rest on the ground between his hind feet, which are turned
   // out slightly; the white claws are too small to keep.

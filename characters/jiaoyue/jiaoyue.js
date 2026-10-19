@@ -73,7 +73,7 @@ PhyFriends.define('jiaoyue', {
   // end whose tufts reach down into the purple, as in both pictures.
   tail: {
     base: [-54, 102], angle: 54, length: 147, width: 105, bend: -73, taper: 0.7, root: 0.5,
-    tip: { at: 0.64, color: 'face', fluff: [{ from: 50, to: 130, n: 3, len: 16, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.64, color: 'face', len: 16 },
   },
   // The limbs, on the house template. Seated, as in PENUP_20261001_192151.png, the lavender forelegs stand side by side
   // in front, white from the wrist down to the white paws on the ground (paw), and the white hind feet point at us at

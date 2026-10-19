@@ -21,6 +21,12 @@
     assert(differing > 0.2, `variant 1 differs from variant 0 in only ${differing} of its pixels`);
   });
 
+  test('the boil steps on the frame on which it is due, at the house rate unless given another', () => {
+    const { boilStep, variantAt, settings } = PhyFriends.pencil;
+    assertEqual([boilStep(405 / 30, 26 / 3), variantAt(405 / 30, 26 / 3), variantAt(405 / 30, 0)], [117, 117 % settings.variants, 0]);
+    assertEqual(boilStep(1), settings.boil);
+  });
+
   test('a rig shows the variant of the texture it is set to', () => {
     support.withBoxSync(el => {
       const rig = PF.mount(el, 'phy', { bitmap: false });
@@ -32,6 +38,30 @@
       rig.setTexture(0);
       assertEqual(image.getAttribute('href'), PF.pencil.texture(...sheet, 0));
     });
+  });
+
+  // A live rig's size is watched, so that its bitmap stays sharp, until it leaves the page; one that leaves without ever
+  // having been laid out has no resize to say so. The watching is seen through ResizeObserver's own methods.
+  test('a rig mounted where another was, or removed before it was ever laid out, is watched no more', () => {
+    const { observe, unobserve } = ResizeObserver.prototype, watched = new Set();
+    ResizeObserver.prototype.observe = function (target, options) { watched.add(target); return observe.call(this, target, options); };
+    ResizeObserver.prototype.unobserve = function (target) { watched.delete(target); return unobserve.call(this, target); };
+    const hidden = document.body.appendChild(document.createElement('div'));
+    hidden.style.display = 'none';
+    try {
+      const first = PF.mount(hidden, 'phy').svg, second = PF.mount(hidden, 'phy').svg;
+      assert(!watched.has(first) && watched.has(second), 'the rig mounted in its place replaces it');
+      hidden.remove();
+      const shown = support.withBoxSync(box => PF.mount(box, 'phy').svg);
+      assert(!watched.has(second), 'a rig removed while hidden is forgotten at the next mount');
+      assert(watched.has(shown), 'that mount is watched');
+      const off = PF.mount(document.createElement('div'), 'phy').svg;
+      support.withBoxSync(box => PF.mount(box, 'phy'));
+      assert(watched.has(off), 'a rig mounted off the page stays watched, since it may yet be put on it');
+    } finally {
+      Object.assign(ResizeObserver.prototype, { observe, unobserve });
+      hidden.remove();
+    }
   });
 
   // A character drawn on the page has no background, so that the pencil shows the page's paper, and a sheet of paper

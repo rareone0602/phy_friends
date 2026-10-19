@@ -88,7 +88,7 @@
     assertEqual([hx, hy], [60 * F.hip, 80 + 45 - F.hipUp], 'the hips sit inside the bottom of the body');
     const reach = PF.shapes.reachAt(S.body, sy);
     assert(sx < reach && sx > reach - stand.arms.L.width / 2, 'the shoulder sits just inside the body\'s side');
-    assertEqual(PF.standLift(S), stand.ground - 120, 'the rig lifts it by the legs it shows below its seat');
+    assertEqual(PF.standLift(S), stand.ground - 131, 'the rig lifts it by the legs it shows below its seat, from the house ground');
     const given = PF.standFor({ ...S, stand: { ground: 150, arms: { shoulder: [30, 70], angle: 12 } } });
     assertEqual([given.ground, given.arms.R.shoulder, given.arms.R.angle], [150, [30, 70], 12], 'a spec may place them itself');
     const oni = PF.standFor({ ...S, body: { ...S.body, onigiri: { taper: 0.6, square: 2 } } });
@@ -116,7 +116,7 @@
       const given = PF.standFor({ ...S, stand: { ground: 150, arms: { shoulder: [30, 70] }, tail: { base: [40, 115] } } });
       assertEqual([given.ground, given.arms.L.shoulder, given.tail.base], [150 + 22.5, [30, 35 + 35 * 1.25], [40, 35 + 80 * 1.25]],
         'what a spec places on the body moves along with it, and its ground drops');
-      assertEqual(PF.groundOf({ ...SITTER }), 120, 'a friend that never stands keeps its body');
+      assertEqual(PF.groundOf({ ...SITTER }), 131, 'a friend that never stands keeps its body, on the house ground');
     });
   });
 
@@ -541,5 +541,45 @@
       rig.setPose({ facing: 0 });
       assertEqual(named(svg, 'armsBehind').children.length, 0, 'and facing the viewer again');
     }, 160);
+  });
+
+  test('a friend whose rig is false stands on the house ground, as one whose rig leaves the ground out does', () => {
+    const plain = { ...STANDER }, none = { ...STANDER, rig: false };
+    assertEqual([PF.groundOf(none), PF.standLift(none)], [PF.groundOf(plain), PF.standLift(plain)]);
+  });
+
+  test('a pose field given as undefined falls back to the pose beneath it rather than drawing NaN', () => {
+    const name = 'howdi', unset = Object.fromEntries(Object.keys(PF.POSE).map(field => [field, undefined]));
+    assertEqual(PF.render(name, { pose: unset, uid: 'u' }), PF.render(name, { uid: 'u' }), 'every field undefined draws the rest pose');
+    const view = { ...PF.resolveView(PF.get(name)), pose: { tilt: 8, lookX: 0.5 } };
+    assertEqual(PF.render(name, { view, pose: { tilt: undefined }, uid: 'u' }), PF.render(name, { view, uid: 'u' }), "the view's pose shows through");
+    const transforms = rig => Object.fromEntries(Object.entries(rig.parts).map(([part, node]) => [part, node.getAttribute('transform')]));
+    const rest = support.withBoxSync(box => transforms(PF.mount(box, name, { bitmap: false })));
+    support.withBoxSync(box => {
+      const rig = PF.mount(box, name, { bitmap: false });
+      rig.setPose({ lookX: 0.6, tilt: 10, squash: 0.2, blush: 0.5, stance: 'stand', armL: 90 });
+      rig.setPose({ lookX: undefined, tilt: undefined, squash: undefined, blush: undefined, stance: undefined, armL: undefined });
+      assert(!rig.svg.outerHTML.includes('NaN'), 'NaN in the rig');
+      assertEqual(transforms(rig), rest, 'the rig is at rest again');
+    });
+  });
+
+  test('every color a render writes is one, even for a part whose role the palette lacks (Claude\'s tongue)', () => {
+    for (const name of PF.list()) {
+      const fills = [...PF.render(name, { pose: { mouth: 'open' }, pencil: false }).matchAll(/ (?:fill|stroke)="([^"]*)"/g)].map(m => m[1]);
+      const odd = fills.filter(c => c !== 'none' && !/^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(c));
+      assertEqual(odd, [], name);
+    }
+    const tongue = new DOMParser().parseFromString(PF.render('claude', { pencil: false }), 'image/svg+xml')
+      .querySelector('[data-pf-when="mouth=open"] ellipse');
+    assertEqual(tongue.getAttribute('fill'), PF.palette('claude').blush, "Claude's palette has no tongue, so its blush stands in");
+  });
+
+  test("a tail's tip is the house's, a row of tufts pointing back at the base, unless its spec says otherwise", () => {
+    const howdi = PF.get('howdi'), tip = howdi.tail.tip, uid = 'u';
+    const withTip = given => PF.render({ ...howdi, tail: { ...howdi.tail, tip: { ...tip, ...given } } }, { uid });
+    const house = { from: 50, to: 130, n: 3, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 };
+    assertEqual(withTip({}), withTip({ fluff: [house] }), 'the house tip');
+    assertEqual(withTip({ n: 4, span: 30 }), withTip({ fluff: [{ ...house, n: 4, from: 60, to: 120 }] }), 'its own number of tufts and span');
   });
 })();

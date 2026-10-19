@@ -92,7 +92,7 @@ PhyFriends.define('raze', {
     fluff: [{ from: 300, to: 350, n: 2, len: 12, lean: 6, depth: 0.05, b1: -30, b2: 5, jit: 0 },
       { from: 255, to: 290, n: 1, len: 14, lean: -10, b1: 25, b2: -25, jit: 0 },
       { from: 200, to: 240, n: 2, len: 10, lean: 6, b1: -25, b2: 5, jit: 0 }],
-    tip: { at: 0.56, color: 'teal', fluff: [{ from: 50, to: 130, n: 3, len: 20, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.56, color: 'teal', len: 20 },
   },
   // The limbs, on the house template. Seated, his forepaws rest on the ground between his hind feet, which are turned
   // out slightly; the claws are too small to keep. Standing, as on the sheets, the short sleeves of IMG_2575.jpg are

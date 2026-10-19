@@ -378,8 +378,9 @@ side and four short legs.
   terracotta reads as a highlight, and its eyes look a whole unit aside (16
   head units, where the house's move 6), as the glyphs move the notches.
 - Having no tail, it does not sway. It is short, so its legs meet the ground
-  at 112 rather than about 131, and standing already on four legs, it never
-  stands up (`stand: false`).
+  at 112 rather than at the house's 131 (`rig.ground`, which
+  `PhyFriends.groundOf` lowers with the others' taller bodies, to about 140),
+  and standing already on four legs, it never stands up (`stand: false`).
 - Its laptop, for its routine, is a grey base and screen drawn only on cue (an
   extra's `show`): on its arm while held, then on the ground
   (`on: 'ground'`), where it stays while Claude hops. Set down, it reaches a
@@ -395,7 +396,7 @@ side and four short legs.
   different point. A fwiend standing also breathes with its arms and shifts
   its weight slowly from foot to foot. The pencil boils: its texture is
   redrawn 8 times a second, through three versions, as in hand-drawn
-  animation.
+  animation (`PhyFriends.pencil.settings.boil`, which pages and films share).
 - Each friend works out the direction from its own head to the pointer, so
   the group converges on it: the eyes take the whole offset (`lookX/lookY`),
   the head about half (`turnX/turnY`, drawn as layer parallax), and the
@@ -478,7 +479,7 @@ checks these rules and refuses to break them.
   speed. They turn with `turnX`, never with a mirror image, which would swap
   two-coloured eyes and reverse K3V1N's mark. Each is on its own paper, cut
   to its outline (`STYLE.md` §9).
-- Films boil as the gallery does, 8 times a second (`film/film.js`). Under
+- Films boil as the gallery does, 8 times a second. Under
   reduced motion a scene plays as the motion rules above say; travel becomes a
   glide, a fwiend stands up or sits down in a cut, and a film shows its last
   frame and waits to be played.

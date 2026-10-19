@@ -41,9 +41,10 @@
     });
   }
 
+  // How long the strokes take, in seconds: none take none, so that a text with nothing to write is written at once.
   function duration(strokes, pace = PACE) {
     const last = times(strokes, pace).at(-1);
-    return last.at + last.seconds;
+    return last ? last.at + last.seconds : 0;
   }
 
   // How much of a stroke is written u (0 to 1) of the way through its time: a hand slows at each end.

@@ -68,6 +68,43 @@
     assert(departs(paw, /stand\.arms\.right\.paw\.color is set: give the palette's pawRight instead/), 'a right paw with a color of its own');
   });
 
+  test('a palette color of other than three or six digits names no color', () => {
+    for (const color of ['#abcd', '#abcde', '#aabbccdd']) {
+      const spec = copy('jiaoyue');
+      spec.palette.fur = color;
+      assert(departs(spec, /palette\.fur names no color/), color);
+    }
+  });
+
+  test('a friend without ears, eyes or a mouth (false) draws none of them, and keeps their parts empty', () => {
+    const spec = { ...copy('howdi'), ears: false, eyes: false, mouth: false }, lacking = ['earL', 'earR', 'eyeL', 'eyeR', 'mouth'];
+    assertEqual(PF.check(spec), [], 'the anatomy allows it');
+    const poses = [{}, { mouth: 'open', eyes: 'happy', lookX: 1, earL: 20, blink: 0.5 }, { stance: 'stand', facing: 90 }, { facing: 180 }];
+    const empty = (svg, where) => {
+      assert(!svg.outerHTML.includes('NaN'), `NaN ${where}`);
+      for (const part of lacking) {
+        const node = svg.querySelector(`[data-pf="${part}"]`);
+        assert(node && !node.childElementCount, `${part} ${where} is ${node ? 'not empty' : 'missing'}`);
+      }
+      assert(!svg.querySelector('[data-pf="earLfront"], [data-pf="eyeLopen"]'), `an inner ear or an open eye ${where}`);
+    };
+    const box = document.createElement('div');
+    for (const pose of poses) {
+      box.innerHTML = PF.render(spec, { pose });
+      empty(box.firstElementChild, `in a still (${JSON.stringify(pose)})`);
+    }
+    box.innerHTML = PF.render('howdi');
+    assert(lacking.every(part => box.querySelector(`[data-pf="${part}"]`).childElementCount), 'Howdi himself has all of them');
+    support.withBoxSync(el => {
+      const rig = PF.mount(el, spec, { bitmap: false });
+      for (const pose of poses) {
+        rig.setPose(pose, true);
+        assert(PF.ANATOMY.parts.every(part => rig.parts[part]), `a part missing from the rig (${JSON.stringify(pose)})`);
+        empty(rig.svg, `on a rig (${JSON.stringify(pose)})`);
+      }
+    });
+  });
+
   test('an extra names a feature of the house list, so that what friends share has one name', () => {
     const spec = copy('jiaoyue');
     spec.extras[0].feature = 'eyebrows';

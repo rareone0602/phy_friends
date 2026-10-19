@@ -95,7 +95,7 @@ PhyFriends.define('weiwei', {
   // not say on which side it hangs.
   tail: {
     base: [56, 106], angle: 50, length: 140, width: 98, bend: -70, taper: 0.7, root: 0.5,
-    tip: { at: 0.5, color: 'peach', fluff: [{ from: 50, to: 130, n: 4, len: 18, depth: 0.02, b1: 18, b2: 12, jit: 0.2 }] },
+    tip: { at: 0.5, color: 'peach', n: 4 },
   },
   // The limbs, on the house template. Seated, the peach forepaws rest on the ground in front, and the peach hind feet
   // show their soles at either side. Standing, as on the sheet, the orange arms turn peach at the elbow, in tufts, down

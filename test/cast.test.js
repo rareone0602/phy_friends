@@ -52,6 +52,10 @@
     assertThrows(() => cast.ensureVoice('terry', 'hello'), /Terry has no voice/);
   });
 
+  test('a friend the cast lacks is refused a voice, even for a mark', () => {
+    assertThrows(() => sample().ensureVoice('nobody', '!'), /"nobody" is not in the cast/);
+  });
+
   test("a film made for one owner alone may draft words for that owner's friend, and for no other", () => {
     const cast = sample();
     assert(cast.canSpeak('yuda', { madeFor: 'yuda' }) && !cast.canSpeak('yuda'), 'only in a film made for its owner');

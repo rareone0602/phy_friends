@@ -313,13 +313,13 @@ PhyFriends.define('name', {
   palette: { bg, fur, head, face, hair, ear, earRight, earInner, iris, irisRight, ink, blush, tongue, body, tail, arm, paw, pawRight, leg, foot, ...others },  // The roles first (see Anatomy); shades such as furShade are derived
   head:  { cx, cy, rx, ry, fluff: [{ from, to, n, len, lean, sym }] },  // Fluffy ellipse
   face:  { ... same as head ... },                                     // Pale mask (false: none)
-  ears:  { base, angle, width, length, lean, tip, inner, stripes, over, right: {...overrides} },  // over: drawn over the head, under the face (Terry's lobes)
+  ears:  { base, angle, width, length, lean, tip, inner, stripes, over, right: {...overrides} },  // over: drawn over the head, under the face (Terry's lobes); false: none
   hair:  { cx, cy, rx, ry, valley, tips: [[x, y, b1, b2], ...] },      // Spiky star (false: none)
-  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own (its color is irisRight)
+  eyes:  { x, y, w, h, shape: 'pill' | 'dot', tilt, shine, range, stroke, arc, right: { shine } },  // shine: a highlight, or a list of marks (iris, highlight); right: the right eye's own (its color is irisRight); false: none
   blush: { x, y, rx, ry, tilt },                                      // tilt > 0 raises the outer ends
-  mouth: { x, y, size, shape, fang },                                 // shape: the default mouth
+  mouth: { x, y, size, shape, fang },                                 // shape: the default mouth; false: none
   body:  { ...fluffy ellipse..., onigiri },                            // onigiri: a rice ball rather than an ellipse (0..1, or { taper, square })
-  tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, color } },  // Optional
+  tail:  { base, angle, length, width, curl, bend, taper, root, fluff, tip: { at, n, len, span, color, fluff } },  // Optional; tip: the house's tip unless it says otherwise (see tail, below)
   stand: {                                                             // The standing figure: the seated body on two legs (false: never stands); any part left out takes the default, fitted to the body
     seat:  { paw, foot, right: { paw, foot }, arms, legs },            // The seated forepaw and hind foot, ellipses { cx, cy, rx, ry, rot }, down to which the arms hang and into which the legs fold (false: one the seated drawing hides, which tucks under the body); arms and legs override the folded limbs' numbers (arms: { length: 0 } folds an arm into its paw)
     fit,                                                               // Any of STAND_FIT's numbers, for this friend
@@ -333,13 +333,26 @@ PhyFriends.define('name', {
   // An extra with show: 'name' is drawn only while the pose's show lists that name (a prop); one on 'ground' stays put as the friend hops
   // An extra on 'paws' or 'feet' with sole: true faces us only while the friend sits, and flattens as it rises
   // An extra's turn names the group of ANATOMY.turns it turns with, rather than its feature's ('none': it rides its part)
-  rig:   { ground, neck, turn },                                       // ground: where the paws touch (default 120)
+  // An extra with under: true lies under its part's own shape rather than over it; kind: 'ellipse' draws a plain ellipse { cx, cy, rx, ry, rot }
+  rig:   { ground, neck, turn },                                       // ground: where the rig meets the ground (default 131, the house's; groundOf lowers it with a taller body); neck: the head's pivot (default [0, 50]); turn: how far the head's layers slide as it turns (default 14)
   emotions: false,                                                     // Only off the house template (Claude): no feelings
   routine: { says, saysStill, duration, keys: { field: [[t, value, ease]] } },  // Its third hi plays it, if it shows no feelings (Claude's laptop)
-  views: { ref: { w, h, x, y, scale, rotate, pose } },
+  views: { ref: { w, h, x, y, scale, rotate, pose, bg } },             // bg: the view's background, in place of the palette's (a render's own bg overrides it)
   extends: 'other-character',                                          // Variants
 });
 ```
+
+`render(spec, options)` returns the SVG and `mount(el, spec, options)` a live
+rig, and both take the same options: `view` (a view's name, or a camera), `pose`,
+`size` (the width in pixels to which the view is scaled, keeping its proportions),
+`bg` and `pencil` (see [The pencil](#the-pencil)), `fluid` (no width or height,
+so that the drawing fills its box: a mounted rig's default) and `uid` (the
+prefix of the drawing's ids, otherwise new for every render: a page names its
+own where it refers to them, or where a still must come out the same every
+time). `mount` also takes `bitmap: false`, which keeps the pencil's texture as a
+still draws it rather than swapping it for a bitmap, for a page that must come
+out the same every time, such as a film. A pose field given as `undefined`
+counts as not given.
 
 Every character file is laid out the same way, so two specs read side by side:
 - a one-line header comment naming the character and its reference pictures;
@@ -392,7 +405,11 @@ Shape primitives (`PhyFriends.shapes`):
   tail can curl right over into a crescent (a tail with `bend` has no curl
   unless it sets one). `taper` and `root` (0..1) pinch the two ends. `tip`
   paints a clipped marking over the last part of the length, from `at` (a
-  fraction) to the end. Its edge is `n` tufts pointing back at the base. The
+  fraction, 0.7 unless given) to the end, in `color` (`tailTip` unless given).
+  Its edge is the house's: `n` tufts (3) `len` long (18), pointing back at the
+  base, `span` degrees either side of it (40); a spec gives only the numbers in
+  which its tip differs, or replaces the row outright with `fluff`, as a fluffy's
+  ranges (Yuda's short band). The
   tail pivots at `base` and leans `angle` degrees away from the body's centre
   line; a base on the left is mirrored. Extras with `on: 'tail'` are drawn on
   the straight tail: fluffies bend with it, while nodes and ellipses keep their
@@ -461,9 +478,10 @@ lacks is a decision rather than an oversight:
   caught.
 - Every friend's drawing has the same parts, by the names a mounted rig gives
   them (`ANATOMY.parts`, `rig.parts`): what a pose moves, and all that the code
-  that animates a friend may rely on. The head's layers come in one order for
-  all of them; an ear drawn over the head, as Terry's lobes and cowosus's folded
-  ear are, says so (`ears.over`).
+  that animates a friend may rely on. A part that a friend lacks (`ears: false`,
+  `eyes: false`, `mouth: false`) is still there, empty. The head's layers come
+  in one order for all of them; an ear drawn over the head, as Terry's lobes and
+  cowosus's folded ear are, says so (`ears.over`).
 
 The anatomy makes the friends alike in what they are made of; the house contract
 (`test/contract.test.js`) makes them alike in what they do, which is what the

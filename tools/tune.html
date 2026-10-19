@@ -247,13 +247,14 @@
     A.layer(up, A.make.sitDown({ spec })), A.still({ stance: 'sit' }, 0.5));
   const turning = A.layer(up, A.make.turn({ quarters: 4, seconds: 0.8 }));
   const ROWS = [['sitting', 'in between', 'standing', 'moving'], ['side-on, sitting', 'side-on', 'from behind', 'turning round']];
-  let shown = [], made = 0;
+  let shown = [];
   function draw() {
     settle();
     const names = [...picker.querySelectorAll('input:checked')].map(i => i.value);
     stage.innerHTML = names.length ? '' : '<p class="empty">tick a fwiend under “fwiends to show”.</p>';
     shown = names.map(name => {
-      const label = FRIENDS.find(f => f[0] === name)[1], spec = PF.define(`${name}~${++made}`, { ...PF.get(name) });
+      // A copy, not registered, so that redrawing adds nothing to the friends (PhyFriends.list()).
+      const label = FRIENDS.find(f => f[0] === name)[1], spec = { ...PF.get(name) };
       stage.insertAdjacentHTML('beforeend', `<div class="friend"><h2>${label}</h2><div class="cells">` + ROWS.map(row =>
         '<div class="cell"></div>'.repeat(row.length) + row.map(c => `<div class="caption">${c}</div>`).join('')).join('') + '</div></div>');
       const rigs = [...stage.lastElementChild.querySelectorAll('.cell')].map(cell => PF.mount(cell, spec, { bg: false, view: viewOf(spec) }));

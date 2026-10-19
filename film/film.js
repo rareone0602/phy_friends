@@ -23,7 +23,7 @@
   const PLAY_WHEN_VISIBLE = 0.9;
   const THRESHOLDS = Array.from({ length: 21 }, (_, i) => i / 20);  // Reports every 5%, to catch either case.
   const PLAYED_LABEL = 'play again';
-  const BOIL = 8;  // Texture redraws per second in a film.
+  const BOIL = root.PhyFriends.pencil.settings.boil;  // Texture redraws per second in a film, as on a live page.
 
   const params = new URLSearchParams(location.search);
   const filming = params.has('film');  // A filmed scene never glides (film/scene.js), and nor should what moves with a friend.
