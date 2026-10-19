@@ -201,9 +201,7 @@ preview show everything in place.
   watch each one land. The labels are there from the start, so the empty
   places read as the names still to be called; each fwiend's ground is
   drawn as it sets off, from the side it comes from, so that the line is
-  there before the fwiend lands on it, and gives as it does. (The roll call
-  kept in `design/backup/roll-call-rise.html` draws each ground just before
-  its fwiend rises through it.)
+  there before the fwiend lands on it, and gives as it does.
 - A row is called once any of it is in view; one just below the fold comes in
   with only its ears showing, which draws the eye down, and on a phone the
   lower rows come in as they are scrolled to. A row scrolled past unseen is

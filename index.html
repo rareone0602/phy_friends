@@ -38,9 +38,11 @@
     const STILL_KEY = 'phy-friends-still';      // Where src/live.js remembers "keep still" (its STILL_KEY, which pf.py test checks).
     const query = new URLSearchParams(location.search), navigation = performance.getEntriesByType('navigation')[0];
     if (query.has('px') || query.has('hi') || query.has('feel') || location.hash.length > 1 || keepingStill()) return;
-    if (navigation && navigation.type !== 'navigate') return;
+    // An opening asked for by its entrance (?opening=hop or ?opening=rise) plays however the page was reached.
+    const asked = ['hop', 'rise'].includes(query.get('opening'));
+    if (!asked && navigation && navigation.type !== 'navigate') return;
     try {
-      if (sessionStorage.getItem(OPENING_KEY) !== null) return;
+      if (!asked && sessionStorage.getItem(OPENING_KEY) !== null) return;
       sessionStorage.setItem(OPENING_KEY, 'played');
     } catch {
       // Without storage, as in some private windows, the opening plays on every visit.
@@ -128,6 +130,9 @@
     [data-host] .name::after, .disclaimer .mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
   .friend.on-its-way { z-index: 2; }
+  /* A friend rising through its rule shows only above it, as a figure cut out of paper pushed up through a slit in the
+     page does. */
+  html.rising .friend.on-its-way .rig { clip-path: inset(-100% -100% 0 -100%); }
   /* A mark over a friend's head (src/live.js) may reach over a neighbor's slot, so the friend showing it is drawn on top. */
   .friend:has(.pf-live-mark) { z-index: 3; }
   /* The ground's line, 6.5px down its 12px, lands on the middle of the rule at the box's bottom edge. */
@@ -462,6 +467,11 @@
   // if that is shorter, so that the line is there before the friend lands on it.
   const ROLL_CALL = { first: 0.2, stride: 200, maxHops: 6, height: 20, clearance: 24, cadence: 0.4, smile: 0.8,
     watch: { before: 0.6, after: 0.9 }, pen: 0.4 };
+  // Now and then (one opening in `chance`), the friends rise through their rules instead, one after another in reading
+  // order, as figures cut out of paper pushed up through slits in the page, each overshooting a little before it
+  // settles; each one's ground is drawn, from the left, in the `pen` seconds before it rises through it. ?opening=rise
+  // asks for it, and ?opening=hop for the usual roll call.
+  const RISE = { chance: 1 / 20, seconds: 0.5, cadence: 0.3, pen: 0.3 };
 
   // Two easter eggs, to which nothing on the page points. Stroking Terry for `seconds` opens the tuning page, on which
   // his owner chose the friends' proportions. Stroking every friend that shows feelings, each at least once in one
@@ -475,6 +485,8 @@
   PhyFriends.live.keepStill(document.querySelector('.still input'));
   const params = new URLSearchParams(location.search);
   const opening = document.documentElement.classList.contains('opening');
+  const rising = opening && (params.get('opening') === 'rise' || (params.get('opening') !== 'hop' && Math.random() < RISE.chance));
+  document.documentElement.classList.toggle('rising', rising);
   // While the opening lasts: the roll call, what writes the title at once, and what stops ending it on request.
   let rollCall = null, finishTitle = null, stopEndingOnRequest = null;
   // The slots' geometry, as the troupe's CSS declares it: a box's width in head units, and how much neighboring
@@ -885,10 +897,10 @@
       if (next === rows.length) observer.disconnect();
     }
 
-    // The row's friends join the queue, the farthest from its edge first.
+    // The row's friends join the queue: the farthest from its edge first, or, rising, in reading order.
     function callRow(row) {
-      const entrances = row.friends.map(friend => ({ friend, ...entranceFor(friend) }))
-        .sort((a, b) => Math.abs(b.offset) - Math.abs(a.offset));
+      const entrances = row.friends.map(friend => ({ friend, ...entranceFor(friend) }));
+      if (!rising) entrances.sort((a, b) => Math.abs(b.offset) - Math.abs(a.offset));
       for (const { friend, ...entrance } of entrances) {
         friend.arrival = { ...entrance, start: Infinity, land: Infinity };
         queue.push(friend);
@@ -905,7 +917,7 @@
       for (const friend of queue) {
         const arrival = friend.arrival;
         if (!arrival || arrival.start <= from) continue;
-        arrival.land = Math.max(from + arrival.duration, lastLanding + ROLL_CALL.cadence);
+        arrival.land = Math.max(from + arrival.duration, lastLanding + (rising ? RISE.cadence : ROLL_CALL.cadence));
         arrival.start = arrival.land - arrival.duration;
         lastLanding = arrival.land;
       }
@@ -980,9 +992,10 @@
 
   // The way a friend comes in: from just beyond the nearer edge of the page, along its row's rule, in
   // hops of about ROLL_CALL.stride. offset is where it starts, in px from its place; height is a hop's
-  // height in px; dir is the way it goes (1, rightward, or -1).
+  // height in px; dir is the way it goes (1, rightward, or -1). Rising, it comes up from a box's depth below its rule.
   function entranceFor(friend) {
     const box = friend.rig.el.getBoundingClientRect(), unit = box.width / friend.view.w;
+    if (rising) return { depth: box.height, duration: RISE.seconds, dir: 1 };
     const pageWidth = document.documentElement.clientWidth, fromLeft = box.left + box.width / 2 < pageWidth / 2;
     const offset = fromLeft
       ? -(box.right + (friend.reach.right + ROLL_CALL.clearance) * unit)
@@ -1006,7 +1019,7 @@
   function arrive(friend) {
     friend.arrival = null;
     friend.element.classList.remove('waiting', 'on-its-way');
-    friend.rig.el.style.transform = '';
+    friend.rig.el.style.transform = friend.rig.svg.style.transform = '';
     friend.ground.svg.style.clipPath = '';
   }
 
@@ -1043,22 +1056,35 @@
   }
 
   // Where a friend on its way is now: its offset from its place and its lift, in px; its squash and
-  // lean; and the way it goes. Null for a friend in place or still waiting.
+  // lean; and the way it goes. Rising, how far below its place it is (depth), overshooting a little before it settles,
+  // looking straight ahead. Null for a friend in place or still waiting.
   function travelAt(friend, seconds) {
     const arrival = friend.arrival;
     if (!arrival || seconds < arrival.start) return null;
+    if (rising) {
+      const u = (seconds - arrival.start) / arrival.duration;
+      return { depth: arrival.depth * (1 - PhyFriends.anim.ease.back(u)), squash: -0.06 * Math.sin(Math.PI * u), lean: 0, dir: 0 };
+    }
     const hop = PhyFriends.anim.hopping((seconds - arrival.start) / arrival.duration, arrival.hops);
     return { offset: arrival.offset * (1 - hop.along), lift: arrival.height * hop.lift, squash: hop.squash,
       lean: hop.lean * arrival.dir, dir: arrival.dir };
   }
 
   // Shows a friend once its way in has begun and moves it along, box and all: its paper travels with
-  // it (STYLE.md §9). The pen draws its ground as it sets off (ROLL_CALL.pen).
+  // it (STYLE.md §9). The pen draws its ground as it sets off (ROLL_CALL.pen). Rising, the drawing moves up inside its
+  // box, which the slit clips, and the pen draws the ground in the moments before (RISE.pen).
   function showOnItsWay(friend, travel) {
     friend.element.classList.toggle('waiting', !travel);
     friend.element.classList.toggle('on-its-way', !!travel);
+    const arrival = friend.arrival;
+    if (rising) {
+      friend.rig.svg.style.transform = travel ? `translateY(${travel.depth}px)` : '';
+      const drawn = Math.min(1, Math.max(0, (stage.seconds - arrival.start + RISE.pen) / RISE.pen));
+      penGround(friend, 1 - (1 - drawn) ** 2, 1);
+      return;
+    }
     friend.rig.el.style.transform = travel ? `translate(${travel.offset}px, ${-travel.lift}px)` : '';
-    const arrival = friend.arrival, pen = Math.min(ROLL_CALL.pen, arrival.duration * 0.8);
+    const pen = Math.min(ROLL_CALL.pen, arrival.duration * 0.8);
     const drawn = travel ? Math.min(1, (stage.seconds - arrival.start) / pen) : 0;
     penGround(friend, 1 - (1 - drawn) ** 2, travel ? travel.dir : 1);
   }

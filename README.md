@@ -61,7 +61,7 @@ out/           generated output (git-ignored)
 | `characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
 | `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`), `examples/`, and `backup/` for the versions not taken |
 | `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`, `say-hi/`), which are made with the film kit |
-| `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`, with `roll-call-rise.html`, the gallery's roll call not taken) |
+| `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
