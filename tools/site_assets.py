@@ -7,15 +7,14 @@ Run this after a character changes:
 
 Outputs:
 
-  site/icon.svg              The favicon: phy's head, with the tail tucked away. The icons are drawn
+  lib/style/site/icon.svg              The favicon: phy's head, with the tail tucked away. The icons are drawn
                              flat, because they are too small to hold the pencil texture.
-  site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
-  site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
-  site/preview.png           1200x630 link preview image: the title over every friend, standing in the gallery's
+  lib/style/site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
+  lib/style/site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
+  preview.png           1200x630 link preview image: the title over every friend, standing in the gallery's
                              order in rows on the gallery's paper, as large as the frame allows (see LAYOUT).
 """
 import json
-import re
 import tempfile
 from pathlib import Path
 
@@ -25,6 +24,7 @@ import gallery
 import pf
 import shoot
 from cdp import ChromeError, exit_on_sigterm
+from layout import KIT
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -47,20 +47,19 @@ POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so 
 # palette is trained on the colors with their populations flattened (count ** FLATTEN), so that the small bright
 # things (eyes, a bandana, a cheek) keep their colors beside the great areas of paper and fur.
 PALETTE = {'colors': 224, 'flatten': 0.2, 'refinements': 3}
-GRAPHITE = re.compile(r'<filter id="graphite".*?</filter>', re.S)
 
 
 def gallery_slots():
-    """The friends in the gallery's order, each as (name, reach left, reach right) in head units, the slots' geometry
-    (gallery.slot_geometry) and the graphite filter that the gallery textures its lines with, all read from index.html."""
+    """The friends in the gallery's order, each as (name, reach left, reach right) in head units, and the slots'
+    geometry (gallery.slot_geometry), both read from index.html."""
     text = gallery.GALLERY.read_text(encoding='utf-8')
-    return gallery.read_slots(text), gallery.slot_geometry(text), GRAPHITE.search(text)[0]
+    return gallery.read_slots(text), gallery.slot_geometry(text)
 
 
 def composition(layout=LAYOUT):
     """The link preview as a page: the title on the paper's top rule, and under it the friends in rows, each friend
     in a box five rules square standing on a rule, as in the gallery (index.html), with one size for all."""
-    slots, geometry, graphite = gallery_slots()
+    slots, geometry = gallery_slots()
     box, overlap = geometry['box'], geometry['overlap'] / 2  # Each side of a slot overlaps its neighbor's by half.
     rule, rows, margin = layout['rule'], layout['rows'], layout['margin']
     if sum(rows) != len(slots):
@@ -83,8 +82,8 @@ def composition(layout=LAYOUT):
     scripts = '\n'.join(f'<script src="{path.as_uri()}"></script>' for path in pf.scripts())
     return f"""<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8">
-<link rel="stylesheet" href="{(ROOT / 'site/notebook.css').as_uri()}">
-<link rel="stylesheet" href="{(ROOT / 'site/pencil.css').as_uri()}">
+<link rel="stylesheet" href="{(KIT / 'notebook.css').as_uri()}">
+<link rel="stylesheet" href="{(KIT / 'pencil.css').as_uri()}">
 <style>
   :root {{ --informal: 100; --L: {rule}px; --margin-x: {margin}px; --band: {layout['band'] + layout['top'] / rule}; --size: calc(var(--L) * 5); }}
   html, body {{ width: {width}px; height: {height}px; margin: 0; overflow: hidden; }}
@@ -103,7 +102,7 @@ def composition(layout=LAYOUT):
 </style>
 {scripts}
 </head><body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">{graphite}</svg>
+<script src="{(KIT / 'graphite.js').as_uri()}"></script>
 <h1>phy's fwiends</h1>
 {''.join(lists)}
 <script>
@@ -155,12 +154,12 @@ def still(view, out, bg=False):
 def main():
     with pf.session():  # One Chrome for the icon's drawing and every still's check.
         svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: 'i' }})")
-        (ROOT / 'site/icon.svg').write_text(svg)
-        print(ROOT / 'site/icon.svg')
-        still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, ROOT / 'site/icon-32.png')
-        still(TOUCH, ROOT / 'site/apple-touch-icon.png', bg='#fbf9f3')
-        photograph(LAYOUT, ROOT / 'site/preview.png')
-        print(ROOT / 'site/preview.png')
+        (KIT / 'icon.svg').write_text(svg)
+        print(KIT / 'icon.svg')
+        still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, KIT / 'icon-32.png')
+        still(TOUCH, KIT / 'apple-touch-icon.png', bg='#fbf9f3')
+        photograph(LAYOUT, ROOT / 'preview.png')
+        print(ROOT / 'preview.png')
 
 
 if __name__ == '__main__':

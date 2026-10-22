@@ -3,7 +3,7 @@
  * like.
  *
  * 45.4-49.1, a page of feelings: phy alone beside a penciled cross whose axes run from unpleasant to
- * pleasant and from drowsy to alert, every feeling of src/emotion.js a dot where it sits on them. A
+ * pleasant and from drowsy to alert, every feeling of lib/fwiends/src/emotion.js a dot where it sits on them. A
  * cursor glides from dot to dot; the two numbers it stands for are written under the cross as the call
  * posture(valence, arousal), and phy's ears, lids, head and tail follow them all the way, since the
  * body's share of a feeling is computed from the two numbers. At each dot the face snaps into the feeling
@@ -18,7 +18,7 @@
  * (sections/intro.js): until they move, every friend in the film stands and sits on the numbers before;
  * from then on, on his owner's, which are the library's today.
  *
- * The designs not chosen are the specs kept in characters/<friend>/backup/, loaded under names of the
+ * The designs not chosen are the specs kept in lib/fwiends/characters/<friend>/backup/, loaded under names of the
  * film's own, so that they never replace the friend's own spec.
  */
 (function () {
@@ -30,9 +30,9 @@
 
   // Film-local names for the designs not chosen, and the backup each is kept in.
   const ALTERNATIVES = {
-    'fruit~first-draft': 'characters/fruit/backup/first-draft.js',
-    'fruit~reviewed': 'characters/fruit/backup/reviewed.js',
-    'whitedeer~plain': 'characters/whitedeer/backup/plain.js',
+    'fruit~first-draft': 'lib/fwiends/characters/fruit/backup/first-draft.js',
+    'fruit~reviewed': 'lib/fwiends/characters/fruit/backup/reviewed.js',
+    'whitedeer~plain': 'lib/fwiends/characters/whitedeer/backup/plain.js',
   };
   const ROOT = '../../';                       // The repository, from demo/say-hi/.
 

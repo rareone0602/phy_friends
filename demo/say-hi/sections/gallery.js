@@ -55,7 +55,7 @@ SayHi.section('gallery', k => {
   // The library's taper today, which the rice ball eases to: read from the source, since by the time a
   // module is built the era may already have set the live constant to the film's opening value.
   const TAPER = Number(SayHi.source.onigiri.text.match(/taper: ([\d.]+)/)[1]);
-  const DAY = { paper: '#fbf9f3', rule: '#cfdbe8', grain: 1 };              // site/notebook.css.
+  const DAY = { paper: '#fbf9f3', rule: '#cfdbe8', grain: 1 };              // lib/style/site/notebook.css.
   const NIGHT = { paper: '#e3ddd0', rule: '#bfc9d3', grain: 1.3 };         // The stubs' night, unless the method gives one.
   const INK = '#3d3c39';
 
@@ -274,7 +274,7 @@ SayHi.section('gallery', k => {
   CALLS.forEach((call, i) => { call.next = i + 1 < CALLS.length ? CALLS[i + 1].land : at(ROLL.gone[0]); });
   const landOf = name => CALLS.find(call => call.name === name).land;
 
-  // The title: the gallery's own, written by the gallery's own pen (src/pen.js, site/title-pen.js), a
+  // The title: the gallery's own, written by the gallery's own pen (lib/fwiends/src/pen.js, lib/fwiends/src/title-pen.js), a
   // little quicker than on the real page, so that, as there, the friends start to land as the pen
   // reaches "fwiends" (on 13.1, the roll call's first beat).
   const PEN = (typeof TITLE_PEN !== 'undefined' && PF.pen) ? TITLE_PEN : null;
@@ -423,7 +423,7 @@ SayHi.section('gallery', k => {
   }
 
   // Claude, landed, steps aside, swings its laptop up and sets it down open, and hops round to sit at it,
-  // as its routine has it (characters/claude/claude.js); from then the page's typing loop takes over
+  // as its routine has it (lib/fwiends/characters/claude/claude.js); from then the page's typing loop takes over
   // (pages.js), until it folds the laptop away at 75.1.
   // Routine seconds: from the step aside to the typing, and the fold; `after` is the wait after landing.
   const ROUTINE = { arrive: [0.39, L.typing.loop[0]], fold: 3.03, after: 0.22 };
@@ -617,7 +617,7 @@ SayHi.section('gallery', k => {
     return { paper: mixColor(DAY.paper, n.paper, u), rule: mixColor(DAY.rule, n.rule, u), grain: lerp(DAY.grain, n.grain, u) };
   });
 
-  // The doze: the gallery's own schedule (src/live.js), its seconds scaled so that the friends grow
+  // The doze: the gallery's own schedule (lib/fwiends/src/live.js), its seconds scaled so that the friends grow
   // sleepy one by one over bar 29 and each falls asleep three beats later. phy stays up.
   const SLEEPERS = HOUSE.filter(name => name !== HOST);
   const DOZE = PF.live.DOZE, dozeScale = BAR / DOZE.spread;
@@ -947,7 +947,7 @@ SayHi.section('gallery', k => {
       actor.leap({ at: LEAP.last - A.HOP.crouch * SONG.seconds, height: SONG.height, duration: SONG.seconds });
       for (const [cue, height] of GROOVE.hops) actor.leap({ at: at(cue) - A.HOP.crouch * GROOVE.seconds, height, duration: GROOVE.seconds });
     }
-    // Claude folds its laptop away and turns to the place, as its routine ends (characters/claude/claude.js).
+    // Claude folds its laptop away and turns to the place, as its routine ends (lib/fwiends/characters/claude/claude.js).
     const claude = cast[CLAUDE];
     if (claude) {
       const routine = A.track(claude.spec.routine.keys, { duration: claude.spec.routine.duration }), a = ROUTINE.fold;

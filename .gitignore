@@ -4,12 +4,12 @@ out/
 __pycache__/
 
 # Per-character material that informs a design but is not published, such as photos of a real pet.
-characters/*/private/
+lib/fwiends/characters/*/private/
 
 # Reference pictures stay on the machine that drew the character: they belong to their artists.
-characters/*/examples/
+lib/fwiends/characters/*/examples/
 
-# LaTeX build output from figures/diagram.tex and similar sources.
-figures/*.aux
-figures/*.log
-figures/*.pdf
+# LaTeX build output from lib/style/figures/diagram.tex and similar sources.
+lib/style/figures/*.aux
+lib/style/figures/*.log
+lib/style/figures/*.pdf

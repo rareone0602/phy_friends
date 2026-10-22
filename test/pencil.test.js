@@ -1,4 +1,4 @@
-// Tests for the pencil texture's bitmap (src/phyfriends.js), which a live rig shows in place of the
+// Tests for the pencil texture's bitmap (lib/fwiends/src/phyfriends.js), which a live rig shows in place of the
 // texture's filter: it must have the grain of the filter as the browser draws it, in each of the
 // variants that a page that boils cycles through.
 (function () {
@@ -66,7 +66,7 @@
 
   // A character drawn on the page has no background, so that the pencil shows the page's paper, and a sheet of paper
   // cut to its outline that the kit shows only where the page's paper cannot show through: on the dark sheet and in
-  // forced colors (site/pencil.css).
+  // forced colors (lib/style/site/pencil.css).
   test('a character drawn on the page carries a cut-out of paper and no background', () => {
     const box = document.createElement('div');
     box.innerHTML = PF.render('phy', { bg: 'page' });

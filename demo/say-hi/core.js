@@ -24,13 +24,13 @@
  * Queries: ?film (tools/pf.py film), ?strict, ?debug (bar.beat, section and shot over the frame),
  * ?draft (allows friends outside the film's cast, stamped as a draft), ?at=<bar.beat or seconds>.
  *
- * Loads as a classic script after the library, film/scene.js and demo/say-hi/beats.js (SayHi).
+ * Loads as a classic script after the library, lib/fwiends/film/scene.js and demo/say-hi/beats.js (SayHi).
  */
 (function (root) {
   'use strict';
 
   const PF = root.PhyFriends, A = PF && PF.anim, B = root.SayHi && root.SayHi.beats;
-  if (!PF || !A || !PF.scene || !B) throw new Error('say hi: load the library, film/scene.js and beats.js before core.js');
+  if (!PF || !A || !PF.scene || !B) throw new Error('say hi: load the library, lib/fwiends/film/scene.js and beats.js before core.js');
 
   const ROOT = '../../';                       // The repository, from demo/say-hi/.
   const FRAME = Object.freeze({ width: 1920, height: 1080, fps: 30 });
@@ -94,7 +94,7 @@
     });
   }
 
-  // Loads characters/cast.js and the specs of the friends whose owners have agreed to video. The cast
+  // Loads lib/fwiends/characters/cast.js and the specs of the friends whose owners have agreed to video. The cast
   // names every friend of the gallery, and installing it needs a spec for each, so a friend outside
   // the film gets an empty placeholder: its drawing is never loaded, and its name is never written in
   // the film's source.
@@ -103,13 +103,13 @@
     let data = null;
     PF.cast.define = given => { data = given; return PF.cast; };
     try {
-      await loadScript(`${ROOT}characters/cast.js`);
+      await loadScript(`${ROOT}lib/fwiends/characters/cast.js`);
     } finally {
       PF.cast.define = install;
     }
-    if (!data) throw new Error('say hi: characters/cast.js defined no cast');
+    if (!data) throw new Error('say hi: lib/fwiends/characters/cast.js defined no cast');
     const inFilm = id => (data.friends[id].agreed || []).includes(MEDIUM);
-    await Promise.all(Object.keys(data.friends).filter(inFilm).map(id => loadScript(`${ROOT}characters/${id}/${id}.js`)));
+    await Promise.all(Object.keys(data.friends).filter(inFilm).map(id => loadScript(`${ROOT}lib/fwiends/characters/${id}/${id}.js`)));
     for (const id of Object.keys(data.friends)) if (!inFilm(id)) PF.define(id, {});
     install(data);
     loaded.cast = data;
@@ -244,7 +244,7 @@
     return eraSpecs.get(key);
   }
 
-  // Runs fn while PhyFriends.get(name) gives each named friend its era spec, for film/scene.js,
+  // Runs fn while PhyFriends.get(name) gives each named friend its era spec, for lib/fwiends/film/scene.js,
   // which takes a friend's spec by name when the friend is added.
   function withEraSpecs(values, fn) {
     const get = PF.get;
@@ -289,7 +289,7 @@
   // (world: { width, height }, 16:9), with its own camera. From the back: the paper (paper), a layer
   // under the friends (under), the friends of its scene, a layer over them (over), all three moving
   // with the camera, and a layer fixed to the page (screen), in frame pixels. A page with a cast gets
-  // a scene (film/scene.js) for every set of era values it is shown under; the scene's cues come from
+  // a scene (lib/fwiends/film/scene.js) for every set of era values it is shown under; the scene's cues come from
   // the page's programs (cue()), which run again for each new scene.
   function definePage(id, def) {
     ensureOpen(`page ${id}`);
@@ -359,7 +359,7 @@
       boil: BOIL, medium: MEDIUM, credits: false, strict: true, reducedMotion: { matches: false },
     });
     // A scene without a duration is a live one, which forgets the cues that ended two seconds before
-    // the time of any frame it draws itself (film/scene.js, pruneCues); a browser frame can come
+    // the time of any frame it draws itself (lib/fwiends/film/scene.js, pruneCues); a browser frame can come
     // between two seeks, so a film's scene is given the film's length and keeps every cue.
     scene.duration = B.DURATION;
     const cast = {};
@@ -391,7 +391,7 @@
   }
 
   // The camera at t: where its cues have taken it, each easing from where the last left it, as
-  // film/scene.js moves its own (which the page's scenes are given too).
+  // lib/fwiends/film/scene.js moves its own (which the page's scenes are given too).
   function cameraAt(page, t) {
     return PF.scene.cameraAt(page.cameraCues, { x: page.world.width / 2, y: page.world.height / 2, zoom: 1 }, t);
   }
@@ -740,7 +740,7 @@
     };
   }
 
-  // The pencil texture's boil variant at t, and how many times the film has boiled by then (film/scene.js).
+  // The pencil texture's boil variant at t, and how many times the film has boiled by then (lib/fwiends/film/scene.js).
   const variantAt = t => PF.pencil.variantAt(t, BOIL);
   const boilStep = t => PF.pencil.boilStep(t, BOIL);
 
@@ -1029,7 +1029,7 @@
   const internals = { FRAME, definePage, frameBox, filmCast, layerScale, reads, stage, notes };
 
   // Starts the film in host and makes the page filmable (the film contract in tools/pf.py): the page
-  // owns window.film itself, since film/scene.js's own film() would take over the whole page.
+  // owns window.film itself, since lib/fwiends/film/scene.js's own film() would take over the whole page.
   function own(host) {
     const ready = start(host);
     root.film = {

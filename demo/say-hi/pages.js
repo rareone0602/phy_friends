@@ -2,7 +2,7 @@
  * say hi: the pages every section shares.
  *
  *   A  phy's page: phy alone, close, sitting on a rule. Its rules can become the lines of
- *      characters/phy/phy.js (the crash at bar 21).
+ *      lib/fwiends/characters/phy/phy.js (the crash at bar 21).
  *   B  the gallery: the film's cast in two rows on floors seven rules apart, in the gallery's order,
  *      Claude at its laptop at the end of the second row, then an empty place on the ground line: the
  *      viewer's. Neighbors are spaced for every facing (the friends turn later, together, and from
@@ -55,7 +55,7 @@
   // under its middle on the rule `rules` rules under the floor (clear of the ground line), its capitals
   // `cap` frame pixels tall when the page is shown whole, as large as a label phy presses hard.
   const EMPTY = { cap: 60, rules: 2 };
-  // Claude, at its laptop: the moment of its routine (characters/claude/claude.js) at which it sits
+  // Claude, at its laptop: the moment of its routine (lib/fwiends/characters/claude/claude.js) at which it sits
   // side-on at the open laptop, and the stretch of the routine that types, looped.
   const TYPING = { sit: 1.4, from: 1.48, to: 2.52 };
   const GROUND = { inset: 6, wobble: 1.6, step: 50, seed: 5 };      // As the gallery draws a friend's ground (index.html).

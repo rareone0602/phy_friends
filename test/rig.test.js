@@ -1,4 +1,4 @@
-// Tests of the rig (src/phyfriends.js): extras shown on cue, extras that stay on the ground, and the standing figure.
+// Tests of the rig (lib/fwiends/src/phyfriends.js): extras shown on cue, extras that stay on the ground, and the standing figure.
 (function () {
   'use strict';
   const PF = PhyFriends;

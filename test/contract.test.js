@@ -1,5 +1,5 @@
 // Tests of the house contract: what every friend but Claude promises the code that animates it. The pages, the films,
-// the clips and the feelings (src/anim.js, src/emotion.js, src/live.js, film/scene.js) know only these promises and
+// the clips and the feelings (lib/fwiends/src/anim.js, lib/fwiends/src/emotion.js, lib/fwiends/src/live.js, lib/fwiends/film/scene.js) know only these promises and
 // never a particular friend, so each promise is checked on every friend of the house rather than on a few, and a new
 // friend is held to all of them the moment it is registered.
 (function () {

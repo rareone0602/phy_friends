@@ -28,7 +28,7 @@ SayHi.section('finale', k => {
   const W = k.FRAME.width, H = k.FRAME.height, RULE = k.RULE;
   const gallery = k.page('B'), hello = k.page('C'), layout = SayHi.layout.B;
   const intro = k.exportsOf('intro');
-  const INK = '#3d3c39';                               // Graphite, as site/notebook.css's --ink.
+  const INK = '#3d3c39';                               // Graphite, as lib/style/site/notebook.css's --ink.
   const PAPER = '#fbf9f3';                             // The paper, as --paper.
   const PAGE_WHITE = '#ffffff';                        // A plain browser page, which has no style of its own.
 
@@ -249,8 +249,8 @@ SayHi.section('finale', k => {
   // The three lines, verbatim; run at the repository's root, they return the string streamed below and
   // draw phy on the page, with no background of their own ({ bg: false }, as the library takes it).
   const LINES = [
-    '<script src="src/phyfriends.js"></script>',
-    '<script src="characters/phy/phy.js"></script>',
+    '<script src="lib/fwiends/src/phyfriends.js"></script>',
+    '<script src="lib/fwiends/characters/phy/phy.js"></script>',
     '<script>document.body.innerHTML = PhyFriends.render(\'phy\', { bg: false });</script>',
   ];
   LINES.forEach(line => k.ensureShowable(line, 'a line of hello, world'));

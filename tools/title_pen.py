@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Derive the pen strokes that write the gallery's title, and write site/title-pen.js.
+"""Derive the pen strokes that write the gallery's title, and write lib/fwiends/src/title-pen.js.
 
   python3 tools/title_pen.py            # Requires numpy, scipy, Pillow and Google Chrome.
   python3 tools/title_pen.py --check    # Also writes out/design/title-pen.png, the strokes over the title.
 
-Headless Chrome sets the title exactly as the gallery does (Shantell Sans from site/fonts/, weight 300, INFM 100
+Headless Chrome sets the title exactly as the gallery does (Shantell Sans from lib/style/site/fonts/, weight 300, INFM 100
 and BNCE 50), large and upright, and the ink is thinned to its centerlines. Each letter's strokes are
 given below as a few waypoints, in the order and direction a hand writes them; a stroke follows the
 centerline from one waypoint to the next. The gallery reveals its title along these strokes
-(src/pen.js; FWIENDS.md, "the opening"), as does the roll-call film. Run this again whenever the title, the face or its axes change: it
+(lib/fwiends/src/pen.js; FWIENDS.md, "the opening"), as does the roll-call film. Run this again whenever the title, the face or its axes change: it
 fails if the strokes leave any of the ink unwritten.
 """
 import argparse
@@ -24,6 +24,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import dijkstra
 
 from cdp import HeadlessChrome, exit_on_sigterm
+from layout import KIT, SRC
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -35,7 +36,7 @@ MARGIN = 0.012                # Added to each side of a stroke's width beyond th
 SIMPLIFY = 0.004              # How far a simplified stroke may stray from the centerline, in em.
 REACH = 0.15                  # How far past its own box, in em, a letter's strokes may look for its centerline.
 UNWRITTEN_LIMIT = 0.001       # The share of the ink the strokes may leave uncovered.
-OUT = ROOT / 'site' / 'title-pen.js'
+OUT = SRC / 'title-pen.js'
 CHECK = ROOT / 'out' / 'design' / 'title-pen.png'
 
 # Each letter's strokes, in writing order. A waypoint is (x, y) in em from the letter's origin on the
@@ -66,7 +67,7 @@ STROKES = {
 SECOND_S = [[(0.3475, -0.5925), (0.0975, -0.45), (0.385, -0.1875), (0.0725, -0.10)]]
 
 PAGE = f'''<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
-<link rel="stylesheet" href="{(ROOT / 'site' / 'notebook.css').as_uri()}">
+<link rel="stylesheet" href="{(KIT / 'notebook.css').as_uri()}">
 <style>
   :root {{ --informal: 100; }}  /* As index.html sets it. */
   html, body {{ margin: 0; padding: 0; background: #fff !important; }}
@@ -124,7 +125,7 @@ def set_title():
         loaded = chrome.evaluate(f"document.fonts.load({json.dumps(face)}).then(() => document.fonts.ready)"
                                  f".then(() => document.fonts.check({json.dumps(face)}, {json.dumps(TITLE)}))")
         if not loaded:
-            sys.exit('title_pen: Shantell Sans did not load from site/fonts/, so the title would be set in another face')
+            sys.exit('title_pen: Shantell Sans did not load from lib/style/site/fonts/, so the title would be set in another face')
         chrome.evaluate(TWO_FRAMES_JS)  # Lets the page paint with the face in place.
         layout = json.loads(chrome.evaluate(MEASURE_JS))
         shot = chrome.screenshot()
@@ -275,7 +276,7 @@ def write_module(strokes, axes, width):
  * Each stroke follows the centerline of a letter of "{TITLE}" in the order and direction a hand
  * writes it, as Shantell Sans sets the title in the gallery ({axes}, weight 300).
  * Lengths are in thousandths of an em, from the start of the text on its baseline, y downward.
- * width is the text's width in em, by which src/pen.js checks that the face still matches. For each
+ * width is the text's width in em, by which lib/fwiends/src/pen.js checks that the face still matches. For each
  * stroke, letter indexes the character in the text, width is how wide a pen reveals the whole
  * letter, and length is how long the stroke is.
  */

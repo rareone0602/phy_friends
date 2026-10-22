@@ -1,4 +1,4 @@
-// Tests of src/live.js: a stage drawn frame by frame at chosen times (stage.draw), so that the rules for
+// Tests of lib/fwiends/src/live.js: a stage drawn frame by frame at chosen times (stage.draw), so that the rules for
 // saying hi, stroking, curiosity and dozing can be checked without waiting for real time to pass.
 (function () {
   'use strict';

@@ -1,10 +1,10 @@
 /* say hi: the film's frame, its pages and the shared components (demo/say-hi/components.js). Load it
-   after site/notebook.css. The frame is 1920 by 1080 CSS pixels whether it is filmed or watched; on a
+   after lib/style/site/notebook.css. The frame is 1920 by 1080 CSS pixels whether it is filmed or watched; on a
    page it is scaled to fit the window. */
 
 /* The face comes from the repository, not a web font service, so that every filming sets the same
    letters, offline. */
-@font-face { font-family: 'Shantell Sans'; src: url('../../figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
+@font-face { font-family: 'Shantell Sans'; src: url('../../lib/style/figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
 
 :root {
   --informal: 100;  /* A hobby piece sits at the top of the dial (STYLE.md §5). */
@@ -30,7 +30,7 @@ body::before { display: none; }  /* The pages carry their own paper grain. */
 .sh-grain { position: absolute; inset: 0; pointer-events: none; opacity: calc(.4 * var(--sh-grain, 1)); mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .34  0 0 0 0 .3  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
 
-/* A page's scenes (film/scene.js) lie over the paper, transparent; only the one for the era shown is
+/* A page's scenes (lib/fwiends/film/scene.js) lie over the paper, transparent; only the one for the era shown is
    visible. The scene kit makes its stage position: relative, which would stack them. */
 .sh-scenes > .sh-scene.pf-stage { position: absolute; inset: 0; background: none; }
 

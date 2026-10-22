@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
-"""Derive the dark sheet's inks and marks from the paper's (site/README.md), and write them into the kit.
+"""Derive the dark sheet's inks and marks from the paper's (lib/style/site/README.md), and write them into the
+kit.
 
   python3 tools/dark_sheet.py
 
 On the dark sheet the paper and the ink swap: the sheet is the graphite ink and the words are in
 the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3 and the red) keeps its
 CIELAB hue and chroma and moves to the lightness at which it has the same contrast with the dark
-sheet as it has with the paper. The marks in site/pencil.css hard-code their inks, since a data URI
-cannot read var(), so their dark set is the same marks with each ink replaced by its dark one.
+sheet as it has with the paper. The marks in lib/style/site/pencil.css hard-code their inks, since a
+data URI cannot read var(), so their dark set is the same marks with each ink replaced by its dark
+one.
 
 Run it after an ink or a mark changes. It rewrites the block between its markers in
-site/notebook.css and site/pencil.css, and prints each ink's contrast on both sheets.
+lib/style/site/notebook.css and lib/style/site/pencil.css, and prints each ink's contrast on both sheets.
 The pages' theme colors (their theme-color metas) are kept by hand: the paper's, and
 the dark sheet's where a page has one; `python3 tools/pf.py test` checks them, and
 the blocks, with written() and theme_drift().
@@ -19,9 +21,10 @@ import html.parser
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-NOTEBOOK = ROOT / 'site/notebook.css'
-PENCIL = ROOT / 'site/pencil.css'
+from layout import KIT
+
+NOTEBOOK = KIT / 'notebook.css'
+PENCIL = KIT / 'pencil.css'
 
 # A page turns to the dark sheet only where it declares both schemes, so that pages and films made
 # for paper alone keep it. Print always stays on paper.
@@ -32,7 +35,7 @@ INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red']  # The inks that keep their c
 INKS_BEGIN = ("/* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */")
 INKS_END = "/* The end of the dark sheet's inks. */"
 MARKS_BEGIN = ("/* The dark sheet's marks, written by `python3 tools/dark_sheet.py` from the marks above and the inks in\n"
-               "   site/notebook.css: edit those and run it. */")
+               "   lib/style/site/notebook.css: edit those and run it. */")
 MARKS_END = "/* The end of the dark sheet's marks. */"
 
 
@@ -127,14 +130,14 @@ def replace_block(text, begin, end, body):
 
 
 def with_inks(text, dark):
-    """site/notebook.css's text with the dark sheet's inks written in."""
+    """lib/style/site/notebook.css's text with the dark sheet's inks written in."""
     order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red']
     tokens = ' '.join(f'--{name}: {dark[name]};' for name in order)
     return replace_block(text, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
 
 
 def with_marks(text, day, dark):
-    """site/pencil.css's text with the dark sheet's marks written in."""
+    """lib/style/site/pencil.css's text with the dark sheet's marks written in."""
     marks = re.search(r':root \{\n(.*?)\n\}', text, re.S).group(1)
     swap = {day[name][1:]: dark[name][1:] for name in ('ink', 'ink-2', 'ink-3', 'red')}
     lines = []

@@ -41,7 +41,7 @@
   // written at on close pages before the rule of speech, one rule tall (head units), kept for layouts
   // that measure by it.
   const HAND = Object.freeze({ letter: 0.07, perEm: 0.08, lift: 0.03, space: 0.14, punctuation: 0.05, size: 52, rotate: -1 });
-  const BASELINE = 0.85;      // With a line box of 1em, the face's baseline lies this far below its top (film/scene.js).
+  const BASELINE = 0.85;      // With a line box of 1em, the face's baseline lies this far below its top (lib/fwiends/film/scene.js).
   const MARKS = ['tick', 'ring', 'box', 'box-again', 'arrow', 'caret', 'line', 'ground', 'squiggle', 'checkbox'];
   // The faces words are set in, as say-hi.css sets them, for measuring their cap heights.
   const FACES = Object.freeze({ hand: '300 100px "Shantell Sans"', mono: "600 100px ui-monospace, 'SF Mono', Menlo, monospace" });
@@ -328,7 +328,7 @@
 
     // ------------------------------------------------------------ mark
 
-    // One of the house's pencil marks (site/pencil.css), w by h, its center at (x, y). o: at, until,
+    // One of the house's pencil marks (lib/style/site/pencil.css), w by h, its center at (x, y). o: at, until,
     // rotate, grow (seconds over which it is drawn on, as a wipe from the left).
     function mark(layer, kind, o = {}) {
       if (!MARKS.includes(kind)) throw new Error(`say hi: no mark "${kind}"; use one of ${MARKS.join(', ')}`);

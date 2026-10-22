@@ -7,27 +7,18 @@
 <title>roll call · phy's fwiends</title>
 <meta name="description" content="the register, taken in pencil: seven fwiends hop on to the page one at a time and sign in.">
 <meta name="theme-color" content="#fbf9f3">
-<link rel="icon" href="../../site/icon.svg" type="image/svg+xml">
-<link rel="icon" href="../../site/icon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="../../site/apple-touch-icon.png">
-<link rel="stylesheet" href="../../site/notebook.css">
-<link rel="stylesheet" href="../../site/pencil.css">
-<link rel="stylesheet" href="../../film/film.css">
+<link rel="icon" href="../../lib/style/site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../lib/style/site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../lib/style/site/apple-touch-icon.png">
+<link rel="stylesheet" href="../../lib/style/site/notebook.css">
+<link rel="stylesheet" href="../../lib/style/site/pencil.css">
+<link rel="stylesheet" href="../../lib/fwiends/film/film.css">
 <style>
   :root { --informal: 100; }  /* A hobby project sits at the top of the dial (STYLE.md §5). */
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Graphite grain and a slight displacement wobble for the title and the pencil lines. -->
-  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
+<script src="../../lib/style/site/graphite.js"></script>
 
 <main>
   <header>
@@ -61,38 +52,38 @@
   </footer>
 </main>
 
-<script src="../../src/phyfriends.js"></script>
-<script src="../../characters/howdi/howdi.js"></script>
-<script src="../../characters/yuanyuan/yuanyuan.js"></script>
-<script src="../../characters/phy/phy.js"></script>
-<script src="../../characters/fruit/fruit.js"></script>
-<script src="../../characters/yuda/yuda.js"></script>
-<script src="../../characters/terry/terry.js"></script>
-<script src="../../characters/brian/brian.js"></script>
-<script src="../../characters/mumuyou/mumuyou.js"></script>
-<script src="../../characters/kevin/kevin.js"></script>
-<script src="../../characters/bardell/bardell.js"></script>
-<script src="../../characters/weiwei/weiwei.js"></script>
-<script src="../../characters/mosing/mosing.js"></script>
-<script src="../../characters/yawei/yawei.js"></script>
-<script src="../../characters/cowosus/cowosus.js"></script>
-<script src="../../characters/raze/raze.js"></script>
-<script src="../../characters/tanyuan/tanyuan.js"></script>
-<script src="../../characters/alfie/alfie.js"></script>
-<script src="../../characters/teni/teni.js"></script>
-<script src="../../characters/whitedeer/whitedeer.js"></script>
-<script src="../../characters/jiaoyue/jiaoyue.js"></script>
-<script src="../../characters/claude/claude.js"></script>
-<script src="../../src/anim.js"></script>
-<script src="../../src/emotion.js"></script>
-<script src="../../src/pen.js"></script>
-<script src="../../site/title-pen.js"></script>
-<script src="../../src/cast.js"></script>
-<script src="../../characters/cast.js"></script>
-<script src="../../film/scene.js"></script>
-<script src="../../film/film.js"></script>
+<script src="../../lib/fwiends/src/phyfriends.js"></script>
+<script src="../../lib/fwiends/characters/howdi/howdi.js"></script>
+<script src="../../lib/fwiends/characters/yuanyuan/yuanyuan.js"></script>
+<script src="../../lib/fwiends/characters/phy/phy.js"></script>
+<script src="../../lib/fwiends/characters/fruit/fruit.js"></script>
+<script src="../../lib/fwiends/characters/yuda/yuda.js"></script>
+<script src="../../lib/fwiends/characters/terry/terry.js"></script>
+<script src="../../lib/fwiends/characters/brian/brian.js"></script>
+<script src="../../lib/fwiends/characters/mumuyou/mumuyou.js"></script>
+<script src="../../lib/fwiends/characters/kevin/kevin.js"></script>
+<script src="../../lib/fwiends/characters/bardell/bardell.js"></script>
+<script src="../../lib/fwiends/characters/weiwei/weiwei.js"></script>
+<script src="../../lib/fwiends/characters/mosing/mosing.js"></script>
+<script src="../../lib/fwiends/characters/yawei/yawei.js"></script>
+<script src="../../lib/fwiends/characters/cowosus/cowosus.js"></script>
+<script src="../../lib/fwiends/characters/raze/raze.js"></script>
+<script src="../../lib/fwiends/characters/tanyuan/tanyuan.js"></script>
+<script src="../../lib/fwiends/characters/alfie/alfie.js"></script>
+<script src="../../lib/fwiends/characters/teni/teni.js"></script>
+<script src="../../lib/fwiends/characters/whitedeer/whitedeer.js"></script>
+<script src="../../lib/fwiends/characters/jiaoyue/jiaoyue.js"></script>
+<script src="../../lib/fwiends/characters/claude/claude.js"></script>
+<script src="../../lib/fwiends/src/anim.js"></script>
+<script src="../../lib/fwiends/src/emotion.js"></script>
+<script src="../../lib/fwiends/src/pen.js"></script>
+<script src="../../lib/fwiends/src/title-pen.js"></script>
+<script src="../../lib/fwiends/src/cast.js"></script>
+<script src="../../lib/fwiends/characters/cast.js"></script>
+<script src="../../lib/fwiends/film/scene.js"></script>
+<script src="../../lib/fwiends/film/film.js"></script>
 <script>
-  // The film (film/scene.js): the register, taken on a ruled page. The title writes itself stroke by
+  // The film (lib/fwiends/film/scene.js): the register, taken on a ruled page. The title writes itself stroke by
   // stroke, as in the gallery, then the seven fwiends hop in to their places in a row (ROW).
   // The one whose place is farthest from its own side of the frame comes first, so nobody hops past
   // anybody already standing. Each greets the viewer as it lands, its name is written under it, and
@@ -102,16 +93,16 @@
   // Left to right, as the gallery stood when these seven were all of it (it has since put Brian before mumuyou and
   // K3V1N); the film is composed for this order.
   const ROW = ['howdi', 'phy', 'yuda', 'terry', 'mumuyou', 'kevin', 'brian'];
-  const GAP = 40;                                // Paper between neighbors' outlines: what strangers need (src/cast.js).
+  const GAP = 40;                                // Paper between neighbors' outlines: what strangers need (lib/fwiends/src/cast.js).
   // The sheet is as small as the row allows, so that the fwiends are drawn as large as they can be:
   // the row and a little paper either side, 16:9, and a whole number of rules tall (25).
   const WORLD = { width: 2400, height: 1350 };
   // The floor leaves a rule for the names, and under them room for the scene's credit line, which on
   // a phone-sized film wraps to three lines of its 10px least size (about 310 head units).
   const GROUND = RULE * 17;
-  const PAGE_RULE_PX = 32;                       // The page's rule (site/notebook.css), for sizes taken from the gallery.
+  const PAGE_RULE_PX = 32;                       // The page's rule (lib/style/site/notebook.css), for sizes taken from the gallery.
   const LETTERS_PER_SECOND = 9;                  // How fast the hand writes a name.
-  // The gallery's title, written as the gallery writes it: stroke by stroke (src/pen.js).
+  // The gallery's title, written as the gallery writes it: stroke by stroke (lib/fwiends/src/pen.js).
   const TITLE = { text: "phy's fwiends", size: RULE * 64 / PAGE_RULE_PX, x: RULE, y: RULE * 3, at: 0.2,
     seconds: PF.pen.duration(TITLE_PEN.strokes) };
   const NAME = { size: RULE * 31 / PAGE_RULE_PX, y: GROUND + RULE, delay: 0.3 };  // The gallery's names, on the rule under the floor.

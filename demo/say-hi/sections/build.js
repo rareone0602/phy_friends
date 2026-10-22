@@ -7,7 +7,7 @@
  * The build. Each part is the library's own drawing of it: a flat render (pencil: false) that shows
  * that part's groups (data-pf) alone. It comes in as a draftsman's part would: a graphite
  * construction from the spec's numbers (a center, two radii, or a root, an angle and a length), with
- * the line of characters/phy/phy.js that holds them penciled beside it; then its outline, whose tufts
+ * the line of lib/fwiends/characters/phy/phy.js that holds them penciled beside it; then its outline, whose tufts
  * grow as their lengths (fluff len) run from 0 to the spec's; then a flat fill that floods out from the
  * center. The parts come in the order of the render's own groups. The eyes and the blush, on the page
  * since bars 1-4, stay in pencil throughout.
@@ -26,7 +26,7 @@ SayHi.section('build', k => {
   const page = k.page('A'), { phy } = SayHi.layout.A;
   const BOX = PF.scene.BOX, RULE = k.RULE;
   const drawn = k.friend('phy');
-  const INK = '#3d3c39', INK_2 = '#6d6a63';     // Graphite, as site/notebook.css's --ink and --ink-2.
+  const INK = '#3d3c39', INK_2 = '#6d6a63';     // Graphite, as lib/style/site/notebook.css's --ink and --ink-2.
 
   // The film's phy at the start of the build, in the era it is built in (a plain oval for a body, on the
   // standing template before Terry's owner tuned it), and what is worked out from it under that era.

@@ -7,22 +7,13 @@
 <title>say hi · phy's fwiends</title>
 <meta name="description" content="say hi: a music video about the library that draws the fwiends, drawn by the library itself.">
 <meta name="theme-color" content="#fbf9f3">
-<link rel="icon" href="../../site/icon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../../site/notebook.css">
-<link rel="stylesheet" href="../../site/pencil.css">
+<link rel="icon" href="../../lib/style/site/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../lib/style/site/notebook.css">
+<link rel="stylesheet" href="../../lib/style/site/pencil.css">
 <link rel="stylesheet" href="say-hi.css">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Graphite grain and a slight displacement wobble, for words and lines in pencil (STYLE.md §6). -->
-  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
+<script src="../../lib/style/site/graphite.js"></script>
 
 <div class="sh-host" aria-label="say hi, a film"></div>
 <p class="sh-controls"><button type="button" class="sh-play">play</button><span class="sh-time"></span></p>
@@ -32,14 +23,14 @@
   <source src="https://archive.org/download/Komiku-TaleOnTheLate/Komiku_-_03_-_The_road_we_use_to_travel_when_we_were_kids.mp3" type="audio/mpeg">
 </audio>
 
-<script src="../../src/phyfriends.js"></script>
-<script src="../../src/anim.js"></script>
-<script src="../../src/emotion.js"></script>
-<script src="../../src/live.js"></script>
-<script src="../../src/pen.js"></script>
-<script src="../../site/title-pen.js"></script>
-<script src="../../src/cast.js"></script>
-<script src="../../film/scene.js"></script>
+<script src="../../lib/fwiends/src/phyfriends.js"></script>
+<script src="../../lib/fwiends/src/anim.js"></script>
+<script src="../../lib/fwiends/src/emotion.js"></script>
+<script src="../../lib/fwiends/src/live.js"></script>
+<script src="../../lib/fwiends/src/pen.js"></script>
+<script src="../../lib/fwiends/src/title-pen.js"></script>
+<script src="../../lib/fwiends/src/cast.js"></script>
+<script src="../../lib/fwiends/film/scene.js"></script>
 <script src="beats.js"></script>
 <script src="core.js"></script>
 <script src="pages.js"></script>

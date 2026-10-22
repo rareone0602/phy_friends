@@ -1,4 +1,4 @@
-// Tests for film/props.js and the shared props in props/: every spec keeps to the format, a drawing depends only on its
+// Tests for lib/fwiends/film/props.js and the shared props in lib/fwiends/props/: every spec keeps to the format, a drawing depends only on its
 // spec, its state and its colors, and a scene places a prop by name and switches its states on cue.
 (function () {
   'use strict';

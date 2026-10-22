@@ -19,7 +19,7 @@
   python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows and slots (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
-Each character lives in characters/<name>/, which holds the spec <name>.js and
+Each character lives in lib/fwiends/characters/<name>/, which holds the spec <name>.js and
 an examples/ folder of reference pictures. An example is compared through the
 view of the same name, so examples/ref.jpg pairs with the spec's views.ref.
 
@@ -36,7 +36,7 @@ whole; --fade fades the sound out at the end. An .mp4 or .webm is converted with
 the BT.709 matrix in limited range and tagged so, as players assume for HD video,
 so that its colors match the page's; --crf sets its quality.
 
-`test` also checks the pages against the cast in characters/cast.js: the labels
+`test` also checks the pages against the cast in lib/fwiends/characters/cast.js: the labels
 that index.html repeats by hand, and the script tags and rows that `pages` writes
 (tools/gallery.py); and the files derived from others: style.html, the dark
 sheet's blocks (tools/dark_sheet.py), the theme colors and the list of test files
@@ -67,6 +67,9 @@ from PIL import Image
 
 import dark_sheet
 import gallery
+import kit_api
+import layout
+from layout import CHARACTERS, KIT, SRC
 import style_page
 from cdp import (NEXT_PAINT_JS, ChromeError, ChromeTimeout, HeadlessChrome, PageError, exit_on_sigterm, page_url,
                  split_page)
@@ -76,18 +79,17 @@ ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / 'out'  # Holds out/<name>/..., out/design/, out/tune.html and out/scratch/.
 TUNE_PAGE = ROOT / 'tools' / 'tune.html'  # The tuning page, which `tune` writes out as one file.
 LOCAL_SCRIPT = re.compile(r'<script src="(?P<src>[^":]+)"></script>')  # A script tag that loads a file of this repository.
-CHARACTERS = ROOT / 'characters'  # Holds characters/<name>/<name>.js and characters/<name>/examples/.
 IMAGE_TYPES = {'.png', '.jpg', '.jpeg', '.webp', '.gif'}
 EXTRA = []  # Scripts from --with, loaded after the characters (e.g. a working copy that redefines one).
 
 
 def characters():
-    """Return the character names: every characters/<name>/ that holds a <name>.js."""
+    """Return the character names: every lib/fwiends/characters/<name>/ that holds a <name>.js."""
     return sorted(d.name for d in CHARACTERS.iterdir() if (d / f'{d.name}.js').is_file())
 
 
 def examples(name):
-    """Return {example name: path} for the pictures in characters/<name>/examples/."""
+    """Return {example name: path} for the pictures in lib/fwiends/characters/<name>/examples/."""
     folder = CHARACTERS / name / 'examples'
     if not folder.is_dir():
         return {}
@@ -96,7 +98,7 @@ def examples(name):
 
 def scripts():
     """Return the scripts a page loads: library files, then character definitions, then --with scripts."""
-    libs = [ROOT / 'src' / 'phyfriends.js'] + sorted(p for p in (ROOT / 'src').glob('*.js') if p.name != 'phyfriends.js')
+    libs = [SRC / 'phyfriends.js'] + sorted(p for p in SRC.glob('*.js') if p.name not in ('phyfriends.js', 'title-pen.js'))
     return libs + [CHARACTERS / n / f'{n}.js' for n in characters()] + [Path(x).resolve() for x in EXTRA]
 
 
@@ -795,7 +797,7 @@ def refuse_unagreed(names, draft):
     several = len(names) > 1
     owners = f'the owner{"s" if several else ""} of {join_names(names)} {"have" if several else "has"}'
     if not draft:
-        raise SystemExit(f'not filming: {owners} not agreed to video. Record the agreement in characters/cast.js, '
+        raise SystemExit(f'not filming: {owners} not agreed to video. Record the agreement in lib/fwiends/characters/cast.js, '
                          'or pass --draft to film a draft.')
     print(f'note: filming a draft; {owners} not agreed to video', file=sys.stderr)
 
@@ -846,9 +848,12 @@ PAGES_TEST = "the pages load every friend of the cast, in its order, and the gal
 STYLE_TEST = 'style.html is written from STYLE.md and FWIENDS.md'
 DARK_TEST = "the dark sheet's inks and marks, and every theme color, follow from the paper's inks"
 TEST_FILES_TEST = 'test/index.html loads every test file'
-GRAPHITE_TEST = 'every page pastes the graphite filter as site/graphite.svg holds it'
-GRAPHITE = ROOT / 'site' / 'graphite.svg'
-GRAPHITE_FILTER = re.compile(r'<filter id="graphite".*?</filter>', re.S)
+GRAPHITE_TEST = 'every page that draws in pencil loads the graphite filter from lib/style/site/graphite.js'
+LINKS_TEST = 'every local link names a file of the repository'
+DEPENDENCY_TEST = "the library links nothing outside it, and phy's style nothing of the fwiends"
+KIT_TEST = 'the kit keeps every name that the published kit defines'
+GRAPHITE = KIT / 'graphite.js'
+PENCIL_SHEETS = {KIT / 'pencil.css', KIT / 'phy.css'}  # The kit's stylesheets that draw through the filter.
 
 
 def run_tests(page=TEST_PAGE):
@@ -871,10 +876,12 @@ def run_tests(page=TEST_PAGE):
     if results is None:
         errors.append((relative(page), 'it did not load test/harness.js: window.testsDone is missing'))
         results = {'passed': [], 'failed': []}
+    found = layout.links()
     checks = {LABEL_TEST: gallery.label_drift(cast),
               PAGES_TEST: unmeasured + (gallery.page_drift(cast, measures) if cast else []),
               STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page),
-              GRAPHITE_TEST: graphite_drift()}
+              LINKS_TEST: layout.link_drift(found), DEPENDENCY_TEST: layout.dependency_drift(found),
+              GRAPHITE_TEST: graphite_drift(found), KIT_TEST: kit_api.kit_drift()}
     for name, drift in checks.items():
         results['failed'] += [{'name': name, 'message': message} for message in drift]
         if not drift:
@@ -939,16 +946,20 @@ def dark_drift():
                     for problem in dark_sheet.theme_drift(page)]
 
 
-def graphite_drift():
-    """Every page (and the style guide's template) whose pasted graphite filter is not site/graphite.svg's, one line
-    each; the filter is compared without its whitespace."""
-    def filter_of(path):
-        match = GRAPHITE_FILTER.search(Path(path).read_text(encoding='utf-8'))
-        return match and ' '.join(match[0].split())
-    kept = filter_of(GRAPHITE)
-    pages = THEMED_PAGES + opened_pages() + [ROOT / 'tools' / 'style_page.py']
-    return [f'{relative(page)}: its graphite filter is not site/graphite.svg\'s; paste that file\'s filter in again'
-            for page in pages if filter_of(page) not in (None, kept)]
+def graphite_drift(found):
+    """Every page that pastes a graphite filter of its own, or draws in pencil (it loads the kit's pencil, or puts the
+    filter over something itself) without loading lib/style/site/graphite.js, one line each. found is layout.links()."""
+    loads = {}
+    for source, _, path in found:
+        loads.setdefault(source, set()).add(ROOT / path)
+    problems = []
+    for page in sorted(source for source in loads if source.endswith('.html')):
+        text = (ROOT / page).read_text(encoding='utf-8')
+        if '<filter id="graphite"' in text:
+            problems.append(f'{page} pastes a graphite filter of its own: load {relative(GRAPHITE)} instead')
+        elif (loads[page] & PENCIL_SHEETS or 'url(#graphite)' in text) and GRAPHITE not in loads[page]:
+            problems.append(f'{page} draws in pencil without the graphite filter: load {relative(GRAPHITE)} first in its body')
+    return problems
 
 
 def test_files_drift(page=TEST_PAGE):

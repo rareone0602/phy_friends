@@ -1,4 +1,4 @@
-// Tests of src/emotion.js: every feeling works on every friend drawn on the house template, holds
+// Tests of lib/fwiends/src/emotion.js: every feeling works on every friend drawn on the house template, holds
 // still as a face, loops as a hold, and ends its reaction in the face it holds.
 (function () {
   'use strict';

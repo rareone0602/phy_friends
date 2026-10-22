@@ -42,16 +42,7 @@
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Graphite grain: noise eats into the stroke a little, plus a sub-pixel wobble. -->
-  <filter id="graphite" x="-2%" y="-10%" width="104%" height="120%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.6 2.2" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.6" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
+<script src="../lib/style/site/graphite.js"></script>
 
 <h1>phy's friends — pencil font specimen</h1>
 <p class="note">Every sample is set with <code>font-size-adjust: ex-height 0.42</code> so x-heights match; real use would tune each size by hand. Title 64px, label 23px, intro 18px. Red notes mark the shortlist.</p>

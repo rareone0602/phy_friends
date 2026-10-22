@@ -2,7 +2,7 @@
  * say hi, the method: the code made visible (bars 21-28, 31-36, the callout at 38.3, and 41-45.2).
  *
  * 21-28, page A. On the track's strongest attack the page drops into its source: every rule holds, at
- * once and in bold, a line of characters/phy/phy.js that draws phy, numbered as in the file and folded as
+ * once and in bold, a line of lib/fwiends/characters/phy/phy.js that draws phy, numbered as in the file and folded as
  * an editor folds them, and phy sits on their own `rig: { ground: 131 },`. The g phy was writing on page B
  * carries on down through the rule as the page drops. On the groove's hits each part's line lights and a
  * penciled leader runs from it to the part. In bar 24 the parts slide out from the head, each along a
@@ -707,7 +707,7 @@ SayHi.section('method', k => {
   const call1 = k.ui.hand(pageA.over, CALL[0].text, { x: callRight, y: CALL[0].rule * RULE, align: 'right', at: NIGHT.call, seconds: 1.2, until: CALL_UNTIL, fadeOut: 0.35 });
   k.ui.hand(pageA.over, CALL[1].text, { x: callRight, y: CALL[1].rule * RULE, align: 'right', at: call1.end + 0.1, seconds: 1.0, until: CALL_UNTIL, fadeOut: 0.35 });
 
-  // Claude's routine (characters/claude/claude.js): from stepping aside, the laptop swung up and set down
+  // Claude's routine (lib/fwiends/characters/claude/claude.js): from stepping aside, the laptop swung up and set down
   // open, the hop round to sit side-on, then the typing, round and round, until the night is over.
   const claudeSpec = PF.get(claudeId);
   const routine = A.track(claudeSpec.routine.keys, { duration: claudeSpec.routine.duration });

@@ -1,98 +1,124 @@
 # phy's fwiends
 
-A tiny factory for characters in coloured pencil. The repository and the code
-are named `phy_friends`.
+phy's personal style, and the fwiends drawn in it. The repository is in two
+parts. The **library**, `lib/`, is what other work uses: a tiny factory for
+characters in coloured pencil (`lib/fwiends/`) and phy's style, as a CSS kit
+and as styles for figures (`lib/style/`). The **demos** use it: the site's
+pages at the root, the films in `demo/` and the page mockups in `design/`. The
+repository and the code are named `phy_friends`.
 
 [![say hi: Terry, a yellow plush toy, and Brian, a cream fox in an orange beret, stand in coloured pencil on ruled paper](demo/say-hi/thumbnail.jpg)](https://rareone0602.github.io/phy_friends/demo/say-hi/)
 
 *say hi*, a music video about the library, drawn by the library itself (`demo/say-hi/`).
 
-Images like `characters/howdi/examples/ref.jpg` have very low Kolmogorov complexity: a few
-ellipses, some fur tufts, a spiky hair mop, two pill eyes, and blush. So instead
-of storing pixels, a character here is a ~100-line **spec** (a palette plus a
-handful of shape parameters). The library turns spec + pose into SVG, which makes
-characters trivially scalable, recolourable, animatable, and able to look at
-your cursor.
+Images like `lib/fwiends/characters/howdi/examples/ref.jpg` have very low
+Kolmogorov complexity: a few ellipses, some fur tufts, a spiky hair mop, two
+pill eyes, and blush. So instead of storing pixels, a character here is a
+~100-line **spec** (a palette plus a handful of shape parameters). The library
+turns spec + pose into SVG, which makes characters trivially scalable,
+recolourable, animatable, and able to look at your cursor.
 
 ```
-characters/howdi/howdi.js ──►  PhyFriends.render(spec, {view, pose})  ──►  SVG
-   (data, ~100 lines)           PhyFriends.mount(el, spec).setPose({...})   (live rig)
-                                PhyFriends.anim.*                        (clips)
-                                PhyFriends.emotion.*                     (feelings)
-                                PhyFriends.live.stage().add(el, name)    (alive on a page)
+lib/fwiends/characters/howdi/howdi.js
+   (data, ~100 lines)
+        │
+        └──►  PhyFriends.render(spec, {view, pose})      ──►  SVG
+              PhyFriends.mount(el, spec).setPose({...})       (live rig)
+              PhyFriends.anim.*                               (clips)
+              PhyFriends.emotion.*                            (feelings)
+              PhyFriends.live.stage().add(el, name)           (alive on a page)
 ```
 
-No build step and no dependencies: `src/phyfriends.js` is a classic script
-(`window.PhyFriends`, or CommonJS), so pages work straight from `file://` or
-GitHub Pages.
+No build step and no dependencies: `lib/fwiends/src/phyfriends.js` is a
+classic script (`window.PhyFriends`, or CommonJS), so pages work straight from
+`file://` or GitHub Pages.
 
 ## Layout
 
 The repository is laid out by what each part is for:
 
 ```
-index.html  style.html  specimen.html    the site (GitHub Pages serves it from the root)
-site/          the kit, phy's CSS library: the stylesheets, face and graphite filter; and the icons, link preview and title strokes
-src/           the library: what a friend is and does
-film/          the film kit: friends together on a sheet, played in a page or filmed
-characters/    the fwiends: a spec each, and the cast
-props/         the things the films share: a spec each
-demo/          one-off pieces, each in a folder of its own
-design/        page mockups, and the candidates not taken
-tools/         the command line, and the scripts that rebuild the site's assets
-test/          the in-browser tests
-figures/       the house style for charts and diagrams
-out/           generated output (git-ignored)
+lib/                      the library: what other work uses
+  fwiends/src/            what a friend is and does
+  fwiends/film/           the film kit: friends together on a sheet, played in a page or filmed
+  fwiends/characters/     the fwiends: a spec each, and the cast
+  fwiends/props/          the things the films share: a spec each
+  style/site/             the kit, phy's CSS library: the stylesheets, the face, the graphite filter and the icons
+  style/figures/          the house style for charts and diagrams
+index.html  style.html  specimen.html  preview.png
+                          the site (GitHub Pages serves it from the root), and its link preview
+demo/                     one-off pieces, each in a folder of its own
+design/                   page mockups, and the candidates not taken
+tools/                    the command line, the checks, and the scripts that derive what is derived
+test/                     the in-browser tests
+out/                      generated output (git-ignored)
 ```
+
+Dependencies run one way. The demos use the library and the library never uses
+them; phy's style uses nothing of the fwiends, so that it can be taken up
+alone. Pages elsewhere link the library where GitHub Pages publishes
+it rather than copy it, so that nothing is kept twice; for the same reason,
+everything one file derives from another is written by a tool, never by hand.
+`python3 tools/pf.py test` checks that every link resolves, that dependencies
+run one way, that everything derived is up to date, and that the kit keeps
+every name a page linking it may use.
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `site/` | the site: the gallery; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn. `site/` is the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `site/phy.css` loads `site/notebook.css`, the paper (and the dark sheet), and `site/pencil.css`, everything drawn on it, with `site/graphite.svg` the filter a page pastes in, `site/fonts/` the face it is set in (a Latin subset of Shantell Sans, served from the site, not by a font service) and `site/title-pen.js` the strokes with which the gallery's title writes itself |
-| `src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
-| `src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
-| `src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
-| `src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
-| `src/pen.js` | text that writes itself stroke by stroke, as the gallery's title does |
-| `src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
-| `film/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
-| `film/film.js`, `film/film.css` | a film on a page: it plays once when it scrolls into view, with a button to play it again, and boils as it plays; the stage, and the credits and controls under it |
-| `film/props.js` | props as specs, as friends are: a palette, a box and parts, drawn with the core's shapes and pencil; states (a cake's candles lit) that a scene switches on cue, and colours a scene may override (a party hat in a friend's colour) |
-| `props/<name>.js` | the shared props, one spec each (`PhyFriends.props.define(name, spec)`): `cake`, `candle`, `partyHat`, `balloon`, `gift`, `medal`, `pencil` and `gramophone` |
-| `characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
-| `characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`), `examples/`, and `backup/` for the versions not taken |
+| `index.html`, `style.html`, `specimen.html`, `preview.png` | the site: the gallery, with its link preview; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn |
+| `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
+| `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
+| `lib/fwiends/src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
+| `lib/fwiends/src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
+| `lib/fwiends/src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
+| `lib/fwiends/src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
+| `lib/fwiends/src/pen.js`, `lib/fwiends/src/title-pen.js` | text that writes itself stroke by stroke, and the strokes with which the gallery's title writes itself |
+| `lib/fwiends/src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
+| `lib/fwiends/film/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
+| `lib/fwiends/film/film.js`, `lib/fwiends/film/film.css` | a film on a page: it plays once when it scrolls into view, with a button to play it again, and boils as it plays; the stage, and the credits and controls under it |
+| `lib/fwiends/film/props.js` | props as specs, as friends are: a palette, a box and parts, drawn with the core's shapes and pencil; states (a cake's candles lit) that a scene switches on cue, and colours a scene may override (a party hat in a friend's colour) |
+| `lib/fwiends/props/<name>.js` | the shared props, one spec each (`PhyFriends.props.define(name, spec)`): `cake`, `candle`, `partyHat`, `balloon`, `gift`, `medal`, `pencil` and `gramophone` |
+| `lib/fwiends/characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
+| `lib/fwiends/characters/<name>/` | one folder per character: the spec `<name>.js` (`PhyFriends.define(name, spec)`), `examples/`, and `backup/` for the versions not taken |
 | `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`, `say-hi/`), which are made with the film kit |
 | `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
+| `tools/layout.py` | where each part of the repository lives, and the checks that every link resolves and that dependencies run one way |
+| `tools/kit_api.py` | the kit's promise to the pages that link it: the check that it keeps every name the published kit defines |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
-| `tools/title_pen.py` | derives the strokes that write the gallery's title (`site/title-pen.js`) |
-| `tools/font_subset.py` | subsets the house face, `figures/fonts/`, to the WOFF2 in `site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
-| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (`site/README.md`) and writes them into `site/notebook.css` and `site/pencil.css` |
+| `tools/title_pen.py` | derives the strokes that write the gallery's title (`lib/fwiends/src/title-pen.js`) |
+| `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
+| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (`lib/style/site/README.md`) and writes them into `lib/style/site/notebook.css` and `lib/style/site/pencil.css` |
+| `tools/palette.py`, `tools/colormath.py` | derive the data colours from the fwiends' own and test them (needs numpy) |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
 | `tools/feelings.html` | a review sheet of every friend in every feeling, with each feeling's mark, still or playing, seated or standing (`?stand`), or held at a moment of the feeling (`?at=1.5`) |
 | `tools/props.html` | a review sheet of every prop in each of its states, standing on the rules beside phy at the gallery's size (`?rules=10` for twice that), and the party hat in Yuda's cyan |
 | `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI`, `BODY` and `TURN`), with every friend that stands, seated, standing and moving, then side-on, from behind and turning round, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
-| `figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `palette.py`, which derives the data colours from the fwiends (needs numpy); `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
-| `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be copied into other projects |
+| `STYLE.md` | phy's style guide: the house style for everything phy makes, written to be handed to anyone, or any agent, making something for phy |
 | `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/props/` for the props' sheet, `out/tune.html` for the tuning page to send, `out/scratch/` for experiments |
 | `LICENSE` | the GNU Affero General Public License, version 3, which covers everything here but the fwiends and the font (see [Licence](#licence)) |
 
 New work goes where it will be used from:
-- **What every friend can do goes in `src/`**: a new module is a classic script that
-  adds to `PhyFriends`, loads after `src/anim.js`, and has its tests in `test/`.
-  It works from the parts that every friend drawn to the house template has (the
-  eyes, ears, blush, mouth, body and tail), so it suits all of them. Claude keeps
-  every rule but the shape (FWIENDS.md, "Claude, the exception"), so a module
-  may leave it out.
-- **What every film needs goes in `film/`**, and `pf.py film` is how a film is
-  recorded. A film's own script, props and soundtrack stay in its folder under
-  `demo/`.
-- **A prop that more than one film can use goes in `props/`**, one spec to a file
-  (FWIENDS.md, "Props and sets"), and `tools/props.html` shows it beside phy. A
-  prop only one film needs stays in that film's folder.
+- **What every friend can do goes in `lib/fwiends/src/`**: a new module is a
+  classic script that adds to `PhyFriends`, loads after
+  `lib/fwiends/src/anim.js`, and has its tests in `test/`. It works from the
+  parts that every friend drawn to the house template has (the eyes, ears,
+  blush, mouth, body and tail), so it suits all of them. Claude keeps every
+  rule but the shape (FWIENDS.md, "Claude, the exception"), so a module may
+  leave it out.
+- **What every film needs goes in `lib/fwiends/film/`**, and `pf.py film` is
+  how a film is recorded. A film's own script, props and soundtrack stay in
+  its folder under `demo/`.
+- **A prop that more than one film can use goes in `lib/fwiends/props/`**, one
+  spec to a file (FWIENDS.md, "Props and sets"), and `tools/props.html` shows
+  it beside phy. A prop only one film needs stays in that film's folder.
+- **What makes anything phy's goes in `lib/style/`**: a token, a mark or a
+  class in the kit (its README lists them), a rule for charts in `figures/`.
+  The kit may add and restyle, but keeps every name a page may use.
 - **A one-off goes in `demo/`**, in a folder of its own. It may use anything in
   the library or the film kit, but nothing outside `demo/` may use it, so any
   one-off can be deleted without breaking the rest.
@@ -100,7 +126,7 @@ New work goes where it will be used from:
 ## Characters and examples
 
 ```
-characters/
+lib/fwiends/characters/
   howdi/
     howdi.js            the spec, with views.ref lining the render up with ref.jpg
     examples/
@@ -118,7 +144,7 @@ its own file (`sheet-front.png`, `sheet-back.png`), each with its own view.
 Git ignores `examples/`: the pictures belong to their artists, so they stay on
 the machine that drew the character. Material that should never leave that
 machine, such as photos of the real pet behind a fursona, goes in
-`characters/<name>/private/`, which git ignores too.
+`lib/fwiends/characters/<name>/private/`, which git ignores too.
 
 ## Head space
 
@@ -534,18 +560,19 @@ paper, cut to the character's outline, under the drawing, so the pencil shows
 paper rather than the background. `{ bg: false }` draws no background, so the
 pencil shows the page's own paper; `{ bg: 'page' }`, for a page that may turn
 to the dark sheet, does the same but adds the cut-out with the class
-`pf-cutout`, which `site/pencil.css` shows only on the dark sheet and in forced
-colours. `{ pencil: false }` draws the flat shapes
+`pf-cutout`, which the library shows only on the kit's dark sheet and in
+forced colours (it adds its own rules to the page the first time it draws such
+a friend). `{ pencil: false }` draws the flat shapes
 alone, for an icon too small to hold the texture or for matching a flat
 reference picture.
 
 ## Scenes
 
-`film/scene.js` puts several friends on one sheet of ruled paper, measured in
-head units (a rule every 54, so a friend stands five rules tall). Everything in
-it is a cue at a time on the scene's clock, and a frame depends on the time
-alone, so a film plays in a page and `pf.py film` films it frame by frame from
-the same script, while a game adds cues as it goes.
+`lib/fwiends/film/scene.js` puts several friends on one sheet of ruled paper,
+measured in head units (a rule every 54, so a friend stands five rules tall).
+Everything in it is a cue at a time on the scene's clock, and a frame depends
+on the time alone, so a film plays in a page and `pf.py film` films it frame
+by frame from the same script, while a game adds cues as it goes.
 
 ```js
 const scene = PhyFriends.scene.create(document.querySelector('#stage'), { width: 1600, height: 900 });
@@ -556,67 +583,70 @@ yuda.emote('♪', { at: 2 });
 if (!scene.film({ duration: 4 })) scene.play();   // Filmed by pf.py film; played live otherwise.
 ```
 
-Friends hop, look, show marks and feelings (`yuda.feel('surprised', { at: 2 })`,
-from `src/emotion.js`, with its mark) and play clips, each made for the friend
-that plays it (`PhyFriends.anim.parse(clip, { spec })`): `yuda.play('wave')`
-waves with the arm away from his tail, and a feeling in an expression is his
-own; phy, the host, may also speak. A friend sits unless it is added standing (`scene.add('yuda', { stance:
-'stand' })`) or stands up on cue (`yuda.stand({ at: 1 })`, and `sit()` to sit
-down again). It rises through every height in between (the pose's `rise`), and
-its eyes, and the marks and words above them, rise with it. While it stands it
-walks where a seated friend hops: its feet take the walk's small steps
-(`PhyFriends.anim.WALK` and `walking`) while its body glides on up to twice as
-far, at a little under half a hop's speed. `moveTo(x, { hop: true })` hops all
-the same.
-`src/cast.js` holds the rules for friends together (FWIENDS.md, "scenes"), and
-the scene enforces them: two friends are strangers unless `characters/cast.js`
-says their owners know each other, strangers keep a strip of paper between
-their outlines as drawn (whichever way they face, sitting or standing) and
-neither talk to nor hand things to each other, and only a friend with a
-voice says or writes words (`scene.write(text, { by: yuda })` checks a friend's
-writing as `say()` checks its speech); a friend other than phy uses the hand its
-marks are written in. A film made for one owner alone
-(`PhyFriends.scene.create(el, { madeFor: 'yuda' })`) lets that owner's friend
-say and write a few drafted lines as well. A broken rule throws, saying what
-would allow it, and its error's `code` is `PhyFriends.cast.BROKEN`, which tells
-it from a slip in a page's own code. Each frame credits the owners of the
-friends in it, and a friend whose owner has not agreed to films or games marks
-the scene "draft".
-`credits: false` turns the frame's credits off: a game that runs only in the
-page then links each owner in the page's small print, and a film names the
-owners once, written large, and leaves the links to its post, since a link in a
-video cannot be clicked.
-Props are specs too (`film/props.js`, `props/`): `scene.prop('cake', { x: 900 })`
-places the shared cake on the floor, `state: ['lit']` draws it with its candles
-lit, `palette: { paper: PF.get('yuda').palette.scarf }` draws the party hat in
-Yuda's cyan, its shade following, and `scale: 2` draws a prop twice as large.
-`cake.state('lit', true, { at: 12.5 })` lights the candles on cue without drawing
-the cake again; `cake.reveal({ at: 72, seconds: 3.6 })` draws it in from the
-bottom up (or `from: 'left'`), as handwriting writes itself, and
-`cake.erase({ at: 90 })` rubs it out the same way, after which none of it shows.
-`hat.recolor({ paper: PF.get('yuda').palette.scarf }, { at: 80, amount: 0.2 })`
-colours a prop in: the same drawing in those colours, merged over its own,
-comes in over it as `reveal()` draws, until `amount` of it (here the bottom
-fifth) is coloured. A prop may be coloured in again, each colouring over the
-last and from the same side, and only one placed by name or by spec can be
-coloured in at all. A drawing of a film's own (`{ w, h, svg }`) is placed as
-before, and a scene that names props loads `film/props.js` and the props it
-names after `film/scene.js`.
-A scene follows the viewer's reduced-motion setting unless given its own
-`reducedMotion` (anything with `matches`): say hi passes `{ matches: false }`,
-so that it plays live as it is filmed, and decides itself what the setting means
-(it never starts by itself). A friend's moves may be cued in any order: each
-starts where the moves before it in time leave the friend.
-`paper: false` leaves the scene's ruled paper out so the page's own shows
-through, and `write(text, { graphite: true })` is for a title only (STYLE.md
-§6); `write(text, { pen: TITLE_PEN })` writes the gallery's title stroke by
-stroke (`src/pen.js`). A page loads, in order, `src/phyfriends.js`, the
-characters, `src/anim.js`, `src/emotion.js`, `src/cast.js`, `characters/cast.js` and
-`film/scene.js`, with `src/pen.js` and `site/title-pen.js` before the scene where
-a title writes itself. A page that shows a film also loads `film/film.css` after
-the site's stylesheets and `film/film.js` after the scene. The films in `demo/`
-are built this way: `python3 tools/pf.py film demo/roll-call/index.html --draft
--o out/roll-call.mp4` films one while its friends' owners have yet to agree to
+Friends hop, look, show marks and feelings (`yuda.feel('surprised', { at: 2
+})`, from `lib/fwiends/src/emotion.js`, with its mark) and play clips, each
+made for the friend that plays it (`PhyFriends.anim.parse(clip, { spec })`):
+`yuda.play('wave')` waves with the arm away from his tail, and a feeling in an
+expression is his own; phy, the host, may also speak. A friend sits unless it
+is added standing (`scene.add('yuda', { stance: 'stand' })`) or stands up on
+cue (`yuda.stand({ at: 1 })`, and `sit()` to sit down again). It rises through
+every height in between (the pose's `rise`), and its eyes, and the marks and
+words above them, rise with it. While it stands it walks where a seated friend
+hops: its feet take the walk's small steps (`PhyFriends.anim.WALK` and
+`walking`) while its body glides on up to twice as far, at a little under half
+a hop's speed. `moveTo(x, { hop: true })` hops all the same.
+`lib/fwiends/src/cast.js` holds the rules for friends together (FWIENDS.md,
+"scenes"), and the scene enforces them: two friends are strangers unless
+`lib/fwiends/characters/cast.js` says their owners know each other, strangers
+keep a strip of paper between their outlines as drawn (whichever way they
+face, sitting or standing) and neither talk to nor hand things to each other,
+and only a friend with a voice says or writes words (`scene.write(text, { by:
+yuda })` checks a friend's writing as `say()` checks its speech); a friend
+other than phy uses the hand its marks are written in. A film made for one
+owner alone (`PhyFriends.scene.create(el, { madeFor: 'yuda' })`) lets that
+owner's friend say and write a few drafted lines as well. A broken rule
+throws, saying what would allow it, and its error's `code` is
+`PhyFriends.cast.BROKEN`, which tells it from a slip in a page's own code.
+Each frame credits the owners of the friends in it, and a friend whose owner
+has not agreed to films or games marks the scene "draft". `credits: false`
+turns the frame's credits off: a game that runs only in the page then links
+each owner in the page's small print, and a film names the owners once,
+written large, and leaves the links to its post, since a link in a video
+cannot be clicked. Props are specs too (`lib/fwiends/film/props.js`,
+`lib/fwiends/props/`): `scene.prop('cake', { x: 900 })` places the shared cake
+on the floor, `state: ['lit']` draws it with its candles lit, `palette: {
+paper: PF.get('yuda').palette.scarf }` draws the party hat in Yuda's cyan, its
+shade following, and `scale: 2` draws a prop twice as large.
+`cake.state('lit', true, { at: 12.5 })` lights the candles on cue without
+drawing the cake again; `cake.reveal({ at: 72, seconds: 3.6 })` draws it in
+from the bottom up (or `from: 'left'`), as handwriting writes itself, and
+`cake.erase({ at: 90 })` rubs it out the same way, after which none of it
+shows. `hat.recolor({ paper: PF.get('yuda').palette.scarf }, { at: 80, amount:
+0.2 })` colours a prop in: the same drawing in those colours, merged over its
+own, comes in over it as `reveal()` draws, until `amount` of it (here the
+bottom fifth) is coloured. A prop may be coloured in again, each colouring
+over the last and from the same side, and only one placed by name or by spec
+can be coloured in at all. A drawing of a film's own (`{ w, h, svg }`) is
+placed as before, and a scene that names props loads
+`lib/fwiends/film/props.js` and the props it names after
+`lib/fwiends/film/scene.js`. A scene follows the viewer's reduced-motion
+setting unless given its own `reducedMotion` (anything with `matches`): say hi
+passes `{ matches: false }`, so that it plays live as it is filmed, and
+decides itself what the setting means (it never starts by itself). A friend's
+moves may be cued in any order: each starts where the moves before it in time
+leave the friend. `paper: false` leaves the scene's ruled paper out so the
+page's own shows through, and `write(text, { graphite: true })` is for a title
+only (STYLE.md §6); `write(text, { pen: TITLE_PEN })` writes the gallery's
+title stroke by stroke (`lib/fwiends/src/pen.js`). A page loads, in order,
+`lib/fwiends/src/phyfriends.js`, the characters, `lib/fwiends/src/anim.js`,
+`lib/fwiends/src/emotion.js`, `lib/fwiends/src/cast.js`,
+`lib/fwiends/characters/cast.js` and `lib/fwiends/film/scene.js`, with
+`lib/fwiends/src/pen.js` and `lib/fwiends/src/title-pen.js` before the scene
+where a title writes itself. A page that shows a film also loads
+`lib/fwiends/film/film.css` after the site's stylesheets and
+`lib/fwiends/film/film.js` after the scene. The films in `demo/` are built
+this way: `python3 tools/pf.py film demo/roll-call/index.html --draft -o
+out/roll-call.mp4` films one while its friends' owners have yet to agree to
 video.
 
 ## Pose
@@ -679,13 +709,14 @@ rig.setPose({ lookX: 0.8, turnX: 0.5, eyes: 'happy' });
 
 ## Feelings
 
-`src/emotion.js` (`PhyFriends.emotion`) shows how a friend feels with the parts
-every friend drawn on the house template has, so every feeling works on every
-one of them without a new drawing. There are twenty-three, listed from the
-pleased to the drowsy: happy, excited, laughing, playful, fond, content,
-relieved, proud, determined, inspired, curious, thoughtful, shy, surprised,
-confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep. Each
-comes in four forms, all partial poses that layer over a friend's idle clip:
+`lib/fwiends/src/emotion.js` (`PhyFriends.emotion`) shows how a friend feels
+with the parts every friend drawn on the house template has, so every feeling
+works on every one of them without a new drawing. There are twenty-three,
+listed from the pleased to the drowsy: happy, excited, laughing, playful,
+fond, content, relieved, proud, determined, inspired, curious, thoughtful,
+shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy
+and asleep. Each comes in four forms, all partial poses that layer over a
+friend's idle clip:
 
 ```js
 const E = PhyFriends.emotion;
@@ -737,8 +768,8 @@ and mouth, without the blush or the posture.
 
 ## Alive on a page
 
-`src/live.js` (`PhyFriends.live`) brings friends to life on an ordinary page,
-as the gallery and the specimen's portrait are brought to life:
+`lib/fwiends/src/live.js` (`PhyFriends.live`) brings friends to life on an
+ordinary page, as the gallery and the specimen's portrait are brought to life:
 
 ```js
 const stage = PhyFriends.live.stage({ announcer: document.querySelector('.announcer') });
@@ -749,34 +780,32 @@ stage.start();
 Each friend rests on the bottom edge of its box, seated unless it is added
 with `stance: 'stand'`; then it stays standing through a hi or a feeling, and
 its ears reach further above the box. It breathes and blinks with the idle
-clip, follows the pointer, answers a hi (a click, a tap, Enter or Space),
-and feels what a visitor does to it (FWIENDS.md, "Saying hi"); the stage says
-what happened in the page's live region (`.announcer`, in `site/pencil.css`).
-A box that is a button takes `role="button"`, `tabindex="0"`, a short
-`aria-label` ("say hi to phy") and an `aria-describedby` pointing at a
-`hidden` element that says what the friend looks like. That element stands
-beside the box, not in it, since mounting replaces what the box holds. The
-page keeps its own layout; the gallery's roll call moves its friends and
-turns their eyes through two hooks on each friend, `travel` and `watch`
-(another friend to look at, or a point on the screen), and a friend's
-`smile()` lasts until the function it returns is called, as on the gallery
-while a friend's owner's credit is pointed at.
-The stage's `onStroke(friend, seconds)` tells a page how long a friend has
-been stroked; on the gallery, stroking Terry for five seconds opens the
-tuning page (`tools/tune.html`), on which his owner chose the proportions, and
-stroking every friend that shows feelings, each at least once in one visit,
-opens the feelings sheet (`tools/feelings.html`) once the last one's ♪ has
-shown.
-Options fix a pointer, a hi or a feeling for screenshots (the
-gallery's `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`; a feeling so fixed
-returns after a hi or a stroke) and set how long
-the friends wait before they doze (`?doze=<seconds>`). Under reduced motion
-the friends keep still but for their eyes; `PhyFriends.live.keepStill(checkbox)`
-gives a reader the same choice ("keep still"), remembered on the device in
-`live.still`, which every stage follows unless given a `reducedMotion` of its
-own. A page loads
-`src/phyfriends.js`, the characters, `src/anim.js`, `src/emotion.js` and
-`src/live.js`, in that order.
+clip, follows the pointer, answers a hi (a click, a tap, Enter or Space), and
+feels what a visitor does to it (FWIENDS.md, "Saying hi"); the stage says what
+happened in the page's live region (`.announcer`, in
+`lib/style/site/pencil.css`). A box that is a button takes `role="button"`,
+`tabindex="0"`, a short `aria-label` ("say hi to phy") and an
+`aria-describedby` pointing at a `hidden` element that says what the friend
+looks like. That element stands beside the box, not in it, since mounting
+replaces what the box holds. The page keeps its own layout; the gallery's roll
+call moves its friends and turns their eyes through two hooks on each friend,
+`travel` and `watch` (another friend to look at, or a point on the screen),
+and a friend's `smile()` lasts until the function it returns is called, as on
+the gallery while a friend's owner's credit is pointed at. The stage's
+`onStroke(friend, seconds)` tells a page how long a friend has been stroked;
+on the gallery, stroking Terry for five seconds opens the tuning page
+(`tools/tune.html`), on which his owner chose the proportions, and stroking
+every friend that shows feelings, each at least once in one visit, opens the
+feelings sheet (`tools/feelings.html`) once the last one's ♪ has shown.
+Options fix a pointer, a hi or a feeling for screenshots (the gallery's
+`?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`; a feeling so fixed returns
+after a hi or a stroke) and set how long the friends wait before they doze
+(`?doze=<seconds>`). Under reduced motion the friends keep still but for their
+eyes; `PhyFriends.live.keepStill(checkbox)` gives a reader the same choice
+("keep still"), remembered on the device in `live.still`, which every stage
+follows unless given a `reducedMotion` of its own. A page loads
+`lib/fwiends/src/phyfriends.js`, the characters, `lib/fwiends/src/anim.js`,
+`lib/fwiends/src/emotion.js` and `lib/fwiends/src/live.js`, in that order.
 
 ## CLI
 
@@ -857,9 +886,14 @@ friends, in the cast's order, and the gallery's rows and slots, from the
 friends' reaches; `test` fails while either is stale, and `pages` writes no
 rows from a gallery that reports an error. `test` fails, too, while `style.html`
 or the dark sheet's blocks (`tools/dark_sheet.py`) are stale, while a page's
-theme colour is not the paper's (or the dark sheet's), while a page's pasted
-graphite filter is not `site/graphite.svg`'s, and while `test/index.html`
-leaves out a `*.test.js`. Finally it opens every tool page
+theme colour is not the paper's (or the dark sheet's), while a page that draws
+in pencil pastes a graphite filter of its own or does not load
+`lib/style/site/graphite.js`, and while `test/index.html` leaves out a
+`*.test.js`. It fails while a local link names no file of the repository (one
+into `out/` excepted, which a page looks for only with a fallback), while the
+library links anything outside it or phy's style anything of the fwiends
+(`tools/layout.py`), and while the kit drops a name that the published kit,
+on `origin/main`, defines (`tools/kit_api.py`). Finally it opens every tool page
 and every demo that `demo/index.html` lists, with requests to other hosts
 refused, so that a page that breaks shows up. Each page error names its page,
 and the gallery's its window's width. A test that hangs in an endless loop is
@@ -871,12 +905,13 @@ comes with it.
 
 ## Workflows
 
-1. **Reproduce an image**: make `characters/<name>/`, put the picture in its
-   `examples/` as `ref.jpg`, write `<name>.js` with a `views.ref` camera
-   matching the crop, and iterate with `pf.py compare <name>`. A new character
-   joins the cast (`characters/cast.js`) and the gallery's list; `pf.py pages`
-   then loads it in every page that shows them all and lays out the rows, and
-   `pf.py test` holds it to the house contract (`test/contract.test.js`).
+1. **Reproduce an image**: make `lib/fwiends/characters/<name>/`, put the
+   picture in its `examples/` as `ref.jpg`, write `<name>.js` with a
+   `views.ref` camera matching the crop, and iterate with `pf.py compare
+   <name>`. A new character joins the cast (`lib/fwiends/characters/cast.js`)
+   and the gallery's list; `pf.py pages` then loads it in every page that
+   shows them all and lays out the rows, and `pf.py test` holds it to the
+   house contract (`test/contract.test.js`).
 2. **Reproduce a design sheet**: crop each figure into `examples/`, add a view
    per figure, and compare against all of them at once; the portrait view is
    the canonical one.
@@ -896,10 +931,11 @@ use over a network (a website, say) must offer those people its source too.
 "Version 3 only" means that no later version of the licence applies.
 
 The exceptions:
-- **The fwiends.** Each character (its look, its name, everything in its folder
-  under `characters/` and every picture of it, such as the site's icons and link
-  preview) belongs to whoever is named under it in the gallery, and the licence
-  gives no rights to it. That goes for phy's own, and for Claude's, whose figure
-  is Claude Code's mascot and belongs to Anthropic.
-- **Shantell Sans** (`figures/fonts/`, and its subset in `site/fonts/`) is under the
-  SIL Open Font License, whose text sits next to each copy.
+- **The fwiends.** Each character (its look, its name, everything in its
+  folder under `lib/fwiends/characters/` and every picture of it, such as the
+  site's icons and link preview) belongs to whoever is named under it in the
+  gallery, and the licence gives no rights to it. That goes for phy's own, and
+  for Claude's, whose figure is Claude Code's mascot and belongs to Anthropic.
+- **Shantell Sans** (`lib/style/figures/fonts/`, and its subset in
+  `lib/style/site/fonts/`) is under the SIL Open Font License, whose text sits
+  next to each copy.

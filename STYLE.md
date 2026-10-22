@@ -13,14 +13,16 @@ to what the work is about.
 guide wins; where the guide is wrong, it is corrected here. The source is
 `STYLE.md` in [rareone0602/phy_friends](https://github.com/rareone0602/phy_friends),
 also at [its raw address](https://raw.githubusercontent.com/rareone0602/phy_friends/main/STYLE.md)
-for an agent to read. Other projects copy the kit (§7) from the same commit
-and point to the source; a copy does not update itself. §2 is the guide in
-short, for a brief with no room for the rest.
+for an agent to read. Other projects link the kit (§7) where it is
+published rather than copy it, so that they change as the style does; the kit
+keeps every name that a page relies on. §2 is the guide in short, for a brief
+with no room for the rest.
 
-**The details live in code.** The look of a page is a CSS library, `site/`,
-whose README lists its tokens, type, marks and components; the look of a chart
-or a diagram is in `figures/`, whose README lists the data colours and the
-rules for charts, slides and a paper's diagram. This guide keeps the intent.
+**The details live in code.** The look of a page is a CSS library,
+`lib/style/site/`, whose README lists its tokens, type, marks and components;
+the look of a chart or a diagram is in `lib/style/figures/`, whose README lists
+the data colours and the rules for charts, slides and a paper's diagram. This
+guide keeps the intent.
 
 ---
 
@@ -158,8 +160,8 @@ for a few words: anything longer than a line goes in the print. Weight is
 pressure: everything is light, bold is the pencil pressed harder, and there
 are no italics. The sizes, the steps of the dial and how a line sits on its
 rule are the kit's (§7). The face's files for LaTeX, matplotlib or a design
-tool are in `figures/fonts/`; the SIL Open Font License allows any use, so
-long as the licence file stays beside any copy of the font.
+tool are in `lib/style/figures/fonts/`; the SIL Open Font License allows any
+use, so long as the licence file stays beside any copy of the font.
 
 ## 6. hand-drawn marks
 
@@ -176,11 +178,12 @@ and the arrow, never over small text or a figure.
 
 ## 7. parts of a page
 
-**The kit** is a CSS library, `site/` in rareone0602/phy_friends, to copy from
-one commit: `phy.css` loads the paper (`notebook.css`) and everything drawn on
-it (`pencil.css`); `fonts/` holds the face, `graphite.svg` the graphite filter
-and `icon.svg` the favicon. Its README says how to set a page up and lists
-every token, size, mark and class, and `specimen.html` shows every part at
+**The kit** is a CSS library, `lib/style/site/` in rareone0602/phy_friends,
+which a page links as published: `phy.css` loads the paper (`notebook.css`)
+and everything drawn on it (`pencil.css`); `graphite.js` writes the graphite
+filter into the page, `fonts/` holds the face and `icon.svg` is the favicon.
+Its README says how to set a page up and lists every token, size, mark and
+class, and `specimen.html` shows every part at
 work, on the rules, with the dial to turn. A page has a `header` (the title,
 the intro and any nav), a `main` holding the writing and a `footer`.
 
@@ -222,9 +225,9 @@ the blank band, and may watch the cursor.
 ## 8. charts, slides and a paper's diagram
 
 Charts and diagrams wear the same hand, and the data plays the characters'
-part as the only saturated thing (principle 2). `figures/` carries the rules
-for matplotlib and TikZ, and its README lists the data colours and the rules
-for charts, slides and a paper's main diagram:
+part as the only saturated thing (principle 2). `lib/style/figures/` carries
+the rules for matplotlib and TikZ, and its README lists the data colours and
+the rules for charts, slides and a paper's main diagram:
 
 ```
 plt.style.use(['phy.mplstyle', 'phy-slides.mplstyle'])  # Slides and the web.
@@ -244,22 +247,23 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 ## 9. the avatar and characters
 
 - **phy's mark is phy** (§1): the head alone for a favicon or avatar, the
-  whole character where there is room. It is drawn by `src/phyfriends.js`
-  from `characters/phy/phy.js`, never by hand, so every copy matches.
-- Every character is a small spec, about 100 lines, that a factory draws
-  **in coloured pencil**: soft round shapes coloured in without an outline,
-  pill eyes in the character's own eye colour, a soft blush, and no nose and
-  no mouth by default. Each has **exactly one shade layer**, which its body,
+  whole character where there is room. It is drawn by
+  `lib/fwiends/src/phyfriends.js` from `lib/fwiends/characters/phy/phy.js`,
+  never by hand, so every copy matches.
+- Every character is a small spec, about 100 lines, that a factory draws **in
+  coloured pencil**: soft round shapes coloured in without an outline, pill
+  eyes in the character's own eye colour, a soft blush, and no nose and no
+  mouth by default. Each has **exactly one shade layer**, which its body,
   under the head, always wears: each colour has at most one shade, the house
   step darker (CIELAB L* `−10` and chroma `×1.2` at the same hue, with a
-  near-grey leaning to lavender, as `shadeOf` in `src/phyfriends.js` computes
-  it), and it only parts two neighbours of the same colour. No highlights or
-  second steps, and nothing copied from a reference's light and shade: the
-  pencil's texture is paper, and light (§12) falls on the place, never on a
-  character. The rules for drawing one, and the references a reviewer needs,
-  are in `FWIENDS.md`, next to the factory.
-  However free a piece is (§12), it stages its characters and never redraws
-  them.
+  near-grey leaning to lavender, as `shadeOf` in
+  `lib/fwiends/src/phyfriends.js` computes it), and it only parts two
+  neighbours of the same colour. No highlights or second steps, and nothing
+  copied from a reference's light and shade: the pencil's texture is paper,
+  and light (§12) falls on the place, never on a character. The rules for
+  drawing one, and the references a reviewer needs, are in `FWIENDS.md`, next
+  to the factory. However free a piece is (§12), it stages its characters and
+  never redraws them.
 - **The pencil is one texture over the whole character**: strokes rising to
   the right, the paper's tooth, and patches where the hand pressed more
   lightly, with the paper, rules and all, showing through. The texture

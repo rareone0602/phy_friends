@@ -136,7 +136,7 @@ def contents_lines(docs):
     return '\n'.join(line(title, headings) for title, headings in docs)
 
 
-# The page is styled only by site/notebook.css (the paper) and site/pencil.css (the .doc
+# The page is styled only by lib/style/site/notebook.css (the paper) and lib/style/site/pencil.css (the .doc
 # column and everything drawn on it). It deliberately has no CSS of its own, so the style
 # guide is rendered with the same stylesheets it documents.
 STYLE_PAGE = Template("""<!doctype html>
@@ -149,25 +149,16 @@ STYLE_PAGE = Template("""<!doctype html>
 <meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
 <meta name="theme-color" content="#fbf9f3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#3d3c39" media="(prefers-color-scheme: dark)">
-<link rel="icon" href="site/icon.svg" type="image/svg+xml">
-<link rel="icon" href="site/icon-32.png" sizes="32x32" type="image/png">
-<link rel="apple-touch-icon" href="site/apple-touch-icon.png">
+<link rel="icon" href="lib/style/site/icon.svg" type="image/svg+xml">
+<link rel="icon" href="lib/style/site/icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="lib/style/site/apple-touch-icon.png">
 <!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
-<link rel="preload" href="site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="site/notebook.css">
-<link rel="stylesheet" href="site/pencil.css">
+<link rel="preload" href="lib/style/site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="lib/style/site/notebook.css">
+<link rel="stylesheet" href="lib/style/site/pencil.css">
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <!-- Graphite grain and a slight displacement wobble for the title. -->
-  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
+<script src="lib/style/site/graphite.js"></script>
 
 <header>
   <h1>style guide</h1>

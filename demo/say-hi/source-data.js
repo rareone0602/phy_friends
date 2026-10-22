@@ -5,7 +5,7 @@
 window.SayHi = window.SayHi || {};
 window.SayHi.source = Object.freeze({
   "phy": {
-    "file": "characters/phy/phy.js",
+    "file": "lib/fwiends/characters/phy/phy.js",
     "lines": [
       {"n": 1, "text": "", "stripped": true},
       {"n": 2, "text": "", "stripped": true},
@@ -149,7 +149,7 @@ window.SayHi.source = Object.freeze({
       {"n": 148, "text": "});", "stripped": false}
     ]
   },
-  "onigiri": {"file": "src/phyfriends.js", "n": 157, "text": "const ONIGIRI = { square: 0, taper: 0.8 };"},
+  "onigiri": {"file": "lib/fwiends/src/phyfriends.js", "n": 157, "text": "const ONIGIRI = { square: 0, taper: 0.8 };"},
   "tests": {
     "passed": 158,
     "failed": 0,

@@ -1,7 +1,7 @@
 /*!
  * say hi, bars 1-4 (the intro, page A): a line of phy's spec becomes a pair of eyes.
  *
- * Frame 0 is the start of one line of characters/phy/phy.js on a rule, `eyes:`, close and large, with
+ * Frame 0 is the start of one line of lib/fwiends/characters/phy/phy.js on a rule, `eyes:`, close and large, with
  * the typist's caret at its end, a pill as tall as the text. A graphite copy of the colon lifts off the
  * line (the line itself never changes) and, beside a penciled arrow, tips a quarter turn so that its dots
  * lie side by side. Then the rest of the line is typed, and each number acts on the dots as it is
@@ -95,7 +95,7 @@ SayHi.section('intro', k => {
   const page = k.page('A'), { phy } = SayHi.layout.A;
   const spec = PF.get('phy'), EYE = spec.eyes, BOX = PF.scene.BOX;
   const IRIS = PF.palette('phy').iris;
-  const INK = '#3d3c39';                           // Graphite, as site/notebook.css's --ink.
+  const INK = '#3d3c39';                           // Graphite, as lib/style/site/notebook.css's --ink.
 
   // The line, as the file has it (comments stripped), and where it lies: on the rule one above phy's
   // floor, its colon under the middle of phy's eyes, in the code's face at the size whose caret is as

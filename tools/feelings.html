@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>phy's fwiends · feelings</title>
-<link rel="preload" href="../site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../lib/style/site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
   @font-face {
     font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;
-    src: url('../site/fonts/ShantellSans-Latin.woff2') format('woff2');
+    src: url('../lib/style/site/fonts/ShantellSans-Latin.woff2') format('woff2');
   }
   :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --rule: #cfdbe8; --cell: 132px; }
   body { margin: 0; padding: 24px; background: var(--paper); color: var(--ink); font: 14px/1.4 ui-monospace, Menlo, monospace; }
@@ -28,37 +28,37 @@
 </style>
 </head>
 <body>
-<p>every friend in every feeling of src/emotion.js. <label><input id="live" type="checkbox"> play them</label>
+<p>every friend in every feeling of lib/fwiends/src/emotion.js. <label><input id="live" type="checkbox"> play them</label>
   (each plays its reaction, then holds the feeling, then starts again). <label><input id="stand" type="checkbox"> stand them up</label>
   (a standing friend adds its arms and legs). ?who=howdi,phy and ?feel=sad,cross narrow the sheet; ?live plays it and ?stand
   stands them up; ?at=1.5 holds every cell that many seconds into its feeling (its reaction, then the feeling held), and
   ?cell=240 draws the cells larger. under each feeling, its mark, if it has one.</p>
 <table><thead><tr id="feelings"><th></th></tr></thead><tbody id="rows"></tbody></table>
 
-<script src="../src/phyfriends.js"></script>
-<script src="../src/anim.js"></script>
-<script src="../src/emotion.js"></script>
-<script src="../characters/howdi/howdi.js"></script>
-<script src="../characters/yuanyuan/yuanyuan.js"></script>
-<script src="../characters/phy/phy.js"></script>
-<script src="../characters/fruit/fruit.js"></script>
-<script src="../characters/yuda/yuda.js"></script>
-<script src="../characters/terry/terry.js"></script>
-<script src="../characters/brian/brian.js"></script>
-<script src="../characters/mumuyou/mumuyou.js"></script>
-<script src="../characters/kevin/kevin.js"></script>
-<script src="../characters/bardell/bardell.js"></script>
-<script src="../characters/weiwei/weiwei.js"></script>
-<script src="../characters/mosing/mosing.js"></script>
-<script src="../characters/yawei/yawei.js"></script>
-<script src="../characters/cowosus/cowosus.js"></script>
-<script src="../characters/raze/raze.js"></script>
-<script src="../characters/tanyuan/tanyuan.js"></script>
-<script src="../characters/alfie/alfie.js"></script>
-<script src="../characters/teni/teni.js"></script>
-<script src="../characters/whitedeer/whitedeer.js"></script>
-<script src="../characters/jiaoyue/jiaoyue.js"></script>
-<script src="../characters/claude/claude.js"></script>
+<script src="../lib/fwiends/src/phyfriends.js"></script>
+<script src="../lib/fwiends/src/anim.js"></script>
+<script src="../lib/fwiends/src/emotion.js"></script>
+<script src="../lib/fwiends/characters/howdi/howdi.js"></script>
+<script src="../lib/fwiends/characters/yuanyuan/yuanyuan.js"></script>
+<script src="../lib/fwiends/characters/phy/phy.js"></script>
+<script src="../lib/fwiends/characters/fruit/fruit.js"></script>
+<script src="../lib/fwiends/characters/yuda/yuda.js"></script>
+<script src="../lib/fwiends/characters/terry/terry.js"></script>
+<script src="../lib/fwiends/characters/brian/brian.js"></script>
+<script src="../lib/fwiends/characters/mumuyou/mumuyou.js"></script>
+<script src="../lib/fwiends/characters/kevin/kevin.js"></script>
+<script src="../lib/fwiends/characters/bardell/bardell.js"></script>
+<script src="../lib/fwiends/characters/weiwei/weiwei.js"></script>
+<script src="../lib/fwiends/characters/mosing/mosing.js"></script>
+<script src="../lib/fwiends/characters/yawei/yawei.js"></script>
+<script src="../lib/fwiends/characters/cowosus/cowosus.js"></script>
+<script src="../lib/fwiends/characters/raze/raze.js"></script>
+<script src="../lib/fwiends/characters/tanyuan/tanyuan.js"></script>
+<script src="../lib/fwiends/characters/alfie/alfie.js"></script>
+<script src="../lib/fwiends/characters/teni/teni.js"></script>
+<script src="../lib/fwiends/characters/whitedeer/whitedeer.js"></script>
+<script src="../lib/fwiends/characters/jiaoyue/jiaoyue.js"></script>
+<script src="../lib/fwiends/characters/claude/claude.js"></script>
 <script>
   // A review sheet for the emotion library: a row per friend and a column per feeling, drawn still
   // (the feeling's face) or playing (its reaction, then the feeling held, over and over), seated or

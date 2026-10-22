@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Subset the house face, Shantell Sans, to the WOFF2 that site/notebook.css serves.
+"""Subset the house face, Shantell Sans, to the WOFF2 that lib/style/site/notebook.css serves.
 
   python3 tools/font_subset.py          # Requires fontTools and brotli: pip install fonttools brotli
 
-The source is the full variable font in figures/fonts/. The axes the pages use (wght, BNCE and INFM;
-site/README.md) keep their full ranges, and every other axis is pinned to its default, since the house style has
+The source is the full variable font in lib/style/figures/fonts/. The axes the pages use (wght, BNCE and INFM;
+lib/style/site/README.md) keep their full ranges, and every other axis is pinned to its default, since the house style has
 no italics and keeps the face's spacing. The glyphs are those of UNICODE_RANGES, with the features the pages
 use: kerning, ligatures, the alternates for repeated letters (in rlig) and tabular figures. A character the face
 lacks, such as the eighth note, falls back to the system's faces, as it always has.
@@ -22,14 +22,16 @@ from fontTools import subset
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
 
+from layout import FIGURES, KIT
+
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / 'figures' / 'fonts' / 'ShantellSans-Variable.ttf'
-LICENSE = ROOT / 'figures' / 'fonts' / 'OFL-ShantellSans.txt'
-OUT_DIR = ROOT / 'site' / 'fonts'
+SOURCE = FIGURES / 'fonts' / 'ShantellSans-Variable.ttf'
+LICENSE = FIGURES / 'fonts' / 'OFL-ShantellSans.txt'
+OUT_DIR = KIT / 'fonts'
 OUT = OUT_DIR / 'ShantellSans-Latin.woff2'
 
-KEPT_AXES = ('wght', 'BNCE', 'INFM')  # The axes at their full ranges, as site/notebook.css and the pages use them.
-ADDED_FEATURES = ('tnum',)            # Tabular figures (font-variant-numeric in site/pencil.css), beyond fontTools' defaults.
+KEPT_AXES = ('wght', 'BNCE', 'INFM')  # The axes at their full ranges, as lib/style/site/notebook.css and the pages use them.
+ADDED_FEATURES = ('tnum',)            # Tabular figures (font-variant-numeric in lib/style/site/pencil.css), beyond fontTools' defaults.
 DROPPED_TABLES = ('vhea', 'vmtx', 'VVAR')  # Vertical metrics: the pages set horizontal text only.
 
 # The code points kept, inclusive. Where a range reaches past what the face holds, the subset keeps what it has.

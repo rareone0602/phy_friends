@@ -1,4 +1,4 @@
-// Tests for src/pen.js. Each writes into its own positioned element with a pen made to fit it, since
+// Tests for lib/fwiends/src/pen.js. Each writes into its own positioned element with a pen made to fit it, since
 // the test page sets its text in its own face rather than the house face.
 (function () {
   'use strict';

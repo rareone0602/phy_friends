@@ -48,37 +48,37 @@
   <p id="msg">Space plays or pauses. Expressions can use every clip and helper in PhyFriends.anim, and face, react, hold and feel from PhyFriends.emotion. Tick Stand to play them standing, as walk, wave, point and the other standing movements need.</p>
 </main>
 
-<script src="../src/phyfriends.js"></script>
-<script src="../src/anim.js"></script>
-<script src="../src/emotion.js"></script>
-<script src="../characters/howdi/howdi.js"></script>
-<script src="../characters/yuanyuan/yuanyuan.js"></script>
-<script src="../characters/phy/phy.js"></script>
-<script src="../characters/fruit/fruit.js"></script>
-<script src="../characters/yuda/yuda.js"></script>
-<script src="../characters/terry/terry.js"></script>
-<script src="../characters/brian/brian.js"></script>
-<script src="../characters/mumuyou/mumuyou.js"></script>
-<script src="../characters/kevin/kevin.js"></script>
-<script src="../characters/bardell/bardell.js"></script>
-<script src="../characters/weiwei/weiwei.js"></script>
-<script src="../characters/mosing/mosing.js"></script>
-<script src="../characters/yawei/yawei.js"></script>
-<script src="../characters/cowosus/cowosus.js"></script>
-<script src="../characters/raze/raze.js"></script>
-<script src="../characters/tanyuan/tanyuan.js"></script>
-<script src="../characters/alfie/alfie.js"></script>
-<script src="../characters/teni/teni.js"></script>
-<script src="../characters/whitedeer/whitedeer.js"></script>
-<script src="../characters/jiaoyue/jiaoyue.js"></script>
-<script src="../characters/claude/claude.js"></script>
+<script src="../lib/fwiends/src/phyfriends.js"></script>
+<script src="../lib/fwiends/src/anim.js"></script>
+<script src="../lib/fwiends/src/emotion.js"></script>
+<script src="../lib/fwiends/characters/howdi/howdi.js"></script>
+<script src="../lib/fwiends/characters/yuanyuan/yuanyuan.js"></script>
+<script src="../lib/fwiends/characters/phy/phy.js"></script>
+<script src="../lib/fwiends/characters/fruit/fruit.js"></script>
+<script src="../lib/fwiends/characters/yuda/yuda.js"></script>
+<script src="../lib/fwiends/characters/terry/terry.js"></script>
+<script src="../lib/fwiends/characters/brian/brian.js"></script>
+<script src="../lib/fwiends/characters/mumuyou/mumuyou.js"></script>
+<script src="../lib/fwiends/characters/kevin/kevin.js"></script>
+<script src="../lib/fwiends/characters/bardell/bardell.js"></script>
+<script src="../lib/fwiends/characters/weiwei/weiwei.js"></script>
+<script src="../lib/fwiends/characters/mosing/mosing.js"></script>
+<script src="../lib/fwiends/characters/yawei/yawei.js"></script>
+<script src="../lib/fwiends/characters/cowosus/cowosus.js"></script>
+<script src="../lib/fwiends/characters/raze/raze.js"></script>
+<script src="../lib/fwiends/characters/tanyuan/tanyuan.js"></script>
+<script src="../lib/fwiends/characters/alfie/alfie.js"></script>
+<script src="../lib/fwiends/characters/teni/teni.js"></script>
+<script src="../lib/fwiends/characters/whitedeer/whitedeer.js"></script>
+<script src="../lib/fwiends/characters/jiaoyue/jiaoyue.js"></script>
+<script src="../lib/fwiends/characters/claude/claude.js"></script>
 <script>
   const PF = PhyFriends, A = PF.anim, E = PF.emotion, $ = id => document.getElementById(id);
   const LOOK_OFF = { lookX: null, lookY: null, turnX: null, turnY: null };
   let rig = null, player = null;
 
   for (const n of PF.list()) $('char').add(new Option(n));
-  // The movements, then each feeling in full (its reaction, then the feeling held; src/emotion.js).
+  // The movements, then each feeling in full (its reaction, then the feeling held; lib/fwiends/src/emotion.js).
   const group = (label, values) => {
     const g = document.createElement('optgroup');
     g.label = label;

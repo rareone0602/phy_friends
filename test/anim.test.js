@@ -1,4 +1,4 @@
-// Tests of src/anim.js: a clip is a deterministic function of time, and composition keeps its timing.
+// Tests of lib/fwiends/src/anim.js: a clip is a deterministic function of time, and composition keeps its timing.
 (function () {
   'use strict';
 
@@ -70,7 +70,7 @@
   });
 
   test('extend adds names to what parse understands, but never replaces one', () => {
-    assertEqual(timing(A.parse("layer(idle, hold('curious'))")), { duration: 8, loop: true }, 'src/emotion.js adds hold');
+    assertEqual(timing(A.parse("layer(idle, hold('curious'))")), { duration: 8, loop: true }, 'lib/fwiends/src/emotion.js adds hold');
     assertThrows(() => A.extend({ idle: A.rest(1) }), 'already a name');
     assertThrows(() => A.extend({ layer: () => null }), 'already a name');
   });

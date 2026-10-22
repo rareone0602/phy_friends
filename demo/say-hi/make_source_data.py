@@ -7,14 +7,14 @@
 A page opened from file:// cannot read the repository's files, so the film reads this module instead.
 It holds:
 
-  phy      the lines of characters/phy/phy.js with their own line numbers, every comment stripped,
+  phy      the lines of lib/fwiends/characters/phy/phy.js with their own line numbers, every comment stripped,
            whole-line and trailing; the views block is left out altogether.
-  onigiri  the line of src/phyfriends.js that defines ONIGIRI, with its number.
+  onigiri  the line of lib/fwiends/src/phyfriends.js that defines ONIGIRI, with its number.
   tests    the names of the tests and the count from a real run of `python3 tools/pf.py test`
            (test/index.html and the checks of the pages against the cast), and its summary line.
 
 Nothing it writes may name a friend whose owner has not agreed to video, or give the owner's handle or
-link (read from characters/cast.js), or hold a forbidden string; a test whose name would is left out of the names but still counted, and any
+link (read from lib/fwiends/characters/cast.js), or hold a forbidden string; a test whose name would is left out of the names but still counted, and any
 other offending text stops the script. Run it again before the film is filmed, so that the count is the
 count on that day.
 """
@@ -29,14 +29,14 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 
 OUT = Path(__file__).resolve().parent / 'source-data.js'
-PHY = ROOT / 'characters' / 'phy' / 'phy.js'
-LIBRARY = ROOT / 'src' / 'phyfriends.js'
-CAST = ROOT / 'characters' / 'cast.js'
+PHY = ROOT / 'lib' / 'fwiends' / 'characters' / 'phy' / 'phy.js'
+LIBRARY = ROOT / 'lib' / 'fwiends' / 'src' / 'phyfriends.js'
+CAST = ROOT / 'lib' / 'fwiends' / 'characters' / 'cast.js'
 FORBIDDEN_STRINGS = ['examples/', '.png', '.jpg', 'views', 'generated']
 MEDIUM = 'video'
 ONIGIRI = re.compile(r'^\s*const ONIGIRI = ')
 LEFT_OUT_BLOCK = re.compile(r'^\s*views:\s*\{')  # The reference views name pictures and are never shown.
-# What forbidden_names() reads from each friend's entry in characters/cast.js.
+# What forbidden_names() reads from each friend's entry in lib/fwiends/characters/cast.js.
 FRIEND_FIELDS = {
     'name': r"\bname: '([^']+)'", 'handle': r"\bhandle: '([^']+)'", 'href': r"\bhref: '([^']+)'", 'agreed': r"\bagreed: \[([^\]]*)\]",
 }
@@ -103,7 +103,7 @@ def onigiri_line(path):
 
 def forbidden_names():
     """The ids, names, handles and links of the friends whose owners have not agreed to video, read from
-    characters/cast.js, each handle also without its '@' or site ('fb/'), as core.js forbids them on screen.
+    lib/fwiends/characters/cast.js, each handle also without its '@' or site ('fb/'), as core.js forbids them on screen.
 
     Stops the script if it reads no friend from the cast, or a friend without one of those fields, since
     the filter would then let a name through."""
@@ -113,13 +113,13 @@ def forbidden_names():
         fields = {key: re.search(pattern, body) for key, pattern in FRIEND_FIELDS.items()}
         missing = [key for key, found in fields.items() if not found]
         if missing:
-            raise SystemExit(f'could not read the {", ".join(missing)} of {friend_id} from characters/cast.js')
+            raise SystemExit(f'could not read the {", ".join(missing)} of {friend_id} from lib/fwiends/characters/cast.js')
         entries += 1
         name, handle, href, agreed = (fields[key].group(1) for key in FRIEND_FIELDS)
         if f"'{MEDIUM}'" not in agreed:
             names += [friend_id, name, handle, re.sub(r'^(@|[\w.-]+/)', '', handle), href]
     if not entries:
-        raise SystemExit('read no friend from characters/cast.js, so cannot tell whose names to keep off the screen')
+        raise SystemExit('read no friend from lib/fwiends/characters/cast.js, so cannot tell whose names to keep off the screen')
     return names
 
 
@@ -181,8 +181,8 @@ def main(argv=None):
     a = parser.parse_args(argv)
     names = forbidden_names()
     data = {
-        'phy': {'file': 'characters/phy/phy.js', 'lines': source_lines(PHY)},
-        'onigiri': {'file': 'src/phyfriends.js', **onigiri_line(LIBRARY)},
+        'phy': {'file': 'lib/fwiends/characters/phy/phy.js', 'lines': source_lines(PHY)},
+        'onigiri': {'file': 'lib/fwiends/src/phyfriends.js', **onigiri_line(LIBRARY)},
         'tests': previous_tests() if a.no_tests else tests_section(names),
     }
     texts = [line['text'] for line in data['phy']['lines']] + [data['onigiri']['text']] + [t['name'] for t in data['tests']['names']]

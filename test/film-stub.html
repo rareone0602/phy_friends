@@ -9,7 +9,7 @@
   /* A test fixture for `pf.py film`: the smallest page that follows the film contract (tools/pf.py, film).
      The face comes from the repository, so that filming works offline and gives the same frames every
      time. */
-  @font-face { font-family: 'Shantell Sans'; src: url('../figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
+  @font-face { font-family: 'Shantell Sans'; src: url('../lib/style/figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
   :root { --paper: #fbf9f3; --ink: #3d3c39; --ink-2: #6d6a63; --box: 60vh; --ground: 18vh; --x: 0; }
   html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper); color: var(--ink); }
   /* Every measure is in viewport units, so the scene fills whatever frame it is filmed at. */
@@ -35,10 +35,10 @@
   <p class="caption hand">phy crosses the page</p>
 </main>
 
-<script src="../src/phyfriends.js"></script>
-<script src="../characters/phy/phy.js"></script>
-<script src="../src/anim.js"></script>
-<script src="../src/emotion.js"></script>
+<script src="../lib/fwiends/src/phyfriends.js"></script>
+<script src="../lib/fwiends/characters/phy/phy.js"></script>
+<script src="../lib/fwiends/src/anim.js"></script>
+<script src="../lib/fwiends/src/emotion.js"></script>
 <script>
   const DURATION = 2;                   // Seconds.
   const FRAME = { width: 1280, height: 720, fps: 30 };

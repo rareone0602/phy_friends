@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>phy's fwiends · props</title>
-<link rel="stylesheet" href="../site/notebook.css">
-<link rel="stylesheet" href="../site/pencil.css">
+<link rel="stylesheet" href="../lib/style/site/notebook.css">
+<link rel="stylesheet" href="../lib/style/site/pencil.css">
 <style>
   :root { --informal: 100; --rules: 5; }  /* A sheet of the fwiends, a hobby project, so at the top of the dial (STYLE.md §5). */
   /* Each prop stands on a rule in a box as tall as a seated friend's (--rules, five as in the gallery), with its name
@@ -25,15 +25,7 @@
 </style>
 </head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <filter id="graphite" x="-2%" y="-20%" width="104%" height="140%">
-    <feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" seed="7" result="n"/>
-    <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 2.1" result="grain"/>
-    <feComposite in="SourceGraphic" in2="grain" operator="in" result="g"/>
-    <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" seed="2" result="w"/>
-    <feDisplacementMap in="g" in2="w" scale="1.5" xChannelSelector="R" yChannelSelector="G"/>
-  </filter>
-</svg>
+<script src="../lib/style/site/graphite.js"></script>
 
 <main>
   <header>
@@ -43,27 +35,27 @@
   <ul class="shelf"></ul>
   <footer>
     <ul>
-      <li>each prop is a spec in props/, drawn by film/props.js</li>
+      <li>each prop is a spec in lib/fwiends/props/, drawn by lib/fwiends/film/props.js</li>
       <li>?rules=10 draws them twice as large</li>
     </ul>
   </footer>
 </main>
 
-<script src="../src/phyfriends.js"></script>
-<script src="../characters/phy/phy.js"></script>
+<script src="../lib/fwiends/src/phyfriends.js"></script>
+<script src="../lib/fwiends/characters/phy/phy.js"></script>
 <!-- Yuda, for the party hat in his bandana's cyan. -->
-<script src="../characters/yuda/yuda.js"></script>
-<script src="../film/props.js"></script>
-<script src="../props/cake.js"></script>
-<script src="../props/candle.js"></script>
-<script src="../props/partyHat.js"></script>
-<script src="../props/balloon.js"></script>
-<script src="../props/gift.js"></script>
-<script src="../props/medal.js"></script>
-<script src="../props/pencil.js"></script>
-<script src="../props/gramophone.js"></script>
+<script src="../lib/fwiends/characters/yuda/yuda.js"></script>
+<script src="../lib/fwiends/film/props.js"></script>
+<script src="../lib/fwiends/props/cake.js"></script>
+<script src="../lib/fwiends/props/candle.js"></script>
+<script src="../lib/fwiends/props/partyHat.js"></script>
+<script src="../lib/fwiends/props/balloon.js"></script>
+<script src="../lib/fwiends/props/gift.js"></script>
+<script src="../lib/fwiends/props/medal.js"></script>
+<script src="../lib/fwiends/props/pencil.js"></script>
+<script src="../lib/fwiends/props/gramophone.js"></script>
 <script>
-  // A review sheet for the props (film/props.js, props/): each one in each of its states, standing on a rule beside
+  // A review sheet for the props (lib/fwiends/film/props.js, lib/fwiends/props/): each one in each of its states, standing on a rule beside
   // phy, drawn as a scene draws them, and the party hat once more in a friend's color. ?rules=10 draws everything
   // twice as large, still on the rules.
   const PF = PhyFriends, P = PF.props;

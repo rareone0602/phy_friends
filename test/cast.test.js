@@ -1,5 +1,5 @@
-// Tests for src/cast.js. Each builds its own rules with PhyFriends.cast.rules(), so the installed cast
-// (characters/cast.js) is never changed.
+// Tests for lib/fwiends/src/cast.js. Each builds its own rules with PhyFriends.cast.rules(), so the installed cast
+// (lib/fwiends/characters/cast.js) is never changed.
 (function () {
   'use strict';
   const C = PhyFriends.cast;

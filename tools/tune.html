@@ -86,31 +86,31 @@
     </div>
   </div>
 </main>
-<script src="../src/phyfriends.js"></script>
-<script src="../characters/howdi/howdi.js"></script>
-<script src="../characters/yuanyuan/yuanyuan.js"></script>
-<script src="../characters/phy/phy.js"></script>
-<script src="../characters/fruit/fruit.js"></script>
-<script src="../characters/yuda/yuda.js"></script>
-<script src="../characters/terry/terry.js"></script>
-<script src="../characters/brian/brian.js"></script>
-<script src="../characters/mumuyou/mumuyou.js"></script>
-<script src="../characters/kevin/kevin.js"></script>
-<script src="../characters/bardell/bardell.js"></script>
-<script src="../characters/weiwei/weiwei.js"></script>
-<script src="../characters/mosing/mosing.js"></script>
-<script src="../characters/yawei/yawei.js"></script>
-<script src="../characters/cowosus/cowosus.js"></script>
-<script src="../characters/raze/raze.js"></script>
-<script src="../characters/tanyuan/tanyuan.js"></script>
-<script src="../characters/alfie/alfie.js"></script>
-<script src="../characters/teni/teni.js"></script>
-<script src="../characters/whitedeer/whitedeer.js"></script>
-<script src="../characters/jiaoyue/jiaoyue.js"></script>
-<script src="../characters/claude/claude.js"></script>
-<script src="../src/cast.js"></script>
-<script src="../characters/cast.js"></script>
-<script src="../src/anim.js"></script>
+<script src="../lib/fwiends/src/phyfriends.js"></script>
+<script src="../lib/fwiends/characters/howdi/howdi.js"></script>
+<script src="../lib/fwiends/characters/yuanyuan/yuanyuan.js"></script>
+<script src="../lib/fwiends/characters/phy/phy.js"></script>
+<script src="../lib/fwiends/characters/fruit/fruit.js"></script>
+<script src="../lib/fwiends/characters/yuda/yuda.js"></script>
+<script src="../lib/fwiends/characters/terry/terry.js"></script>
+<script src="../lib/fwiends/characters/brian/brian.js"></script>
+<script src="../lib/fwiends/characters/mumuyou/mumuyou.js"></script>
+<script src="../lib/fwiends/characters/kevin/kevin.js"></script>
+<script src="../lib/fwiends/characters/bardell/bardell.js"></script>
+<script src="../lib/fwiends/characters/weiwei/weiwei.js"></script>
+<script src="../lib/fwiends/characters/mosing/mosing.js"></script>
+<script src="../lib/fwiends/characters/yawei/yawei.js"></script>
+<script src="../lib/fwiends/characters/cowosus/cowosus.js"></script>
+<script src="../lib/fwiends/characters/raze/raze.js"></script>
+<script src="../lib/fwiends/characters/tanyuan/tanyuan.js"></script>
+<script src="../lib/fwiends/characters/alfie/alfie.js"></script>
+<script src="../lib/fwiends/characters/teni/teni.js"></script>
+<script src="../lib/fwiends/characters/whitedeer/whitedeer.js"></script>
+<script src="../lib/fwiends/characters/jiaoyue/jiaoyue.js"></script>
+<script src="../lib/fwiends/characters/claude/claude.js"></script>
+<script src="../lib/fwiends/src/cast.js"></script>
+<script src="../lib/fwiends/characters/cast.js"></script>
+<script src="../lib/fwiends/src/anim.js"></script>
 <script src="lorem.js"></script>
 <script>
 // A page for tuning the friends' shared body plan by eye, for an artist who draws rather than codes. It shows every
@@ -118,7 +118,7 @@
 // standing and moving, then turned: side-on, from behind and turning round. Each control changes one of the core's
 // shared defaults in the page (PhyFriends.STAND_FIT, STAND_DEFAULT's arms and legs, ONIGIRI, BODY and TURN), and the
 // friends are redrawn from fresh copies of their specs, since the core works out a friend's figure once per spec. The
-// values block prints those five objects as src/phyfriends.js writes them, to paste back there. The page opens on the
+// values block prints those five objects as lib/fwiends/src/phyfriends.js writes them, to paste back there. The page opens on the
 // values in the code, so it is never out of date.
 // `python3 tools/pf.py tune` writes it out as one file (out/tune.html) that can be sent to someone without the repository.
 (function () {
@@ -228,7 +228,7 @@
   const picker = document.getElementById('picker');
   picker.innerHTML = FRIENDS.map(([name, label]) => `<label><input type="checkbox" value="${name}"${SHOWN.includes(name) ? ' checked' : ''}> ${label}</label>`).join('');
 
-  // The values to send back, written as they are in src/phyfriends.js.
+  // The values to send back, written as they are in lib/fwiends/src/phyfriends.js.
   const literal = v => Array.isArray(v) ? `[${v.map(literal).join(', ')}]` : v && typeof v === 'object'
     ? `{ ${Object.entries(v).map(([k, x]) => `${k}: ${literal(x)}`).join(', ')} }` : typeof v === 'number' ? fixed(v) : typeof v === 'string' ? `'${v}'` : String(v);
   const values = () => `  const STAND_DEFAULT = {\n    arms: ${literal(D.arms)},\n` +

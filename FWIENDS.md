@@ -1,10 +1,10 @@
 # phy's fwiends: the gallery and its characters
 
-This file adds what only this project needs to phy's style guide
-(`STYLE.md`): the gallery page, the rules for drawing a friend with
-`src/phyfriends.js`, and the rules for putting friends together in films and
-games. Where the two disagree, `STYLE.md` wins unless this file says why.
-The site's `style.html` shows both, one after the other, and section N of
+This file adds what only this project needs to phy's style guide (`STYLE.md`):
+the gallery page, the rules for drawing a friend with
+`lib/fwiends/src/phyfriends.js`, and the rules for putting friends together in
+films and games. Where the two disagree, `STYLE.md` wins unless this file says
+why. The site's `style.html` shows both, one after the other, and section N of
 `STYLE.md` stays at `style.html#sN`. Run `python3 tools/pf.py style` after
 editing either.
 
@@ -127,9 +127,9 @@ hidden description (`aria-describedby`): "a yellow plush toy with huge floppy
 ears, a fluffy bib and dark felt soles". The specimen's portrait is named and
 described the same way.
 
-The cast (`characters/cast.js`) is the source of each name, species, credit
-and consent. The page repeats them by hand (the labels, the `aria-label`s,
-the host, the footer's credit and the link preview's alt text);
+The cast (`lib/fwiends/characters/cast.js`) is the source of each name,
+species, credit and consent. The page repeats them by hand (the labels, the
+`aria-label`s, the host, the footer's credit and the link preview's alt text);
 `python3 tools/pf.py test` names the friend and field wherever the two
 disagree, and fails any friend whose owner has not agreed to the gallery.
 Every page that loads all the friends loads them in the cast's order, and
@@ -141,8 +141,9 @@ Every page that loads all the friends loads them in the cast's order, and
 | a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code. | Welcome to a magical world of adorable characters |
 | characters belong to the people named under them | All rights reserved. |
 
-**Saying hi, and how they take it.** `src/live.js`, which any page can use,
-brings the fwiends to life, and their feelings come from the emotion library:
+**Saying hi, and how they take it.** `lib/fwiends/src/live.js`, which any page
+can use, brings the fwiends to life, and their feelings come from the emotion
+library:
 - Hovering over a friend, or tabbing to it, perks it up: ears in, eyes a touch
   wider. Kept there a moment, it grows curious and tilts its head one way,
   then the other.
@@ -189,11 +190,11 @@ the history, a link to a fwiend, reduced motion, "keep still" and the link
 preview show everything in place.
 - The title is written stroke by stroke, in the order a hand writes each
   letter, in just under three seconds, slowing at each end of a stroke and
-  lifting between strokes. `src/pen.js` writes it; `python3 tools/title_pen.py`
-  derives the strokes (`site/title-pen.js`) from the title as the page sets
-  it, and must run again if the title or its face changes. If the face is
-  slow or doesn't match the strokes, or colours are forced, the title simply
-  shows.
+  lifting between strokes. `lib/fwiends/src/pen.js` writes it; `python3
+  tools/title_pen.py` derives the strokes (`lib/fwiends/src/title-pen.js`)
+  from the title as the page sets it, and must run again if the title or its
+  face changes. If the face is slow or doesn't match the strokes, or colours
+  are forced, the title simply shows.
 - As the pen reaches "fwiends", the friends hop in along their row's rule from
   the nearer edge of the screen, row by row, the one farthest from its edge
   first, so that nobody hops past anybody standing. The hops are a little
@@ -221,12 +222,12 @@ full-colour one, with the pencil's grain kept.
 
 ## drawing a friend
 
-The factory (`src/phyfriends.js`) encodes these rules. A friend is a spec of
-about 100 lines, a palette plus shape parameters, not a traced path. Before
-turning someone's picture into one, ask the owner how the character is
-written (the name's capitalisation, the species and the pronoun, "they"
-until told), take one picture as the colour standard and say which, and keep
-private references in a git-ignored `private/` folder.
+The factory (`lib/fwiends/src/phyfriends.js`) encodes these rules. A friend is
+a spec of about 100 lines, a palette plus shape parameters, not a traced path.
+Before turning someone's picture into one, ask the owner how the character is
+written (the name's capitalisation, the species and the pronoun, "they" until
+told), take one picture as the colour standard and say which, and keep private
+references in a git-ignored `private/` folder.
 
 **Coloured pencil** (`STYLE.md` §9):
 - The one texture is the factory's pencil, which `render` and `mount` lay
@@ -349,17 +350,17 @@ turns with it. Where the true turn looks worse than a cheat, the cheat wins.
   the side and the back.
 
 **Feelings come from the pose, not from new drawings.** The emotion library
-(`src/emotion.js`) has twenty-three, each made of parts every fwiend on the
-house template has: the eye shapes (`happy`, `closed`, `squint` and the dizzy
-`swirl`), a lid over the open eyes (`lid`, slanted by `lidTilt` for a sad or
-cross look), the blush spreading (`flush`), a mouth (`w`, `smile`, `frown`,
-`o`, `flat`, `wobble`, `open`), the ears, the tail and the posture, and,
-standing, the arms and a gesture (paws on the hips when proud, a shrug when
-confused). Each shape is drawn from the eye's or the mouth's own size and
-colour, so a spec needs nothing for its feelings, and a new fwiend has them
-all. Body language follows from how pleasant and how alert a feeling is, so
-feelings that sit close look alike. `eyes.arc` and `eyes.stroke` set how wide
-and thick the happy and closed strokes are.
+(`lib/fwiends/src/emotion.js`) has twenty-three, each made of parts every
+fwiend on the house template has: the eye shapes (`happy`, `closed`, `squint`
+and the dizzy `swirl`), a lid over the open eyes (`lid`, slanted by `lidTilt`
+for a sad or cross look), the blush spreading (`flush`), a mouth (`w`,
+`smile`, `frown`, `o`, `flat`, `wobble`, `open`), the ears, the tail and the
+posture, and, standing, the arms and a gesture (paws on the hips when proud, a
+shrug when confused). Each shape is drawn from the eye's or the mouth's own
+size and colour, so a spec needs nothing for its feelings, and a new fwiend
+has them all. Body language follows from how pleasant and how alert a feeling
+is, so feelings that sit close look alike. `eyes.arc` and `eyes.stroke` set
+how wide and thick the happy and closed strokes are.
 
 **Keep the spec small.** Tune the `fluffy`, `star` and ear parameters rather
 than writing raw `nodes`, and match the set in the spec's structure as well as
@@ -425,17 +426,18 @@ side and four short legs.
 
 ## scenes: films and games
 
-Beyond the gallery, the fwiends appear in scenes built with `film/scene.js`:
-short films, listed in `demo/index.html`, and in time games. A scene is a
-sheet of ruled paper measured in head units, a rule every 54, so a seated
-fwiend is five rules tall, as in the gallery. Everything happens at a time on
-the scene's clock, so a film plays in a page and is filmed frame by frame
-(`pf.py film`) from the same script.
+Beyond the gallery, the fwiends appear in scenes built with
+`lib/fwiends/film/scene.js`: short films, listed in `demo/index.html`, and in
+time games. A scene is a sheet of ruled paper measured in head units, a rule
+every 54, so a seated fwiend is five rules tall, as in the gallery. Everything
+happens at a time on the scene's clock, so a film plays in a page and is
+filmed frame by frame (`pf.py film`) from the same script.
 
 **Who knows whom.** Every fwiend belongs to someone, and not every owner knows
 every other one. phy, the host, knows everyone; any other two are strangers
-until phy says their owners know each other (`characters/cast.js`). The scene
-checks these rules and refuses to break them.
+until phy says their owners know each other
+(`lib/fwiends/characters/cast.js`). The scene checks these rules and refuses
+to break them.
 
 | | strangers | know each other |
 |---|---|---|
@@ -477,9 +479,10 @@ checks these rules and refuses to break them.
   (`STYLE.md` §12), in a roll call, say. Without the credits, recompose the
   frame, so that the bottom rule is not left as dead space.
 - **Consent is per medium.** An owner who agreed to the gallery has not
-  thereby agreed to films or games (`agreed` in `characters/cast.js`). Until
-  they do, work that shows their fwiend carries the word "draft" in a corner,
-  and `pf.py film` refuses to film it without `--draft`.
+  thereby agreed to films or games (`agreed` in
+  `lib/fwiends/characters/cast.js`). Until they do, work that shows their
+  fwiend carries the word "draft" in a corner, and `pf.py film` refuses to
+  film it without `--draft`.
 - **Getting about.** Seated fwiends hop. Standing ones walk: facing us, the
   foot on the side they go to steps out and the other closes up, and the body
   glides on up to twice as far as the feet, at a little under half a hop's
@@ -494,13 +497,13 @@ checks these rules and refuses to break them.
 
 **Props and sets.** Everything in a scene that is not a fwiend is drawn as a
 fwiend is, so that the sheet keeps one hand.
-- **A prop is a spec** (`film/props.js`): a palette of the colours the thing
-  really has, a box in head units whose bottom centre stands on the ground, and
-  a few of the factory's shapes, coloured in with the fwiends' pencil, with no
-  outline. Never a traced path or a picture. A prop that films share lives in
-  `props/`, one to a file; one that a single film needs stays in its folder. A
-  set (rock, soil, grass) is props too, laid on the sheet, whose rules show
-  through the pencil.
+- **A prop is a spec** (`lib/fwiends/film/props.js`): a palette of the colours
+  the thing really has, a box in head units whose bottom centre stands on the
+  ground, and a few of the factory's shapes, coloured in with the fwiends'
+  pencil, with no outline. Never a traced path or a picture. A prop that films
+  share lives in `lib/fwiends/props/`, one to a file; one that a single film
+  needs stays in its folder. A set (rock, soil, grass) is props too, laid on
+  the sheet, whose rules show through the pencil.
 - **A prop takes a fwiend's colour by override**
   (`palette: { paper: PF.get('yuda').palette.scarf }`), never by copying the
   value, and its shade follows (`STYLE.md` §9).

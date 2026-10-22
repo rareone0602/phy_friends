@@ -1,6 +1,6 @@
 """The pages that show every friend, kept in step with the cast and with the friends' drawings.
 
-The cast (characters/cast.js) is the one list of the friends, in the gallery's order, and the friends' drawings
+The cast (lib/fwiends/characters/cast.js) is the one list of the friends, in the gallery's order, and the friends' drawings
 decide how much room each takes. From them come, without anyone writing them by hand:
 
 - the script tags that load the friends, in each page that loads them all (PAGES), in the cast's order;
@@ -22,24 +22,26 @@ import re
 import tempfile
 from pathlib import Path
 
+from layout import CHARACTERS, SRC
+
 ROOT = Path(__file__).resolve().parent.parent
 GALLERY = ROOT / 'index.html'
 # The pages that load every friend: the gallery, the tests and the tools that show any friend. The demos are one-offs
 # that keep the friends they were made with.
 PAGES = [GALLERY, ROOT / 'test' / 'index.html', ROOT / 'tools' / 'animate.html', ROOT / 'tools' / 'feelings.html',
          ROOT / 'tools' / 'tune.html']
-SCRIPT_TAG = re.compile(r'^(?P<indent>[ \t]*)<script src="(?P<prefix>[^"]*?)characters/(?P<name>[\w-]+)/(?P=name)\.js"></script>[ \t]*$', re.M)
+SCRIPT_TAG = re.compile(r'^(?P<indent>[ \t]*)<script src="(?P<prefix>[^"]*?)lib/fwiends/characters/(?P<name>[\w-]+)/(?P=name)\.js"></script>[ \t]*$', re.M)
 
 # ---- The cast and the friends' reaches, read in Chrome -------------------------------------
 
 # A page that installs the cast, from which READ_CAST_JS reads it: the library, every friend that has a folder of its
-# own in characters/, then the cast, which checks that each friend it names is defined.
+# own in lib/fwiends/characters/, then the cast, which checks that each friend it names is defined.
 def cast_scripts():
-    friends = sorted(p for p in (ROOT / 'characters').glob('*/*.js') if p.stem == p.parent.name)
-    return [ROOT / 'src/phyfriends.js', *friends, ROOT / 'src/cast.js', ROOT / 'characters/cast.js']
+    friends = sorted(p for p in CHARACTERS.glob('*/*.js') if p.stem == p.parent.name)
+    return [SRC / 'phyfriends.js', *friends, SRC / 'cast.js', CHARACTERS / 'cast.js']
 
 
-# The cast as a page installed it (characters/cast.js), or null if it has none.
+# The cast as a page installed it (lib/fwiends/characters/cast.js), or null if it has none.
 READ_CAST_JS = """(() => {
   try {
     const cast = PhyFriends.cast;
@@ -75,7 +77,7 @@ READ_ROWS_JS = """document.fonts.ready.then(() => new Promise(requestAnimationFr
   }
   return rows.sort((a, b) => a.top - b.top).map(row => row.count);
 })"""
-# A window this wide or narrower is a phone's, on which the rules, and so the boxes, are smaller (site/notebook.css).
+# A window this wide or narrower is a phone's, on which the rules, and so the boxes, are smaller (lib/style/site/notebook.css).
 PHONE_WINDOW = 720
 NARROW, WIDE = 700, 1600  # Windows at which the gallery's measures are read, one either side of PHONE_WINDOW.
 # The page rounds each reach to a whole head unit at the size it draws the friends, so a reach may differ by a unit
@@ -99,9 +101,9 @@ def read_cast(chrome, errors):
                         ''.join(f'<script src="{script.as_uri()}"></script>' for script in cast_scripts()))
         chrome.open(str(page))
         cast = chrome.evaluate(READ_CAST_JS)
-        take_errors(chrome, 'the cast (every friend, then characters/cast.js)', errors)
+        take_errors(chrome, 'the cast (every friend, then lib/fwiends/characters/cast.js)', errors)
     if cast is None:
-        raise ValueError('characters/cast.js installed no cast: see the page errors, or load it in a browser')
+        raise ValueError('lib/fwiends/characters/cast.js installed no cast: see the page errors, or load it in a browser')
     return cast
 
 
@@ -332,7 +334,7 @@ def with_scripts(text, names):
     if len(run.splitlines()) != len(tags):
         raise ValueError("its friends' script tags are not in one run, one to a line: move whatever lies between "
                          'them (a comment, another tag) before or after them')
-    lines = [f"{first['indent']}<script src=\"{first['prefix']}characters/{name}/{name}.js\"></script>" for name in names]
+    lines = [f"{first['indent']}<script src=\"{first['prefix']}lib/fwiends/characters/{name}/{name}.js\"></script>" for name in names]
     return text[:first.start()] + '\n'.join(lines) + text[last.end():]
 
 
@@ -367,7 +369,7 @@ def write_pages(cast, measures=None):
 def page_drift(cast, measures):
     """Every page whose script tags or rows are stale, or that cannot be written, every window in which the
     gallery's rows break (row_drift), and a gallery whose head script looks for "keep still" under another key than
-    src/live.js keeps it under, one line each. Without measures, the rows are not checked."""
+    lib/fwiends/src/live.js keeps it under, one line each. Without measures, the rows are not checked."""
     problems = (row_drift(measures) if measures else []) + still_key_drift()
     for page in PAGES:
         try:
@@ -383,13 +385,13 @@ def page_drift(cast, measures):
     return problems
 
 
-# How the gallery's head script and src/live.js name the key under which "keep still" is remembered: the head script
+# How the gallery's head script and lib/fwiends/src/live.js name the key under which "keep still" is remembered: the head script
 # reads it before live.js loads.
 STILL_KEY = re.compile(r"const STILL_KEY = '([^']+)'")
 
 
-def still_key_drift(gallery=GALLERY, live=ROOT / 'src' / 'live.js'):
-    """A line if the gallery's head script and src/live.js name different keys for "keep still", or either names none."""
+def still_key_drift(gallery=GALLERY, live=SRC / 'live.js'):
+    """A line if the gallery's head script and lib/fwiends/src/live.js name different keys for "keep still", or either names none."""
     keys = {path: STILL_KEY.search(path.read_text(encoding='utf-8')) for path in (gallery, live)}
     if all(keys.values()) and len({key[1] for key in keys.values()}) == 1:
         return []
@@ -471,7 +473,7 @@ class GalleryLabels(html.parser.HTMLParser):
 def label_drift(cast, gallery=GALLERY):
     """Return every way in which the gallery disagrees with the cast, one line per friend and field.
 
-    The cast (characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
+    The cast (lib/fwiends/characters/cast.js) is the source, and the gallery repeats it by hand: each friend's
     label (name, species and credit), the name that opens its aria-label, and which friend is the
     host. A friend is there only with its owner's agreement to the gallery. Any other link that
     credits an owner, such as the footer's to Terry's, uses the cast's name or handle and credit link. The
@@ -480,7 +482,7 @@ def label_drift(cast, gallery=GALLERY):
     cast: {host, friends: {key: entry}}, as READ_CAST_JS reads it, or None.
     """
     if cast is None:
-        return ['no cast (characters/cast.js) was installed to check the labels against']
+        return ['no cast (lib/fwiends/characters/cast.js) was installed to check the labels against']
     page = GalleryLabels()
     page.feed(Path(gallery).read_text(encoding='utf-8'))
     entries, keys = cast['friends'], [friend['key'] for friend in page.friends]
