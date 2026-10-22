@@ -2,10 +2,11 @@
 
 phy's personal style, and the fwiends drawn in it. The repository is in two
 parts. The **library**, `lib/`, is what other work uses: a tiny factory for
-characters in coloured pencil (`lib/fwiends/`) and phy's style, as a CSS kit
-and as styles for figures (`lib/style/`). The **demos** use it: the site's
-pages at the root, the films in `demo/` and the page mockups in `design/`. The
-repository and the code are named `phy_friends`.
+characters in coloured pencil (`lib/fwiends/`), phy's style as a CSS kit and
+as styles for figures (`lib/style/`), and phy's dotfiles in the same inks
+(`lib/dotfiles/`). The **demos** use it: the site's pages at the root, the
+films in `demo/` and the page mockups in `design/`. The repository and the
+code are named `phy_friends`.
 
 [![say hi: Terry, a yellow plush toy, and Brian, a cream fox in an orange beret, stand in coloured pencil on ruled paper](demo/say-hi/thumbnail.jpg)](https://rareone0602.github.io/phy_friends/demo/say-hi/)
 
@@ -45,6 +46,7 @@ lib/                      the library: what other work uses
   fwiends/props/          the things the films share: a spec each
   style/site/             the kit, phy's CSS library: the stylesheets, the face, the graphite filter and the icons
   style/figures/          the house style for charts and diagrams
+  dotfiles/               phy's vimrc and Claude Code status line, in the house inks
 index.html  style.html  specimen.html  preview.png
                           the site (GitHub Pages serves it from the root), and its link preview
 demo/                     one-off pieces, each in a folder of its own
@@ -55,8 +57,8 @@ out/                      generated output (git-ignored)
 ```
 
 Dependencies run one way. The demos use the library and the library never uses
-them; phy's style uses nothing of the fwiends, so that it can be taken up
-alone. Pages elsewhere link the library where GitHub Pages publishes
+them; phy's style and dotfiles use nothing of the fwiends, so that each can be
+taken up alone. Pages elsewhere link the library where GitHub Pages publishes
 it rather than copy it, so that nothing is kept twice; for the same reason,
 everything one file derives from another is written by a tool, never by hand.
 `python3 tools/pf.py test` checks that every link resolves, that dependencies
@@ -68,6 +70,7 @@ every name a page linking it may use.
 | `index.html`, `style.html`, `specimen.html`, `preview.png` | the site: the gallery, with its link preview; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn |
 | `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
 | `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
+| `lib/dotfiles/` | phy's `vimrc` (Google's indents and line lengths, in the house inks) and Claude Code status line (`statusline.py`), and `install.sh`, which links them from a clone, so that a `git pull` updates them |
 | `lib/fwiends/src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `lib/fwiends/src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `lib/fwiends/src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
@@ -89,7 +92,7 @@ every name a page linking it may use.
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`lib/fwiends/src/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
-| `tools/dark_sheet.py` | derives the dark sheet's inks and marks from the paper's (`lib/style/site/README.md`) and writes them into `lib/style/site/notebook.css` and `lib/style/site/pencil.css` |
+| `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |
 | `tools/palette.py`, `tools/colormath.py` | derive the data colours from the fwiends' own and test them (needs numpy) |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
@@ -119,6 +122,8 @@ New work goes where it will be used from:
 - **What makes anything phy's goes in `lib/style/`**: a token, a mark or a
   class in the kit (its README lists them), a rule for charts in `figures/`.
   The kit may add and restyle, but keeps every name a page may use.
+- **phy's own setup goes in `lib/dotfiles/`**, in the kit's inks, which
+  `tools/dark_sheet.py` writes into it.
 - **A one-off goes in `demo/`**, in a folder of its own. It may use anything in
   the library or the film kit, but nothing outside `demo/` may use it, so any
   one-off can be deleted without breaking the rest.

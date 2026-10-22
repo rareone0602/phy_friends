@@ -1,0 +1,192 @@
+" phy's vimrc: one editor on every machine, with the indents and line lengths
+" of Google's style guides (https://google.github.io/styleguide/) and the inks
+" of phy's (https://rareone0602.github.io/phy_friends/style.html). It needs no
+" plugins, and it follows Google's Vimscript guide itself. lib/dotfiles/install.sh
+" in a clone of phy_friends links ~/.vimrc to it, so a git pull updates it.
+
+set nocompatible
+set encoding=utf-8
+scriptencoding utf-8
+
+" Editing. An indent is two spaces, as in most of Google's guides, and is never
+" a tab; a tab already in a file shows eight columns wide.
+set backspace=indent,eol,start
+set hidden
+set autoindent
+set expandtab shiftwidth=2 softtabstop=2 tabstop=8
+set textwidth=0 linebreak
+set nojoinspaces
+set nrformats-=octal
+
+" Searching: case matters only when the pattern has a capital letter.
+set incsearch hlsearch ignorecase smartcase
+
+" Display.
+set number
+set scrolloff=4 sidescrolloff=8
+set showcmd showmatch wildmenu
+set wildmode=longest:full,full
+set list listchars=tab:→\ ,trail:·,nbsp:␣
+set shortmess+=I
+if exists('+belloff')
+  set belloff=all
+endif
+" Mark the first column past a language's line limit.
+if exists('+colorcolumn')
+  set colorcolumn=+1
+endif
+
+" Files: keep undo history across sessions, and keep swap and backup files out
+" of the working folders.
+set undofile undodir=~/.vim/undo//
+set directory=~/.vim/swap//
+set backupdir=~/.vim/backup//
+
+if has('eval')
+  " Create the folders above on a machine that has never run this file.
+  for s:folder in ['undo', 'swap', 'backup']
+    if !isdirectory(expand('~/.vim/' . s:folder))
+      call mkdir(expand('~/.vim/' . s:folder), 'p', 0700)
+    endif
+  endfor
+  unlet s:folder
+
+  " Continued lines in Python and Vimscript are indented four spaces, and a
+  " closing bracket in Python lines up with the line that opened it.
+  let g:pyindent_open_paren = 'shiftwidth()'
+  let g:pyindent_continue = 'shiftwidth()'
+  let g:python_indent = {'closed_paren_align_last_line': v:false}
+  let g:vim_indent_cont = 4
+endif
+
+" Each language's indent and line limit, from its Google guide. Code wraps only
+" its comments at the limit; prose wraps its text too.
+if has('autocmd')
+  filetype plugin indent on
+  augroup phy_style
+    autocmd!
+    autocmd FileType c,cpp,sh,bash,javascript,typescript,r,vim
+        \ setlocal shiftwidth=2 softtabstop=2 textwidth=80 formatoptions-=t
+    autocmd FileType python,haskell
+        \ setlocal shiftwidth=4 softtabstop=4 textwidth=80 formatoptions-=t
+    autocmd FileType java
+        \ setlocal shiftwidth=2 softtabstop=2 textwidth=100 formatoptions-=t
+    autocmd FileType rust
+        \ setlocal shiftwidth=4 softtabstop=4 textwidth=100 formatoptions-=t
+    autocmd FileType html,css,json,yaml setlocal shiftwidth=2 softtabstop=2
+    " Markdown nests a list four spaces in.
+    autocmd FileType markdown setlocal shiftwidth=4 softtabstop=4 textwidth=80
+    " C++ lines up a wrapped argument with the first, or indents it four
+    " spaces after a bracket that ends its line; it continues other lines four
+    " spaces in, does not indent a namespace's contents, and sets public,
+    " protected and private one space in. Java continues every line four
+    " spaces in.
+    autocmd FileType c,cpp setlocal cinoptions=N-s,g1,h1,l1,t0,i4,+4,(0,w1,W4
+    autocmd FileType java setlocal cinoptions=j1,+4,(4
+    " Google has no guide for Lean, so it follows Mathlib's: two spaces and 100
+    " columns.
+    autocmd BufNewFile,BufRead *.lean setfiletype lean
+    autocmd FileType lean
+        \ setlocal shiftwidth=2 softtabstop=2 textwidth=100 formatoptions-=t
+    " Makefiles need real tabs, and git commit messages wrap at 72 columns.
+    autocmd FileType make setlocal noexpandtab shiftwidth=8 softtabstop=0
+    autocmd FileType gitcommit setlocal textwidth=72
+  augroup END
+endif
+
+" The status line, written like Claude Code's: lower case, with middle dots
+" between the parts.
+set laststatus=2
+set statusline=%f
+set statusline+=%{&modified?'\ ·\ modified':''}
+set statusline+=%{&readonly?'\ ·\ read\ only':''}
+set statusline+=%=%{empty(&filetype)?'plain\ text':&filetype}
+set statusline+=\ ·\ %l:%c\ ·\ %p%%
+
+" The inks. They need 24-bit color; elsewhere vim keeps its own colors.
+if has('syntax') && has('termguicolors')
+    \ && ($COLORTERM ==# 'truecolor' || $COLORTERM ==# '24bit')
+  set termguicolors
+  syntax enable
+
+  " Paints the highlight groups in the dark sheet's inks, or in the paper's
+  " when the terminal is light. Red is for errors only.
+  function! s:Paint() abort
+    " The inks, written by `python3 tools/dark_sheet.py` from the kit's and the
+    " figures' (lib/style): edit those and run it.
+    if &background ==# 'dark'
+      let l:ink = '#fbf9f3'
+      let l:ink2 = '#b4b1a9'
+      let l:ink3 = '#86837a'
+      let l:red = '#fe9c8c'
+      let l:rule = '#45505a'
+      let l:blue = '#1d97cf'
+      let l:slate = '#a7b9f2'
+      let l:ochre = '#9d840e'
+      let l:pink = '#d46b75'
+    else
+      let l:ink = '#3d3c39'
+      let l:ink2 = '#6d6a63'
+      let l:ink3 = '#97938a'
+      let l:red = '#a64a3f'
+      let l:rule = '#cfdbe8'
+      let l:blue = '#1092ca'
+      let l:slate = '#4d6295'
+      let l:ochre = '#a98f12'
+      let l:pink = '#d56b75'
+    endif
+    " The end of the inks.
+    " Each group has a foreground, a background and its attributes.
+    let l:groups = {
+        \ 'Normal': [l:ink, 'NONE', 'NONE'],
+        \ 'Comment': [l:ink2, 'NONE', 'NONE'],
+        \ 'Constant': [l:blue, 'NONE', 'NONE'],
+        \ 'String': [l:blue, 'NONE', 'NONE'],
+        \ 'Identifier': [l:ink, 'NONE', 'NONE'],
+        \ 'Function': [l:ink, 'NONE', 'NONE'],
+        \ 'Statement': [l:ink, 'NONE', 'bold'],
+        \ 'PreProc': [l:slate, 'NONE', 'NONE'],
+        \ 'Type': [l:ochre, 'NONE', 'NONE'],
+        \ 'Special': [l:pink, 'NONE', 'NONE'],
+        \ 'Underlined': [l:ink, 'NONE', 'underline'],
+        \ 'Todo': [l:ink, 'NONE', 'bold'],
+        \ 'Error': [l:red, 'NONE', 'bold'],
+        \ 'ErrorMsg': [l:red, 'NONE', 'NONE'],
+        \ 'WarningMsg': [l:ink, 'NONE', 'bold'],
+        \ 'SpellBad': [l:red, 'NONE', 'underline'],
+        \ 'LineNr': [l:ink3, 'NONE', 'NONE'],
+        \ 'CursorLineNr': [l:ink2, 'NONE', 'NONE'],
+        \ 'NonText': [l:ink3, 'NONE', 'NONE'],
+        \ 'SpecialKey': [l:ink3, 'NONE', 'NONE'],
+        \ 'ColorColumn': ['NONE', l:rule, 'NONE'],
+        \ 'Visual': ['NONE', l:rule, 'NONE'],
+        \ 'Search': ['NONE', l:rule, 'NONE'],
+        \ 'IncSearch': [l:ink, l:rule, 'bold'],
+        \ 'MatchParen': [l:ink, 'NONE', 'bold,underline'],
+        \ 'StatusLine': [l:ink2, 'NONE', 'underline'],
+        \ 'StatusLineNC': [l:ink3, 'NONE', 'underline'],
+        \ 'VertSplit': [l:ink3, 'NONE', 'NONE'],
+        \ 'Pmenu': [l:ink, l:rule, 'NONE'],
+        \ 'PmenuSel': [l:ink, l:rule, 'bold'],
+        \ 'Folded': [l:ink2, 'NONE', 'NONE'],
+        \ 'DiffAdd': [l:blue, 'NONE', 'NONE'],
+        \ 'DiffDelete': [l:ink3, 'NONE', 'NONE'],
+        \ 'DiffChange': [l:ochre, 'NONE', 'NONE'],
+        \ 'DiffText': [l:ochre, 'NONE', 'bold'],
+        \ }
+    for [l:name, l:look] in items(l:groups)
+      execute printf('highlight %s guifg=%s guibg=%s gui=%s cterm=%s',
+          \ l:name, l:look[0], l:look[1], l:look[2], l:look[2])
+    endfor
+  endfunction
+
+  if exists('##OptionSet')
+    augroup phy_inks
+      autocmd!
+      " Paint again when vim learns the terminal's background, or when it is
+      " set by hand.
+      autocmd OptionSet background call s:Paint()
+    augroup END
+  endif
+  call s:Paint()
+endif

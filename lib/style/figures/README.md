@@ -20,20 +20,23 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 Each comes from one of phy's characters: the character's colour taken down in
 the house shade step (`STYLE.md` §9) until it holds `3:1` on the paper, and
 where two still sat too close, one took another step. `python3
-tools/palette.py` derives them again and prints the tests.
+tools/palette.py` derives them again and prints the tests. On the dark sheet
+each keeps its hue and takes the lightness at which it has the same contrast
+with the sheet as with the paper, as the inks do; `python3
+tools/dark_sheet.py` writes that column, and both sets into the dotfiles.
 
-| series | colour | shade |
-|---|---|---|
-| 1, blue | `#1092ca` | `#1777a4` |
-| 2, red | `#a74126` | `#931800` |
-| 3, slate | `#4d6295` | `#284a85` |
-| 4, ochre | `#a98f12` | `#8c7609` |
-| 5, pink | `#d56b75` | `#c34758` |
+| series | colour | shade | on the dark sheet |
+|---|---|---|---|
+| 1, blue | `#1092ca` | `#1777a4` | `#1d97cf` |
+| 2, red | `#a74126` | `#931800` | `#fca88e` |
+| 3, slate | `#4d6295` | `#284a85` | `#a7b9f2` |
+| 4, ochre | `#a98f12` | `#8c7609` | `#9d840e` |
+| 5, pink | `#d56b75` | `#c34758` | `#d46b75` |
 
 - Every pair stays apart under protanopia, deuteranopia and tritanopia
-  (CIEDE2000 `13.9` at the closest), but the five fall into only two tiers of
-  grey: a figure that may be printed in grey needs direct labels or marker
-  shapes as well.
+  (CIEDE2000 `13.9` at the closest, and `11.5` on the dark sheet), but the
+  five fall into only two tiers of grey: a figure that may be printed in grey
+  needs direct labels or marker shapes as well.
 - **Five at most.** Fold the rest into "other" in `--ink-3`, or split the
   figure into small panels. Take the colours in order; a series keeps its
   colour from figure to figure, never its rank.

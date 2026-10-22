@@ -21,8 +21,9 @@ with no room for the rest.
 **The details live in code.** The look of a page is a CSS library,
 `lib/style/site/`, whose README lists its tokens, type, marks and components;
 the look of a chart or a diagram is in `lib/style/figures/`, whose README lists
-the data colours and the rules for charts, slides and a paper's diagram. This
-guide keeps the intent.
+the data colours and the rules for charts, slides and a paper's diagram; and
+an editor and a terminal take the same inks from phy's dotfiles,
+`lib/dotfiles/`. This guide keeps the intent.
 
 ---
 

@@ -1,15 +1,15 @@
 """The repository's layout: where each part lives, and the checks that keep the parts whole and apart.
 
 The repository has two parts. The library, lib/, is what other work uses: the fwiends (lib/fwiends: the renderer and
-its kin in src/, the film kit in film/, the characters and the props) and phy's style (lib/style: the CSS kit in site/
-and the figures' styles in figures/). The demos use it: the site's pages at the root, the films in demo/ and the
-mockups in design/. tools/ and test/ serve both.
+its kin in src/, the film kit in film/, the characters and the props), phy's style (lib/style: the CSS kit in site/ and
+the figures' styles in figures/) and phy's dotfiles (lib/dotfiles). The demos use it: the site's pages at the root, the
+films in demo/ and the mockups in design/. tools/ and test/ serve both.
 
 `python3 tools/pf.py test` runs both checks:
 - link_drift: every local link of every page, stylesheet and document, and every link to this repository's own pages
   or source, names a file that the repository holds.
-- dependency_drift: dependencies run one way. Nothing in the library links outside it, and phy's style links nothing
-  of the fwiends, so that each can be used without the other.
+- dependency_drift: dependencies run one way. Nothing in the library links outside it, and phy's style and dotfiles
+  link nothing of the fwiends, so that each can be used without the others.
 """
 import os
 import posixpath
@@ -28,6 +28,7 @@ PROPS = FWIENDS / 'props'
 STYLE = LIB / 'style'
 KIT = STYLE / 'site'
 FIGURES = STYLE / 'figures'
+DOTFILES = LIB / 'dotfiles'
 
 # A link to the repository as published (its Pages site) or to its source on GitHub, at any branch or commit; the
 # second group is the path inside the repository.
@@ -140,6 +141,6 @@ def dependency_drift(found=None):
             continue
         if not within(path, LIB):
             problems.append(f'{source}: {link} lies outside the library, which the demos use and never the reverse')
-        elif within(source, STYLE) and within(path, FWIENDS):
-            problems.append(f"{source}: {link} lies in the fwiends, which phy's style never uses")
+        elif (within(source, STYLE) or within(source, DOTFILES)) and within(path, FWIENDS):
+            problems.append(f"{source}: {link} lies in the fwiends, which phy's style and dotfiles never use")
     return problems

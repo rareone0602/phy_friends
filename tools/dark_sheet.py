@@ -1,30 +1,39 @@
 #!/usr/bin/env python3
-"""Derive the dark sheet's inks and marks from the paper's (lib/style/site/README.md), and write them into the
-kit.
+"""Derive the dark sheet's inks, marks and data colors from the paper's (lib/style/site/README.md and
+lib/style/figures/README.md), and write them wherever they are used.
 
   python3 tools/dark_sheet.py
 
 On the dark sheet the paper and the ink swap: the sheet is the graphite ink and the words are in
 the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3 and the red) keeps its
 CIELAB hue and chroma and moves to the lightness at which it has the same contrast with the dark
-sheet as it has with the paper. The marks in lib/style/site/pencil.css hard-code their inks, since a
-data URI cannot read var(), so their dark set is the same marks with each ink replaced by its dark
-one.
+sheet as it has with the paper, and so does each data color. The marks in lib/style/site/pencil.css
+hard-code their inks, since a data URI cannot read var(), so their dark set is the same marks with
+each ink replaced by its dark one.
 
-Run it after an ink or a mark changes. It rewrites the block between its markers in
-lib/style/site/notebook.css and lib/style/site/pencil.css, and prints each ink's contrast on both sheets.
-The pages' theme colors (their theme-color metas) are kept by hand: the paper's, and
-the dark sheet's where a page has one; `python3 tools/pf.py test` checks them, and
-the blocks, with written() and theme_drift().
+Run it after an ink, a mark or a data color changes. It rewrites the block between its markers in
+lib/style/site/notebook.css and lib/style/site/pencil.css, the data colors' table in
+lib/style/figures/README.md, and the inks of both sheets in the dotfiles (lib/dotfiles/vimrc and
+statusline.py), and prints each color's contrast on both sheets. The pages' theme colors (their
+theme-color metas) are kept by hand: the paper's, and the dark sheet's where a page has one;
+`python3 tools/pf.py test` checks them, and everything written here, with written() and theme_drift().
 """
 import html.parser
 import re
 from pathlib import Path
 
-from layout import KIT
+from layout import DOTFILES, FIGURES, KIT
 
 NOTEBOOK = KIT / 'notebook.css'
 PENCIL = KIT / 'pencil.css'
+MPLSTYLE = FIGURES / 'phy.mplstyle'  # Holds the data colors, in order, as matplotlib's color cycle.
+FIGURES_README = FIGURES / 'README.md'
+VIMRC = DOTFILES / 'vimrc'
+STATUSLINE = DOTFILES / 'statusline.py'
+SERIES = ['blue', 'red', 'slate', 'ochre', 'pink']  # The data colors' names, in their order.
+# The colors a terminal is painted in: the inks, and the data colors but the red, which there would read as an error.
+TERMINAL_INKS = {'ink': 'ink', 'ink2': 'ink-2', 'ink3': 'ink-3', 'red': 'red', 'rule': 'rule'}
+TERMINAL_SERIES = ['blue', 'slate', 'ochre', 'pink']
 
 # A page turns to the dark sheet only where it declares both schemes, so that pages and films made
 # for paper alone keep it. Print always stays on paper.
@@ -37,6 +46,13 @@ INKS_END = "/* The end of the dark sheet's inks. */"
 MARKS_BEGIN = ("/* The dark sheet's marks, written by `python3 tools/dark_sheet.py` from the marks above and the inks in\n"
                "   lib/style/site/notebook.css: edit those and run it. */")
 MARKS_END = "/* The end of the dark sheet's marks. */"
+VIM_BEGIN = """    " The inks, written by `python3 tools/dark_sheet.py` from the kit's and the
+    " figures' (lib/style): edit those and run it."""
+VIM_END = '    " The end of the inks.'
+PYTHON_BEGIN = "# The inks, written by `python3 tools/dark_sheet.py` from the kit's and the figures' (lib/style): edit those and run it."
+PYTHON_END = '# The end of the inks.'
+TABLE_HEAD = '| series | colour | shade |'
+TABLE_ROW = re.compile(r'^\| (\d), (\w+) \| `(#[0-9a-f]{6})` \| `(#[0-9a-f]{6})` \|.*$', re.M)
 
 
 # ---- Color: sRGB, CIELAB (D65) and WCAG contrast
@@ -124,6 +140,53 @@ def dark_inks(day):
     return dark
 
 
+# ---- The figures and the dotfiles
+
+def day_data():
+    """The data colors on the paper, by name, from matplotlib's color cycle in lib/style/figures/phy.mplstyle."""
+    cycle = re.search(r"axes\.prop_cycle: cycler\('color', \[(.*?)\]\)", MPLSTYLE.read_text())[1]
+    return dict(zip(SERIES, ('#' + color for color in re.findall(r"'([0-9a-f]{6})'", cycle))))
+
+
+def dark_data(day, data):
+    """The data colors on the dark sheet: each keeps its contrast with the sheet, as the inks do."""
+    sheet = dark_inks(day)['paper']
+    return {name: at_contrast(color, sheet, contrast(color, day['paper'])) for name, color in data.items()}
+
+
+def with_data_table(text, dark):
+    """lib/style/figures/README.md's text with the data colors' table given a column for the dark sheet."""
+    head = text.index(TABLE_HEAD)
+    rule = text.index('\n', head) + 1
+    text = text[:head] + TABLE_HEAD + ' on the dark sheet |\n|---|---|---|---|\n' + text[text.index('\n', rule) + 1:]
+    return TABLE_ROW.sub(lambda m: f'| {m[1]}, {m[2]} | `{m[3]}` | `{m[4]}` | `{dark[m[2]]}` |', text)
+
+
+def terminal_sheets(day, dark, data, data_dark):
+    """The colors a terminal is painted in, on each sheet: {'dark': {name: color}, 'paper': {name: color}}."""
+    def sheet(inks, colors):
+        return {**{name: inks[ink] for name, ink in TERMINAL_INKS.items()}, **{name: colors[name] for name in TERMINAL_SERIES}}
+    return {'dark': sheet(dark, data_dark), 'paper': sheet(day, data)}
+
+
+def with_vim_inks(text, sheets):
+    """lib/dotfiles/vimrc's text with the inks of both sheets written in, the dark sheet's for a dark terminal."""
+    def lets(colors):
+        return ''.join(f"      let l:{name} = '{color}'\n" for name, color in colors.items())
+    body = f"    if &background ==# 'dark'\n{lets(sheets['dark'])}    else\n{lets(sheets['paper'])}    endif\n"
+    return replace_block(text, VIM_BEGIN, VIM_END, body)
+
+
+def with_python_inks(text, sheets):
+    """lib/dotfiles/statusline.py's text with the inks of both sheets written in, as INKS."""
+    def entries(colors):
+        pairs = [f'"{name}": "{color}"' for name, color in colors.items()]
+        inks, series = pairs[:len(TERMINAL_INKS)], pairs[len(TERMINAL_INKS):]
+        return f'        {", ".join(inks)},\n        {", ".join(series)},\n'
+    body = 'INKS = {\n' + ''.join(f'    "{name}": {{\n{entries(colors)}    }},\n' for name, colors in sheets.items()) + '}\n'
+    return replace_block(text, PYTHON_BEGIN, PYTHON_END, body)
+
+
 def replace_block(text, begin, end, body):
     start, stop = text.index(begin), text.index(end)
     return text[:start] + begin + '\n' + body + end + text[stop + len(end):]
@@ -149,9 +212,14 @@ def with_marks(text, day, dark):
 def written(day=None):
     """Each file's text now and as written, as {path: (text now, text as written)}."""
     day = day or day_inks()
-    dark = dark_inks(day)
-    notebook, pencil = NOTEBOOK.read_text(), PENCIL.read_text()
-    return {NOTEBOOK: (notebook, with_inks(notebook, dark)), PENCIL: (pencil, with_marks(pencil, day, dark))}
+    dark, data = dark_inks(day), day_data()
+    data_dark = dark_data(day, data)
+    sheets = terminal_sheets(day, dark, data, data_dark)
+    texts = {path: path.read_text() for path in (NOTEBOOK, PENCIL, FIGURES_README, VIMRC, STATUSLINE)}
+    write = {NOTEBOOK: lambda text: with_inks(text, dark), PENCIL: lambda text: with_marks(text, day, dark),
+             FIGURES_README: lambda text: with_data_table(text, data_dark), VIMRC: lambda text: with_vim_inks(text, sheets),
+             STATUSLINE: lambda text: with_python_inks(text, sheets)}
+    return {path: (text, write[path](text)) for path, text in texts.items()}
 
 
 class ThemeColors(html.parser.HTMLParser):
@@ -190,6 +258,9 @@ def main():
     print(f'{"ink":8} {"paper":>8} {"dark":>8}  contrast on paper / on the dark sheet')
     for name in ['ink'] + INKS:
         print(f'{name:8} {day[name]:>8} {dark[name]:>8}  {contrast(day[name], day["paper"]):.2f} / {contrast(dark[name], dark["paper"]):.2f}')
+    data = day_data()
+    for name, color in dark_data(day, data).items():
+        print(f'{name:8} {data[name]:>8} {color:>8}  {contrast(data[name], day["paper"]):.2f} / {contrast(color, dark["paper"]):.2f}')
 
 
 if __name__ == '__main__':
