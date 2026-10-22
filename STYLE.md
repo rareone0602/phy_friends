@@ -139,6 +139,10 @@ contrast with the paper are tokens of the kit (§7).
   inverted: a character keeps its own paper (§9), and a scan its own white.
 - On a dark host the page doesn't control, a slide say, lay a sheet of paper
   on it. A piece's night is a darker sheet (§12).
+- **Blue pencil**, an illustrator's non-photo blue deepened to be read, is
+  for a page's workings and nothing else: the construction under a drawing
+  and the notes on how the page is made, shown only when the reader asks
+  (`lib/fwiends/src/workings.js`), never as decoration.
 
 ## 5. type
 

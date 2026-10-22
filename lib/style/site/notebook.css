@@ -23,6 +23,7 @@
   --ink-2: #6d6a63;
   --ink-3: #97938a;         /* For marks only, never for text. */
   --red: #a64a3f;           /* For errors only: a darker margin red. */
+  --blue-pencil: #1c77ad;   /* An illustrator's non-photo blue, deepened to be read: a page's workings, shown on request. */
   --band: 4;                /* Blank header band, in rules; the title sits on the first rule. */
   /* One typeface on one dial (STYLE.md §5). --informal sets how informal the work is:
      0 for a paper's diagram, 50 for a site, 100 for a hobby project. */
@@ -125,7 +126,7 @@ footer a:hover { color: var(--ink); }
    contrast with the sheet. A page made for paper alone, and any print, stays on paper. */
 /* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */
 @media screen and (prefers-color-scheme: dark) {
-  :root:has(meta[name="color-scheme"][content~="dark"]) { --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; }
+  :root:has(meta[name="color-scheme"][content~="dark"]) { --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; --blue-pencil: #66afe8; }
 }
 /* The end of the dark sheet's inks. */
 @media screen and (prefers-color-scheme: dark) and (forced-colors: none) {

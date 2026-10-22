@@ -24,7 +24,7 @@ The page has five parts, in this order:
 1. The title, `phy's fwiends`, in the hand: the project's name wherever
    people read it (`phy_friends` is only the repository's and the code's).
 2. One line of intro: "a few fwiends in coloured pencil, each one drawn from a
-   hundred-odd lines of code."
+   hundred-odd lines of code." The last words show the page's workings (below).
 3. The nav, as on the other two pages: fwiends, style guide, specimen.
 4. **The stage**, a group photo: the fwiends stand together on pencilled
    ground and all watch the cursor.
@@ -183,6 +183,22 @@ library:
 - A double-click or a long press selects nothing and opens no menu, and a
   quick second tap doesn't zoom the page. The labels stay selectable, so a
   handle can still be copied.
+
+**The workings.** "a hundred-odd lines of code", in the intro, is a quiet
+button that shows how the page is drawn, in blue pencil (`STYLE.md` §4); until
+it is pressed, nothing of it shows. Pressed, the fwiends sit still, as with
+"keep still", and fade to the construction that their specs describe: the
+head, the face and the body, the line of the eyes and the eyes on it, the ears
+and the tail's spine. Each label gives its friend's spec and its length in
+place of the species ("howdi.js, 131 lines": `python3 tools/pf.py pages` writes
+the lengths into the page); where there is room, notes give the kit's names for
+the parts of the page (the title's size and its pen, the nav's ring, the
+note's tilt, the margin and the rules), each read from the page as it stands;
+and a note on the library says what each part of `lib/` does and gives the two
+lines that link it, beside the title on a wide screen and under the nav on a
+narrower one. Pressing the phrase again, or Escape, puts everything back. The
+gallery loads `lib/fwiends/src/workings.js` for this, and a page that does not
+load it has none of it.
 
 **The opening.** The first time the page opens in a tab, the title writes
 itself and the fwiends come in by roll call. A reload, a step back through

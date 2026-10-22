@@ -175,6 +175,19 @@
      shown once the script can make it work, and a link past the fwiends to the footer, shown only while it is
      focused, since a keyboard would otherwise take some forty steps to get there. */
   body > header { position: relative; }
+  /* The workings (lib/fwiends/src/workings.js), in blue pencil, which the phrase in the intro shows and hides: and
+     with them a note on the library, which stands at the title's right where there is room, tilted as a margin
+     note is, and under the nav where there is not. */
+  .intro .workings { font-size: inherit; line-height: inherit; }
+  .intro .workings[aria-pressed="true"] { color: var(--blue-pencil); }
+  .library { margin: 0; font-size: 18px; line-height: var(--L); color: var(--blue-pencil); }
+  .library p { margin: 0; }
+  .library a { color: inherit; }
+  .library code { display: block; font-size: 13px; line-height: var(--L); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  @media (min-width: 1180px) {
+    .library { position: absolute; top: var(--L); right: var(--column-right); width: 36rem; transform: rotate(-1deg); transform-origin: 100% 0; }
+  }
+  @media print { .library { display: none; } }
   .controls { position: absolute; left: var(--column-left); top: calc(100% + var(--sit)); height: var(--L); margin: 0; display: flex; column-gap: 1.4em;
     font-size: 15px; color: var(--ink-2); white-space: nowrap; }
   .still { cursor: pointer; }
@@ -261,7 +274,7 @@
 
 <header>
   <h1>phy's fwiends</h1>
-  <p class="intro">a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code.</p>
+  <p class="intro">a few fwiends in coloured pencil, each one drawn from <span class="workings">a hundred-odd lines of code</span>.</p>
   <nav aria-label="pages">
     <ul>
       <li><span aria-current="page">fwiends</span></li>
@@ -269,6 +282,14 @@
       <li><a href="specimen.html">specimen</a></li>
     </ul>
   </nav>
+  <div class="library hand" id="library" hidden>
+    <p><a href="https://github.com/rareone0602/phy_friends/tree/main/lib/fwiends">lib/fwiends</a> draws them,
+      <a href="https://github.com/rareone0602/phy_friends/tree/main/lib/style">lib/style</a> is the paper and
+      <a href="https://github.com/rareone0602/phy_friends/tree/main/lib/dotfiles">lib/dotfiles</a> keeps phy's terminal in the same inks.
+      link them, don't copy them:</p>
+    <code>&lt;script src="https://rareone0602.github.io/phy_friends/lib/fwiends/src/phyfriends.js"&gt;&lt;/script&gt;</code>
+    <code>&lt;link rel="stylesheet" href="https://rareone0602.github.io/phy_friends/lib/style/site/phy.css"&gt;</code>
+  </div>
   <p class="controls"><label class="check still" hidden><input type="checkbox"> keep still</label><a class="skip" href="#footer">skip the fwiends</a></p>
 </header>
 
@@ -278,107 +299,107 @@
     <div class="troupe">
       <p class="note"><span class="long">psst: they watch your cursor. </span><span class="mouse">click one to say hi</span><span class="touch">tap one to say hi</span></p>
       <ul class="friends">
-        <li class="friend" id="howdi" data-friend="howdi" style="--wide-left: 54; --wide-right: 0; --phone-left: 54; --phone-right: 0"><figure>
+        <li class="friend" id="howdi" data-friend="howdi" data-lines="131" style="--wide-left: 54; --wide-right: 0; --phone-left: 54; --phone-right: 0"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Howdi" aria-describedby="looks-howdi"></div>
           <p id="looks-howdi" hidden>a sky-blue wolf</p>
           <figcaption><span class="name hand">Howdi</span><span class="species">sky-blue wolf</span><span class="credit"><a href="https://x.com/howdi1129">@howdi1129</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yuanyuan" data-friend="yuanyuan" style="--wide-left: 18; --wide-right: 18; --phone-left: 28; --phone-right: 28"><figure>
+        <li class="friend" id="yuanyuan" data-friend="yuanyuan" data-lines="201" style="--wide-left: 18; --wide-right: 18; --phone-left: 28; --phone-right: 28"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to YuanYuan" aria-describedby="looks-yuanyuan"></div>
           <p id="looks-yuanyuan" hidden>a white cat in a navy yukata, with a lavender mop, a curl on his crown, red-brown eyes and a red-and-white cord round one ankle</p>
           <figcaption><span class="name hand">YuanYuan</span><span class="species">lavender-haired cat</span><span class="credit"><a href="https://x.com/Milk_YuanYuan" aria-label="@Milk_YuanYuan">@Milk_<wbr>YuanYuan</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="phy" data-friend="phy" data-host style="--wide-left: 16; --wide-right: 83; --phone-left: 25; --phone-right: 83"><figure>
+        <li class="friend" id="phy" data-friend="phy" data-host data-lines="145" style="--wide-left: 16; --wide-right: 83; --phone-left: 25; --phone-right: 83"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to phy" aria-describedby="looks-phy"></div>
           <p id="looks-phy" hidden>an Eevee in tuxedo-cat colours, with Oreo crumbs on their ruff and tail</p>
           <figcaption><span class="name hand">phy</span><span class="species">tuxedo eevee</span><span class="credit"><span class="me">that's me <span class="dot" aria-hidden="true">· </span></span><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116" rel="me">linkedin</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="fruit" data-friend="fruit" style="--wide-left: 0; --wide-right: 49; --phone-left: 0; --phone-right: 49"><figure>
+        <li class="friend" id="fruit" data-friend="fruit" data-lines="174" style="--wide-left: 0; --wide-right: 49; --phone-left: 0; --phone-right: 49"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Fruit" aria-describedby="looks-fruit"></div>
           <p id="looks-fruit" hidden>a navy-blue wolf with small cyan horns, a spiky royal-blue mop, grey-tipped ears, red eyes, little teal bat wings and a big navy tail with a lighter blue end</p>
           <figcaption><span class="name hand">Fruit</span><span class="species">navy-blue wolf</span><span class="credit"><a href="https://www.facebook.com/cheekullowo/" aria-label="fb/cheekullowo">fb/<wbr>cheekullowo</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yuda" data-friend="yuda" style="--wide-left: 0; --wide-right: 63; --phone-left: 0; --phone-right: 63"><figure>
+        <li class="friend" id="yuda" data-friend="yuda" data-lines="136" style="--wide-left: 0; --wide-right: 63; --phone-left: 0; --phone-right: 63"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yuda" aria-describedby="looks-yuda"></div>
           <p id="looks-yuda" hidden>a slate-blue wolf with white eyebrow spots and a cyan bandana</p>
           <figcaption><span class="name hand">Yuda</span><span class="species">slate-blue wolf</span><span class="credit"><a href="https://x.com/YuDa_Hay">@YuDa_Hay</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="terry" data-friend="terry" style="--wide-left: 12; --wide-right: 12; --phone-left: 21; --phone-right: 21"><figure>
+        <li class="friend" id="terry" data-friend="terry" data-lines="81" style="--wide-left: 12; --wide-right: 12; --phone-left: 21; --phone-right: 21"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Terry" aria-describedby="looks-terry"></div>
           <p id="looks-terry" hidden>a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles</p>
           <figcaption><span class="name hand">Terry</span><span class="species">yellow plush toy</span><span class="credit"><a href="https://x.com/FreshSnails_x_6" aria-label="@FreshSnails_x_6">@FreshSnails_<wbr>x_6</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="brian" data-friend="brian" style="--wide-left: 21; --wide-right: 66; --phone-left: 30; --phone-right: 66"><figure>
+        <li class="friend" id="brian" data-friend="brian" data-lines="135" style="--wide-left: 21; --wide-right: 66; --phone-left: 30; --phone-right: 66"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Brian" aria-describedby="looks-brian"></div>
           <p id="looks-brian" hidden>a cream fox in an orange newsboy cap and a green bandana, with one amber eye and one blue</p>
           <figcaption><span class="name hand">Brian</span><span class="species">cream fox</span><span class="credit"><a href="https://www.facebook.com/brian.ren.856964/" aria-label="fb/brian.ren.856964">fb/<wbr>brian.<wbr>ren.856964</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="mumuyou" data-friend="mumuyou" style="--wide-left: 70; --wide-right: 16; --phone-left: 70; --phone-right: 5"><figure>
+        <li class="friend" id="mumuyou" data-friend="mumuyou" data-lines="170" style="--wide-left: 70; --wide-right: 16; --phone-left: 70; --phone-right: 5"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mumuyou" aria-describedby="looks-mumuyou"></div>
           <p id="looks-mumuyou" hidden>a white fox with a blond mop, sky-blue ears, a blue diamond on his forehead, one blue eye and one yellow</p>
           <figcaption><span class="name hand">mumuyou</span><span class="species">white fox</span><span class="credit"><a href="https://www.facebook.com/MuMuYouo">fb/MuMuYouo</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="k3v1n" data-friend="kevin" style="--wide-left: 0; --wide-right: 74; --phone-left: 0; --phone-right: 74"><figure>
+        <li class="friend" id="k3v1n" data-friend="kevin" data-lines="146" style="--wide-left: 0; --wide-right: 74; --phone-left: 0; --phone-right: 74"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to K3V1N" aria-describedby="looks-kevin"></div>
           <p id="looks-kevin" hidden>an ice-blue cat with a yellow mark on his forehead, one eye blue over mint and the other orange over yellow, and a white-tipped tail</p>
           <figcaption><span class="name hand">K3V1N</span><span class="species">ice-blue cat</span><span class="credit"><a href="https://x.com/K3V1N_V01D">@K3V1N_V01D</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="bardell" data-friend="bardell" style="--wide-left: 12; --wide-right: 41; --phone-left: 21; --phone-right: 41"><figure>
+        <li class="friend" id="bardell" data-friend="bardell" data-lines="169" style="--wide-left: 12; --wide-right: 41; --phone-left: 21; --phone-right: 41"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to BarDell" aria-describedby="looks-bardell"></div>
           <p id="looks-bardell" hidden>a cream puppy with a shaggy crimson mop and a curl on top, chocolate-brown ears and feet, amber eyes and a red-tipped tail</p>
           <figcaption><span class="name hand">BarDell</span><span class="species">maple syrup puppy</span><span class="credit"><a href="https://sites.google.com/view/bardell-kc">bardell_kc</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="weiwei" data-friend="weiwei" style="--wide-left: 0; --wide-right: 64; --phone-left: 0; --phone-right: 64"><figure>
+        <li class="friend" id="weiwei" data-friend="weiwei" data-lines="154" style="--wide-left: 0; --wide-right: 64; --phone-left: 0; --phone-right: 64"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to WeiWei" aria-describedby="looks-weiwei"></div>
           <p id="looks-weiwei" hidden>an orange fox with a white mop, white eyebrows, a white muzzle and a big white ruff, pink inner ears, one eye blue over mint and the other brown over yellow, and a bushy tail with a peach end</p>
           <figcaption><span class="name hand">WeiWei</span><span class="species">orange fox</span><span class="credit"><a href="https://www.facebook.com/Aawei1105/" aria-label="fb/Aawei1105">fb/<wbr>Aawei1105</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="mosing" data-friend="mosing" style="--wide-left: 57; --wide-right: 0; --phone-left: 57; --phone-right: 0"><figure>
+        <li class="friend" id="mosing" data-friend="mosing" data-lines="142" style="--wide-left: 57; --wide-right: 0; --phone-left: 57; --phone-right: 0"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to mosing" aria-describedby="looks-mosing"></div>
           <p id="looks-mosing" hidden>a black dragon with a spiky black mop, two cyan horns, big ears cyan inside and at the tips, a white diamond and cyan spots on his forehead, a white muzzle and a big white ruff, one eye green and the other amber, and a tail with cyan fins</p>
           <figcaption><span class="name hand">mosing</span><span class="species">black dragon</span><span class="credit"><a href="https://www.facebook.com/furry.QAQ" aria-label="fb/furry.QAQ">fb/<wbr>furry.QAQ</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="yawei" data-friend="yawei" style="--wide-left: 14; --wide-right: 60; --phone-left: 23; --phone-right: 60"><figure>
+        <li class="friend" id="yawei" data-friend="yawei" data-lines="123" style="--wide-left: 14; --wide-right: 60; --phone-left: 23; --phone-right: 60"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Yawei" aria-describedby="looks-yawei"></div>
           <p id="looks-yawei" hidden>a sky-blue dragon with a big spiky white mane, two long white horns and a white crest between them, long pale grey-blue ears, dark red eyes under white spots, small teal wings with a yellow streak, and a tail banded in yellow and white with a white tuft</p>
           <figcaption><span class="name hand">Yawei</span><span class="species">sky-blue dragon</span><span class="credit"><a href="https://www.facebook.com/yaweithedragon" aria-label="fb/yaweithedragon">fb/<wbr>yaweithedragon</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="cowosus" data-friend="cowosus" style="--wide-left: 21; --wide-right: 51; --phone-left: 31; --phone-right: 51"><figure>
+        <li class="friend" id="cowosus" data-friend="cowosus" data-lines="189" style="--wide-left: 21; --wide-right: 51; --phone-left: 31; --phone-right: 51"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to cowosus" aria-describedby="looks-cowosus"></div>
           <p id="looks-cowosus" hidden>a white Australian Shepherd like a pineapple, with golden thighs scaled in orange diamonds, a ruff and tail tipped with green leaves, a lime patch round one eye, one folded ear, a red-tipped curl, a mint band across his muzzle and blue eyes, the left one orange at the bottom</p>
           <figcaption><span class="name hand">cowosus</span><span class="species">australian shepherd</span><span class="credit"><a href="https://linktr.ee/cowosus" aria-label="linktr.ee/cowosus">linktr.ee/<wbr>cowosus</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="raze" data-friend="raze" style="--wide-left: 56; --wide-right: 18; --phone-left: 56; --phone-right: 27"><figure>
+        <li class="friend" id="raze" data-friend="raze" data-lines="171" style="--wide-left: 56; --wide-right: 18; --phone-left: 56; --phone-right: 27"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Raze" aria-describedby="looks-raze"></div>
           <p id="looks-raze" hidden>a dark-teal dragon in a short-sleeved teal hoodie with white headphones round his neck, with one cyan horn, big ears tipped in teal and purple, a cyan fringe swept over one eye, one eye cyan and the other lavender, and a slim tail ending in a teal tuft</p>
           <figcaption><span class="name hand">Raze</span><span class="species">dark-teal dragon</span><span class="credit"><a href="https://www.facebook.com/huang.alan.9279/" aria-label="fb/huang.alan.9279">fb/<wbr>huang.<wbr>alan.9279</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="tanyuan" data-friend="tanyuan" style="--wide-left: 1; --wide-right: 44; --phone-left: 4; --phone-right: 44"><figure>
+        <li class="friend" id="tanyuan" data-friend="tanyuan" data-lines="164" style="--wide-left: 1; --wide-right: 44; --phone-left: 4; --phone-right: 44"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to tanyuan" aria-describedby="looks-tanyuan"></div>
           <p id="looks-tanyuan" hidden>a tan dog in a blue-grey hoodie, with a white mop streaked with red, red eyes and one folded ear</p>
           <figcaption><span class="name hand">tanyuan</span><span class="species">tan dog</span><span class="credit"><a href="https://x.com/tanyuan_UwU" aria-label="@tanyuan_UwU">@tanyuan_<wbr>UwU</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="alfie" data-friend="alfie" style="--wide-left: 0; --wide-right: 32; --phone-left: 0; --phone-right: 32"><figure>
+        <li class="friend" id="alfie" data-friend="alfie" data-lines="148" style="--wide-left: 0; --wide-right: 32; --phone-left: 0; --phone-right: 32"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Alfie" aria-describedby="looks-alfie"></div>
           <p id="looks-alfie" hidden>a coral tabby cat in round glasses, with a red mark on the forehead, amber eyes and a bushy coral tail</p>
           <figcaption><span class="name hand">Alfie</span><span class="species">coral tabby cat</span><span class="credit"><a href="https://x.com/alfiecat_djq">@alfiecat_djq</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="teni" data-friend="teni" style="--wide-left: 22; --wide-right: 54; --phone-left: 32; --phone-right: 54"><figure>
+        <li class="friend" id="teni" data-friend="teni" data-lines="122" style="--wide-left: 22; --wide-right: 54; --phone-left: 32; --phone-right: 54"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Teni" aria-describedby="looks-teni"></div>
           <p id="looks-teni" hidden>a Glaceon with a cyan bob that ends in dark-teal diamonds, a curl on the crown and a diamond-tipped tail</p>
           <figcaption><span class="name hand">Teni</span><span class="species">cyan-haired glaceon</span><span class="credit"><a href="https://x.com/foxx_manome" aria-label="@foxx_manome">@foxx_<wbr>manome</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="whitedeer" data-friend="whitedeer" style="--wide-left: 30; --wide-right: 30; --phone-left: 18; --phone-right: 18"><figure>
+        <li class="friend" id="whitedeer" data-friend="whitedeer" data-lines="185" style="--wide-left: 30; --wide-right: 30; --phone-left: 18; --phone-right: 18"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to WhiteDeer" aria-describedby="looks-whitedeer"></div>
           <p id="looks-whitedeer" hidden>a pale blue deer with branched blue antlers and a white face, in a sailor suit with a navy collar and neckerchief and a white sailor hat with a gold anchor</p>
           <figcaption><span class="name hand">WhiteDeer</span><span class="species">ocean deer</span><span class="credit"><a href="https://www.facebook.com/bai.lu.149190/" aria-label="fb/bai.lu.149190">fb/<wbr>bai.<wbr>lu.149190</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="jiaoyue" data-friend="jiaoyue" style="--wide-left: 73; --wide-right: 4; --phone-left: 73; --phone-right: 13"><figure>
+        <li class="friend" id="jiaoyue" data-friend="jiaoyue" data-lines="100" style="--wide-left: 73; --wide-right: 4; --phone-left: 73; --phone-right: 13"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to jiaoyue" aria-describedby="looks-jiaoyue"></div>
           <p id="looks-jiaoyue" hidden>a lavender dog with a white face and chest, pale blue eyes, white paws and a big purple tail with a white end</p>
           <figcaption><span class="name hand">jiaoyue</span><span class="species">lavender dog</span><span class="credit"><a href="https://github.com/Louis0325" aria-label="github/Louis0325">github/<wbr>Louis0325</a></span></figcaption>
         </figure></li>
-        <li class="friend" id="claude" data-friend="claude" style="--wide-left: 0; --wide-right: 0; --phone-left: 5; --phone-right: 5"><figure>
+        <li class="friend" id="claude" data-friend="claude" data-lines="100" style="--wide-left: 0; --wide-right: 0; --phone-left: 5; --phone-right: 5"><figure>
           <div class="rig" role="button" tabindex="0" aria-label="say hi to Claude" aria-describedby="looks-claude"></div>
           <p id="looks-claude" hidden>the machine that drew this page, as it appears in Claude Code: a small terracotta block with two tall eyes, a stub of an arm on each side and four short legs</p>
           <figcaption><span class="name hand">Claude</span><span class="species">language model</span><span class="credit"><a href="https://x.com/AnthropicAI">@AnthropicAI</a></span></figcaption>
@@ -427,6 +448,7 @@
 <script src="lib/fwiends/src/live.js"></script>
 <script src="lib/fwiends/src/pen.js"></script>
 <script src="lib/fwiends/src/title-pen.js"></script>
+<script src="lib/fwiends/src/workings.js"></script>
 <script>
   // The stage (FWIENDS.md). Each friend is mounted in its slot and brought to life by the live library
   // (lib/fwiends/src/live.js): it stands on its own penciled ground, follows the pointer and answers a hi, and its
@@ -506,6 +528,7 @@
   });
   const friends = [...document.querySelectorAll('.friend')].map(mountFriend);
   knowTheirPeople(friends);
+  showWorkingsOnRequest(friends);
   fitSlots(friends, disclaimerArrow(friends.find(friend => friend.name === 'claude')));
   stage.start();
   rollCall = opening ? callTheRoll() : null;
@@ -546,6 +569,40 @@
     friend.travel = seconds => travelAt(friend, seconds);
     friend.watch = seconds => newcomerFor(friend, seconds) || personOf(friend);
     return friend;
+  }
+
+  // How the page is made, in blue pencil (lib/fwiends/src/workings.js), shown only while the reader asks, by pressing
+  // "a hundred-odd lines of code": over each friend the construction its spec describes, and the spec's file and
+  // length in place of its species; the kit's names for the parts of the page, where there is room; and the note on
+  // the library. Every number is read from the page as it stands, and each spec's length from its tag (data-lines,
+  // which `python3 tools/pf.py pages` writes).
+  function showWorkingsOnRequest(friends) {
+    const phrase = document.querySelector('.intro .workings'), button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn quiet workings';
+    button.textContent = phrase.textContent;
+    button.setAttribute('aria-label', `${phrase.textContent}: show how the page is drawn`);
+    button.setAttribute('aria-controls', 'library');
+    phrase.replaceWith(button);
+    const root = getComputedStyle(document.documentElement), wide = '(min-width: 721px)', roomy = '(min-width: 1180px)';
+    const title = document.querySelector('h1'), nav = document.querySelector('header nav'), note = document.querySelector('.stage .note');
+    // In the margin, level with the title, and with the nav.
+    const inMargin = element => () => ({ left: 4, top: element.getBoundingClientRect().top });
+    const nearEnd = element => () => { const box = element.getBoundingClientRect(); return { left: box.right - 150, top: box.top }; };
+    PhyFriends.workings.attach({
+      button, stage, friends, reveal: [document.getElementById('library')],
+      notes: [
+        { at: title, place: 'above', media: wide,
+          text: `the title, in the hand at ${getComputedStyle(title).fontSize}, written stroke by stroke by pen.js` },
+        { at: nav, place: 'right', media: wide, text: '← the nav: the ring marks the page you are on' },
+        { at: nearEnd(note), place: 'above', media: roomy, text: '.note, tilted as the title is' },
+        { at: inMargin(title), place: 'right', media: wide, size: 13,
+          text: `--margin-x<br>${root.getPropertyValue('--margin-x').trim()} in` },
+        { at: inMargin(nav), place: 'right', media: wide, size: 13, text: `--L<br>${root.getPropertyValue('--L').trim()} apart` },
+        ...friends.map(friend => ({ at: friend.element.querySelector('.species'), place: 'over',
+          text: `${friend.name}.js, ${friend.element.dataset.lines} lines` })),
+      ],
+    });
   }
 
   // A friend knows its person: pointing at the credit to its owner, under it or elsewhere on the page (a link with

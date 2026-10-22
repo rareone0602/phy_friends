@@ -5,9 +5,9 @@ lib/style/figures/README.md), and write them wherever they are used.
   python3 tools/dark_sheet.py
 
 On the dark sheet the paper and the ink swap: the sheet is the graphite ink and the words are in
-the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3 and the red) keeps its
-CIELAB hue and chroma and moves to the lightness at which it has the same contrast with the dark
-sheet as it has with the paper, and so does each data color. The marks in lib/style/site/pencil.css
+the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3, the red and the blue
+pencil) keeps its CIELAB hue and chroma and moves to the lightness at which it has the same contrast
+with the dark sheet as it has with the paper, and so does each data color. The marks in lib/style/site/pencil.css
 hard-code their inks, since a data URI cannot read var(), so their dark set is the same marks with
 each ink replaced by its dark one.
 
@@ -39,7 +39,7 @@ TERMINAL_SERIES = ['blue', 'slate', 'ochre', 'pink']
 # for paper alone keep it. Print always stays on paper.
 OPT_IN = ':root:has(meta[name="color-scheme"][content~="dark"])'
 MEDIA = '@media screen and (prefers-color-scheme: dark)'
-INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red']  # The inks that keep their contrast; ink and paper swap.
+INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red', 'blue-pencil']  # The inks that keep their contrast; ink and paper swap.
 
 INKS_BEGIN = ("/* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */")
 INKS_END = "/* The end of the dark sheet's inks. */"
@@ -130,7 +130,7 @@ def at_contrast(color, sheet, target):
 
 def day_inks():
     root = re.search(r':root \{(.*?)\n\}', NOTEBOOK.read_text(), re.S).group(1)
-    return dict(re.findall(r'--(paper|rule|margin|ink|ink-2|ink-3|red): (#[0-9a-f]{6});', root))
+    return dict(re.findall(r'--(paper|rule|margin|ink|ink-2|ink-3|red|blue-pencil): (#[0-9a-f]{6});', root))
 
 
 def dark_inks(day):
@@ -194,7 +194,7 @@ def replace_block(text, begin, end, body):
 
 def with_inks(text, dark):
     """lib/style/site/notebook.css's text with the dark sheet's inks written in."""
-    order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red']
+    order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']
     tokens = ' '.join(f'--{name}: {dark[name]};' for name in order)
     return replace_block(text, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
 
@@ -255,12 +255,12 @@ def main():
     dark = dark_inks(day)
     for path, (_, new) in written(day).items():
         path.write_text(new)
-    print(f'{"ink":8} {"paper":>8} {"dark":>8}  contrast on paper / on the dark sheet')
+    print(f'{"ink":11} {"paper":>8} {"dark":>8}  contrast on paper / on the dark sheet')
     for name in ['ink'] + INKS:
-        print(f'{name:8} {day[name]:>8} {dark[name]:>8}  {contrast(day[name], day["paper"]):.2f} / {contrast(dark[name], dark["paper"]):.2f}')
+        print(f'{name:11} {day[name]:>8} {dark[name]:>8}  {contrast(day[name], day["paper"]):.2f} / {contrast(dark[name], dark["paper"]):.2f}')
     data = day_data()
     for name, color in dark_data(day, data).items():
-        print(f'{name:8} {data[name]:>8} {color:>8}  {contrast(data[name], day["paper"]):.2f} / {contrast(color, dark["paper"]):.2f}')
+        print(f'{name:11} {data[name]:>8} {color:>8}  {contrast(data[name], day["paper"]):.2f} / {contrast(color, dark["paper"]):.2f}')
 
 
 if __name__ == '__main__':

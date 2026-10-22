@@ -74,6 +74,7 @@ The tokens, in `notebook.css`, on the paper and on the dark sheet:
 | `--ink-2` | `#6d6a63` | `#b4b1a9` | `5.1:1`: quieter words (intros, small print, notes, captions, table heads, code), the lines of controls, focus |
 | `--ink-3` | `#97938a` | `#86837a` | `2.9:1`: marks only (dashes, squiggles, the quote line, disabled controls); never words someone needs to read |
 | `--red` | `#a64a3f` | `#fe9c8c` | `5.4:1`: errors, and nothing else; the margin's red, pressed harder |
+| `--blue-pencil` | `#1c77ad` | `#66afe8` | `4.7:1`: a page's workings (the construction under a drawing, notes on how the page is made), shown only when the reader asks |
 
 - The paper's tooth is a fine fractal noise at `40%`, multiplied over
   everything.

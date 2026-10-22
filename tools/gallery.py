@@ -9,7 +9,8 @@ decide how much room each takes. From them come, without anyone writing them by 
   and the page width at which every friend stands in one row (layout_css);
 - each friend's slot (index.html): its reaches past its box on a wide screen and on a phone (--wide-left,
   --wide-right, --phone-left, --phone-right) in its tag, so that the page is laid out as it will stand before its
-  script has drawn and measured the friends (with_slots).
+  script has drawn and measured the friends, and the number of lines in its spec (data-lines), which the page's
+  workings show (with_slots).
 
 `python3 tools/pf.py pages` writes both, and `python3 tools/pf.py test` fails while either is stale, or while the
 friends do not stand in the rows of the split that the page means for a window either side of where each split
@@ -266,13 +267,15 @@ def row_drift(measures):
 
 def with_slots(text, reaches):
     """The gallery's text with each friend's reaches on each size of screen (the largest over its windows) written
-    in its tag, so that its slot is as wide before the page's script runs as after."""
+    in its tag, so that its slot is as wide before the page's script runs as after, and the number of lines in its
+    spec (data-lines), which the page's workings show."""
     by_name = {reach['name']: reach for reach in reaches}
     for tag in reversed(FriendTags(text).tags):  # From the end, so that each tag's place in the text still holds.
         reach = by_name[tag['key']]
         sides = '; '.join(f'--{screen}-{side}: {reach[screen][side]}' for screen in SCREENS for side in ('left', 'right'))
-        slot = re.sub(r' style="[^"]*"', '', tag['text'])
-        text = text[:tag['start']] + f'{slot[:-1]} style="{sides}">' + text[tag['start'] + len(tag['text']):]
+        lines = len((CHARACTERS / tag['key'] / f'{tag["key"]}.js').read_text(encoding='utf-8').splitlines())
+        slot = re.sub(r' (?:style|data-lines)="[^"]*"', '', tag['text'])
+        text = text[:tag['start']] + f'{slot[:-1]} data-lines="{lines}" style="{sides}">' + text[tag['start'] + len(tag['text']):]
     return text
 
 
@@ -380,7 +383,7 @@ def page_drift(cast, measures):
         if new == text:
             continue
         scripts = with_scripts(text, cast['names']) or text
-        stale = (["its friends' script tags"] if scripts != text else []) + (['its rows and slots'] if new != scripts else [])
+        stale = (["its friends' script tags"] if scripts != text else []) + (['its rows, slots and line counts'] if new != scripts else [])
         problems.append(f'{page.relative_to(ROOT)}: {" and ".join(stale)} are stale; run python3 tools/pf.py pages')
     return problems
 
