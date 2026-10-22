@@ -15,26 +15,7 @@
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true,
   "permissions": {
-    "defaultMode": "auto",
-    "deny": [
-      "Read(~/Private/**)",
-      "Edit(~/Private/**)",
-      "Read(~/.ssh/**)",
-      "Edit(~/.ssh/**)",
-      "Read(~/.aws/**)",
-      "Read(~/.gnupg/**)",
-      "Read(~/.config/gcloud/**)",
-      "Read(~/.kube/**)",
-      "Read(~/.netrc)",
-      "Read(~/.zsh_history)",
-      "Read(~/.bash_history)",
-      "Read(~/Library/Keychains/**)",
-      "Read(~/.claude/.credentials.json)",
-      "Read(.env)",
-      "Read(.env.*)",
-      "Read(**/id_rsa*)",
-      "Read(**/*.pem)"
-    ]
+    "defaultMode": "auto"
   },
   "skillOverrides": {
     "anthropic-skills:docs": "off",
