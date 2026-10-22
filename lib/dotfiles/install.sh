@@ -1,7 +1,11 @@
 #!/bin/bash
-# Installs phy's dotfiles from this clone of phy_friends: links ~/.vimrc to lib/dotfiles/vimrc and Claude
-# Code's status line to lib/dotfiles/statusline.py, so that a git pull in the clone updates both.
-# Usage: git clone https://github.com/rareone0602/phy_friends.git && phy_friends/lib/dotfiles/install.sh
+# Installs phy's dotfiles from the clone of phy_friends that holds this script: links ~/.vimrc to vimrc and Claude
+# Code's status line to claude/statusline.py, so that a git pull in the clone brings both up to date. Claude Code's
+# settings are not linked: claude/settings.json recommends them, and each machine aligns its own by hand (README.md).
+# Usage:
+#   git clone --filter=blob:none --sparse https://github.com/rareone0602/phy_friends.git ~/.dotfiles
+#   git -C ~/.dotfiles sparse-checkout set lib/dotfiles
+#   ~/.dotfiles/lib/dotfiles/install.sh
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
@@ -12,54 +16,42 @@ if ! command -v python3 >/dev/null; then
   exit 1
 fi
 
-# Links a file to its copy in this clone. A file already there is kept beside it as <file>.before-dotfiles,
-# unless an earlier run kept one, which is never overwritten.
+# Links a file to its copy in this clone, given by its path in lib/dotfiles. A link into lib/dotfiles that an earlier
+# run made, from this clone or another and wherever the file then lay, is replaced, and so is a file that already
+# matches its copy; any other file is kept beside it as <file>.before-dotfiles, unless an earlier run kept one, which is
+# never overwritten.
 link() {
-  local target="$1" source="$2"
+  local target="$1" source="$here/$2"
   if [ -L "$target" ] && [ "$(readlink "$target")" = "$source" ]; then
     return
   fi
-  if [ -e "$target" ] || [ -L "$target" ]; then
+  if [ -L "$target" ] && [[ "$(readlink "$target")" == */lib/dotfiles/* ]]; then
+    rm "$target"
+  elif [ -f "$target" ] && [ ! -L "$target" ] && cmp -s "$target" "$source"; then
+    rm "$target"
+  elif [ -e "$target" ] || [ -L "$target" ]; then
     if [ -e "$target.before-dotfiles" ] || [ -L "$target.before-dotfiles" ]; then
       echo "Both $target and $target.before-dotfiles exist: move one of them, then run this again." >&2
       exit 1
     fi
     mv "$target" "$target.before-dotfiles"
   fi
+  mkdir -p "$(dirname "$target")"
   ln -s "$source" "$target"
 }
 
-mkdir -p "$config_dir"
-link "$HOME/.vimrc" "$here/vimrc"
-link "$config_dir/statusline.py" "$here/statusline.py"
+# Each link, as the file in its place and the path of its copy in lib/dotfiles. Every copy is checked before any link
+# is made, so that a clone missing one leaves the machine as it was.
+links=("$HOME/.vimrc" vimrc "$config_dir/statusline.py" claude/statusline.py)
+for ((i = 1; i < ${#links[@]}; i += 2)); do
+  if [ ! -f "$here/${links[i]}" ]; then
+    echo "This clone has no lib/dotfiles/${links[i]}: pull it again, then run this again." >&2
+    exit 1
+  fi
+done
+for ((i = 0; i < ${#links[@]}; i += 2)); do
+  link "${links[i]}" "${links[i + 1]}"
+done
 
-# Point Claude Code at the script, keeping every other setting and a copy of the file as it was before the first
-# run.
-python3 - "$config_dir" <<'EOF'
-import json
-import os
-import shlex
-import shutil
-import sys
-
-config_dir = sys.argv[1]
-settings_path = os.path.join(config_dir, "settings.json")
-settings = {}
-if os.path.exists(settings_path):
-    with open(settings_path) as settings_file:
-        settings = json.load(settings_file)
-    if not os.path.exists(settings_path + ".before-statusline"):
-        shutil.copyfile(settings_path, settings_path + ".before-statusline")
-# Any other setting of the status line (its padding, say) is kept.
-settings["statusLine"] = {
-    **(settings.get("statusLine") or {}),
-    "type": "command",
-    "command": "python3 " + shlex.quote(os.path.join(config_dir, "statusline.py")),
-}
-with open(settings_path + ".tmp", "w") as settings_file:
-    json.dump(settings, settings_file, indent=2)
-    settings_file.write("\n")
-os.replace(settings_path + ".tmp", settings_path)
-EOF
-
-echo "Linked ~/.vimrc and Claude Code's status line to $here. A git pull there updates them."
+echo "Linked ~/.vimrc and Claude Code's status line to $here; a git pull there updates them."
+echo "Claude Code's settings stay the machine's own: $here/claude/settings.json recommends them."

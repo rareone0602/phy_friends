@@ -2,14 +2,15 @@
 """Claude Code status line in phy's inks: who, where and which model, then a meter for each limit.
 
 Claude Code pipes the session to this script as JSON on stdin and shows what it prints. The inks follow the
-house style at https://rareone0602.github.io/phy_friends/style.html. lib/dotfiles/install.sh, in a clone of
-phy_friends, points Claude Code at this file, so a git pull updates it.
+house style at https://rareone0602.github.io/phy_friends/style.html. lib/dotfiles/install.sh links this file from
+a clone of phy_friends, so a git pull updates it, and the settings recommended beside it run it.
 """
 
 import getpass
 import json
 import os
 import socket
+import subprocess
 import sys
 
 # The inks, written by `python3 tools/dark_sheet.py` from the kit's and the figures' (lib/style): edit those and run it.
@@ -54,18 +55,47 @@ def lookup(data, path):
     return data
 
 
+def settings_path():
+    """Return the path of Claude Code's user settings."""
+    config_dir = os.environ.get("CLAUDE_CONFIG_DIR", os.path.join(os.path.expanduser("~"), ".claude"))
+    return os.path.join(config_dir, "settings.json")
+
+
+def system_is_light():
+    """Whether the system asks for light: macOS's appearance, or GNOME's color scheme. A machine reached over SSH has
+    no appearance of its own that this script can read, so it, like any other that says nothing, counts as dark."""
+    if os.environ.get("SSH_CONNECTION"):
+        return False
+    try:
+        if sys.platform == "darwin":
+            # The key holds "Dark" while the appearance is dark, and is absent while it is light.
+            result = subprocess.run(["defaults", "read", "-g", "AppleInterfaceStyle"], capture_output=True,
+                                    text=True, timeout=1)
+            return result.returncode != 0 or "Dark" not in result.stdout
+        result = subprocess.run(["gsettings", "get", "org.gnome.desktop.interface", "color-scheme"],
+                                capture_output=True, text=True, timeout=1)
+        return result.returncode == 0 and "dark" not in result.stdout
+    except (OSError, subprocess.SubprocessError):
+        return False
+
+
 def sheet():
-    """Choose the inks: STATUSLINE_SHEET if set, otherwise paper for a light Claude Code theme and dark for the rest."""
+    """Choose the inks: STATUSLINE_SHEET if set; otherwise the Claude Code theme's sheet, and for "auto" (or no theme)
+    the system's, as Claude Code follows it."""
     chosen = os.environ.get("STATUSLINE_SHEET")
     if chosen in INKS:
         return INKS[chosen]
-    config_dir = os.environ.get("CLAUDE_CONFIG_DIR", os.path.join(os.path.expanduser("~"), ".claude"))
     try:
-        with open(os.path.join(config_dir, "settings.json")) as settings_file:
-            theme = json.load(settings_file).get("theme", "")
+        with open(settings_path()) as settings_file:
+            theme = str(json.load(settings_file).get("theme", ""))
     except (OSError, ValueError, AttributeError):
         theme = ""
-    return INKS["paper"] if str(theme).startswith("light") else INKS["dark"]
+    if theme.startswith("light"):
+        return INKS["paper"]
+    if theme.startswith("dark"):
+        return INKS["dark"]
+    return INKS["paper"] if system_is_light() else INKS["dark"]
+
 
 
 def short_path(path):

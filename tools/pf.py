@@ -852,6 +852,7 @@ GRAPHITE_TEST = 'every page that draws in pencil loads the graphite filter from 
 LINKS_TEST = 'every local link names a file of the repository'
 DEPENDENCY_TEST = "the library links nothing outside it, and phy's style and dotfiles nothing of the fwiends"
 KIT_TEST = 'the kit keeps every name that the published kit defines'
+DOTFILES_TEST = 'the dotfiles fit any machine: the recommended settings parse, and no file names a home folder'
 GRAPHITE = KIT / 'graphite.js'
 PENCIL_SHEETS = {KIT / 'pencil.css', KIT / 'phy.css'}  # The kit's stylesheets that draw through the filter.
 
@@ -881,7 +882,8 @@ def run_tests(page=TEST_PAGE):
               PAGES_TEST: unmeasured + (gallery.page_drift(cast, measures) if cast else []),
               STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page),
               LINKS_TEST: layout.link_drift(found), DEPENDENCY_TEST: layout.dependency_drift(found),
-              GRAPHITE_TEST: graphite_drift(found), KIT_TEST: kit_api.kit_drift()}
+              GRAPHITE_TEST: graphite_drift(found), KIT_TEST: kit_api.kit_drift(),
+              DOTFILES_TEST: layout.dotfiles_drift()}
     for name, drift in checks.items():
         results['failed'] += [{'name': name, 'message': message} for message in drift]
         if not drift:

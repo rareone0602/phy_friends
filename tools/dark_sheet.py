@@ -14,7 +14,7 @@ each ink replaced by its dark one.
 Run it after an ink, a mark or a data color changes. It rewrites the block between its markers in
 lib/style/site/notebook.css and lib/style/site/pencil.css, the data colors' table in
 lib/style/figures/README.md, and the inks of both sheets in the dotfiles (lib/dotfiles/vimrc and
-statusline.py), and prints each color's contrast on both sheets. The pages' theme colors (their
+claude/statusline.py), and prints each color's contrast on both sheets. The pages' theme colors (their
 theme-color metas) are kept by hand: the paper's, and the dark sheet's where a page has one;
 `python3 tools/pf.py test` checks them, and everything written here, with written() and theme_drift().
 """
@@ -29,7 +29,7 @@ PENCIL = KIT / 'pencil.css'
 MPLSTYLE = FIGURES / 'phy.mplstyle'  # Holds the data colors, in order, as matplotlib's color cycle.
 FIGURES_README = FIGURES / 'README.md'
 VIMRC = DOTFILES / 'vimrc'
-STATUSLINE = DOTFILES / 'statusline.py'
+STATUSLINE = DOTFILES / 'claude' / 'statusline.py'
 SERIES = ['blue', 'red', 'slate', 'ochre', 'pink']  # The data colors' names, in their order.
 # The colors a terminal is painted in: the inks, and the data colors but the red, which there would read as an error.
 TERMINAL_INKS = {'ink': 'ink', 'ink2': 'ink-2', 'ink3': 'ink-3', 'red': 'red', 'rule': 'rule'}
@@ -178,7 +178,7 @@ def with_vim_inks(text, sheets):
 
 
 def with_python_inks(text, sheets):
-    """lib/dotfiles/statusline.py's text with the inks of both sheets written in, as INKS."""
+    """lib/dotfiles/claude/statusline.py's text with the inks of both sheets written in, as INKS."""
     def entries(colors):
         pairs = [f'"{name}": "{color}"' for name, color in colors.items()]
         inks, series = pairs[:len(TERMINAL_INKS)], pairs[len(TERMINAL_INKS):]

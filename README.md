@@ -46,7 +46,7 @@ lib/                      the library: what other work uses
   fwiends/props/          the things the films share: a spec each
   style/site/             the kit, phy's CSS library: the stylesheets, the face, the graphite filter and the icons
   style/figures/          the house style for charts and diagrams
-  dotfiles/               phy's vimrc and Claude Code status line, in the house inks
+  dotfiles/               phy's setup on every machine: the vimrc, and Claude Code's settings and status line
 index.html  style.html  specimen.html  preview.png
                           the site (GitHub Pages serves it from the root), and its link preview
 demo/                     one-off pieces, each in a folder of its own
@@ -70,7 +70,7 @@ every name a page linking it may use.
 | `index.html`, `style.html`, `specimen.html`, `preview.png` | the site: the gallery, with its link preview; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn |
 | `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
 | `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
-| `lib/dotfiles/` | phy's `vimrc` (Google's indents and line lengths, in the house inks) and Claude Code status line (`statusline.py`), and `install.sh`, which links them from a clone, so that a `git pull` updates them |
+| `lib/dotfiles/` | phy's setup, one set of files for every machine (its README says how to set one up): `vimrc` (Google's indents and line lengths, in the house inks); Claude Code's recommended settings and its status line (`claude/`); and `install.sh`, which links the vimrc and the status line from a clone of their own, so that a `git pull` updates them |
 | `lib/fwiends/src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `lib/fwiends/src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `lib/fwiends/src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
@@ -123,8 +123,8 @@ New work goes where it will be used from:
 - **What makes anything phy's goes in `lib/style/`**: a token, a mark or a
   class in the kit (its README lists them), a rule for charts in `figures/`.
   The kit may add and restyle, but keeps every name a page may use.
-- **phy's own setup goes in `lib/dotfiles/`**, in the kit's inks, which
-  `tools/dark_sheet.py` writes into it.
+- **phy's own setup goes in `lib/dotfiles/`**, one file for every machine,
+  in the kit's inks, which `tools/dark_sheet.py` writes into it.
 - **A one-off goes in `demo/`**, in a folder of its own. It may use anything in
   the library or the film kit, but nothing outside `demo/` may use it, so any
   one-off can be deleted without breaking the rest.

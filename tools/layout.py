@@ -5,12 +5,15 @@ its kin in src/, the film kit in film/, the characters and the props), phy's sty
 the figures' styles in figures/) and phy's dotfiles (lib/dotfiles). The demos use it: the site's pages at the root, the
 films in demo/ and the mockups in design/. tools/ and test/ serve both.
 
-`python3 tools/pf.py test` runs both checks:
+`python3 tools/pf.py test` runs these checks:
 - link_drift: every local link of every page, stylesheet and document, and every link to this repository's own pages
   or source, names a file that the repository holds.
 - dependency_drift: dependencies run one way. Nothing in the library links outside it, and phy's style and dotfiles
   link nothing of the fwiends, so that each can be used without the others.
+- dotfiles_drift: the dotfiles fit every machine. Claude Code's recommended settings parse, and no dotfile names one
+  machine's home folder.
 """
+import json
 import os
 import posixpath
 import re
@@ -143,4 +146,28 @@ def dependency_drift(found=None):
             problems.append(f'{source}: {link} lies outside the library, which the demos use and never the reverse')
         elif (within(source, STYLE) or within(source, DOTFILES)) and within(path, FWIENDS):
             problems.append(f"{source}: {link} lies in the fwiends, which phy's style and dotfiles never use")
+    return problems
+
+
+# A path into one machine's home folder (/Users/<name> on macOS, /home/<name> on Linux), which no other machine has.
+HOME_FOLDER = re.compile(r'/(?:Users|home)/\w')
+
+
+def dotfiles_drift():
+    """Every way in which the dotfiles would not fit every machine, one line each. Claude Code's recommended settings
+    must parse, so that a machine can take any of them as they stand, and no dotfile may name one machine's home
+    folder, which ~ names for each."""
+    problems = []
+    settings = DOTFILES / 'claude' / 'settings.json'
+    if not settings.exists():
+        problems.append(f'{settings.relative_to(ROOT)}, the recommended settings, is missing')
+    else:
+        try:
+            json.loads(settings.read_text(encoding='utf-8'))
+        except ValueError as error:
+            problems.append(f'{settings.relative_to(ROOT)} does not parse, so no machine could take it: {error}')
+    for path in sorted(ROOT / name for name in tracked() if within(name, DOTFILES)):
+        for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
+            if HOME_FOLDER.search(line):
+                problems.append(f"{path.relative_to(ROOT)}:{number} names one machine's home folder: write ~ instead")
     return problems
