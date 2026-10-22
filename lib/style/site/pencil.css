@@ -126,6 +126,7 @@ header nav a { text-decoration-line: none; }
 header nav a:hover { text-decoration-line: underline; }
 /* Links, and a quiet button, are underlined in pencil: the line mark, in --ink-2, under the text, stretched to its
    length. Print and forced colors, which drop or recolor background images, keep the plain underline. */
+.btn.quiet { text-decoration: underline 1px; text-underline-offset: 3px; }
 @media screen and (forced-colors: none) {
   a, .btn.quiet { text-decoration-line: none; background: var(--mark-line) 0 calc(100% + 3px) / 100% 8px no-repeat; }
   h1 a, header nav a, header nav a:hover { text-decoration-line: none; background: none; }
@@ -158,7 +159,7 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 .btn::before { content: ''; position: absolute; inset: 1px -3px -2px; pointer-events: none; filter: url(#graphite); transform: rotate(-.8deg); background: var(--mark-box) 0 0 / 100% 100% no-repeat; }
 .btn:hover::before { background-image: var(--mark-box-again); }  /* Traced a second time on hover. */
 .btn:active { top: 1px; }
-.btn.quiet { padding: 0; color: var(--ink-2); text-decoration: underline 1px; text-underline-offset: 3px; }
+.btn.quiet { padding: 0; color: var(--ink-2); }
 .btn.quiet::before { content: none; }
 .btn.quiet:hover { color: var(--ink); }
 .btn:disabled { color: var(--ink-3); cursor: default; top: 0; }
