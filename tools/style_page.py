@@ -102,7 +102,7 @@ def heading_id(text):
 
 HEADING = re.compile(r'<h([12]) id="([^"]+)">(.*?)</h\1>')
 # A code block or code span, which is left alone, or a section reference: §N, after the name of the
-# document it points into when that is another one ("`STYLE.md` §5").
+# document it points into when that is another one ("`STYLE.md` §3").
 SECTION_REF = re.compile(r'<pre>.*?</pre>|(?:(?:<code>)?([\w-]+\.md)(?:</code>)?,? )?§(\d+)|<code>.*?</code>', re.S)
 
 

@@ -604,7 +604,7 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
 
     Frame i shows t = i / fps, for start * fps <= i < end * fps; each is screenshotted
     after seek(t) and two animation frames. A film with unagreed friends is refused
-    unless draft is set (the owners' say, STYLE.md §2).
+    unless draft is set (the owners' say, STYLE.md §1).
     page: an HTML file, relative to the current directory and optionally with a query
     and a fragment of its own, or a URL. out: .mp4, .webm, .gif or .apng; with `at` (seconds), a .png
     still instead. size: (width, height) in CSS pixels. scale: the device pixel ratio, so

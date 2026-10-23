@@ -7,7 +7,7 @@
 @font-face { font-family: 'Shantell Sans'; src: url('../../lib/style/figures/fonts/ShantellSans-Variable.ttf') format('truetype'); font-weight: 300 800; }
 
 :root {
-  --informal: 100;  /* A hobby piece sits at the top of the dial (STYLE.md §5). */
+  --informal: 100;  /* A hobby piece sits at the top of the dial (STYLE.md §3). */
   --mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --frame-bg: #e9e6de;
 }

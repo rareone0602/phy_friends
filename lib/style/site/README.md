@@ -1,7 +1,7 @@
 # The kit
 
 phy's CSS library: a sheet of lined notebook paper and everything drawn on it,
-for any page in the house style. `STYLE.md` §4 to §7 say what it is for; this
+for any page in the house style. `STYLE.md` §3 says what it is for; this
 says how to use it. `specimen.html` shows every part at work, with the dial to
 turn. A page links the kit where it is published, never a copy of it, so that
 it changes as the style does (see [Keeping step](#keeping-step)).
@@ -142,6 +142,10 @@ wide, in an ink, never filled. `pencil.css` defines each once, as a token
 - a **cross**, in red, for errors;
 - a **caret** on a select.
 
+A page that needs another mark writes a word instead; a piece draws whatever
+it needs, rain or speed lines, by the same rule. A mark may turn to point
+somewhere or grow to hold its own, and stays the same mark.
+
 - **Focus** is a dashed pencil outline, `1.5px` in `--ink-2`, `3–4px` clear of
   the thing.
 - **Tilts:** the title `−1°`, a margin note `−2°`, the button's box `−0.8°`.
@@ -149,6 +153,21 @@ wide, in an ink, never filled. `pencil.css` defines each once, as a token
 
 ## Parts of a page
 
+A page has a `header` (the title, the intro and any nav), a `main` holding the
+writing and a `footer`, in one column `42em` wide at most, left-aligned against
+the margin line. Nothing else is required.
+
+What a page leaves out, and what it says:
+- No menus and no hamburgers: the nav is plain words, with the ring round
+  the current page. Tags are plain words, with no pills and no #.
+- Pictures have no frame, no rounded corners and no shadow. A photo stays a
+  photo, with no words over it.
+- Tables have no borders, stripes or vertical lines.
+- An error says what to do in phy's voice ("that needs to be a number, like
+  250"); loading is one plain word ("counting…"); an empty state is one note,
+  "nothing saved yet.", with no picture and no "oops".
+
+The parts:
 - **Small print**, in `--ink-2`: the nav, a date line, a contents line and the
   footer. The nav sits on the rule under the intro: plain words spaced apart,
   underlined only while hovered, with the ring round the current page. A date
@@ -182,5 +201,19 @@ wide, in an ink, never filled. `pencil.css` defines each once, as a token
   on the next rule; a result is written in the hand with the arrow pointing at
   it; loading shows the squiggle drawing itself, and under reduced motion it
   stays still; an empty state is one note, then a few blank rules.
+- **A portrait:** an about page may have one character standing beside the
+  title, a rule taller than it. It stands on the title's rule, reaches up into
+  the blank band, and may watch the cursor.
 - **Print:** plain paper. The rules, margin line, tooth, nav and portrait drop
   out; the ink stays.
+
+## Other places
+
+- **Favicon:** phy's head on everything phy makes, unless the work is about
+  another character.
+- **Link preview:** the page's own paper, title and characters, set to fill
+  `1200×630` with every character at one size; not a designed card, with no
+  extra text and no logo.
+- **README:** GitHub strips CSS, so the style lives in the words, in sentence
+  case: a title, one honest line, the preview picture and short plain
+  sections. No badges, no emoji and no feature lists.

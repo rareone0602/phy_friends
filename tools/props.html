@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="../lib/style/site/notebook.css">
 <link rel="stylesheet" href="../lib/style/site/pencil.css">
 <style>
-  :root { --informal: 100; --rules: 5; }  /* A sheet of the fwiends, a hobby project, so at the top of the dial (STYLE.md §5). */
+  :root { --informal: 100; --rules: 5; }  /* A sheet of the fwiends, a hobby project, so at the top of the dial (STYLE.md §3). */
   /* Each prop stands on a rule in a box as tall as a seated friend's (--rules, five as in the gallery), with its name
      on the next rule and its state on the one after. A row is eight rules, so that every row stands on a rule. */
   main { max-width: none; }  /* The shelf is the sheet's one wide thing, as the gallery's stage is, so that every prop stands in phy's row. */
@@ -17,7 +17,7 @@
   .shelf p { margin: 0; }
   .box { height: calc(var(--L) * var(--rules)); display: flex; align-items: flex-end; position: relative; padding: 0 8px; }
   .box > div svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  /* The ground, the kit's mark over the rule at the box's bottom edge, through the graphite filter (STYLE.md §6). */
+  /* The ground, the kit's mark over the rule at the box's bottom edge, through the graphite filter (STYLE.md §3). */
   .box::after { content: ''; position: absolute; left: 0; right: 0; top: calc(100% - 4.8px); height: 8px; pointer-events: none;
     background: var(--mark-ground) 0 0 / 100% 8px no-repeat; filter: url(#graphite); }
   .name { --hand: 50; height: var(--L); font: 300 22px/var(--L) var(--face); position: relative; top: var(--sit); white-space: nowrap; }

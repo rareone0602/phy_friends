@@ -77,7 +77,7 @@
      the page is laid out as it will stand before the friends are drawn, and the page measures them
      again (fitSlots). The page's script and tools/gallery.py read --box and --overlap from here. The
      stage is the one centered thing on the page (FWIENDS.md). */
-  :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §5). */
+  :root { --informal: 100; }  /* The gallery is a hobby project, so it sits at the top of the dial (STYLE.md §3). */
   /* The box is five rules, so that the second row stands on its rule 768px down the page: a window at
      least that tall shows two rows of friends. --reaching is 0 where the slots give up their reaches. */
   .stage { container-type: inline-size; }
@@ -108,7 +108,7 @@
   .rig { position: relative; height: var(--size); cursor: pointer; border-radius: 3px; -webkit-tap-highlight-color: transparent;
     touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
   .rig:focus { outline: none; }
-  /* The ring goes round the friend's slot, so that it stays clear of a tail that reaches past the box (STYLE.md §6). */
+  /* The ring goes round the friend's slot, so that it stays clear of a tail that reaches past the box (STYLE.md §3). */
   .rig:focus-visible::after { content: ''; position: absolute; pointer-events: none; border: 1.5px dashed var(--ink-2); border-radius: 3px;
     inset: -5.5px calc(var(--size) * var(--past-right) * -1 - 4px) -5.5px calc(var(--size) * var(--past-left) * -1 - 4px); }
   .rig svg { display: block; width: 100%; height: auto; overflow: visible; }
@@ -139,10 +139,10 @@
   .ground { position: absolute; left: 0; width: 100%; top: calc(var(--size) - 7px); height: 12px; overflow: visible; pointer-events: none; z-index: 5;
     color: var(--ink); filter: url(#graphite); }
   @media (forced-colors: active) { .ground { color: CanvasText; } }
-  /* On the dark sheet (STYLE.md §4) a light is rubbed out at the feet of the friend you point at, tap or focus: an
+  /* On the dark sheet (STYLE.md §3) a light is rubbed out at the feet of the friend you point at, tap or focus: an
      eraser, rubbed back and forth along the ground, has lifted the graphite in an oval pool to show the paper
      (#fbf9f3), in streaks, ragged at the edges and with some graphite left in. It lies on the sheet, under the friend
-     and its ground; the friend keeps its own paper (STYLE.md §12). It lies about the ground, clear of the words
+     and its ground; the friend keeps its own paper (STYLE.md §4). It lies about the ground, clear of the words
      below, and across the friend's slot less the overlap with each neighbor's (or half of it where the slots do not
      overlap), so that it never lies over another friend's tail. Forced colors are not the dark sheet, so it has none. */
   @media screen and (prefers-color-scheme: dark) and (forced-colors: none) {
@@ -559,7 +559,7 @@
 
   // Mounts one friend in its slot and draws its ground. Each friend is drawn on the page ('page'): on the
   // dark sheet and in forced colors, where the page's paper cannot show through its pencil, on a sheet
-  // of paper cut to its outline instead (STYLE.md §9). The roll call keeps its own fields on each friend,
+  // of paper cut to its outline instead (FWIENDS.md). The roll call keeps its own fields on each friend,
   // and tells the library where the friend is going and whom it watches.
   function mountFriend(element, index) {
     const label = element.querySelector('.name').textContent;
@@ -1119,7 +1119,7 @@
   }
 
   // Shows a friend once its way in has begun and moves it along, box and all: its paper travels with
-  // it (STYLE.md §9). The pen draws its ground as it sets off (ROLL_CALL.pen). Rising, the drawing moves up inside its
+  // it (FWIENDS.md). The pen draws its ground as it sets off (ROLL_CALL.pen). Rising, the drawing moves up inside its
   // box, which the slit clips, and the pen draws the ground in the moments before (RISE.pen).
   function showOnItsWay(friend, travel) {
     friend.element.classList.toggle('waiting', !travel);

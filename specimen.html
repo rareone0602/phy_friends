@@ -46,7 +46,7 @@
 <main>
   <article class="doc">
     <h2 id="dial">the dial</h2>
-    <p>Everything here is in one face on <a href="style.html#s5">one dial</a>, <code>--informal</code>. Turn it and the letters follow, from neat print at 0 to a bouncing hand at 100. The case stays put: sentence case below 50 is the writer's job, and a stylesheet given it would capitalise phy.</p>
+    <p>Everything here is in one face on <a href="style.html#s3">one dial</a>, <code>--informal</code>. Turn it and the letters follow, from neat print at 0 to a bouncing hand at 100. The case stays put: sentence case below 50 is the writer's job, and a stylesheet given it would capitalise phy.</p>
     <div class="row">
       <label for="informal">informality</label>
       <select class="field" id="informal"><option value="0">0, a paper's diagram</option><option value="50" selected>50, a site</option><option value="100">100, a hobby project</option></select>
@@ -141,7 +141,7 @@
   drawing.setAttribute('aria-label', placeholder.alt);
   placeholder.remove();
   // The dial: the select sets --informal on the root, which lib/style/site/notebook.css turns into every letter's
-  // informality and bounce (STYLE.md §5). It starts at the page's own value, read from the stylesheet, so a
+  // informality and bounce (STYLE.md §3). It starts at the page's own value, read from the stylesheet, so a
   // reload returns the page to it even where the browser would restore the select's last choice.
   const root = document.documentElement;
   const dial = document.getElementById('informal');

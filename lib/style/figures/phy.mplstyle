@@ -3,7 +3,7 @@
 # Sized for one column of a paper (3.3 in). Stack an overlay on top for the target medium:
 #   plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Paper: white background, the paper's text face.
 #   plt.style.use(['phy.mplstyle', 'phy-slides.mplstyle'])  # Slides and web: paper background, larger type.
-# Values come from lib/style/site/notebook.css and STYLE.md §8 rather than being chosen here; the colors come from tools/palette.py.
+# Values come from lib/style/site/notebook.css and STYLE.md §3 rather than being chosen here; the colors come from tools/palette.py.
 # Text is set in Shantell Sans (lib/style/figures/fonts/). Matplotlib finds it only after registration; otherwise it silently falls back to Helvetica Neue:
 #   from matplotlib import font_manager; font_manager.fontManager.addfont('lib/style/figures/fonts/ShantellSans-Variable.ttf')
 

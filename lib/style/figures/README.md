@@ -1,7 +1,7 @@
 # Figures
 
 phy's charts, slides and a paper's main diagram, in the house style (`STYLE.md`
-§8 says what they are for). The matplotlib styles and the TikZ package carry
+§3 says what they are for). The matplotlib styles and the TikZ package carry
 these rules; stack a matplotlib overlay for the medium:
 
 ```
@@ -18,7 +18,7 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 ## Data colours
 
 Each comes from one of phy's characters: the character's colour taken down in
-the house shade step (`STYLE.md` §9) until it holds `3:1` on the paper, and
+the house shade step (`FWIENDS.md`) until it holds `3:1` on the paper, and
 where two still sat too close, one took another step. `python3
 tools/palette.py` derives them again and prints the tests. On the dark sheet
 each keeps its hue and takes the lightness at which it has the same contrast

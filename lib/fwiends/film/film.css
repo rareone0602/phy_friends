@@ -6,7 +6,7 @@
 main { max-width: 1720px; }
 
 /* The film is a sheet of its own ruled paper laid on the page. It is a picture, so it is a whole
-   number of the page's rules tall (STYLE.md §7), and 16:9 wide. Its rules are spaced by the
+   number of the page's rules tall (STYLE.md §3), and 16:9 wide. Its rules are spaced by the
    film's scale, not the page's, so a faint edge in the rules' blue shows where the sheet lies; a
    film being recorded (tools/pf.py film) is the whole frame, and has no edge. */
 .film { container-type: inline-size; margin-top: calc(var(--L) * 2); }

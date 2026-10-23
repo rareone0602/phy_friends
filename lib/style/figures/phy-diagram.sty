@@ -1,5 +1,5 @@
 % phy-diagram.sty: the house style for a paper's main diagram, such as the teaser or
-% the method overview (STYLE.md §8). The paper's own text keeps the venue's typeface.
+% the method overview (STYLE.md §3). The paper's own text keeps the venue's typeface.
 %
 % Build the diagram separately, in this folder, and include the resulting PDF:
 %   lualatex diagram.tex
@@ -11,7 +11,7 @@
 % fonts/ next to this file, together with its license.
 %
 % One typeface, Shantell Sans, on one dial: informal is 0 for a paper, 50 for a site
-% and 100 for a hobby project (STYLE.md §5 and §8).
+% and 100 for a hobby project (STYLE.md §2).
 %   \usepackage[informal=50]{phy-diagram}   a diagram for a site or slides
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{phy-diagram}[2026/09/28 phy's pencil for diagrams]
@@ -36,7 +36,7 @@
 \edef\phy@fonts{\directlua{local f = kpse.find_file('phy-diagram.sty', 'tex') or ''
   tex.sprint((f:match('^(.*/)') or './') .. 'fonts/')}}
 
-% Map the dial to the font's axes, as lib/style/site/notebook.css does (STYLE.md §5). Running
+% Map the dial to the font's axes, as lib/style/site/notebook.css does (STYLE.md §3). Running
 % text uses the dial value as its informality (INFM). Hand-lettered text (hand = 50)
 % never drops below INFM 50 and bounces in the top half of the dial, reaching BNCE 50
 % at 100. The weight is always Light (300).
@@ -53,7 +53,7 @@
 % Hand-lettered text, for the diagram's single note.
 \phy@pencil\phyhand{\phy@informal}{50}
 
-% The inks (lib/style/site/notebook.css) and the data colors with their shades (STYLE.md §8).
+% The inks (lib/style/site/notebook.css) and the data colors with their shades (STYLE.md §3).
 \definecolor{phyink}{HTML}{3D3C39}
 \definecolor{phyink2}{HTML}{6D6A63}
 \definecolor{phyink3}{HTML}{97938A}

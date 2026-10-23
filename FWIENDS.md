@@ -4,7 +4,18 @@ This file adds what only this project needs to phy's style guide (`STYLE.md`):
 the gallery page, the rules for drawing a friend with
 `lib/fwiends/src/phyfriends.js`, and the rules for putting friends together in
 films and games. Where the two disagree, `STYLE.md` wins unless this file says
-why. The site's `style.html` shows both, one after the other, and section N of
+why.
+
+The characters are made by a small program, not stored as pixels: phy noticed
+that [Grokbot Icon](https://grokbot-icon-studio.serio-ai.chatgpt.site/)'s
+character icons have a low Kolmogorov complexity (a few ellipses, some tufts,
+two pill eyes and a blush), and the house template follows them. Wherever they
+appear, they are **drawn by the factory from their specs**, never by hand, so
+every copy matches, and in one material, the gallery's: coloured pencil
+without an outline, exactly one shade layer, and paper cut to the outline
+wherever the ground is not paper. Another material is for a one-off, with the
+owner's yes. However free a piece is (`STYLE.md` §4), it stages its characters
+and never redraws them. The site's `style.html` shows both, one after the other, and section N of
 `STYLE.md` stays at `style.html#sN`. Run `python3 tools/pf.py style` after
 editing either.
 
@@ -14,11 +25,11 @@ editing either.
 
 `index.html` (the gallery), `style.html` (the guides) and `specimen.html`
 (the kit at work) all wear the kit, and turn to the dark sheet where the
-reader's system asks for it (`STYLE.md` §4). The paper is design C of the
+reader's system asks for it (`STYLE.md` §3). The paper is design C of the
 mockups in `design/`; A and B are kept in `design/backup/`. The specimen
 sits at `50`, and its dial turns the face, never the case, to `0` or `100`
 until a reload. The gallery is a hobby project, so it sits at `100`
-(`STYLE.md` §5).
+(`STYLE.md` §3).
 
 The page has five parts, in this order:
 1. The title, `phy's fwiends`, in the hand: the project's name wherever
@@ -74,19 +85,19 @@ The page has five parts, in this order:
   seeded wobble, `PhyFriends.rng(5)`, ink at 70%, 1.4px, through the graphite
   filter). Each friend is drawn on the page (`bg: 'page'`): on the dark
   sheet and in forced colours, on paper cut to its outline instead
-  (`STYLE.md` §9), a pencil's width wide of it, as a sticker is cut, so
-  that a dark friend keeps its edge. In forced colours its ground is in the
+  (drawing a friend, below), a pencil's width wide of it, as a sticker is
+  cut, so that a dark friend keeps its edge. In forced colours its ground is in the
   system's text colour.
 - **A light is rubbed out** of the dark sheet at the feet of the friend you
   point at, tap or focus: an eraser, rubbed back and forth along its ground,
   lifts the graphite in an oval pool, streaked, ragged at the edges and never
-  quite clean (`STYLE.md` §12). It is the one light on the site's pages,
+  quite clean (`STYLE.md` §4). It is the one light on the site's pages,
   since the gallery is a stage, and it lights one friend at a time, so that
   the page still has one thing to look at. It stays within the friend's slot,
   clear of the words below and of its neighbours' tails.
 - The ring circles the host's name, phy's: "this one" is the one whose page
   it is.
-- **Two winks**, both in corners of the stage (`STYLE.md` §3). A pencilled
+- **Two winks**, both in corners of the stage (`STYLE.md` §2). A pencilled
   note on the rule under the nav, over the right end of the row, says what to
   do: "psst: they watch your cursor. click one to say hi" (only "click one to
   say hi" where fewer than five stand in a row, and "tap" on touch screens).
@@ -185,7 +196,7 @@ library:
   handle can still be copied.
 
 **The workings.** "a hundred-odd lines of code", in the intro, is a quiet
-button that shows how the page is drawn, in blue pencil (`STYLE.md` §4); until
+button that shows how the page is drawn, in blue pencil (`STYLE.md` §3); until
 it is pressed, nothing of it shows. Pressed, the fwiends sit still, as with
 "keep still", and fade to the construction that their specs describe: the
 head, the face and the body, the line of the eyes and the eyes on it, the ears
@@ -245,7 +256,24 @@ written (the name's capitalisation, the species and the pronoun, "they" until
 told), take one picture as the colour standard and say which, and keep private
 references in a git-ignored `private/` folder.
 
-**Coloured pencil** (`STYLE.md` §9):
+**Make it cute.** Characters are soft and round, with a big head on a small
+body. Cute comes before literal, so long as every part can still be told
+apart. Where the two disagree, what looks good beats what is spatially
+logical, in a turned view as anywhere.
+
+**Coloured pencil:** soft round shapes coloured in without an
+outline, pill eyes in the character's own eye colour, a soft blush, and no nose
+and no mouth by default.
+- **The pencil is one texture over the whole character**: strokes rising to
+  the right, the paper's tooth, and patches where the hand pressed more
+  lightly, with the paper, rules and all, showing through. The texture
+  belongs to the paper: it stays put while the character breathes, turns or
+  hops on the spot, and travels with it about a page, as a figure cut out of
+  paper would. On a background of its own, such as a dark close-up or the
+  dark sheet, a character is drawn on paper cut to its outline, so the pencil
+  shows paper, never the background; on the dark sheet the cut runs a
+  pencil's width wide, as a sticker's does, so that a dark character keeps
+  its edge. Light falls on the place, never on a character.
 - The one texture is the factory's pencil, which `render` and `mount` lay
   over the whole friend; a spec never draws a texture of its own.
   `pencil: false` draws the flat shapes alone, for an icon too small to hold
@@ -267,10 +295,12 @@ references in a git-ignored `private/` folder.
   Markings and clothes follow, named for what they paint, and `bg`
   (`#1c1d21`), the same for all, comes from the abstract friend that every
   spec extends.
-- **Exactly one shade layer** (`STYLE.md` §9). `<name>Shade` is
-  derived from `<name>` by `PhyFriends.shadeOf`, so shades match across
-  fwiends, and nothing comes from a reference's lighting: no pale rim along an
-  ear, no darker far side, no highlights.
+- **Exactly one shade layer.** `<name>Shade` is derived
+  from `<name>` by `PhyFriends.shadeOf`, the house step darker (CIELAB L*
+  `−10` and chroma `×1.2` at the same hue, with a near-grey leaning to
+  lavender), so shades match across fwiends. There are no second steps, and
+  nothing comes from a reference's lighting: no pale rim along an ear, no
+  darker far side, no highlights.
   - The body sits under the head, so every body is in its fur's shade, or its
     clothes' shade where it is dressed. A layer of the clothes lying over it
     takes the clothes' own colour, such as the front of a hoodie.
@@ -412,7 +442,8 @@ side and four short legs.
 - Its species is "language model", its pronoun "it", and its credit
   Anthropic's.
 
-**Motion**, on the page and in a scene (`STYLE.md` §9):
+**Motion**, on the page and in a scene (`STYLE.md` §3), with the eyes smoothed
+so that they never jitter:
 - Idle, the library's clip plays underneath: breathing, blinks at irregular
   intervals, a slow sway of the head and tail, a glance about now and then and
   an occasional ear flick, on an 8-second loop that each fwiend starts at a
@@ -470,7 +501,7 @@ to break them.
   speak in marks, since only their owners know how they talk: ! ? !? … z ??,
   and drawn ones, a ♪, a heart, a bead of sweat, a sparkle, a light bulb and a
   swirl. A mark is a drawing over a fwiend's head, not punctuation, so the
-  calm punctuation of `STYLE.md` §3 doesn't apply to it. It is written in the
+  calm punctuation of `STYLE.md` §2 doesn't apply to it. It is written in the
   hand pressed harder, bold (`600`) in `--ink-2`, so that it reads at a
   glance; a drawn mark is a line as thick as that hand's stem, never filled,
   on the same baseline (the hand has no ♪, so the ♪ is drawn too). Likewise,
@@ -492,7 +523,7 @@ to break them.
 - **The owners are credited where a viewer can follow the link.** A page links
   each owner in its small print, and a frame may credit the owners of the
   fwiends in it on the bottom rule. A video credits them once, large
-  (`STYLE.md` §12), in a roll call, say. Without the credits, recompose the
+  (`STYLE.md` §4), in a roll call, say. Without the credits, recompose the
   frame, so that the bottom rule is not left as dead space.
 - **Consent is per medium.** An owner who agreed to the gallery has not
   thereby agreed to films or games (`agreed` in
@@ -504,7 +535,7 @@ to break them.
   glides on up to twice as far as the feet, at a little under half a hop's
   speed. They turn with `turnX`, never with a mirror image, which would swap
   two-coloured eyes and reverse K3V1N's mark. Each is on its own paper, cut
-  to its outline (`STYLE.md` §9).
+  to its outline (above).
 - Films boil as the gallery does, 8 times a second. Under
   reduced motion a scene plays as the motion rules above say; travel becomes a
   glide, a fwiend stands up or sits down in a cut, and a film shows its last
@@ -522,11 +553,11 @@ fwiend is, so that the sheet keeps one hand.
   the sheet, whose rules show through the pencil.
 - **A prop takes a fwiend's colour by override**
   (`palette: { paper: PF.get('yuda').palette.scarf }`), never by copying the
-  value, and its shade follows (`STYLE.md` §9).
+  value, and its shade follows (above).
 - **Light is a pale shape:** a flame, a beam or a lit window is a prop
-  like any other (`STYLE.md` §12), never a glow or a halo.
+  like any other (`STYLE.md` §4), never a glow or a halo.
 - **Ink is a stroke:** a wick, a string, a vein or a rib is one pencil line in
-  an ink, at `STYLE.md` §6's width, never filled.
+  an ink, at the kit's mark width (`STYLE.md` §3), never filled.
 - **A prop changes by its states,** parts shown or hidden on cue (the candles
   lit, the needle down), never by a second drawing, and it may be drawn in,
   coloured in or rubbed out from the bottom or the left, as handwriting writes
