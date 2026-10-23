@@ -13,3 +13,6 @@ lib/fwiends/characters/*/examples/
 lib/style/figures/*.aux
 lib/style/figures/*.log
 lib/style/figures/*.pdf
+
+# Notes for agents on this machine only, which name private work.
+CLAUDE.local.md
