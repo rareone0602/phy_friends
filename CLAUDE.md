@@ -19,10 +19,11 @@ code. These rules are for agents working here, most important first.
    friends is fixed in the factory, the house anatomy or a check, not patched
    into one spec. Claude is exempt from the house anatomy and shows no
    feelings.
-5. **One pass.** A change updates every document, generated page and derived
-   value it touches. Generated files are never edited by hand; their tools
-   write them: `pf.py style` (style.html), `pf.py pages` (script tags and the
-   gallery's rows), `tools/dark_sheet.py` (the dark sheet and the dotfiles'
-   inks) and `tools/site_assets.py` (icons and the link preview). Work is done
-   when `python3 tools/pf.py test` passes.
+5. **One pass.** A change updates every document, page and derived value it
+   touches. Generated files are never edited by hand; their tools write them:
+   `pf.py pages` (script tags and the gallery's rows), `tools/dark_sheet.py`
+   (the dark sheet, the papers' and the dotfiles' inks) and
+   `tools/site_assets.py` (icons and the link preview). `style.html` is drawn
+   by hand from `STYLE.md` and `FWIENDS.md`, so a change to a rule it pictures
+   redraws the picture. Work is done when `python3 tools/pf.py test` passes.
 6. **No CJK text in any file**, code and data included.

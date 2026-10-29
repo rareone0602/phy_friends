@@ -10,12 +10,11 @@
   python3 tools/pf.py anim howdi --clip idle            # Writes out/howdi/anim/idle.gif.
   python3 tools/pf.py anim howdi --clip "layer(idle, hold('curious'))" --size 512 --sheet -o out/scratch/x.mp4
   python3 tools/pf.py render howdi --with out/scratch/mine.js   # A working copy that may redefine howdi.
-  python3 tools/pf.py style                             # STYLE.md + FWIENDS.md -> style.html (the style guide page).
   python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4   # Films a page that defines window.film.
   python3 tools/pf.py film test/film-stub.html --at 1 --size 1920x1080 -o out/scratch/film/still.png
   python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4
   python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4   # Twice the pixels each way, at a higher quality.
-  python3 tools/pf.py test                              # Runs test/index.html headless, checks the pages and the derived files, and opens every tool and demo page; exits non-zero on a failure or a page error.
+  python3 tools/pf.py test                              # Runs test/index.html headless, checks the pages and the derived files, and opens every page as a reader opens it from disk; exits non-zero on a failure or a page error.
   python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows and slots (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
@@ -38,8 +37,9 @@ so that its colors match the page's; --crf sets its quality.
 
 `test` also checks the pages against the cast in lib/fwiends/characters/cast.js: the labels
 that index.html repeats by hand, and the script tags and rows that `pages` writes
-(tools/gallery.py); and the files derived from others: style.html, the dark
-sheet's blocks (tools/dark_sheet.py), the theme colors and the list of test files
+(tools/gallery.py); and the files derived from others: the dark sheet's blocks
+(tools/dark_sheet.py), the theme colors, the inks' contrasts and the data
+colors that the kit's README and style.html give, and the list of test files
 in test/index.html.
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
@@ -70,7 +70,6 @@ import gallery
 import kit_api
 import layout
 from layout import CHARACTERS, KIT, SRC
-import style_page
 from cdp import (NEXT_PAINT_JS, ChromeError, ChromeTimeout, HeadlessChrome, PageError, exit_on_sigterm, page_url,
                  split_page)
 from shoot import shoot as shoot_page
@@ -832,21 +831,21 @@ def shoot_frame(chrome, t):
     return chrome.screenshot()
 
 
-# ---- Tests: test/index.html, run headless, the derived files, and every tool and demo page ----
+# ---- Tests: test/index.html, run headless, the derived files, and every page ----
 
 TEST_PAGE = ROOT / 'test' / 'index.html'
 TEST_TIMEOUT = 120  # Seconds for the whole run; the harness stops a test that waits too long, and pf.py one that hangs.
 TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testResults) : null'
 DEMOS = ROOT / 'demo' / 'index.html'  # Lists the demos, each as <a href="<folder>/index.html">.
 # The pages whose theme colors must be the paper's, and the dark sheet's where a page has one.
-THEMED_PAGES = [ROOT / 'index.html', ROOT / 'specimen.html', ROOT / 'style.html']
-OPENED_VIEWPORT = (1280, 800)  # The window in which the tool and demo pages are opened.
+THEMED_PAGES = [ROOT / 'index.html', ROOT / 'style.html']
+OPENED_VIEWPORT = (1280, 800)  # The window in which every page is opened.
 
 # The checks of the pages against the cast (tools/gallery.py) and of the derived files, each a test of its own.
 LABEL_TEST = "the gallery's labels agree with the cast"
 PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows and slots fit the friends' reaches"
-STYLE_TEST = 'style.html is written from STYLE.md and FWIENDS.md'
 DARK_TEST = "the dark sheet's inks and marks, and every theme color, follow from the paper's inks"
+SHOWN_TEST = "the inks' contrasts and the data colors that the kit's README and the style guide give are the kit's"
 TEST_FILES_TEST = 'test/index.html loads every test file'
 GRAPHITE_TEST = 'every page that draws in pencil loads the graphite filter from lib/style/site/graphite.js'
 LINKS_TEST = 'every local link names a file of the repository'
@@ -858,10 +857,10 @@ PENCIL_SHEETS = {KIT / 'pencil.css', KIT / 'phy.css'}  # The kit's stylesheets t
 
 
 def run_tests(page=TEST_PAGE):
-    """Run the in-browser tests and the checks of the pages and of the derived files, and open every tool and demo
-    page. Return (results, errors): results is {'passed': [names], 'failed': [{'name', 'message'}]}, and errors
-    lists what the pages reported as (page, message): the tests' page, the cast's, the gallery at each width at
-    which it is measured, and each tool and demo page."""
+    """Run the in-browser tests and the checks of the pages and of the derived files, and open every page as a reader
+    opens it from disk. Return (results, errors): results is {'passed': [names], 'failed': [{'name', 'message'}]},
+    and errors lists what the pages reported as (page, message): the tests' page, the cast's, the gallery at each
+    width at which it is measured, and each page opened."""
     errors, unmeasured = [], []
     with HeadlessChrome(1024, 768) as chrome:
         chrome.open(page)
@@ -873,14 +872,15 @@ def run_tests(page=TEST_PAGE):
             measures = gallery.measure_gallery(chrome, errors)
         except ValueError as error:
             unmeasured.append(str(error))
-        errors += opening_errors(chrome, opened_pages())
+    with HeadlessChrome(*OPENED_VIEWPORT, reader=True) as reader:
+        errors += opening_errors(reader, opened_pages())
     if results is None:
         errors.append((relative(page), 'it did not load test/harness.js: window.testsDone is missing'))
         results = {'passed': [], 'failed': []}
     found = layout.links()
     checks = {LABEL_TEST: gallery.label_drift(cast),
               PAGES_TEST: unmeasured + (gallery.page_drift(cast, measures) if cast else []),
-              STYLE_TEST: style_drift(), DARK_TEST: dark_drift(), TEST_FILES_TEST: test_files_drift(page),
+              DARK_TEST: dark_drift(), SHOWN_TEST: dark_sheet.shown_drift(), TEST_FILES_TEST: test_files_drift(page),
               LINKS_TEST: layout.link_drift(found), DEPENDENCY_TEST: layout.dependency_drift(found),
               GRAPHITE_TEST: graphite_drift(found), KIT_TEST: kit_api.kit_drift(),
               DOTFILES_TEST: layout.dotfiles_drift()}
@@ -917,26 +917,19 @@ def demo_pages():
 
 
 def opened_pages():
-    """The pages that `test` opens to see that they load and draw without errors: every tool page and demo page."""
-    return sorted((ROOT / 'tools').glob('*.html')) + demo_pages()
+    """The pages that `test` opens to see that they load and draw without errors: the site's, every tool page and
+    every demo page."""
+    return THEMED_PAGES + sorted((ROOT / 'tools').glob('*.html')) + demo_pages()
 
 
 def opening_errors(chrome, pages):
     """Open each page and return the errors that it reports while it loads and first paints, as (page, message).
-    Requests to other hosts are refused, so that the check needs no network and does not wait for one."""
+    Requests to other hosts are refused, so that the check needs no network and does not wait for one. With a reader's
+    Chrome (HeadlessChrome(reader=True)) a page is opened from disk as anyone opens it, unable to read the files beside
+    it, as a font preloaded with crossorigin would."""
     chrome.block('http://*', 'https://*')
     chrome.set_viewport(*OPENED_VIEWPORT)
     return [(relative(page), error) for page in pages for error in chrome.visit(page)]
-
-
-def style_drift():
-    """Whether style.html is as `pf.py style` would write it, as a list of problems."""
-    try:
-        written = style_page.style_html()
-    except SystemExit as error:  # STYLE.md or FWIENDS.md cannot be written out, and the message says why.
-        return [str(error)]
-    stale = written != style_page.STYLE_HTML.read_text(encoding='utf-8')
-    return ['style.html is stale; run python3 tools/pf.py style'] if stale else []
 
 
 def dark_drift():
@@ -1055,8 +1048,6 @@ def main(argv=None):
     n.add_argument('--sheet', nargs='?', const=True, help='also write a contact sheet (default <out>-sheet.png)')
     n.add_argument('-o', '--out')
 
-    sub.add_parser('style', help='write STYLE.md and FWIENDS.md out as style.html')
-
     f = sub.add_parser('film', help='film a page that defines window.film to .mp4 / .webm (with --audio, with sound) / '
                                     '.gif / .apng, or a still')
     f.add_argument('page', help='an HTML file, optionally with a query and a fragment (e.g. "scene.html?take=2"), '
@@ -1084,7 +1075,7 @@ def main(argv=None):
                         'for at least 8 Mb/s at 1080p30 and 16 Mb/s at 1440p30')
 
     sub.add_parser('test', help='run the in-browser tests in test/index.html, check the pages against the cast and '
-                                'the derived files, and open every tool and demo page')
+                                'the derived files, and open every page as a reader opens it from disk')
     sub.add_parser('pages', help="write the friends' script tags and the gallery's rows and slots from the cast and the friends' reaches")
     u = sub.add_parser('tune', help='write the tuning page (tools/tune.html) out as one file, to send to an artist')
     u.add_argument('-o', '--out', default=OUT / 'tune.html')
@@ -1112,8 +1103,6 @@ def run(a):
         view = json.loads(a.view) if a.view.lstrip().startswith('{') else a.view
         print(anim(a.name, a.clip, a.out, fps=a.fps, seconds=a.seconds, view=view, size=a.size,
                    bg=not a.no_bg, sheet=a.sheet, zoom=a.zoom))
-    elif a.cmd == 'style':
-        print(style_page.style_page())
     elif a.cmd == 'film':
         print(film(a.page, a.out, size=a.size, scale=a.scale, fps=a.fps, start=a.start, end=a.end, at=a.at,
                    draft=a.draft, sheet=a.sheet, audio=a.audio, fade=a.fade, crf=a.crf))

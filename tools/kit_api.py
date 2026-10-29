@@ -2,7 +2,8 @@
 
 Pages elsewhere link the kit as it is published (https://rareone0602.github.io/phy_friends/lib/style/site/phy.css),
 so that every change to it reaches them at once and they keep in step with phy's style. What a page relies on is the
-kit's names: its files, its tokens (custom properties such as --ink) and its classes (such as .note). kit_drift
+kit's names: its files, its tokens (custom properties such as --ink), its classes (such as .note) and the values its
+attributes take (such as [data-paper=kraft]). kit_drift
 compares them with the kit as published, on origin/main, and names each one that the working copy drops, so that a
 change can add and restyle, but not break a page. To retire a name, keep it beside its successor until no page uses
 it, or list it in RETIRED with the reason.
@@ -25,6 +26,7 @@ STRING = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'')
 TOKEN = re.compile(r'(--[\w-]+)\s*:')
 PRELUDE = re.compile(r'([^{};]+)\{')
 CLASS = re.compile(r'\.(-?[a-zA-Z_][\w-]*)')
+ATTRIBUTE = re.compile(r'\[(data-[\w-]+)=([\w-]+)\]')  # A value of one of the kit's attributes, unquoted.
 
 
 def git(*args):
@@ -42,6 +44,7 @@ def names(files):
         for prelude in PRELUDE.findall(text):
             if not prelude.strip().startswith('@'):
                 found |= {'.' + name for name in CLASS.findall(prelude)}
+                found |= {f'[{name}={value}]' for name, value in ATTRIBUTE.findall(prelude)}
     return found
 
 

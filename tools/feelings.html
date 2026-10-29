@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light">
 <title>phy's fwiends · feelings</title>
-<link rel="preload" href="../lib/style/site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+  // The face starts loading before the style below asks for it, but not on a page opened from disk, where a browser
+  // refuses a font fetched this way and the style loads it instead.
+  if (location.protocol !== 'file:') document.head.append(Object.assign(document.createElement('link'),
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: '', href: '../lib/style/site/fonts/ShantellSans-Latin.woff2' }));
+</script>
 <style>
   @font-face {
     font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;

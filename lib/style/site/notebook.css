@@ -7,7 +7,9 @@
 /* The face, served from fonts/ (a Latin subset made by tools/font_subset.py) with the
    three axes that the dial uses at their full ranges. The URL is relative to this file. A
    page preloads the file so that it starts early (rel="preload", as="font", type="font/woff2"
-   and crossorigin, which a font request needs even from the same origin). */
+   and crossorigin, which a font request needs even from the same origin). Opened from disk, a
+   browser refuses a font fetched with crossorigin, though this rule still loads it, so a page
+   that may be opened from disk adds the preload from a script only where it is served. */
 @font-face {
   font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;
   src: url('fonts/ShantellSans-Latin.woff2') format('woff2');
@@ -58,10 +60,16 @@ body {
     var(--paper);
   background-attachment: local;
 }
-/* Paper texture. */
+/* Paper texture: the paper's tooth, and on the dark sheet the tooth showing through the graphite as specks and the
+   strokes in which the graphite was laid on. They are tokens, so that another sheet (papers.css) can take them up. */
+:root {
+  --tooth: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .34  0 0 0 0 .3  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --speckle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .98  0 0 0 0 .98  0 0 0 0 .95  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  --streaks: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1600'><filter id='s' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.002 .5' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .9  0 0 0 0 .9  0 0 0 0 .88  1.6 0 0 0 -.62'/></filter><g transform='rotate(-30 800 800)'><rect x='-800' y='-800' width='3200' height='3200' filter='url(%23s)'/></g></svg>");
+}
 body::before {
   content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 10;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .36  0 0 0 0 .34  0 0 0 0 .3  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-image: var(--tooth);
   opacity: .4; mix-blend-mode: multiply;
 }
 /* The column beside the margin line. main keeps it, and so do a header and a footer that stand beside main in the
@@ -132,9 +140,9 @@ footer a:hover { color: var(--ink); }
 @media screen and (prefers-color-scheme: dark) and (forced-colors: none) {
   /* The graphite was laid on in strokes rising to the right, and the paper's tooth shows through it in light specks. */
   :root:has(meta[name="color-scheme"][content~="dark"]) body::before { mix-blend-mode: screen; opacity: .22;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .98  0 0 0 0 .98  0 0 0 0 .95  .5 0 0 0 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+    background-image: var(--speckle); }
   :root:has(meta[name="color-scheme"][content~="dark"]) body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9; mix-blend-mode: screen; opacity: .07;
-    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1600'><filter id='s' x='0' y='0' width='100%' height='100%'><feTurbulence type='fractalNoise' baseFrequency='.002 .5' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .9  0 0 0 0 .9  0 0 0 0 .88  1.6 0 0 0 -.62'/></filter><g transform='rotate(-30 800 800)'><rect x='-800' y='-800' width='3200' height='3200' filter='url(%23s)'/></g></svg>") 0 0 / 1600px 1600px; }
+    background: var(--streaks) 0 0 / 1600px 1600px; }
 }
 /* Forced colors are the system's, neither the paper nor the dark sheet, so neither texture (the dark sheet's is kept
    to forced-colors: none above) lies over them. */

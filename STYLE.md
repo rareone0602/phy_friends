@@ -140,6 +140,11 @@ words to red for errors.
   colour, like white pencil on black paper. Nothing is inverted: a character
   keeps its own paper, and a scan its own white. On a dark host the page
   doesn't control, a slide say, lay a sheet of paper on it.
+- **Other sheets** (`lib/style/site/papers.css`): graph paper, a score, a
+  toned sketchbook, kraft, an index card, a cyanotype, and tracing paper laid
+  over another, each with inks that keep the paper's contrasts. A light sheet
+  turns to the dark sheet with the page; a dark or toned one is a piece's
+  look, never a working page's.
 - **Blue pencil**, an illustrator's non-photo blue deepened to be read, is
   for a page's workings: the construction under a drawing and the notes on
   how the page is made, shown only when the reader asks

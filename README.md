@@ -25,7 +25,7 @@ lib/                      the library: what other work uses
   style/site/             the kit, phy's CSS library: the stylesheets, the face, the graphite filter and the icons
   style/figures/          the house style for charts and diagrams
   dotfiles/               phy's setup on every machine: the vimrc, and Claude Code's settings and status line
-index.html  style.html  specimen.html  preview.png
+index.html  style.html  preview.png
                           the site (GitHub Pages serves it from the root), and its link preview
 demo/                     one-off pieces, each in a folder of its own
 design/                   page mockups, and the candidates not taken
@@ -45,8 +45,8 @@ every name a page linking it may use.
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `specimen.html`, `preview.png` | the site: the gallery, with its link preview; the style guide, made from `STYLE.md` and `FWIENDS.md` by `pf.py style`; and the specimen, the parts of a page at work, with the dial (`--informal`) to turn |
-| `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
+| `index.html`, `style.html`, `preview.png` | the site: the gallery, with its link preview; and the style guide, `STYLE.md` and `FWIENDS.md` drawn by hand, with the kit at work and its dial (`--informal`) to turn |
+| `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `papers.css`, loaded after them, gives a piece other sheets (graph paper, a score, kraft, tracing paper and more); `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
 | `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `lib/style/CASEBOOK.md` | phy's finished pieces, one line each: what it is, its look in one sentence and a link, so that the next piece can do something else |
 | `lib/fwiends/` | the fwiends' library: the factory that draws a friend from its spec, animation, feelings, friends alive on a page, the film kit, the props and the characters; its README is the reference |
@@ -60,7 +60,7 @@ every name a page linking it may use.
 | `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`lib/fwiends/src/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
-| `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |
+| `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours, and every other sheet's inks and marks, from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |
 | `tools/palette.py`, `tools/colormath.py` | derive the data colours from the fwiends' own and test them (needs numpy) |
 | `tools/shoot.py` | takes a screenshot of a page, such as a mockup, through a real `file://` address |
 | `tools/animate.html` | a page for trying clips and feelings on every friend, live, seated or standing |
@@ -111,12 +111,11 @@ python3 tools/pf.py compare howdi --view ref --region 0,600,700,1254   # One exa
 python3 tools/pf.py anim howdi --clip idle                  # out/howdi/anim/idle.gif
 python3 tools/pf.py anim howdi --view stand --clip "layer(still({stance:'stand'}), wave)"  # Made for howdi: the wave is away from its tail
 python3 tools/pf.py render howdi --with out/scratch/mine.js # Here mine.js redefines howdi, to try a working copy
-python3 tools/pf.py style                                   # style.html, written from STYLE.md and FWIENDS.md
 python3 tools/pf.py film test/film-stub.html -o out/scratch/film/stub.mp4 --sheet   # A page, frame by frame
 python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.png  # One still from it
 python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4  # A part, with its part of the sound
 python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4  # Twice the pixels each way, at a higher quality
-python3 tools/pf.py test                                    # The in-browser tests, the pages against the cast, the derived files, and every tool and demo page
+python3 tools/pf.py test                                    # The in-browser tests, the pages against the cast, the derived files, and every page
 python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows and slots, written from the cast
 python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
 ```
@@ -176,18 +175,20 @@ follows from the cast and the drawings is written, not typed: `pf.py pages`
 (`tools/gallery.py`) writes the script tags of every page that loads all the
 friends, in the cast's order, and the gallery's rows and slots, from the
 friends' reaches; `test` fails while either is stale, and `pages` writes no
-rows from a gallery that reports an error. `test` fails, too, while `style.html`
-or the dark sheet's blocks (`tools/dark_sheet.py`) are stale, while a page's
-theme colour is not the paper's (or the dark sheet's), while a page that draws
-in pencil pastes a graphite filter of its own or does not load
+rows from a gallery that reports an error. `test` fails, too, while the dark
+sheet's blocks (`tools/dark_sheet.py`) are stale, while an ink's contrast or a
+data colour that the kit's README or `style.html` gives is not the kit's, while
+a page's theme colour is not the paper's (or the dark sheet's), while a page
+that draws in pencil pastes a graphite filter of its own or does not load
 `lib/style/site/graphite.js`, and while `test/index.html` leaves out a
 `*.test.js`. It fails while a local link names no file of the repository (one
 into `out/` excepted, which a page looks for only with a fallback), while the
 library links anything outside it or phy's style anything of the fwiends
 (`tools/layout.py`), and while the kit drops a name that the published kit,
-on `origin/main`, defines (`tools/kit_api.py`). Finally it opens every tool page
-and every demo that `demo/index.html` lists, with requests to other hosts
-refused, so that a page that breaks shows up. Each page error names its page,
+on `origin/main`, defines (`tools/kit_api.py`). Finally it opens the site's
+pages, every tool page and every demo that `demo/index.html` lists, from disk
+as a reader's browser does (unable to read the files beside a page) and with
+requests to other hosts refused, so that a page that breaks shows up. Each page error names its page,
 and the gallery's its window's width. A test that hangs in an endless loop is
 stopped once the run has taken two minutes, and fails by name.
 

@@ -48,7 +48,7 @@ UNICODE_RANGES = (
 )
 
 # The documents whose characters the subset must cover; a character outside ASCII that they use is checked.
-DOCUMENTS = ('index.html', 'specimen.html', 'style.html', 'STYLE.md', 'FWIENDS.md')
+DOCUMENTS = ('index.html', 'style.html', 'STYLE.md', 'FWIENDS.md')
 
 
 def main():

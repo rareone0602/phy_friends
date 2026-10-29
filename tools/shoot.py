@@ -5,7 +5,7 @@
   python3 tools/shoot.py design/fonts.html out/design/fonts.png --size 1280x2400
 
 It loads the page through its real file:// URL (so that relative ../src and ../characters paths resolve) and
-gives web fonts and timers time to settle, in virtual time (cdp.screenshot_once). The gallery, the specimen and
+gives web fonts and timers time to settle, in virtual time (cdp.screenshot_once). The gallery, the style guide and
 the mockups in design/backup/ honor ?px=..&py=.. (CSS pixels) as a simulated pointer position, so a still shows
 the eyes following it. tools/pf.py takes its stills with shoot() too, from an HTML string.
 

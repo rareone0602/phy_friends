@@ -31,7 +31,7 @@ classic script (`window.PhyFriends`, or CommonJS), so pages work straight from
 | `lib/fwiends/src/phyfriends.js` | core: shape generators, spec registry, renderer, pose rig, seated and standing |
 | `lib/fwiends/src/anim.js` | animation: clips of movement (idle, hop, bounce, nod, turning round; and for a friend standing, walk, wave, cheer, jump, dance, stretch, point, beckon, and standing up and sitting down), composition, stacks of timed layers, a browser player, and the hop and the walk by which a friend gets about |
 | `lib/fwiends/src/emotion.js` | feelings: happy, excited, laughing, playful, fond, content, relieved, proud, determined, inspired, curious, thoughtful, shy, surprised, confused, nervous, scared, cross, dizzy, bored, sad, sleepy and asleep, each as a face, a reaction and a held loop, for every friend drawn on the house template; a friend standing adds its arms and a gesture; and the marks over a friend's head, written in the hand or drawn in its line |
-| `lib/fwiends/src/live.js` | friends alive on an ordinary page, as the gallery and the specimen's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
+| `lib/fwiends/src/live.js` | friends alive on an ordinary page, as the gallery and the style guide's portrait are: one clock for all of them, the idle clip, following the pointer, a hi, and the feelings a visitor stirs (shy, content, curious, asleep) |
 | `lib/fwiends/src/workings.js` | a page's workings in blue pencil, only when the reader asks: each friend's construction drawn from its spec, notes beside the parts of the page, and elements of the page's own revealed; a page loads it only if it wants it |
 | `lib/fwiends/src/pen.js`, `lib/fwiends/src/title-pen.js` | text that writes itself stroke by stroke, and the strokes with which the gallery's title writes itself |
 | `lib/fwiends/src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
@@ -688,7 +688,7 @@ and mouth, without the blush or the posture.
 ## Alive on a page
 
 `lib/fwiends/src/live.js` (`PhyFriends.live`) brings friends to life on an
-ordinary page, as the gallery and the specimen's portrait are brought to life:
+ordinary page, as the gallery and the style guide's portrait are brought to life:
 
 ```js
 const stage = PhyFriends.live.stage({ announcer: document.querySelector('.announcer') });
@@ -742,6 +742,7 @@ PhyFriends.workings.attach({
   friends: stage.friends,           // each drawn over with its construction
   notes: [{ at: title, place: 'above', text: 'the title, in the hand' }],
   reveal: [document.querySelector('#library')],   // the page's own, hidden until then
+  tracing: document.querySelector('.troupe'),     // laid over with tracing paper meanwhile
 });
 ```
 
@@ -753,7 +754,10 @@ space), drawn through the friend's own camera while its drawing fades. A note
 stands `right`, `left`, `above` or `below` an element, or `over` it in place of
 its text, and is left out where it would leave the window or outside its
 `media` query. Notes are for the eye; what a reader needs goes in a revealed
-element. Escape hides the workings. The gallery shows its own on "a hundred-odd
+element. The tracing paper is the kit's (`data-paper="tracing"`,
+`lib/style/site/papers.css`), laid in its element under the element's
+positioned children, with a short drop that is left out while the reader keeps
+things still. Escape hides the workings. The gallery shows its own on "a hundred-odd
 lines of code" (FWIENDS.md, "The workings").
 
 ## Workflows

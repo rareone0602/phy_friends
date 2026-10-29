@@ -2,7 +2,7 @@
 
 phy's CSS library: a sheet of lined notebook paper and everything drawn on it,
 for any page in the house style. `STYLE.md` §3 says what it is for; this
-says how to use it. `specimen.html` shows every part at work, with the dial to
+says how to use it. `style.html` shows every part at work, with the dial to
 turn. A page links the kit where it is published, never a copy of it, so that
 it changes as the style does (see [Keeping step](#keeping-step)).
 
@@ -11,6 +11,7 @@ it changes as the style does (see [Keeping step](#keeping-step)).
 | `phy.css` | the library: the paper, then everything drawn on it |
 | `notebook.css` | the paper: the tokens, the face, the rules, the margin line, the tooth and the dark sheet |
 | `pencil.css` | everything drawn on the paper; its opening comment lists the classes |
+| `papers.css` | other sheets, optional, loaded after the rest: see [Papers](#papers) |
 | `fonts/` | the face, Shantell Sans: a Latin subset of about 170 KB with all three axes (`tools/font_subset.py` makes it), and its licence; it stays beside `notebook.css` |
 | `graphite.js` | writes the graphite filter into the page |
 | `icon.svg`, `icon-32.png`, `apple-touch-icon.png` | the favicon: phy's head (`tools/site_assets.py` draws them) |
@@ -39,6 +40,10 @@ it changes as the style does (see [Keeping step](#keeping-step)).
 - Link `phy.css`, or, to save a round trip, `notebook.css` then `pencil.css`.
   A page on rareone0602.github.io may write the address from the root,
   `/phy_friends/lib/style/site/phy.css`; one in this repository, from itself.
+- **The preload** starts the face early. Opened from disk, a browser refuses
+  a font preloaded from beside the page (one from the site is fine), so a page
+  in this repository adds the preload from a script that leaves it out for a
+  `file:` page, as `index.html` does.
 - **The dial:** set `--informal` on `:root` where the work is not at `50`, and
   mark hand-written text with `.hand`.
 - **The dark sheet:** `<meta name="color-scheme" content="light dark">` turns
@@ -74,15 +79,64 @@ The tokens, in `notebook.css`, on the paper and on the dark sheet:
 | `--ink-2` | `#6d6a63` | `#b4b1a9` | `5.1:1`: quieter words (intros, small print, notes, captions, table heads, code), the lines of controls, focus |
 | `--ink-3` | `#97938a` | `#86837a` | `2.9:1`: marks only (dashes, squiggles, the quote line, disabled controls); never words someone needs to read |
 | `--red` | `#a64a3f` | `#fe9c8c` | `5.4:1`: errors, and nothing else; the margin's red, pressed harder |
-| `--blue-pencil` | `#1c77ad` | `#66afe8` | `4.7:1`: a page's workings (the construction under a drawing, notes on how the page is made), shown only when the reader asks |
+| `--blue-pencil` | `#1c77ad` | `#66afe8` | `4.6:1`: a page's workings (the construction under a drawing, notes on how the page is made), shown only when the reader asks |
 
 - The paper's tooth is a fine fractal noise at `40%`, multiplied over
-  everything.
+  everything (`--tooth`; the dark sheet's specks and strokes are `--speckle`
+  and `--streaks`).
 - On the dark sheet every ink but the paper and graphite keeps its hue and its
   contrast with the sheet, as the table's numbers say; `python3
   tools/dark_sheet.py` derives them again and writes them, and the marks, into
   the kit. The tooth shows through the graphite as light specks, and the
   graphite lies in strokes rising to the right.
+
+## Papers
+
+`papers.css`, loaded after the kit, gives a piece other sheets. One attribute
+picks a sheet, on `<html>` as the page's paper, or on any other element as a
+sheet laid on the page, which keeps its own paper and inks whatever the
+page's, as a character does. `style.html` shows each.
+
+| `data-paper` | the sheet | its lines |
+|---|---|---|
+| `notebook` | the kit's own paper | lined |
+| `graphite` | the dark sheet, at any hour | lined |
+| `graph` | an engineering pad: a line every rule both ways, a lesser one every quarter | grid |
+| `score` | manuscript paper: a stave every two rules | staves |
+| `sketchbook` | toned paper with a heavier tooth | plain |
+| `kraft` | brown wrapping paper, with its fibres | plain |
+| `card` | an index card: its first rule red, the rest blue | card |
+| `cyanotype` | a sun print of ruled paper | lined |
+| `tracing` | a translucent film over another sheet | plain |
+
+- **`data-ruling`** (`lined`, `grid`, `staves`, `card` or `plain`) changes a
+  sheet's lines; given alone, it rules the paper it lies on.
+- **Light and dark.** As a page's paper, a light sheet (notebook, graph,
+  score, card) turns to the dark sheet where the page declares both schemes
+  and the reader's system asks for dark; the others keep their colours, and
+  are a piece's look, never a working page's (`STYLE.md` §3).
+- **On the rules.** A page's sheet keeps the blank band and falls on the
+  writing's rules. A laid sheet starts its rules at its top edge, so give it a
+  height in whole rules; its margin line is `--sheet-margin` in (three
+  quarters of a rule), and words keep to the right of it. On a score, words go
+  on every other rule, between the staves.
+- **Tracing paper** goes in a positioned element, `position: absolute; inset:
+  0`: what lies under it shows through faded, and what is written on it keeps
+  its contrast, in the inks of the sheet beneath. It is milky white over a
+  sheet with dark words, and its mirror, a little darker than the sheet, over
+  one with light words. `PhyFriends.workings` lays one with `tracing`.
+- **Inks.** Every ink of a sheet but its paper (and its rule, where it gives
+  one) keeps its hue and the contrast it has on the paper, or nearly all the
+  sheet can give: at least `7:1` for ink, `4.5:1` for ink-2, red and blue
+  pencil, `2.2:1` for ink-3. `python3 tools/dark_sheet.py` derives them, and
+  the marks drawn in them, and fails where a sheet falls short; a new sheet
+  gives its `--paper` in `papers.css` and joins `PAPERS_ORDER` in the tool.
+- **Print and forced colours.** A page's sheet prints on plain paper; a laid
+  sheet prints as a picture of itself. In forced colours every sheet is the
+  system's canvas and tracing paper is not drawn.
+- **Your own sheet:** `--sheet-ruling`, `--sheet-texture` and `--sheet-grain`
+  (with `-opacity` and `-blend`) draw one, from `--tooth`, `--speckle`,
+  `--streaks`, `--rule-faint` and `--tracing`.
 
 ## Type
 

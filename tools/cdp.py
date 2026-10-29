@@ -58,6 +58,10 @@ FLAGS = [
     # depending on the frames shot before it.
     '--disable-partial-raster',
 ]
+# A page opened from disk may read the files beside it, as the tools' pages need and a reader's browser never allows.
+FILE_ACCESS = '--allow-file-access-from-files'
+# The flags for a page opened as a reader opens it from disk: a check that it loads without errors there.
+READER_FLAGS = [flag for flag in FLAGS if flag != FILE_ACCESS]
 CONSOLE_ERROR_TYPES = {'error', 'assert'}
 URL_SCHEME = re.compile(r'^[a-zA-Z][a-zA-Z0-9+.-]+:')
 OUT_URL = (ROOT / 'out').as_uri() + '/'  # The git-ignored output, which a fresh copy of the repository lacks.
@@ -178,12 +182,14 @@ def screenshot_once(url, width, height, scale=1, budget=1000, transparent=False,
 class HeadlessChrome:
     """One headless Chrome with a single page, driven over the DevTools protocol."""
 
-    def __init__(self, width=1280, height=720, scale=1, timeout=DEFAULT_TIMEOUT, chrome=CHROME, flags=()):
+    def __init__(self, width=1280, height=720, scale=1, timeout=DEFAULT_TIMEOUT, chrome=CHROME, flags=(), reader=False):
+        """With reader, a page opened from disk is as a reader's browser keeps it, unable to read the files beside it
+        (READER_FLAGS)."""
         self.width, self.height, self.scale = width, height, scale
         self.timeout = timeout
         self.errors = []  # What the page reported, as text, in the order it happened.
         self.url = None  # The page opened last.
-        self._chrome, self._flags = chrome, list(flags)
+        self._chrome, self._flags = chrome, list(READER_FLAGS if reader else FLAGS) + list(flags)
         self._process = self._work = self._session = None
         self._command_write = self._reply_read = None
         self._buffer, self._scanned = bytearray(), 0
@@ -337,8 +343,8 @@ class HeadlessChrome:
             os.dup2(command, COMMAND_FD)
             os.dup2(reply, REPLY_FD)
 
-        command = [self._chrome, *FLAGS, f'--user-data-dir={self._work / "profile"}',
-                   f'--window-size={self.width},{self.height}', '--remote-debugging-pipe', *self._flags, 'about:blank']
+        command = [self._chrome, *self._flags, f'--user-data-dir={self._work / "profile"}',
+                   f'--window-size={self.width},{self.height}', '--remote-debugging-pipe', 'about:blank']
         try:
             with open(self._work / 'chrome.log', 'wb') as log:
                 self._process = subprocess.Popen(command, stdin=subprocess.DEVNULL, stdout=log, stderr=log,

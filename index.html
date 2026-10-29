@@ -23,9 +23,15 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="twenty-one fwiends in coloured pencil, in three rows of seven under the title phy's fwiends, on lined notebook paper, each standing on a pencilled line: Howdi, a sky-blue wolf; YuanYuan, a white cat with a lavender mop, in a navy yukata; phy, a tuxedo Eevee; Fruit, a navy-blue wolf with a royal-blue mop and two little cyan horns; Yuda, a slate-blue wolf in a cyan bandana; Terry, a yellow plush toy with huge floppy ears; Brian, a cream fox in an orange newsboy cap; mumuyou, a white fox with a blond mop; K3V1N, an ice-blue cat with a yellow mark on his forehead; BarDell, a cream puppy with a crimson mop and a red-tipped tail; WeiWei, an orange fox with a white mop and a big white ruff; mosing, a black dragon with two cyan horns and a big white ruff; Yawei, a sky-blue dragon with a white mane, white horns and small teal wings; cowosus, a white Australian Shepherd like a pineapple, with golden thighs and a green-tipped tail; Raze, a dark-teal dragon with one cyan horn, in a teal hoodie with white headphones; tanyuan, a tan dog with a red-streaked white mop, in a blue-grey hoodie; Alfie, a coral tabby cat in round glasses; Teni, a Glaceon with a cyan bob; WhiteDeer, a pale blue deer with blue antlers, in a sailor suit and hat; jiaoyue, a lavender dog with a big purple tail; and Claude, the machine that drew them, as a small terracotta block with four short legs">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="preload" href="lib/style/site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+  // The face starts loading before the stylesheet asks for it (lib/style/site/notebook.css), but not on a page opened
+  // from disk, where a browser refuses a font fetched this way and the stylesheet loads it instead.
+  if (location.protocol !== 'file:') document.head.append(Object.assign(document.createElement('link'),
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: '', href: 'lib/style/site/fonts/ShantellSans-Latin.woff2' }));
+</script>
 <link rel="stylesheet" href="lib/style/site/notebook.css">
 <link rel="stylesheet" href="lib/style/site/pencil.css">
+<link rel="stylesheet" href="lib/style/site/papers.css">
 <script>
   // The opening (FWIENDS.md): the first time the page opens in a tab, the title writes itself and the
   // friends come in by roll call. It is decided here, before the page is first drawn, so that the title
@@ -181,6 +187,9 @@
   .intro .workings { font-size: inherit; line-height: inherit; }
   .intro .workings[aria-pressed="true"] { color: var(--blue-pencil); }
   .library { margin: 0; font-size: 18px; line-height: var(--L); color: var(--blue-pencil); }
+  /* Meanwhile a sheet of tracing paper (lib/style/site/papers.css) lies over the fwiends, from the rule above the note
+     to the rule under the disclaimer, and they show through it under their construction. */
+  .troupe > .pf-tracing[data-paper] { inset: calc(var(--L) * -1) 0 calc(var(--L) * -1); }
   .library p { margin: 0; }
   .library a { color: inherit; }
   .library code { display: block; font-size: 13px; line-height: var(--L); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -235,7 +244,7 @@
     .species, .credit { height: auto; white-space: normal; text-wrap: balance; overflow-wrap: anywhere; }
   }
   /* Phones held sideways have little height, so the note gives up its blank rule, and the page gives up the
-     kit's blank rule above the title, into which a portrait reaches on the specimen; the gallery has no
+     kit's blank rule above the title, into which a portrait reaches on the style guide; the gallery has no
      portrait. The title still sits on the first rule. The tallest ears then reach into the note's rule, so
      the note moves up to the right of the nav's rule, clear of them, and "keep still" to the right end of the
      title's rule. There the link past the fwiends, while it is focused, takes the place of "keep still" rather
@@ -279,7 +288,6 @@
     <ul>
       <li><span aria-current="page">fwiends</span></li>
       <li><a href="style.html">style guide</a></li>
-      <li><a href="specimen.html">specimen</a></li>
     </ul>
   </nav>
   <div class="library hand" id="library" hidden>
@@ -572,7 +580,7 @@
   }
 
   // How the page is made, in blue pencil (lib/fwiends/src/workings.js), shown only while the reader asks, by pressing
-  // "a hundred-odd lines of code": over each friend the construction its spec describes, and the spec's file and
+  // "a hundred-odd lines of code": a sheet of tracing paper over the fwiends, on it each friend's construction, and the spec's file and
   // length in place of its species; the kit's names for the parts of the page, where there is room; and the note on
   // the library. Every number is read from the page as it stands, and each spec's length from its tag (data-lines,
   // which `python3 tools/pf.py pages` writes).
@@ -590,7 +598,7 @@
     const inMargin = element => () => ({ left: 4, top: element.getBoundingClientRect().top });
     const nearEnd = element => () => { const box = element.getBoundingClientRect(); return { left: box.right - 150, top: box.top }; };
     PhyFriends.workings.attach({
-      button, stage, friends, reveal: [document.getElementById('library')],
+      button, stage, friends, reveal: [document.getElementById('library')], tracing: document.querySelector('.troupe'),
       notes: [
         { at: title, place: 'above', media: wide,
           text: `the title, in the hand at ${getComputedStyle(title).fontSize}, written stroke by stroke by pen.js` },

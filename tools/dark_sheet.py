@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Derive the dark sheet's inks, marks and data colors from the paper's (lib/style/site/README.md and
-lib/style/figures/README.md), and write them wherever they are used.
+"""Derive the dark sheet's inks, marks and data colors, and every other sheet's inks and marks, from the paper's
+(lib/style/site/README.md and lib/style/figures/README.md), and write them wherever they are used.
 
   python3 tools/dark_sheet.py
 
@@ -11,24 +11,38 @@ with the dark sheet as it has with the paper, and so does each data color. The m
 hard-code their inks, since a data URI cannot read var(), so their dark set is the same marks with
 each ink replaced by its dark one.
 
-Run it after an ink, a mark or a data color changes. It rewrites the block between its markers in
-lib/style/site/notebook.css and lib/style/site/pencil.css, the data colors' table in
+The other sheets (lib/style/site/papers.css) give their paper, and some their rule. Every other ink of a sheet keeps
+its hue and chroma on the paper and moves to the lightness at which it has the same contrast with the sheet as with
+the paper, on the dark side of a light sheet and the light side of a dark one; where a sheet cannot give that much, it
+gives nearly as much as it can, and the script fails where that falls short of what words need (MINIMUM). A sheet's
+marks are the paper's with each ink replaced by the sheet's. The grid's lesser line has half the rule's contrast, and
+the tracing sheet's film is a milky white over a sheet with dark words and, over one with light words, its mirror: as
+far from the sheet as the milky white is from the paper, on the dark side. It is as opaque as it can be (up to TRACING)
+while the words written on it keep what they need.
+
+Run it after an ink, a mark, a sheet or a data color changes. It rewrites the block between its markers in
+lib/style/site/notebook.css, lib/style/site/pencil.css and lib/style/site/papers.css, the data colors' table in
 lib/style/figures/README.md, and the inks of both sheets in the dotfiles (lib/dotfiles/vimrc and
 claude/statusline.py), and prints each color's contrast on both sheets. The pages' theme colors (their
-theme-color metas) are kept by hand: the paper's, and the dark sheet's where a page has one;
-`python3 tools/pf.py test` checks them, and everything written here, with written() and theme_drift().
+theme-color metas) are kept by hand: the paper's, and the dark sheet's where a page has one; and so are the inks'
+contrasts that the kit's README and the style guide (style.html) give, and the style guide's data colors.
+`python3 tools/pf.py test` checks them, and everything written here, with written(), theme_drift() and
+shown_drift().
 """
 import html.parser
 import re
 from pathlib import Path
 
-from layout import DOTFILES, FIGURES, KIT
+from layout import DOTFILES, FIGURES, KIT, ROOT
 
 NOTEBOOK = KIT / 'notebook.css'
 PENCIL = KIT / 'pencil.css'
+PAPERS = KIT / 'papers.css'
 MPLSTYLE = FIGURES / 'phy.mplstyle'  # Holds the data colors, in order, as matplotlib's color cycle.
 FIGURES_README = FIGURES / 'README.md'
 VIMRC = DOTFILES / 'vimrc'
+KIT_README = KIT / 'README.md'
+GUIDE = ROOT / 'style.html'
 STATUSLINE = DOTFILES / 'claude' / 'statusline.py'
 SERIES = ['blue', 'red', 'slate', 'ochre', 'pink']  # The data colors' names, in their order.
 # The colors a terminal is painted in: the inks, and the data colors but the red, which there would read as an error.
@@ -46,12 +60,30 @@ INKS_END = "/* The end of the dark sheet's inks. */"
 MARKS_BEGIN = ("/* The dark sheet's marks, written by `python3 tools/dark_sheet.py` from the marks above and the inks in\n"
                "   lib/style/site/notebook.css: edit those and run it. */")
 MARKS_END = "/* The end of the dark sheet's marks. */"
+PAPERS_BEGIN = ("/* Every sheet's inks and marks, written by `python3 tools/dark_sheet.py` from the paper's in notebook.css and\n"
+                "   pencil.css and each sheet's own paper above: edit those and run it. */")
+PAPERS_END = "/* The end of every sheet's inks. */"
+# The sheets, in order. A light one, as a page's paper, turns to the dark sheet with the notebook; the others keep their
+# own colours, so their inks are written also for a page that declares both schemes, outweighing the dark sheet's.
+LIGHT_PAPERS = ['notebook', 'graph', 'score', 'card']
+PAPERS_ORDER = ['notebook', 'graphite', 'graph', 'score', 'sketchbook', 'kraft', 'card', 'cyanotype']
+SHEET_INKS = ['rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']
+MINIMUM = {'ink': 7, 'ink-2': 4.5, 'ink-3': 2.2, 'red': 4.5, 'blue-pencil': 4.5}  # What a sheet must give each ink.
+REACH = 0.96  # The share of a sheet's greatest contrast that an ink may take where it cannot keep the paper's.
+FILM = '#fdfdfb'  # The tracing sheet's film over a sheet with dark words, a milky white.
+TRACING = 0.6  # The tracing film's opacity where the words on it need it no thinner.
+WORDS = {'ink': 7, 'ink-2': 4.5, 'blue-pencil': 4.5}  # What the words written on the film keep.
+BOOST = ':has(meta[name="color-scheme"][content~="dark"])'
 VIM_BEGIN = """    " The inks, written by `python3 tools/dark_sheet.py` from the kit's and the
     " figures' (lib/style): edit those and run it."""
 VIM_END = '    " The end of the inks.'
 PYTHON_BEGIN = "# The inks, written by `python3 tools/dark_sheet.py` from the kit's and the figures' (lib/style): edit those and run it."
 PYTHON_END = '# The end of the inks.'
 TABLE_HEAD = '| series | colour | shade |'
+WORD_INKS = ['ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']  # The inks whose contrast the README and the guide give.
+README_CONTRAST = re.compile(r'^\| `--([\w-]+)` \|.*?`([\d.]+):1`', re.M)
+GUIDE_CONTRAST = re.compile(r'<tr data-ink="([\w-]+)">.*?<td class="n">([\d.]+) : 1</td>')
+GUIDE_DATA = re.compile(r'--data-(\w+): (#[0-9a-f]{6});')
 TABLE_ROW = re.compile(r'^\| (\d), (\w+) \| `(#[0-9a-f]{6})` \| `(#[0-9a-f]{6})` \|.*$', re.M)
 
 
@@ -106,21 +138,22 @@ def in_gamut(rgb):
     return all(-1e-6 <= c <= 1 + 1e-6 for c in rgb)
 
 
-def at_contrast(color, sheet, target):
-    """The color with color's hue and chroma, lighter than sheet, whose contrast with sheet is target.
+def at_contrast(color, sheet, target, darker=False):
+    """The color with color's hue and chroma, lighter than sheet (or darker, with darker), whose contrast with sheet
+    is target.
 
     Where that lightness is out of gamut, the chroma is reduced until it fits."""
     _, a, b = lab_of(color)
     for scale in [1 - i / 20 for i in range(21)]:
-        low, high = lab_of(sheet)[0], 100.0
+        near, far = lab_of(sheet)[0], 0.0 if darker else 100.0
         for _ in range(60):
-            mid = (low + high) / 2
+            mid = (near + far) / 2
             rgb = rgb_of_lab(mid, a * scale, b * scale)
             if contrast(hex_of(rgb), sheet) < target:
-                low = mid
+                near = mid
             else:
-                high = mid
-        rgb = rgb_of_lab(high, a * scale, b * scale)
+                far = mid
+        rgb = rgb_of_lab(far, a * scale, b * scale)
         if in_gamut(rgb):
             return hex_of(rgb)
     raise ValueError(f'no color at contrast {target} with {sheet}')
@@ -138,6 +171,102 @@ def dark_inks(day):
     for name in INKS:
         dark[name] = at_contrast(day[name], dark['paper'], contrast(day[name], day['paper']))
     return dark
+
+
+# ---- The other sheets
+
+def papers_given():
+    """Each sheet's own paper and the inks it gives, from lib/style/site/papers.css: {name: {ink: color}}."""
+    text = PAPERS.read_text()
+    text = text[:text.index(PAPERS_BEGIN)]
+    given = {name: {} for name in PAPERS_ORDER}
+    for name, body in re.findall(r'^\[data-paper=([a-z]+)\] \{([^}]*)\}', text, re.M):
+        if name in given:
+            given[name].update(re.findall(r'--(paper|rule|margin): (#[0-9a-f]{6});', body))
+    return given
+
+
+def sheet_inks(day, paper, given):
+    """A sheet's inks, from the paper's (day), given its paper and any inks it gives."""
+    darker = lab_of(paper)[0] > 50
+    reach = contrast('#000000' if darker else '#ffffff', paper) * REACH
+    inks = {'paper': paper}
+    for name in SHEET_INKS:
+        if name in given:
+            inks[name] = given[name]
+            continue
+        inks[name] = at_contrast(day[name], paper, min(contrast(day[name], day['paper']), reach), darker)
+        if contrast(inks[name], paper) < MINIMUM.get(name, 1):
+            raise SystemExit(f'the sheet {paper} gives {name} only {contrast(inks[name], paper):.2f}:1, '
+                             f'short of {MINIMUM[name]}:1: choose a lighter or a darker paper')
+    rule = inks['rule']
+    inks['rule-faint'] = at_contrast(rule, paper, 1 + (contrast(rule, paper) - 1) / 2, luminance(rule) < luminance(paper))
+    inks['tracing'] = tracing_film(inks, day)
+    return inks
+
+
+def over(film, sheet, alpha):
+    """The color of a film of the given opacity laid over sheet, blended as a browser blends it."""
+    return hex_of([alpha * f + (1 - alpha) * s for f, s in zip(rgb_of(film), rgb_of(sheet))])
+
+
+def tracing_film(inks, day):
+    """The tracing sheet's film over a sheet, as an rgba(): the milky white over a sheet with dark words, or its
+    mirror over one with light words; as opaque as TRACING allows, or less where the words written on it would lose
+    the contrast they need."""
+    paper = inks['paper']
+    film = FILM if luminance(inks['ink']) < luminance(paper) else at_contrast(paper, paper, contrast(FILM, day['paper']), True)
+    alpha = TRACING
+    while alpha > 0 and any(contrast(inks[name], over(film, paper, alpha)) < need for name, need in WORDS.items()):
+        alpha = round(alpha - 0.01, 2)
+    r, g, b = (round(c * 255) for c in rgb_of(film))
+    return f'rgba({r}, {g}, {b}, {alpha:g})'
+
+
+def every_sheet(day=None):
+    """Every sheet's inks, by name, in PAPERS_ORDER."""
+    day = day or day_inks()
+    dark, given = dark_inks(day), papers_given()
+    sheets = {}
+    for name in PAPERS_ORDER:
+        if name == 'notebook':
+            sheets[name] = {**day, **sheet_extras(day, day)}
+        elif name == 'graphite':
+            sheets[name] = {**dark, **sheet_extras(day, dark)}
+        else:
+            if 'paper' not in given[name]:
+                raise SystemExit(f'lib/style/site/papers.css: the sheet {name} gives no --paper')
+            sheets[name] = sheet_inks(day, given[name]['paper'], {k: v for k, v in given[name].items() if k != 'paper'})
+    return sheets
+
+
+def sheet_extras(day, inks):
+    """The grid's lesser line and the tracing film for the paper or the dark sheet, whose inks are already known."""
+    rule = inks['rule']
+    faint = at_contrast(rule, inks['paper'], 1 + (contrast(rule, inks['paper']) - 1) / 2, luminance(rule) < luminance(inks['paper']))
+    return {'rule-faint': faint, 'tracing': tracing_film(inks, day)}
+
+
+def with_papers(text, pencil, day):
+    """lib/style/site/papers.css's text with every sheet's inks and marks written in."""
+    marks = re.findall(r'^  (--mark-[a-z-]+): (url\(".*?"\));$', re.search(r':root \{\n(.*?)\n\}', pencil, re.S).group(1), re.M)
+    sheets = every_sheet(day)
+    order = ['paper', 'rule', 'margin', 'rule-faint', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'tracing']
+
+    def declarations(inks, indent):
+        swap = {day[name][1:]: inks[name][1:] for name in ('ink', 'ink-2', 'ink-3', 'red')}
+        lines = [indent + ' '.join(f'--{name}: {inks[name]};' for name in order)]
+        for name, uri in marks:
+            lines.append(f'{indent}{name}: ' + re.sub(r'%23([0-9a-f]{6})', lambda m: '%23' + swap.get(m.group(1), m.group(1)), uri) + ';')
+        return '\n'.join(lines)
+
+    blocks = [f":root {{ --rule-faint: {sheets['notebook']['rule-faint']}; --tracing: {sheets['notebook']['tracing']}; }}",
+              f"{MEDIA} {{\n  {OPT_IN} {{ --rule-faint: {sheets['graphite']['rule-faint']}; --tracing: {sheets['graphite']['tracing']}; }}\n}}"]
+    for name, inks in sheets.items():
+        selector = f'[data-paper={name}]' + ('' if name in LIGHT_PAPERS else f', :root[data-paper={name}]{BOOST}')
+        blocks.append(f'{selector} {{\n{declarations(inks, "  ")}\n}}')
+    blocks.append(f'@media print {{\n  :root[data-paper], :root[data-paper]{BOOST} {{\n{declarations(sheets["notebook"], "    ")}\n  }}\n}}')
+    return replace_block(text, PAPERS_BEGIN, PAPERS_END, '\n'.join(blocks) + '\n')
 
 
 # ---- The figures and the dotfiles
@@ -215,8 +344,9 @@ def written(day=None):
     dark, data = dark_inks(day), day_data()
     data_dark = dark_data(day, data)
     sheets = terminal_sheets(day, dark, data, data_dark)
-    texts = {path: path.read_text() for path in (NOTEBOOK, PENCIL, FIGURES_README, VIMRC, STATUSLINE)}
+    texts = {path: path.read_text() for path in (NOTEBOOK, PENCIL, PAPERS, FIGURES_README, VIMRC, STATUSLINE)}
     write = {NOTEBOOK: lambda text: with_inks(text, dark), PENCIL: lambda text: with_marks(text, day, dark),
+             PAPERS: lambda text: with_papers(text, texts[PENCIL], day),
              FIGURES_README: lambda text: with_data_table(text, data_dark), VIMRC: lambda text: with_vim_inks(text, sheets),
              STATUSLINE: lambda text: with_python_inks(text, sheets)}
     return {path: (text, write[path](text)) for path, text in texts.items()}
@@ -250,6 +380,28 @@ def theme_drift(page):
     return problems
 
 
+def shown_drift():
+    """Every ink's contrast that the kit's README or the style guide gives, and every data color of the style
+    guide's, that is not as the kit and the figures have it, one line each. A contrast is given to one decimal, on
+    the paper; the guide's data colors are the paper's in its :root and the dark sheet's under OPT_IN."""
+    day = day_inks()
+    wanted = {name: f'{contrast(day[name], day["paper"]):.1f}' for name in WORD_INKS}
+    problems = []
+    for path, pattern in ((KIT_README, README_CONTRAST), (GUIDE, GUIDE_CONTRAST)):
+        given = dict(pattern.findall(path.read_text(encoding='utf-8')))
+        problems += [f'{path.relative_to(ROOT)}: {name} is given at {given.get(name, "no")} : 1, not {ratio} : 1'
+                     for name, ratio in wanted.items() if given.get(name) != ratio]
+    text = GUIDE.read_text(encoding='utf-8')
+    data = day_data()
+    sheets = {'the paper': (re.search(r'(?m)^\s*:root \{([^}]*--data-[^}]*)\}', text), data),
+              'the dark sheet': (re.search(re.escape(OPT_IN) + r' \{([^}]*--data-[^}]*)\}', text), dark_data(day, data))}
+    for sheet, (rule, colors) in sheets.items():
+        given = dict(GUIDE_DATA.findall(rule[1])) if rule else {}
+        problems += [f'{GUIDE.relative_to(ROOT)}: the data color {name} on {sheet} is {given.get(name, "missing")}, '
+                     f'not {color}' for name, color in colors.items() if given.get(name) != color]
+    return problems
+
+
 def main():
     day = day_inks()
     dark = dark_inks(day)
@@ -261,6 +413,10 @@ def main():
     data = day_data()
     for name, color in dark_data(day, data).items():
         print(f'{name:11} {data[name]:>8} {color:>8}  {contrast(data[name], day["paper"]):.2f} / {contrast(color, dark["paper"]):.2f}')
+    print(f'\n{"sheet":11} {"paper":>8}  ' + '  '.join(f'{name:>11}' for name in ['ink'] + INKS[2:]) + '  tracing')
+    for name, inks in every_sheet(day).items():
+        print(f'{name:11} {inks["paper"]:>8}  ' + '  '.join(f'{contrast(inks[ink], inks["paper"]):11.2f}' for ink in ['ink'] + INKS[2:])
+              + f'  {inks["tracing"]}')
 
 
 if __name__ == '__main__':

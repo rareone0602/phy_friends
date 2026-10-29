@@ -4,284 +4,572 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>phy's style guide</title>
-<meta name="description" content="how phy makes things: the paper, the pencil, the words and the fwiends.">
+<title>style guide</title>
+<meta name="description" content="how phy makes things, drawn: the paper, the pencil, the words and the fwiends.">
 <meta name="theme-color" content="#fbf9f3" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#3d3c39" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="lib/style/site/icon.svg" type="image/svg+xml">
 <link rel="icon" href="lib/style/site/icon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="lib/style/site/apple-touch-icon.png">
-<!-- Generated from STYLE.md and FWIENDS.md by `python3 tools/pf.py style`: edit those, not this file. -->
-<link rel="preload" href="lib/style/site/fonts/ShantellSans-Latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+  // The face starts loading before the stylesheet asks for it (lib/style/site/notebook.css), but not on a page opened
+  // from disk, where a browser refuses a font fetched this way and the stylesheet loads it instead.
+  if (location.protocol !== 'file:') document.head.append(Object.assign(document.createElement('link'),
+    { rel: 'preload', as: 'font', type: 'font/woff2', crossOrigin: '', href: 'lib/style/site/fonts/ShantellSans-Latin.woff2' }));
+</script>
 <link rel="stylesheet" href="lib/style/site/notebook.css">
 <link rel="stylesheet" href="lib/style/site/pencil.css">
+<link rel="stylesheet" href="lib/style/site/papers.css">
+<style>
+  /* The style guide, drawn: each rule of STYLE.md and of FWIENDS.md (but the gallery's own page) shown at work, with
+     the kit's own parts doing the showing. The full text stays in the Markdown, which each section links. Every block
+     is a whole number of rules tall, as the kit's are. */
+
+  /* Words for a screen reader alone. */
+  .sr { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  .doc .full { font-size: 15px; color: var(--ink-2); }
+  .doc .rule { color: var(--ink); }
+
+  /* A correction: what not to write, struck through in pencil, then what to write. It plays once as it comes into
+     view, striking the first and then writing the second. */
+  .doc ul.edits { list-style: none; padding-left: 0; }
+  .doc del { text-decoration: none; color: var(--ink-2); background: var(--mark-line) 0 62% / 100% 8px no-repeat; }
+  .edits .do { color: var(--ink); }
+  .edits.pending del { background-size: 0 8px; }
+  .edits.pending .do { clip-path: inset(-4px 100% -8px 0); }
+  .edits del { transition: background-size .45s cubic-bezier(.4, 0, .4, 1); }
+  .edits .do { clip-path: inset(-4px -20px -8px 0); transition: clip-path .7s cubic-bezier(.4, 0, .4, 1) .5s; }
+  .edits li + li.pair-start { margin-top: var(--L); }
+  .inline-edits del { margin-right: .35em; }
+  .struck-row { display: flex; flex-wrap: wrap; column-gap: 1.2em; }
+  @media print, (forced-colors: active) { .doc del { text-decoration: line-through; background: none; } }
+
+  /* Sets of small pictures, each with a word or two beneath it, a whole number of rules tall. */
+  .doc .set { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 8.5em), 1fr)); column-gap: 1.2em; row-gap: var(--L); }
+  .set > div { position: relative; }
+  .set .pic { position: relative; height: calc(var(--L) * var(--rules, 4)); top: calc(-1 * var(--lift)); }
+  .set .pic > svg, .set .pic > img { position: absolute; left: 0; bottom: 0; height: 100%; width: auto; max-width: 100%; overflow: visible; }
+  .set .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
+  /* A picture on a sheet of its own, or one that reaches above its box, keeps a blank rule under its heading. */
+  .doc :is(.thumbs, .papers, .sheets-figure, .built), .doc h3 + .set { margin-top: var(--L); }
+
+  /* §1: one hand, and what a design tool lays on, each crossed out. */
+  .hands { display: flex; flex-wrap: wrap; column-gap: 1.4em; align-items: baseline; }
+  .hands span { --hand: 0; font-size: 37px; line-height: calc(var(--L) * 2); position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
+  .doc ul.leave-out { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0 2.2em; min-height: calc(var(--L) * 2); align-items: center; }
+  .leave-out li { position: relative; font: 400 14px/1.2 system-ui, sans-serif; }
+  .leave-out li::after { content: ''; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; translate: -50% -50%; background: var(--mark-cross) center / contain no-repeat; }
+  .leave-out .pill { padding: 3px 10px; border-radius: 999px; background: #e7e9f5; color: #4b55a8; }
+  .leave-out .burger { display: inline-block; vertical-align: middle; width: 22px; height: 16px; background: linear-gradient(#555 0 0) 0 0 / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 50% / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 100% / 100% 2.5px no-repeat; }
+  .leave-out .card { padding: 8px 14px; border-radius: 10px; background: #fff; color: #333; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+  .leave-out .cta { padding: 6px 14px; border-radius: 8px; color: #fff; font-weight: 600; background: linear-gradient(135deg, #7b5cff, #20c5d9); box-shadow: 0 0 12px rgba(123, 92, 255, .55); }
+  .leave-out .glass { padding: 6px 14px; border-radius: 12px; color: #2b3a55; background: linear-gradient(160deg, rgba(255, 255, 255, .85), rgba(200, 215, 240, .55)); box-shadow: inset 0 1px 0 #fff, 0 2px 8px rgba(40, 60, 120, .2); }
+  .leave-out .hero { font: 800 19px/1.1 system-ui, sans-serif; letter-spacing: -.02em; color: #111; }
+  .leave-out .gear { display: inline-block; width: 22px; height: 22px; vertical-align: middle; border-radius: 50%; border: 5px dotted #667; box-sizing: border-box; }
+  @media (forced-colors: active) { .leave-out { display: none; } }
+
+  /* §2: British prose beside American code, and case following the dial. */
+  .doc table.two td:last-child code { font-size: 15px; }
+  .doc table.two th:first-child, .doc table.two td:first-child { min-width: 7.5em; }
+  .cases { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.6em; }
+  .cases > div > * + * { margin-top: 0; }
+  .cases .btn { margin-top: var(--L); }
+  .cases .note { font-size: 18px; }
+  .cases h3 { font-size: 26px; }
+
+  /* §3: the inks, the two sheets, the dial, the sizes, the marks and the data colours. */
+  .swatch { display: inline-block; width: 30px; height: 10px; vertical-align: 1px; margin-right: .5em; }
+  .inks td:first-child { white-space: nowrap; }
+  .sheets { display: grid; grid-template-columns: 1fr 1fr; flex-basis: 100%; }
+  .sheet { position: relative; height: calc(var(--L) * 5); overflow: hidden; color: var(--ink);
+    background: repeating-linear-gradient(transparent 0 calc(var(--L) - 1px), var(--rule) calc(var(--L) - 1px) var(--L)), var(--paper);
+    top: calc(-1 * var(--lift)); }
+  .sheet svg { position: absolute; left: 6%; bottom: calc(var(--L) - 4px); height: calc(var(--L) * 4); width: auto; overflow: visible; }
+  .sheet .ground { position: absolute; left: 2%; width: 50%; bottom: calc(var(--L) - 5px); height: 8px; background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
+  .sheet .name { --hand: 50; position: absolute; left: 58%; bottom: calc(var(--L) * 2); height: var(--L); font: 300 26px/var(--L) var(--face); transform: translateY(calc(var(--sit) + 1px)); }
+  .sheet .sub { position: absolute; left: 58%; bottom: var(--L); height: var(--L); font-size: 15px; line-height: var(--L); color: var(--ink-2); transform: translateY(calc(var(--sit) + 1px)); }
+  .sheets .sheet { --sheet-ruling: repeating-linear-gradient(transparent 0 calc(var(--L) - 1px), var(--rule) calc(var(--L) - 1px) var(--L)); }
+  .sheet.on-graphite .pf-cutout { display: inline !important; }
+  .sheet.on-paper .pf-cutout { display: none !important; }
+  @media (forced-colors: active) { .sheets { display: none; } }
+  .papers { display: grid; grid-template-columns: repeat(auto-fill, minmax(13em, 1fr)); gap: var(--L) 1.2em; }
+  .papers > div { height: calc(var(--L) * 4); padding: 0 12px 0 calc(var(--L) * .75 + 10px); overflow: hidden; }
+  .papers [data-paper=score] p { margin-top: var(--L); }  /* Words go on every other rule, between the staves. */
+  .papers [data-paper=tracing] { position: absolute; inset: -6px -6px -6px 52%; padding-left: 12px; color: var(--blue-pencil); }
+  .built { width: calc(var(--L) * 5); height: calc(var(--L) * 5); position: relative; top: calc(-1 * var(--lift)); }
+  .built svg { display: block; width: 100%; height: 100%; overflow: visible; position: relative; z-index: 1; }  /* Over the tracing paper. */
+  .doc table.dial td.w { --hand: 50; font: 300 26px/var(--L) var(--face); position: relative; top: calc(var(--sit) - var(--lift)); }
+  .doc table.dial td.label { color: var(--ink-2); font-size: 15px; white-space: nowrap; }
+  .slant { display: inline-block; transform: skewX(-12deg); }
+  .doc ul.sizes { list-style: none; padding-left: 0; }
+  .sizes li { --n: 1; --hand: 50; height: calc(var(--L) * var(--n)); white-space: nowrap; overflow: hidden; }
+  .sizes li span { display: inline-block; line-height: calc(var(--L) * var(--n)); position: relative; top: calc(var(--sit) + (var(--n) - 1) * var(--L) / 2 - var(--lift)); }
+  .sizes li small { font: 300 15px/1 var(--face); color: var(--ink-2); margin-left: .8em; }
+  .doc ul.marks-sheet { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(7.2em, 1fr)); column-gap: .8em; }
+  .marks-sheet li { height: calc(var(--L) * 2); position: relative; }
+  .marks-sheet .glyph { position: absolute; left: 0; bottom: calc(var(--L) + 6px); background: var(--m) 0 0 / 100% 100% no-repeat; }
+  .marks-sheet .glyph svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .marks-sheet .what { position: absolute; left: 0; bottom: 0; height: var(--L); font-size: 15px; color: var(--ink-2); white-space: nowrap; }
+  .glyph.ground { --m: var(--mark-ground); width: 84px; height: 8px; filter: url(#graphite); }
+  .glyph.ring { --m: var(--mark-ring); width: 62px; height: 27px; bottom: calc(var(--L) + 1px) !important; }
+  .glyph.arrow { --m: var(--mark-arrow); width: 45px; height: 18px; filter: url(#graphite); }
+  .glyph.squiggle { --m: var(--mark-squiggle); width: 63px; height: 7px; }
+  .glyph.side { --m: var(--mark-side); width: 4px; height: 28px; bottom: calc(var(--L) + 2px) !important; left: 6px !important; }
+  .glyph.box { --m: var(--mark-box); width: 75px; height: 24px; bottom: calc(var(--L) + 3px) !important; }
+  .glyph.tick { --m: var(--mark-tick); width: 22px; height: 22px; }
+  .glyph.cross { --m: var(--mark-cross); width: 18px; height: 18px; }
+  .glyph.caret { --m: var(--mark-caret); width: 14px; height: 10px; }
+  .marks.inline { font-size: 15px; color: var(--ink-2); }
+  .marks.inline span:not(.mark) { white-space: nowrap; margin-right: .9em; }
+  .marks.inline .mark { margin-right: .3em; }
+  /* The data colours, from lib/style/figures (its README), on paper and on the dark sheet. */
+  :root { --data-blue: #1092ca; --data-red: #a74126; --data-slate: #4d6295; --data-ochre: #a98f12; --data-pink: #d56b75; }
+  @media screen and (prefers-color-scheme: dark) {
+    :root:has(meta[name="color-scheme"][content~="dark"]) { --data-blue: #1d97cf; --data-red: #fca88e; --data-slate: #a7b9f2; --data-ochre: #9d840e; --data-pink: #d46b75; }
+  }
+  .chart { --informal: 0; display: block; width: 100%; max-width: 28em; height: calc(var(--L) * 5); position: relative; top: calc(-1 * var(--lift)); overflow: visible; }
+  .chart text { font: 300 15px var(--face); fill: var(--ink-2); }
+
+  /* §4: thumbnails on toned paper, each with its one idea. */
+  .thumbs .pic { overflow: hidden; }
+  .thumbs .pic[data-paper] { padding: 0; }
+  .thumbs .pic > svg { left: auto; }
+  .thumbs .grey { filter: grayscale(1); }
+  .thumbs .glow { position: absolute; inset: 0; background: radial-gradient(circle at 42% 48%, rgba(255, 240, 190, .9), rgba(255, 240, 190, 0) 38%); mix-blend-mode: screen; z-index: 2; }
+  .verdict { position: absolute; right: 6px; top: 6px; z-index: 3; width: 22px; height: 22px; background: var(--mark-cross) center / 18px 18px no-repeat; }
+  .verdict.yes { background: var(--mark-tick) center / 22px 22px no-repeat; }
+  .beats { display: block; width: 100%; height: calc(var(--L) * 3); position: relative; top: calc(-1 * var(--lift)); overflow: visible; }
+  .beats text { font: 300 15px var(--face); fill: var(--ink-2); }
+  /* A list ticked or crossed item by item; a caret is a choice someone else makes. */
+  .doc ul.ticks { list-style: none; padding-left: 0; }
+  .ticks li { padding-left: 1.8em; position: relative; }
+  .ticks li::before { content: ''; position: absolute; left: 0; top: 4px; width: 22px; height: 22px; background: var(--mark-tick) center / 20px 20px no-repeat; }
+  .ticks li.no::before { background: var(--mark-cross) center / 16px 16px no-repeat; }
+  .ticks li.ask::before { background: var(--mark-caret) center / 14px 10px no-repeat; }
+  .knows { display: grid; grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); gap: var(--L) 1.6em; }
+  .knows > div > * + * { margin-top: 0; }
+  .knows .who { font: 300 22px/var(--L) var(--face); color: var(--ink-2); margin: 0; }
+
+  /* The fwiends: phy in pencil and flat, their colours and shades, standing up, turning round and feeling. */
+  .doc ul.palette { list-style: none; padding-left: 0; display: flex; flex-wrap: wrap; column-gap: 1.1em; }
+  .palette li { font-size: 15px; color: var(--ink-2); white-space: nowrap; }
+  .palette svg { width: 34px; height: 10px; vertical-align: -1px; margin-right: .35em; }
+  .rise { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 1.6em; }
+  .rise .pic { width: calc(var(--L) * 5); height: calc(var(--L) * 6); position: relative; top: calc(-1 * var(--lift)); }
+  .rise .pic svg { display: block; width: 100%; height: 100%; overflow: visible; }
+  .rise .row { flex: 1 1 12em; }
+  .rise input[type=range] { width: 100%; max-width: 16em; accent-color: var(--ink-2); }
+  .speech { display: grid; grid-template-columns: repeat(auto-fill, minmax(12em, 1fr)); gap: var(--L) 1.2em; }
+  .speech p { margin: 0; }
+  .speech .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
+  .speech .said { --hand: 50; font: 300 26px/var(--L) var(--face); }
+  .speech .marks-said { --hand: 50; font: 600 26px/var(--L) var(--face); color: var(--ink-2); word-spacing: .4em; }
+
+  @media (max-width: 720px) {
+    /* "style guide" and the portrait beside it share a phone's line, so the title gives way. */
+    .titleline h1 { font-size: min(54px, calc((100vw - 160px) / 5.3)); }
+    .cases { column-gap: 1em; }
+    .cases h3 { font-size: 22px; }
+    .sheet .name { font-size: 22px; }
+    .sheets { grid-template-columns: 1fr; }
+    .doc ul.leave-out { min-height: 0; row-gap: var(--L); padding: calc(var(--L) / 2) 0; }
+    .hands span { font-size: 31px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .edits del, .edits .do { transition: none; } }
+</style>
 </head>
 <body>
 <script src="lib/style/site/graphite.js"></script>
 
 <header>
-  <h1>style guide</h1>
-  <p class="intro">how phy makes things: the paper, the pencil, the words and the fwiends.</p>
+  <div class="titleline">
+    <h1>style guide</h1>
+    <div class="portrait" role="button" tabindex="0" aria-label="say hi to phy" aria-describedby="looks-phy"></div>
+    <p id="looks-phy" hidden>a tuxedo eevee</p>
+  </div>
+  <p class="announcer" role="status"></p>
+  <p class="intro">how phy makes things, drawn rather than told.</p>
   <nav aria-label="pages">
     <ul>
       <li><a href="index.html">fwiends</a></li>
       <li><span aria-current="page">style guide</span></li>
-      <li><a href="specimen.html">specimen</a></li>
     </ul>
   </nav>
 </header>
 
 <main>
   <article class="doc">
-<nav aria-label="contents of phy's style guide">
-<ul class="meta"><li><a href="#s1">1. phy</a></li><li><a href="#s2">2. words</a></li><li><a href="#s3">3. the kit</a></li><li><a href="#s4">4. pieces</a></li><li><a href="#s5">5. working with phy</a></li></ul>
-</nav>
-<nav aria-label="contents of phy's fwiends: the gallery and its characters">
-<ul class="meta"><li><a href="#phy-s-fwiends-the-gallery-and-its-characters">phy's fwiends: the gallery and its characters</a></li><li><a href="#the-gallery-page">the gallery page</a></li><li><a href="#drawing-a-friend">drawing a friend</a></li><li><a href="#scenes-films-and-games">scenes: films and games</a></li></ul>
-</nav>
-<p>This is phy's house style for everything phy makes, from pages, slides and posters to READMEs, hobby projects and code. Hand it to anyone, or any agent, making something for phy. A paper's text has its own guide; from a paper, this one covers only the main diagram (<a href="#s3">§3</a>).</p>
-<p>It is a short programme, not a rulebook. A few things make a work phy's, and a few duties hold in everything (<a href="#s1">§1</a>); the words have rules of their own (<a href="#s2">§2</a>). The rest is a kit of good defaults (<a href="#s3">§3</a>), a way into pieces made to be enjoyed (<a href="#s4">§4</a>) and a way of working (<a href="#s5">§5</a>). The kit is a tool: work that keeps to it out of habit has missed the point, since phy's work should not look the same twice.</p>
-<p><strong>Where this guide is the standard.</strong> Its <a href="#s1">§1</a> and <a href="#s2">§2</a> outrank anything else, and where they are wrong, they are corrected here. The source is <code>STYLE.md</code> in <a href="https://github.com/rareone0602/phy_friends">rareone0602/phy_friends</a>, also at <a href="https://raw.githubusercontent.com/rareone0602/phy_friends/main/STYLE.md">its raw address</a> for an agent to read. <a href="#s1">§1</a> is the guide in short, for a brief with no room for the rest.</p>
-<p><strong>The details live in code.</strong> The look of a page is a CSS library, <code>lib/style/site/</code>, whose README lists its tokens, type, marks and components; the look of a chart or a diagram is in <code>lib/style/figures/</code>, whose README lists the data colours and the rules for charts, slides and a paper's diagram; and an editor and a terminal take the same inks from phy's dotfiles, <code>lib/dotfiles/</code>. Other projects link the kit where it is published rather than copy it, so that they change as the style does; the kit keeps every name that a page relies on. A work with phy's characters in it also follows <code>FWIENDS.md</code>, which says how they are drawn and staged.</p>
-<hr>
-<h2 id="s1">1. phy</h2>
-<p><strong>phy</strong>, always lower case, even at the start of a sentence. The handle is <code>rareone0602</code> on GitHub and X; a credit to phy links to <a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">LinkedIn</a>. phy's mark is phy's avatar, an Eevee in the colours of phy's tuxedo cat: the head alone for a favicon, the whole character where there is room.</p>
-<p class="lead"><strong>What makes a work phy's.</strong> Whatever else changes, four things stay:</p>
-<ul>
-<li><strong>One hand.</strong> Every word is in <strong>Shantell Sans</strong>, a hand drawn with one even line, at any setting of its dial (<a href="#s3">§3</a>), any size and any colour. Only code (the system monospace) and words in a host that sets its own type (a paper's text and maths, a README on GitHub) are in anything else.</li>
-<li><strong>The words</strong> (<a href="#s2">§2</a>).</li>
-<li><strong>Drawn, not designed.</strong> By hand, or as a hand would, honest and quiet. Something in the work shows that a hand made it: a line that wobbles, spacing a little uneven, the grain a pencil, a brush or a press leaves. Nothing a design tool lays on by default: no tool's gradients, glows, glass or drop shadows, no emoji or stock icons, no hero copy and no template layouts such as a grid of cards.</li>
-<li><strong>Colour goes to the subject:</strong> the data in a figure, the characters on a page, the places in a film. The ground stays quiet, and on a working page red is only for an error.</li>
-</ul>
-<p><strong>Never the same twice.</strong> The obvious answer is the floor, not the target. The most likely choice is the boring one: the template, the stock phrase, the default chart, the formal tone put on for show, and phy's own last piece. Before calling a piece finished, describe its look in one sentence; if the sentence also fits phy's last piece of the same kind (the casebook, <a href="#s5">§5</a>), redraw. A piece made to delight should surprise, and then, on a second look, seem the only way it could have gone.</p>
-<p class="lead"><strong>Duties.</strong> These hold whatever the style, and no idea outranks them:</p>
-<ul>
-<li><strong>The owners' say.</strong> People and their characters appear only with their owners' say-so, as the owners give them: name, species, colours, pronoun and a credit linking to the owner. An owner's wish beats a house rule.</li>
-<li><strong>Private things</strong> stay private (<a href="#s5">§5</a>).</li>
-<li><strong>Licences:</strong> the face's (<a href="#s3">§3</a>), whose music a film may use (<a href="#s4">§4</a>), and those of any picture, data or code a work takes in.</li>
-<li><strong>Light and dark</strong> follow the reader's system: a page never offers a switch, and a print is always on paper.</li>
-</ul>
-<p><strong>The kit is a tool.</strong> Everything else, from the ruled paper and the dial to the marks, the layout, the inks, light and motion (<a href="#s3">§3</a>, <a href="#s4">§4</a>), is good defaults, not rules. A working page (a tool, a README, a gallery's controls) keeps them, since there sameness is what makes it easy to use. Anything made to be enjoyed or shown starts free and takes from the kit only what the idea needs; a piece that keeps every default says why, in a line at the top of its source. A series shares its look.</p>
-<h2 id="s2">2. words</h2>
-<p class="lead"><strong>Prose</strong> is modelled on The Economist: opinionated, analytical and dry, with words few, exact and honest, like a note in the margin.</p>
-<ul>
-<li><strong>British English, all the way down:</strong> the spelling (colour, centre, grey, programme, -ise) and the idiom as well ("at the weekend", "in hospital", "take a decision"); American prose in British spelling is not British English. English only: another script appears only inside someone's own name or a quote of theirs.</li>
-<li><strong>Take a view, in the exact word.</strong> Say which is better and why, with the evidence, in short sentences: "the second method is better: it halves the build time", never "both approaches have their merits". Numbers and names, not adjectives: "one script redraws every figure in about 40 seconds", never "blazing-fast". A long word is welcome when it is the precise one, never to sound clever.</li>
-<li><strong>No hype and no ceremony:</strong> no "magical", "seamless" or "leverage", no welcome, no call to action, no sign-off, no exclamation marks and no emoji. "that's me", never "Meet phy, the creator behind it all!". Where the reader can do something, say what, plainly.</li>
-</ul>
-<p class="lead">Two habits, kept unless a piece has a reason to break them:</p>
-<ul>
-<li><strong>Case follows the dial</strong> (<a href="#s3">§3</a>). From <code>50</code> up, the chrome (titles, headings, nav, labels, notes, captions, buttons and footers) is lower case and running prose is in sentence case; below <code>50</code>, and in plain text (READMEs, email), it is sentence case throughout. Names keep their owner's case. A page talks about the work; where phy speaks, it says "me", and the reader is "you". Dates go in full in prose (28 September 2026) and short in a date line (28 sep 2026).</li>
-<li><strong>Humour is dark and dry</strong>, and phy's own: understatement, irony and the grim thing said in the flattest official voice, never explained. A line or two, in the corners, never in what the reader came for. Never at the expense of a real person, their character or the reader, and never baby talk.</li>
-</ul>
-<p class="lead"><strong>Code</strong> is a language of its own: American English and formal. The dial, the lower-case chrome and the humour stop at its edge.</p>
-<ul>
-<li><strong>American English</strong> in identifiers, comments, docstrings and commit messages: <code>color</code>, <code>center</code>, <code>gray</code>, <code>normalize</code>, <code>behavior</code>, <code>license</code>, <code>labeled</code>, <code>toward</code>. Words the code puts in front of people (a page's text, a label, an error message) are prose, and follow the rules above.</li>
-<li><strong>Formal.</strong> Comments and docstrings are full sentences in sentence case, plain and precise: no jokes, no asides and no metaphors.</li>
-<li><strong>Plain names:</strong> no cute names and no puns, however playful the project.</li>
-</ul>
-<h2 id="s3">3. the kit</h2>
-<p>The house setting, for a working page to keep and a piece to take from. Each part says what it is for; the kit's READMEs say how.</p>
-<p class="lead"><strong>Paper and ink.</strong> The page is a sheet of lined notebook paper: pale blue rules, a faded red margin line and a little paper tooth, with everything written on the rules. The rules and the margin line are decoration, so nothing that carries meaning is drawn in them. The inks run from graphite for words to red for errors.</p>
-<ul>
-<li><strong>The dark sheet.</strong> Where the reader's system asks for dark, the paper and the ink swap: the sheet is graphite, and the words are in the paper's colour, like white pencil on black paper. Nothing is inverted: a character keeps its own paper, and a scan its own white. On a dark host the page doesn't control, a slide say, lay a sheet of paper on it.</li>
-<li><strong>Blue pencil</strong>, an illustrator's non-photo blue deepened to be read, is for a page's workings: the construction under a drawing and the notes on how the page is made, shown only when the reader asks (<code>lib/fwiends/src/workings.js</code>).</li>
-</ul>
-<p><strong>Type: the dial.</strong> The face is fixed (<a href="#s1">§1</a>); its informality axis lets the same hand be neat in a diagram and loose in a toy. Each work sets one number, <code>--informal</code>: <code>0</code> for a paper's diagram and for charts, <code>50</code> for a site, notes, slides and posters, and <code>100</code> for a hobby project. Running words sit at the work's number; the few words written rather than set (titles, headings, notes, names) are never neater than <code>50</code>. Weight is pressure: everything is light, bold is the pencil pressed harder, and there are no italics. The face's files for LaTeX, matplotlib and design tools are in <code>lib/style/figures/fonts/</code>; the SIL Open Font License allows any use, so long as the licence file stays beside any copy of the font.</p>
-<p><strong>Marks.</strong> Every mark is a single stroke, never filled, in an ink: a ground line, a ring round "this one", an arrow from a note, a squiggle for a break or a wait, a side line down a quote, a box round the one primary button, a tick, a cross for an error and a caret on a select. A mark tilts anticlockwise, never more than <code>2°</code>. <strong>The graphite filter</strong>, the grain that makes a line look drawn, goes over the title, the ground line and the arrow, never over small text or a chart.</p>
-<p><strong>A page.</strong> One column, <code>42em</code> at most, against the margin line: a title in the hand, one line of intro, the content and a small footer. It has no menus, pills, frames or borders, and its empty state is one note, "nothing saved yet.". The kit's README has the parts, the favicon, the link preview, the README and print.</p>
-<p><strong>Motion</strong> is calm: nothing bounces all the time.</p>
-<p><strong>Charts, slides and a paper's diagram</strong> wear the same hand, and the data is the only saturated thing. <code>lib/style/figures/</code> carries the rules for matplotlib and TikZ:</p>
-<pre><code>plt.style.use(['phy.mplstyle', 'phy-slides.mplstyle'])  # Slides and the web.
-plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the host document's typeface.</code></pre>
-<ul>
-<li><strong>Data colours</strong> come from phy's characters: five at most, each legible on the paper and apart under colour blindness. A series keeps its colour from figure to figure, never its rank.</li>
-<li><strong>A caption</strong> says what is shown, then what it shows: "build time for four versions: the last one halves it". A slide's title states the point, not the topic.</li>
-<li><strong>A paper's main diagram</strong>, the one people remember the paper by and redraw in their own talks, is where the hand shows; the paper's text keeps the venue's type.</li>
-</ul>
-<h2 id="s4">4. pieces</h2>
-<p>A piece made to delight (a picture, a film, a game) is looked at before it is read, and starts free (<a href="#s1">§1</a>). What follows are ways in, not requirements; whatever the piece, the duties hold.</p>
-<p class="lead"><strong>The picture.</strong> A frame is composed, not filled. Some ways that have worked:</p>
-<ul>
-<li>one thing to look at first, and everything else quieter than it;</li>
-<li>scale doing the work: something large against something small;</li>
-<li>the paper as part of the picture, a frame mostly empty when the idea is small;</li>
-<li>off centre and uneven: a row facing us, evenly spaced, is the gallery's picture, and a piece needs its own;</li>
-<li>turned grey (CIELAB L* alone), a frame that still shows its one thing.</li>
-</ul>
-<p><strong>The characters stay as drawn; the world is free.</strong> As in cel animation, the characters are drawn as they always are (<code>FWIENDS.md</code>), and the place around them takes its own colours and its own light. The house way with light is to draw it, never filter it: a beam or a pool of lamplight is a pale shape in coloured pencil laid on the set, or, on a dark sheet, rubbed out of the graphite as an eraser leaves it. Night is a darker sheet of paper, on which the inks turn over. Either way, light falls on the place, never on a character.</p>
-<p class="lead"><strong>References.</strong> Each piece picks its own, and takes one thing from each, never a whole look. Three that have served:</p>
-<ul>
-<li>The Snowman (Raymond Briggs's book and the 1982 film): soft coloured pencil throughout, almost no words, and the pace set by Howard Blake's score.</li>
-<li>Ernest &amp; Celestine (2012): colour that stops short of the frame's edges, so the paper shows round every scene.</li>
-<li>Jon Klassen's hat books (2011–16): eyes without mouths doing all the acting, and menace stated flatly.</li>
-</ul>
-<p class="lead"><strong>Sound and pace.</strong> A film has usually been cut to its music: the track chosen before the story, measured once into data beside the film (its bars and beats, or, where the tempo is free, its moments), and every cue written against that data, never by ear. Motion lands on phrases, not on every beat. Two things are fixed:</p>
-<ul>
-<li><strong>Whose music.</strong> Never music that the agent making the film composes or generates; music someone else made with AI only where it is good. The licence must let a hobby film set it to pictures: public domain in the US, where the site is served (the recording as well as the score), CC0, CC BY or CC BY-NC. CC BY-SA only where phy alone is on screen, since the other characters are not phy's to license; never ND. Credit the composer even where nothing requires it. A commercial song goes only through a platform's own library, never on a page.</li>
-<li><strong>Credits once, large.</strong> A link in a picture cannot be clicked, so a video names the people and characters in it once, written large, and the post that carries it links them.</li>
-</ul>
-<h2 id="s5">5. working with phy</h2>
-<ul>
-<li><strong>Discuss before building</strong> anything big: say what you'll make and wait for a yes. The surprise is in the idea, not the scope: add no work phy did not ask for.</li>
-<li><strong>Keep the source</strong> (a spec, a script, a Markdown file) and the command that builds from it; a built file is never edited by hand. A first version is a sketch, to be redrawn once phy has looked, and the candidates that lose are kept until phy says otherwise.</li>
-<li><strong>Show, don't describe.</strong> Render the options and put them side by side. Looks are settled by looking, and a look settled for one piece stays with that piece: it goes in the casebook, never into this guide.</li>
-<li><strong>The casebook</strong>, <code>lib/style/CASEBOOK.md</code>, has one line per finished piece, newest first: what it is, its look in one sentence and a link. It records what has been done so that the next piece can do something else; nothing in it is a rule.</li>
-<li><strong>phy reviews before anything is published.</strong> Pushing, posting and sharing are phy's call, each time.</li>
-<li><strong>An adversarial review</strong> for visual work, by a reviewer who knows the references and the casebook and asks first where we have seen this before. A review, whoever writes it, is a reference rather than an order: check each finding against the work, adopt what holds, and say what was rejected and why.</li>
-<li><strong>Three ideas first.</strong> For a piece, think first of what the viewer will enjoy, and sketch three ideas before choosing, one of which leaves the house look entirely; an ideas agent is briefed with the duties (<a href="#s1">§1</a>) alone, never this whole guide. The first idea to come is presumed the boring one (<a href="#s1">§1</a>), judged against phy's recent pieces as well as everyone else's, and stays only if it beats the other two. Then draw the best: the kit gives way to the idea. Where <a href="#s1">§1</a> or <a href="#s2">§2</a> blocks a good idea, propose changing the rule rather than dropping the idea; the duties never change.</li>
-<li><strong>Private stays private.</strong> Personal references (photos of a real pet, say) live in a git-ignored folder and never reach a public page. Quote phy's own words only where a piece needs them.</li>
-</ul>
-<hr>
-<h1 id="phy-s-fwiends-the-gallery-and-its-characters">phy's fwiends: the gallery and its characters</h1>
-<p>This file adds what only this project needs to phy's style guide (<code>STYLE.md</code>): the gallery page, the rules for drawing a friend with <code>lib/fwiends/src/phyfriends.js</code>, and the rules for putting friends together in films and games. Where the two disagree, <code>STYLE.md</code> wins unless this file says why.</p>
-<p>The characters are made by a small program, not stored as pixels: phy noticed that <a href="https://grokbot-icon-studio.serio-ai.chatgpt.site/">Grokbot Icon</a>'s character icons have a low Kolmogorov complexity (a few ellipses, some tufts, two pill eyes and a blush), and the house template follows them. Wherever they appear, they are <strong>drawn by the factory from their specs</strong>, never by hand, so every copy matches, and in one material, the gallery's: coloured pencil without an outline, exactly one shade layer, and paper cut to the outline wherever the ground is not paper. Another material is for a one-off, with the owner's yes. However free a piece is (<code>STYLE.md</code> <a href="#s4">§4</a>), it stages its characters and never redraws them. The site's <code>style.html</code> shows both, one after the other, and section N of <code>STYLE.md</code> stays at <code>style.html#sN</code>. Run <code>python3 tools/pf.py style</code> after editing either.</p>
-<hr>
-<h2 id="the-gallery-page">the gallery page</h2>
-<p><code>index.html</code> (the gallery), <code>style.html</code> (the guides) and <code>specimen.html</code> (the kit at work) all wear the kit, and turn to the dark sheet where the reader's system asks for it (<code>STYLE.md</code> <a href="#s3">§3</a>). The paper is design C of the mockups in <code>design/</code>; A and B are kept in <code>design/backup/</code>. The specimen sits at <code>50</code>, and its dial turns the face, never the case, to <code>0</code> or <code>100</code> until a reload. The gallery is a hobby project, so it sits at <code>100</code> (<code>STYLE.md</code> <a href="#s3">§3</a>).</p>
-<p class="lead">The page has five parts, in this order:</p>
-<ol>
-<li>The title, <code>phy's fwiends</code>, in the hand: the project's name wherever people read it (<code>phy_friends</code> is only the repository's and the code's).</li>
-<li>One line of intro: "a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code." The last words show the page's workings (below).</li>
-<li>The nav, as on the other two pages: fwiends, style guide, specimen.</li>
-<li><strong>The stage</strong>, a group photo: the fwiends stand together on pencilled ground and all watch the cursor.</li>
-<li>The footer: "characters belong to the people named under them"; a credit to Terry's owner, who tuned the fwiends' proportions by eye on the tuning page; the style guide; and the source.</li>
-</ol>
-<p class="lead"><strong>The stage:</strong></p>
-<ul>
-<li>It is the one centred and the one wide thing on the page, as the subject of a group photo is; the rest keeps to the margin line. Beside the margin line it runs to the paper's edge, and the page stops growing where every friend fits in one row.</li>
-<li>Every friend is drawn at one scale, in a box 270 head units tall whose bottom edge is its ground (<code>PhyFriends.groundOf</code>): 5 rules, or 4 below 360px, so that two still stand side by side. Ears and tails may reach out of the box, as in a photo. A body or tail that sticks out at ground level widens the friend's slot (<code>--reach-left</code>, <code>--reach-right</code>), so neighbours stand close but never tread on a tail, and so does a long label, so that neighbouring labels keep 30px apart. On the narrowest phones, where a pair would not fit with its reaches, the two stand a whole box apart instead, so that two long species never run together.</li>
-<li>Narrower than one row, they stand eight to a row, then five, four and three, and in pairs on a phone, never a mix of pairs and threes, so that the same friends always share a row. In rows of eight or five the second row's rule is 768px down, so a window that tall shows two rows. <code>python3 tools/pf.py pages</code> works out from the reaches (neighbours overlap by 0.06 of a box) how wide each split is, where the pairs give up their reaches and where the page stops, and writes them, and each slot's reaches on a wide screen and on a phone, into the page, so that it is laid out before the friends are drawn and does not shift as they are. The page measures the labels again once their face has arrived and whenever the width changes. <code>python3 tools/pf.py test</code> fails while any of this is stale, or while a split's rows break where it takes over.</li>
-<li>The order is phy's. Howdi, YuanYuan and phy come first, side by side at every width; Fruit stands next to Yuda; K3V1N, BarDell, WeiWei, mosing and Yawei come between mumuyou and cowosus in that order; Raze stands between cowosus and tanyuan, and Alfie, Teni, WhiteDeer and jiaoyue follow tanyuan in that order; on a phone Yuda shares a row with Terry, Brian with mumuyou, and WeiWei with mosing. Claude stands last, so a new fwiend goes before it, and any change of order is checked at every width.</li>
-<li>A phone held sideways, if at least 390px tall, shows the first row and its names on the first screen: the gallery gives up the blank rule above the title, and the note the one below it. The tallest ears then reach into the note's rule, so the note moves up to the nav's, and "keep still" to the title's.</li>
-<li>Each friend's ground is its own patch of rule, gone over in pencil (a seeded wobble, <code>PhyFriends.rng(5)</code>, ink at 70%, 1.4px, through the graphite filter). Each friend is drawn on the page (<code>bg: 'page'</code>): on the dark sheet and in forced colours, on paper cut to its outline instead (drawing a friend, below), a pencil's width wide of it, as a sticker is cut, so that a dark friend keeps its edge. In forced colours its ground is in the system's text colour.</li>
-<li><strong>A light is rubbed out</strong> of the dark sheet at the feet of the friend you point at, tap or focus: an eraser, rubbed back and forth along its ground, lifts the graphite in an oval pool, streaked, ragged at the edges and never quite clean (<code>STYLE.md</code> <a href="#s4">§4</a>). It is the one light on the site's pages, since the gallery is a stage, and it lights one friend at a time, so that the page still has one thing to look at. It stays within the friend's slot, clear of the words below and of its neighbours' tails.</li>
-<li>The ring circles the host's name, phy's: "this one" is the one whose page it is.</li>
-<li><strong>Two winks</strong>, both in corners of the stage (<code>STYLE.md</code> <a href="#s2">§2</a>). A pencilled note on the rule under the nav, over the right end of the row, says what to do: "psst: they watch your cursor. click one to say hi" (only "click one to say hi" where fewer than five stand in a row, and "tap" on touch screens). Being one long line, it takes the title's tilt, <code>−1°</code>, since at <code>−2°</code> its far end would climb half a rule. And a mock disclaimer about the last fwiend, Claude, the machine that made the page, in small print a blank rule under the last row's labels: "this work was generated entirely by this machine", then "human intelligence was confined to the characters and the corrections." Its first line ends in the kit's arrow, turned to point up at Claude's middle (measured whenever the stage is laid out); where Claude stands alone, the disclaimer is centred under it and the arrow points up and in.</li>
-<li>At the left of the note's rule, a small-print checkbox, "keep still", keeps the fwiends as still as reduced motion does and skips the opening. It starts as the system's setting and is remembered on the device. It closes the header, so that it comes straight after the nav in the tab order, and after it comes "skip the fwiends", shown only when tabbed to, which goes to the footer, some forty presses of Tab on. While it shows, the note steps aside for it; on a phone held sideways it takes the place of "keep still" instead, rather than push it onto the title. Without JavaScript "keep still" is hidden, and the stage reads "the fwiends are drawn live, so they need JavaScript to appear."</li>
-<li>Each fwiend has a link of its own to send its owner, <code>index.html#yuda</code>, its name in lower case (<code>#k3v1n</code>): it skips the opening, brings the fwiend into view and focus, and the fwiend says hi.</li>
-</ul>
-<p><strong>Labels</strong>, three rules tall: the name in the hand, <code>31px</code> (<code>26px</code> on phones, <code>22px</code> on the smallest), a step above an h3, since it is read from further away; the species in small print, two or three lower-case words ("tuxedo eevee"); and the owner's handle in small print, linking to their page (phy's reads "that's me · linkedin", and "linkedin" alone on the narrowest phones, where the ring says the rest). On the smallest phones a long species or handle wraps onto a second rule rather than run into a neighbour.</p>
-<p>Each friend is a button with a short name (<code>aria-label</code>), "say hi to Terry", so that a screen reader or a voice gets to the point; what it looks like is a hidden description (<code>aria-describedby</code>): "a yellow plush toy with huge floppy ears, a fluffy bib and dark felt soles". The specimen's portrait is named and described the same way.</p>
-<p>The cast (<code>lib/fwiends/characters/cast.js</code>) is the source of each name, species, credit and consent. The page repeats them by hand (the labels, the <code>aria-label</code>s, the host, the footer's credit and the link preview's alt text); <code>python3 tools/pf.py test</code> names the friend and field wherever the two disagree, and fails any friend whose owner has not agreed to the gallery. Every page that loads all the friends loads them in the cast's order, and <code>python3 tools/pf.py pages</code> writes their script tags.</p>
-<table>
-<thead><tr><th>do</th><th>don't</th></tr></thead>
-<tbody>
-<tr><td>click one to say hi</td><td>Click a character to interact!</td></tr>
-<tr><td>a few fwiends in coloured pencil, each one drawn from a hundred-odd lines of code.</td><td>Welcome to a magical world of adorable characters</td></tr>
-<tr><td>characters belong to the people named under them</td><td>All rights reserved.</td></tr>
-</tbody>
-</table>
-<p class="lead"><strong>Saying hi, and how they take it.</strong> <code>lib/fwiends/src/live.js</code>, which any page can use, brings the fwiends to life, and their feelings come from the emotion library:</p>
-<ul>
-<li>Hovering over a friend, or tabbing to it, perks it up: ears in, eyes a touch wider. Kept there a moment, it grows curious and tilts its head one way, then the other.</li>
-<li>A fwiend knows its person: pointing at its owner's handle, or tabbing to it, makes that fwiend look at the handle and smile until the pointer leaves. Terry does the same for the footer's credit to his owner, and Claude for "this machine".</li>
-<li>A click, a tap, Enter or Space says hi, with the hop for joy: happy eyes, a small mouth, two bounces, while the others glance at it. Its ground gives under each landing, dipping a little and springing back. A friend in mid-air ignores another hi until it lands, since starting the hop again would drop it to the ground in one frame, and a key held down says hi once.</li>
-<li>A third hi within six seconds makes it shy instead: it blushes, ducks and looks away, and takes no notice of another hi until it recovers.</li>
-<li>Stroking makes it content: it shuts its eyes happily, and a ♪ shows once. The pointer or a finger moved back and forth strokes it, as do ← and → pressed in turn on a fwiend tabbed to, and a finger held still on it for half a second (the tap that ends a long press is not a hi).</li>
-<li>Left alone for 30 seconds, the fwiends grow sleepy one by one and fall asleep, a z drifting up now and then. Any input wakes them, with a "!", nearest the pointer first.</li>
-<li>Claude shows no feelings and stays awake. It perks up, watches and hops like the others, and returns a hi with the same smile, which is manners rather than a feeling. Its third hi, where the others go shy, plays the routine of Claude Code's animated mascot, timed as the mascot's GIF times it: a wink as it steps aside, its laptop swung up and set down open beside it, a hop round to type at it side-on, then the laptop folded away. Meanwhile it ignores a hi and the others watch it. Under reduced motion it only winks.</li>
-<li>A hidden status line tells a screen reader what happened in one flat sentence: "Howdi hops twice." ("Howdi smiles." under reduced motion), "Howdi goes shy.", "Howdi looks content.", "Claude gets out its laptop and types.", "Everyone but Claude falls asleep." (once a visit) and, once they had all fallen asleep, "Everyone wakes up.", which is not said when the reader only moves about the page, so that it never talks over the screen reader's own account. Two things that happen at once are said together.</li>
-<li>A double-click or a long press selects nothing and opens no menu, and a quick second tap doesn't zoom the page. The labels stay selectable, so a handle can still be copied.</li>
-</ul>
-<p><strong>The workings.</strong> "a hundred-odd lines of code", in the intro, is a quiet button that shows how the page is drawn, in blue pencil (<code>STYLE.md</code> <a href="#s3">§3</a>); until it is pressed, nothing of it shows. Pressed, the fwiends sit still, as with "keep still", and fade to the construction that their specs describe: the head, the face and the body, the line of the eyes and the eyes on it, the ears and the tail's spine. Each label gives its friend's spec and its length in place of the species ("howdi.js, 131 lines": <code>python3 tools/pf.py pages</code> writes the lengths into the page); where there is room, notes give the kit's names for the parts of the page (the title's size and its pen, the nav's ring, the note's tilt, the margin and the rules), each read from the page as it stands; and a note on the library says what each part of <code>lib/</code> does and gives the two lines that link it, beside the title on a wide screen and under the nav on a narrower one. Pressing the phrase again, or Escape, puts everything back. The gallery loads <code>lib/fwiends/src/workings.js</code> for this, and a page that does not load it has none of it.</p>
-<p class="lead"><strong>The opening.</strong> The first time the page opens in a tab, the title writes itself and the fwiends come in by roll call. A reload, a step back through the history, a link to a fwiend, reduced motion, "keep still" and the link preview show everything in place.</p>
-<ul>
-<li>The title is written stroke by stroke, in the order a hand writes each letter, in just under three seconds, slowing at each end of a stroke and lifting between strokes. <code>lib/fwiends/src/pen.js</code> writes it; <code>python3 tools/title_pen.py</code> derives the strokes (<code>lib/fwiends/src/title-pen.js</code>) from the title as the page sets it, and must run again if the title or its face changes. If the face is slow or doesn't match the strokes, or colours are forced, the title simply shows.</li>
-<li>As the pen reaches "fwiends", the friends hop in along their row's rule from the nearer edge of the screen, row by row, the one farthest from its edge first, so that nobody hops past anybody standing. The hops are a little lower than a scene's, so that ears clear the labels above, and neighbours watch each one land. The labels are there from the start, so the empty places read as the names still to be called; each fwiend's ground is drawn as it sets off, from the side it comes from, so that the line is there before the fwiend lands on it, and gives as it does.</li>
-<li>A row is called once any of it is in view; one just below the fold comes in with only its ears showing, which draws the eye down, and on a phone the lower rows come in as they are scrolled to. A row scrolled past unseen is simply there, as are the rows still to come once the fwiends doze off. A click, a tap, Escape, a change of width or tabbing to a fwiend still to come brings everyone in at once; scrolling does not.</li>
-</ul>
-<p><strong>The favicon and link preview</strong> come from <code>python3 tools/site_assets.py</code>, run after any character changes: the favicon is phy's head, and the preview (1200×630) sets the title over every fwiend, in the gallery's order and at one size, standing in rows on the rules of the same paper. The rows (<code>LAYOUT</code> in the script) are three of seven: the widest row fills the frame's width, so that the box is as large as the frame allows, and the script fails until the rows seat every fwiend. The title is kept clear of the ears below it, and the picture is saved as a palette PNG, about half the size of a full-colour one, with the pencil's grain kept.</p>
-<h2 id="drawing-a-friend">drawing a friend</h2>
-<p>The factory (<code>lib/fwiends/src/phyfriends.js</code>) encodes these rules. A friend is a spec of about 100 lines, a palette plus shape parameters, not a traced path. Before turning someone's picture into one, ask the owner how the character is written (the name's capitalisation, the species and the pronoun, "they" until told), take one picture as the colour standard and say which, and keep private references in a git-ignored <code>private/</code> folder.</p>
-<p><strong>Make it cute.</strong> Characters are soft and round, with a big head on a small body. Cute comes before literal, so long as every part can still be told apart. Where the two disagree, what looks good beats what is spatially logical, in a turned view as anywhere.</p>
-<p class="lead"><strong>Coloured pencil:</strong> soft round shapes coloured in without an outline, pill eyes in the character's own eye colour, a soft blush, and no nose and no mouth by default.</p>
-<ul>
-<li><strong>The pencil is one texture over the whole character</strong>: strokes rising to the right, the paper's tooth, and patches where the hand pressed more lightly, with the paper, rules and all, showing through. The texture belongs to the paper: it stays put while the character breathes, turns or hops on the spot, and travels with it about a page, as a figure cut out of paper would. On a background of its own, such as a dark close-up or the dark sheet, a character is drawn on paper cut to its outline, so the pencil shows paper, never the background; on the dark sheet the cut runs a pencil's width wide, as a sticker's does, so that a dark character keeps its edge. Light falls on the place, never on a character.</li>
-<li>The one texture is the factory's pencil, which <code>render</code> and <code>mount</code> lay over the whole friend; a spec never draws a texture of its own. <code>pencil: false</code> draws the flat shapes alone, for an icon too small to hold the texture or to match a flat reference picture (<code>pf.py compare</code>).</li>
-<li>Clothes take their thickness from how they are made, never from a texture: a band standing a few units proud of the body (YuanYuan's sash, the roll of tanyuan's hood), or cloth lying over cloth (a crossed collar, a front over its hem). Painted on to the body's ellipse, clothes read as a print on a ball.</li>
-<li>Every colour is one the character really has: fur, hair, markings, accessories. A band the owner counts as a marking (phy's crest) is a colour, not shading.</li>
-<li>A few colours, 6–13, each with a named role in <code>palette</code>. Every fwiend but Claude opens with the same roles in the same order, one for each part of the house figure: <code>fur</code>, <code>head</code>, <code>face</code>, <code>hair</code>, <code>ear</code>, <code>earInner</code>, <code>iris</code>, <code>ink</code> (the mouth), <code>blush</code>, <code>tongue</code>, <code>body</code>, <code>tail</code>, <code>arm</code>, <code>paw</code>, <code>leg</code> and <code>foot</code>, with <code>earRight</code>, <code>irisRight</code> or <code>pawRight</code> where a pair differs. Each is a colour or the name of the role it shares (<code>paw: 'face'</code>). Markings and clothes follow, named for what they paint, and <code>bg</code> (<code>#1c1d21</code>), the same for all, comes from the abstract friend that every spec extends.</li>
-<li><strong>Exactly one shade layer.</strong> <code>&lt;name&gt;Shade</code> is derived from <code>&lt;name&gt;</code> by <code>PhyFriends.shadeOf</code>, the house step darker (CIELAB L* <code>−10</code> and chroma <code>×1.2</code> at the same hue, with a near-grey leaning to lavender), so shades match across fwiends. There are no second steps, and nothing comes from a reference's lighting: no pale rim along an ear, no darker far side, no highlights.
-<ul>
-<li>The body sits under the head, so every body is in its fur's shade, or its clothes' shade where it is dressed. A layer of the clothes lying over it takes the clothes' own colour, such as the front of a hoodie.</li>
-<li>Elsewhere the shade goes only on a part behind a neighbour of the same colour: Terry's ears behind his face, the back layer of a ruff, locks behind the mop, the inside of a hood past its rim.</li>
-<li>One part in front takes it instead: a raised paw, as far as it has come in front of the head or face (fading in as it crosses their edge), so that a paw the colour of the face still shows against it.</li>
-<li>A spec sets a shade by hand only where the derived one looks wrong, and says so in a comment (mumuyou's gold hair). Where a shade lands on a neighbouring colour, the neighbour moves, not the shade: phy's crumb went a step darker, away from the shaded hip.</li>
-</ul></li>
-<li>A pale colour that would vanish on paper takes one slightly deeper tint wherever it appears: most whites become <code>#efeef3</code>, and phy's warm white <code>#f5ede6</code>. A dark colour whose shade would read as black takes the lightest tint its pictures give it (Fruit's navy, <code>#283e74</code>). Judge it on the page, not on a flat render, since the pencil lets the paper through.</li>
-</ul>
-<p class="lead"><strong>Proportions, in head space:</strong> a big head on a small body.</p>
-<ul>
-<li>The origin sits between the eyes. The head is widest around eye level, about 140–190 units across the cheeks. Ear tips reach about −155 (floppy ears less), and the paws reach the ground (<code>PhyFriends.groundOf</code>), about +140. The eyes are about 13 × 32 units, centred 31–35 either side.</li>
-<li><strong>One figure sits and stands.</strong> Standing, a friend keeps its seated body on two short plush legs that show 30 units below it, with arms hung high and well out from its sides; its feet touch <code>stand.ground</code>, and the rig lifts it so that they stand where its seated paws did. Seated, the same arms hang straight down in front as forelegs, to its seated paws (<code>stand.seat</code>), and the legs fold into its feet, so it stands up and sits down through every height between, with nothing appearing or vanishing.</li>
-<li>From the back: the body and its clothes, the scarf (a ruff or bib of fur, or a scarf), the head, whose chin lies over the scarf and collar, then the arms, except at the shoulder, which tucks under the scarf and head. A hood is clothing, so it lies under the arms, and a sleeve takes its cloth's shade, so that it shows against the garment's front.</li>
-<li>A reference in the house template (a 1254px close-up, head tipped 20°, as in the Grokbot Icon prompt's examples, which reviewers should know) is matched at <code>scale: 5.5</code> with the view <code>{w: 1254, h: 1254, x: 450, y: 835, scale: 5.5, rotate: 20}</code>.</li>
-</ul>
-<p class="lead"><strong>Shape vocabulary</strong>, layered ears, head, face mask, blush, eyes, mouth, then hair on top (bangs may cross the face):</p>
-<ul>
-<li><strong>fluffy ellipses</strong> for the head, face mask and chest, whose outlines grow small curved tufts;</li>
-<li><strong>a star hair mop</strong> of broad, curved, flame-like locks, some hanging over the face;</li>
-<li><strong>rounded-triangle ears</strong>, with an inner ear and stripe bands only where the character really has them;</li>
-<li><strong>pill eyes</strong>, one flat colour each, from the art (<code>iris</code>, and <code>irisRight</code> through <code>eyes.right</code> for a second colour): no whites, no highlight and no rim, which reads as an outline. Where the art draws dark eyes, as Terry's does, they are near-black. A colour that would be faint at gallery size goes a house step deeper, or further until it holds (phy's green; mumuyou's pale sky, to a blue), and on a dark face the step goes the other way (Raze's eyes take the cyan and lavender that rim them). An eye its owner draws in two colours keeps both, flat, the second a mark clipped to the eye (<code>shine</code>) that glances and blinks with it, as the lower half of K3V1N's does; it keeps its picture's own tint, since the colour above it holds the eye's shape. The palette's <code>eye</code>, a near-black, is for the open mouth;</li>
-<li>soft <strong>blush</strong> ovals, in the owner's colour if they have one (Yuda's is blue);</li>
-<li>no nose, and no mouth by default.</li>
-</ul>
-<p class="lead"><strong>Turning round comes from the spec, not from new drawings.</strong> Every fwiend but Claude turns as South Park's cut-outs do, a quarter turn at a time (<code>pose.facing</code>): side-on to either side, or its back to the viewer, by rules that every fwiend shares (<code>PhyFriends.TURN</code>), so a change to the body plan turns with it. Where the true turn looks worse than a cheat, the cheat wins.</p>
-<ul>
-<li>Side-on, the face slides forwards and narrows, keeping a pale patch wide enough to read, with only its near eye (drawn over the hair), mouth, cheek and markings; the hair bends from the crown to the face, which a fringe follows; the ears close up and stand straighter, the far one in its shade; the body narrows, the far limbs go behind, and the tail grows from the back. Whatever lies on one side wraps round the near side and hides on the far one.</li>
-<li>From behind, a fwiend is its own mirror image: anything one-sided changes sides, the face hides but the chin keeps the head's outline, the ears show their backs in their shade, hair that covers the crown lies over the head, the arms hang beside it, and the tail is drawn over everything.</li>
-<li>A marking or a garment turns as its feature does (<code>ANATOMY.turns</code>): a bib goes to the front and hides from behind, a hood or wings go to the back, horns and antlers move with the ears, and glasses are left out once a fwiend turns, as is the custom in a side view. Name a feature for what it is and it turns rightly (the anchor on WhiteDeer's hat is a <code>badge</code>, which faces forwards); give an extra its own <code>turn</code> only where it lies otherwise (the pale lock on phy's forehead faces forwards). Teni's spec lights his back (<code>backLit</code>), so the back of his bob takes its own colour.</li>
-<li>A part that shows only from behind is drawn from the owner's own picture of the back (WhiteDeer's sailor-collar flap, the knot of Brian's bandana), and lies under the body facing the viewer, so the front is unchanged.</li>
-<li>A fwiend's own turn numbers (<code>turn</code> in its spec) are a last resort: a difference that several share belongs in the rules. The tuning page shows the side and the back.</li>
-</ul>
-<p><strong>Feelings come from the pose, not from new drawings.</strong> The emotion library (<code>lib/fwiends/src/emotion.js</code>) has twenty-three, each made of parts every fwiend on the house template has: the eye shapes (<code>happy</code>, <code>closed</code>, <code>squint</code> and the dizzy <code>swirl</code>), a lid over the open eyes (<code>lid</code>, slanted by <code>lidTilt</code> for a sad or cross look), the blush spreading (<code>flush</code>), a mouth (<code>w</code>, <code>smile</code>, <code>frown</code>, <code>o</code>, <code>flat</code>, <code>wobble</code>, <code>open</code>), the ears, the tail and the posture, and, standing, the arms and a gesture (paws on the hips when proud, a shrug when confused). Each shape is drawn from the eye's or the mouth's own size and colour, so a spec needs nothing for its feelings, and a new fwiend has them all. Body language follows from how pleasant and how alert a feeling is, so feelings that sit close look alike. <code>eyes.arc</code> and <code>eyes.stroke</code> set how wide and thick the happy and closed strokes are.</p>
-<p><strong>Keep the spec small.</strong> Tune the <code>fluffy</code>, <code>star</code> and ear parameters rather than writing raw <code>nodes</code>, and match the set in the spec's structure as well as in its look.</p>
-<p class="lead"><strong>Claude, the exception.</strong> The last fwiend is Claude, the model that drew the others, as Claude Code draws it on its welcome screen: three lines of block characters. It keeps every rule above but the shape, which comes from the glyphs. A terminal cell is about twice as tall as it is wide, so a quadrant pixel is one unit wide and two tall, drawn 16 head units to the unit, which makes the eyes as tall as the house's: a terracotta block whose body is its head, pill eyes where the glyphs cut their notches, a stub of an arm on each side and four short legs.</p>
-<ul>
-<li>Being made of blocks, it is drawn in raw <code>nodes</code>, rounded as a pencil rounds them: soft top corners and nearly square bottom ones, so its sides run straight into its outer legs. Its arms take the place of ears, in its own colour, each turning about a shoulder inside the block so that they rise as it hops. Its legs are its body, in its one shade.</li>
-<li>It shows no feelings (<code>emotions: false</code>): a feeling gives it the movement without the face, and it smiles only to greet, with the happy eyes and mouth and without the blush. Its blush is a soft rose, since a pale pink on terracotta reads as a highlight, and its eyes look a whole unit aside (16 head units, where the house's move 6), as the glyphs move the notches.</li>
-<li>Having no tail, it does not sway. It is short, so its legs meet the ground at 112 rather than at the house's 131 (<code>rig.ground</code>, which <code>PhyFriends.groundOf</code> lowers with the others' taller bodies, to about 140), and standing already on four legs, it never stands up (<code>stand: false</code>).</li>
-<li>Its laptop, for its routine, is a grey base and screen drawn only on cue (an extra's <code>show</code>): on its arm while held, then on the ground (<code>on: 'ground'</code>), where it stays while Claude hops. Set down, it reaches a little into the space after the last fwiend of a row, and while it is out the page clips sideways, as during the roll call.</li>
-<li>Its species is "language model", its pronoun "it", and its credit Anthropic's.</li>
-</ul>
-<p class="lead"><strong>Motion</strong>, on the page and in a scene (<code>STYLE.md</code> <a href="#s3">§3</a>), with the eyes smoothed so that they never jitter:</p>
-<ul>
-<li>Idle, the library's clip plays underneath: breathing, blinks at irregular intervals, a slow sway of the head and tail, a glance about now and then and an occasional ear flick, on an 8-second loop that each fwiend starts at a different point. A fwiend standing also breathes with its arms and shifts its weight slowly from foot to foot. The pencil boils: its texture is redrawn 8 times a second, through three versions, as in hand-drawn animation (<code>PhyFriends.pencil.settings.boil</code>, which pages and films share).</li>
-<li>Each friend works out the direction from its own head to the pointer, so the group converges on it: the eyes take the whole offset (<code>lookX/lookY</code>), the head about half (<code>turnX/turnY</code>, drawn as layer parallax), and the glances give way whenever there is something to look at. When the pointer leaves or rests a while, they drift back to centre or glance about, unless one has been tabbed to: then the others look at it. A pen is followed like a mouse, and a finger while it touches; there is no gyroscope.</li>
-<li>The stage draws at the screen's rate only while something needs it (a pointer on the move, the eyes catching up with it, a fwiend reacting) and otherwise on fours, 15 frames a second. It stops drawing while none of it is in view or the page is hidden, to spare a phone's battery. Its clock stops with it, so everything picks up where it left off, and a stall (a laptop asleep with the page open) is skipped rather than caught up.</li>
-<li>Under <code>prefers-reduced-motion</code>, or with "keep still" ticked: eyes only, no idle motion and a still pencil; a hi or a feeling changes just the face (the eye and mouth shapes, the lids and the blush), and marks neither pop nor drift. Once the eyes have caught up with the pointer, the stage draws only as often as the pencil would boil. A fwiend that stands stays standing, since its stance belongs to the story rather than the motion.</li>
-</ul>
-<h2 id="scenes-films-and-games">scenes: films and games</h2>
-<p>Beyond the gallery, the fwiends appear in scenes built with <code>lib/fwiends/film/scene.js</code>: short films, listed in <code>demo/index.html</code>, and in time games. A scene is a sheet of ruled paper measured in head units, a rule every 54, so a seated fwiend is five rules tall, as in the gallery. Everything happens at a time on the scene's clock, so a film plays in a page and is filmed frame by frame (<code>pf.py film</code>) from the same script.</p>
-<p><strong>Who knows whom.</strong> Every fwiend belongs to someone, and not every owner knows every other one. phy, the host, knows everyone; any other two are strangers until phy says their owners know each other (<code>lib/fwiends/characters/cast.js</code>). The scene checks these rules and refuses to break them.</p>
-<table>
-<thead><tr><th></th><th>strangers</th><th>know each other</th></tr></thead>
-<tbody>
-<tr><td>share a scene, take turns, look at each other, react to the same thing</td><td>yes</td><td>yes</td></tr>
-<tr><td>greet from a distance</td><td>yes</td><td>yes</td></tr>
-<tr><td>stand close, talk, hand something over, play on one side</td><td>no</td><td>yes</td></tr>
-<tr><td>touch, compete head to head, tease</td><td>no</td><td>only if both owners opt in</td></tr>
-</tbody>
-</table>
-<ul>
-<li>Strangers keep a strip of paper between them, 40 head units between outlines (ears apart), whichever way they face and whether they sit or stand; fwiends who know each other may stand side by side. Choreograph so that nobody hops past anybody.</li>
-<li><strong>Only phy speaks in words,</strong> said or written on the sheet. The others speak in marks, since only their owners know how they talk: ! ? !? … z ??, and drawn ones, a ♪, a heart, a bead of sweat, a sparkle, a light bulb and a swirl. A mark is a drawing over a fwiend's head, not punctuation, so the calm punctuation of <code>STYLE.md</code> <a href="#s2">§2</a> doesn't apply to it. It is written in the hand pressed harder, bold (<code>600</code>) in <code>--ink-2</code>, so that it reads at a glance; a drawn mark is a line as thick as that hand's stem, never filled, on the same baseline (the hand has no ♪, so the ♪ is drawn too). Likewise, nobody is given a personality, a birthday or any other fact its owner didn't give it. A film made for one owner alone (<code>madeFor</code>) may draft a few short lines and traits for that owner's fwiend, used sparingly and written as its marks are (<code>write(text, { by })</code>); nobody else sees them until the owner has kept, changed or struck each one.</li>
-<li><strong>Feelings are reactions, not temperaments.</strong> A feeling answers something that happens in the scene (<code>actor.feel('surprised', { at })</code>, with its mark); nobody is shy, cross or sleepy by nature. Aimed at another fwiend, it follows the table: a heart or a fond look needs the two owners to know each other, and a wink or a laugh at another fwiend is teasing, which needs both to opt in. Aimed at a thing in the scene, any feeling will do.</li>
-<li>Nobody is hurt, frightened for a laugh or beaten by another fwiend. Games are won against the clock or the page; a miss ends with a fwiend sitting down, not falling over, nobody is blamed for it, and each fwiend keeps its own best score.</li>
-<li><strong>The owners are credited where a viewer can follow the link.</strong> A page links each owner in its small print, and a frame may credit the owners of the fwiends in it on the bottom rule. A video credits them once, large (<code>STYLE.md</code> <a href="#s4">§4</a>), in a roll call, say. Without the credits, recompose the frame, so that the bottom rule is not left as dead space.</li>
-<li><strong>Consent is per medium.</strong> An owner who agreed to the gallery has not thereby agreed to films or games (<code>agreed</code> in <code>lib/fwiends/characters/cast.js</code>). Until they do, work that shows their fwiend carries the word "draft" in a corner, and <code>pf.py film</code> refuses to film it without <code>--draft</code>.</li>
-<li><strong>Getting about.</strong> Seated fwiends hop. Standing ones walk: facing us, the foot on the side they go to steps out and the other closes up, and the body glides on up to twice as far as the feet, at a little under half a hop's speed. They turn with <code>turnX</code>, never with a mirror image, which would swap two-coloured eyes and reverse K3V1N's mark. Each is on its own paper, cut to its outline (above).</li>
-<li>Films boil as the gallery does, 8 times a second. Under reduced motion a scene plays as the motion rules above say; travel becomes a glide, a fwiend stands up or sits down in a cut, and a film shows its last frame and waits to be played. A music video (say hi) waits too, and once played, plays as it is filmed: half of it held still would be another film.</li>
-</ul>
-<p class="lead"><strong>Props and sets.</strong> Everything in a scene that is not a fwiend is drawn as a fwiend is, so that the sheet keeps one hand.</p>
-<ul>
-<li><strong>A prop is a spec</strong> (<code>lib/fwiends/film/props.js</code>): a palette of the colours the thing really has, a box in head units whose bottom centre stands on the ground, and a few of the factory's shapes, coloured in with the fwiends' pencil, with no outline. Never a traced path or a picture. A prop that films share lives in <code>lib/fwiends/props/</code>, one to a file; one that a single film needs stays in its folder. A set (rock, soil, grass) is props too, laid on the sheet, whose rules show through the pencil.</li>
-<li><strong>A prop takes a fwiend's colour by override</strong> (<code>palette: { paper: PF.get('yuda').palette.scarf }</code>), never by copying the value, and its shade follows (above).</li>
-<li><strong>Light is a pale shape:</strong> a flame, a beam or a lit window is a prop like any other (<code>STYLE.md</code> <a href="#s4">§4</a>), never a glow or a halo.</li>
-<li><strong>Ink is a stroke:</strong> a wick, a string, a vein or a rib is one pencil line in an ink, at the kit's mark width (<code>STYLE.md</code> <a href="#s3">§3</a>), never filled.</li>
-<li><strong>A prop changes by its states,</strong> parts shown or hidden on cue (the candles lit, the needle down), never by a second drawing, and it may be drawn in, coloured in or rubbed out from the bottom or the left, as handwriting writes itself (<code>reveal</code>, <code>recolor</code>, <code>erase</code>).</li>
-</ul>
+    <nav aria-label="contents"><ul class="meta"><li><a href="#s1">1. phy</a></li><li><a href="#s2">2. words</a></li><li><a href="#s3">3. the kit</a></li><li><a href="#s4">4. pieces</a></li><li><a href="#s5">5. working with phy</a></li><li><a href="#fwiends">the fwiends</a></li></ul></nav>
+    <p class="full">Every rule here, in full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md">STYLE.md</a>, and for the characters <a href="https://github.com/rareone0602/phy_friends/blob/main/FWIENDS.md">FWIENDS.md</a>. Where a drawing and the text disagree, the text wins.</p>
+
+    <h2 id="s1">1. phy</h2>
+    <ul class="edits inline-edits">
+      <li><del><span class="sr">not: </span>Phy</del><span class="do">phy, even at the start of a sentence</span></li>
+    </ul>
+    <ul class="meta"><li><code>rareone0602</code> on GitHub and X</li><li>a credit links to <a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">LinkedIn</a></li></ul>
+    <div class="set" style="--cell: 10em">
+      <div><div class="pic" style="--rules: 2"><img src="lib/style/site/icon.svg" alt="phy's head"></div><span class="what">a favicon</span></div>
+      <div><div class="pic" id="mark-whole" style="--rules: 4"></div><span class="what">the whole, where there is room</span></div>
+    </div>
+
+    <h3>one hand</h3>
+    <div class="hands">
+      <span style="--informal: 0">phy</span><span style="--informal: 50">phy</span><span style="--informal: 100">phy</span>
+    </div>
+    <p class="note">one face, at 0, 50 and 100 on its dial; only code, and a host's own type, are in another</p>
+    <h3>drawn, not designed</h3>
+    <ul class="leave-out" aria-label="what a design tool lays on, left out">
+      <li><span class="cta" aria-hidden="true">Get started</span><span class="sr">no gradients, glows or calls to action</span></li>
+      <li><span class="glass" aria-hidden="true">Glass</span><span class="sr">no glass</span></li>
+      <li><span class="card" aria-hidden="true">Feature</span><span class="sr">no cards or drop shadows</span></li>
+      <li><span class="hero" aria-hidden="true">Unleash it.</span><span class="sr">no hero copy</span></li>
+      <li><span class="gear" aria-hidden="true"></span><span class="sr">no stock icons</span></li>
+      <li><span class="pill" aria-hidden="true">#pencils</span><span class="sr">no pills</span></li>
+      <li><span class="burger" aria-hidden="true"></span><span class="sr">no menus</span></li>
+    </ul>
+    <h3>colour goes to the subject</h3>
+    <div class="set" style="--cell: 13em">
+      <div><div class="pic" id="subject" style="--rules: 3"></div><span class="what">phy, in colour; the ground, quiet</span></div>
+      <div><div class="pic" style="--rules: 3"><p class="error" style="position: absolute; bottom: 0">that needs to be a number</p></div><span class="what">red, only for an error</span></div>
+    </div>
+    <h3>never the same twice</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span>the template, the stock phrase, phy's last piece</del></li>
+      <li class="do">describe the look in one sentence; if it fits the last piece, redraw</li>
+    </ul>
+
+    <h3>duties, whatever the style</h3>
+    <ul class="duties">
+      <li class="rule"><strong>The owners' say.</strong> People and their characters appear only as their owners give them: name, species, colours, pronoun and a credit. An owner's wish beats a house rule.</li>
+      <li class="rule"><strong>Private things</strong> stay private.</li>
+      <li class="rule"><strong>Licences</strong> are kept: the face's, the music's, and those of any picture, data or code.</li>
+      <li class="rule"><strong>Light and dark</strong> follow the reader's system. A page never offers a switch, and a print is on paper.</li>
+    </ul>
+    <p class="note">everything after the duties is a default, not a rule: a working page keeps it, and a piece takes what it needs</p>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#1-phy">STYLE.md §1</a>.</p>
+
+    <hr>
+
+    <h2 id="s2">2. words</h2>
+    <h3>British English, in prose</h3>
+    <table class="two">
+      <thead><tr><th>prose</th><th>code</th></tr></thead>
+      <tbody>
+        <tr><td>colour</td><td><code>color</code></td></tr>
+        <tr><td>centre</td><td><code>center</code></td></tr>
+        <tr><td>grey</td><td><code>gray</code></td></tr>
+        <tr><td>normalise</td><td><code>normalize</code></td></tr>
+        <tr><td>licence</td><td><code>license</code></td></tr>
+      </tbody>
+    </table>
+    <pre><code>&lt;label for="ink-color"&gt;ink colour&lt;/label&gt;</code></pre>
+    <ul class="edits inline-edits">
+      <li><del><span class="sr">not: </span>on</del><span class="do">at the weekend</span></li>
+      <li><del><span class="sr">not: </span>in the</del><span class="do">in hospital</span></li>
+      <li><del><span class="sr">not: </span>make</del><span class="do">take a decision</span></li>
+    </ul>
+
+    <h3>a view, in the exact word</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span>both approaches have their merits</del></li>
+      <li class="do">the second method is better: it halves the build time</li>
+      <li class="pair-start"><del><span class="sr">not: </span>blazing-fast</del></li>
+      <li class="do">one script redraws every figure in about 40 seconds</li>
+    </ul>
+
+    <h3>no hype and no ceremony</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span>Meet phy, the creator behind it all!</del></li>
+      <li class="do">that's me</li>
+      <li class="pair-start struck-row"><del><span class="sr">not: </span>magical</del> <del><span class="sr">not: </span>seamless</del> <del><span class="sr">not: </span>leverage</del> <del><span class="sr">not: </span>welcome</del> <del><span class="sr">not: </span>an exclamation mark</del> <del><span class="sr">not: </span>emoji</del></li>
+    </ul>
+
+    <h3>case follows the dial</h3>
+    <div class="cases">
+      <div>
+        <p class="note">at 50 and up</p>
+        <h3>a small tool</h3>
+        <p>phy counts the rules.</p>
+        <button class="btn" type="button" tabindex="-1" aria-hidden="true">count</button>
+      </div>
+      <div style="--informal: 0">
+        <p class="note">below 50, and in plain text</p>
+        <h3>A small tool</h3>
+        <p>phy counts the rules.</p>
+        <button class="btn" type="button" tabindex="-1" aria-hidden="true">Count</button>
+      </div>
+    </div>
+
+    <h3>dates</h3>
+    <p>It was finished on 28 September 2026.</p>
+    <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
+
+    <h3>humour, dark and dry, in the corners</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span>Oopsie! Our hamsters are on it</del></li>
+      <li class="do">human intelligence was confined to the characters and the corrections.</li>
+    </ul>
+
+    <h3>code: American, formal, plain</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span><code>// this bad boy crunches the rules lol</code></del></li>
+      <li class="do"><code>// Counts the rules a drawing needs, rounding up.</code></li>
+      <li class="pair-start"><del><span class="sr">not: </span><code>function ruleWizard(h)</code></del></li>
+      <li class="do"><code>function countRules(height)</code></li>
+    </ul>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#2-words">STYLE.md §2</a>.</p>
+
+    <hr>
+
+    <h2 id="s3">3. the kit</h2>
+    <h3>paper and ink</h3>
+    <table class="inks">
+      <thead><tr><th>ink</th><th class="n">contrast</th><th>for</th></tr></thead>
+      <tbody>
+        <tr data-ink="ink"><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink)" stroke-width="2.2" stroke-linecap="round"/></svg>ink</td><td class="n">10.5 : 1</td><td>words</td></tr>
+        <tr data-ink="ink-2"><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink-2)" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;2</td><td class="n">5.1 : 1</td><td><span style="color: var(--ink-2); font-size: 15px">small print, the lines of controls</span></td></tr>
+        <tr data-ink="ink-3"><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--ink-3)" stroke-width="2.2" stroke-linecap="round"/></svg>ink&#8209;3</td><td class="n">2.9 : 1</td><td><span class="mark squiggle" aria-hidden="true"></span> marks, never words</td></tr>
+        <tr data-ink="red"><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--red)" stroke-width="2.2" stroke-linecap="round"/></svg>red</td><td class="n">5.4 : 1</td><td><span class="mark cross" aria-hidden="true"></span> <span style="color: var(--red)">errors only</span></td></tr>
+        <tr data-ink="blue-pencil"><td><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--blue-pencil)" stroke-width="2.2" stroke-linecap="round"/></svg>blue pencil</td><td class="n">4.6 : 1</td><td><span style="color: var(--blue-pencil)">a page's workings, on request</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note">the rules and the margin line are decoration: nothing that means anything is drawn in them</p>
+
+    <h3>the dark sheet</h3>
+    <figure class="sheets-figure">
+      <div class="sheets" role="img" aria-label="phy on paper, and on the dark sheet: the paper and the ink swap, and phy keeps their own colours on a sheet of paper cut to their outline">
+        <div class="sheet on-paper" data-paper="notebook"><div class="ground"></div><p class="name">paper</p><p class="sub">ink in graphite</p></div>
+        <div class="sheet on-graphite" data-paper="graphite"><div class="ground"></div><p class="name">graphite</p><p class="sub">ink in white pencil</p></div>
+      </div>
+      <figcaption>nothing is inverted: a character keeps its own paper</figcaption>
+    </figure>
+
+    <h3>other sheets</h3>
+    <div class="papers">
+      <div data-paper="graph"><h3>graph</h3><p>a diagram, at 0</p></div>
+      <div data-paper="score"><h3>score</h3><p>between the staves</p></div>
+      <div data-paper="sketchbook"><h3>sketchbook</h3><p>toned, unruled</p></div>
+      <div data-paper="kraft"><h3>kraft</h3><p>for a card or a gift</p></div>
+      <div data-paper="card"><h3>card</h3><p>one small thing</p></div>
+      <div data-paper="cyanotype"><h3>cyanotype</h3><p>a sun print of a sheet</p></div>
+      <div data-paper="notebook"><h3>tracing</h3><p>laid over</p><div data-paper="tracing"><p>the workings</p></div></div>
+      <div data-ruling="grid"><h3>a ruling</h3><p>on the page's own paper</p></div>
+    </div>
+    <p class="note">a light sheet turns dark with the page; a dark or toned one is a piece's look, never a working page's</p>
+
+    <h3>blue pencil</h3>
+    <div class="built" id="built"></div>
+    <div class="actions"><button class="btn quiet" type="button" id="workings">how phy is drawn</button></div>
+    <p class="note">a page's workings, shown only when asked</p>
+
+    <h3>the dial</h3>
+    <div class="row">
+      <label for="informal">turn it, and this whole page follows</label>
+      <select class="field" id="informal"><option value="0">0, a paper's diagram</option><option value="50" selected>50, a site</option><option value="100">100, a hobby project</option></select>
+    </div>
+    <table class="dial">
+      <thead><tr><th></th><th>written</th><th>set</th></tr></thead>
+      <tbody>
+        <tr style="--informal: 0"><td class="label">0, a diagram</td><td class="w">notes</td><td>phy sketches</td></tr>
+        <tr style="--informal: 50"><td class="label">50, a site</td><td class="w">notes</td><td>phy sketches</td></tr>
+        <tr style="--informal: 100"><td class="label">100, a hobby</td><td class="w">notes</td><td>phy sketches</td></tr>
+      </tbody>
+    </table>
+    <p class="note">written words are never neater than 50</p>
+    <p>light · <strong>pressed harder</strong> · <del><span class="sr">not: </span><span class="slant">italic</span></del></p>
+
+    <h3>sizes, a step of 1.2, each on whole rules</h3>
+    <ul class="sizes">
+      <li style="--n: 3"><span style="font-size: 64px">title</span><small>64 · 3 rules</small></li>
+      <li style="--n: 2"><span style="font-size: 37px">a heading</span><small>37 · 2</small></li>
+      <li><span style="font-size: 26px">a smaller one</span><small>26 · 1</small></li>
+      <li><span style="font-size: 22px; color: var(--ink-2)">a note, a caption</span><small>22 · 1</small></li>
+      <li style="--hand: 0"><span style="font-size: 18px">the body, in print</span><small>18 · 1</small></li>
+      <li style="--hand: 0"><span style="font-size: 15px; color: var(--ink-2)">small print and code</span><small>15 · 1</small></li>
+    </ul>
+
+    <h3>marks, each one stroke</h3>
+    <ul class="marks-sheet">
+      <li><span class="glyph ground" data-mark="ground"></span><span class="what">to stand on</span></li>
+      <li><span class="glyph ring" data-mark="ring"></span><span class="what">this one</span></li>
+      <li><span class="glyph arrow" data-mark="arrow"></span><span class="what">from a note</span></li>
+      <li><span class="glyph squiggle" data-mark="squiggle"></span><span class="what">a break, a wait</span></li>
+      <li><span class="glyph side" data-mark="side"></span><span class="what">a quote</span></li>
+      <li><span class="glyph box" data-mark="box"></span><span class="what">the one button</span></li>
+      <li><span class="glyph tick" data-mark="tick"></span><span class="what">a tick</span></li>
+      <li><span class="glyph cross" data-mark="cross"></span><span class="what">an error</span></li>
+      <li><span class="glyph caret" data-mark="caret"></span><span class="what">a choice</span></li>
+    </ul>
+    <p class="note">a mark tilts anticlockwise, never more than 2°; the grain goes over the title, the ground and the arrow</p>
+
+    <h3>a page</h3>
+    <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
+    <p>One column against the margin line. Links are <a href="index.html">underlined in pencil</a>, and <strong>bold</strong> is the only emphasis that shows from across the room. Long words and <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a> break rather than push the page sideways.</p>
+    <ul>
+      <li>one idea to a line</li>
+      <li>a dash for a bullet, in the lightest ink</li>
+    </ul>
+    <blockquote><p>measure twice, cut once.<br>a carpenter's rule</p></blockquote>
+    <pre><code>:root {
+  --L: 32px;       /* one rule */
+  --ink: #3d3c39;  /* graphite */
+}</code></pre>
+    <figure style="--rules: 5">
+      <img id="photo" alt="phy's close-up, head tipped, on a near-black background, drawn by the library">
+      <img id="drawing" alt="phy asleep, drawn by the library straight onto the paper">
+      <figcaption>a photo stays a photo; a character is drawn straight onto the paper</figcaption>
+    </figure>
+    <p>How many rules does a drawing need?</p>
+    <div class="row">
+      <label for="h">height, in pixels</label>
+      <input class="field" id="h" value="two hundred" inputmode="decimal" autocomplete="off" aria-invalid="true" aria-describedby="h-err">
+      <p class="error" id="h-err">that needs to be a number, like 250</p>
+    </div>
+    <div class="row">
+      <label for="s">rule spacing</label>
+      <select class="field" id="s"><option value="32">32px, on a screen</option><option value="30">30px, on a phone</option></select>
+    </div>
+    <label class="check"><input type="checkbox" id="up" checked> round up to a whole rule</label>
+    <div class="actions"><button class="btn" type="button" id="count">count</button><button class="btn quiet" type="button" id="again">start again</button></div>
+    <p class="result" id="result">eight rules</p>
+    <p class="note" id="exact">7.4 rules, rounded up</p>
+    <p class="loading" id="loading">counting…</p>
+    <h3>saved</h3>
+    <p class="empty" id="empty">nothing saved yet.</p>
+    <ul id="saved" hidden></ul>
+    <p class="note">no menus, pills, frames or borders; an empty state is one note</p>
+
+    <h3>motion, calm</h3>
+    <p class="note">phy, beside the title, breathes, blinks and glances: nothing bounces all the time</p>
+
+    <h3>a chart</h3>
+    <svg class="chart" viewBox="0 0 420 160" role="img" aria-label="build time for four versions, in seconds: 52, 48, 45 and 22">
+      <g fill="none" stroke-linecap="round">
+        <path d="M40 136h360" stroke="var(--ink-3)" stroke-width="1.2"/>
+        <path d="M70 136V44M150 136V52M230 136V58M310 136V98" stroke="var(--data-blue)" stroke-width="22" stroke-linecap="butt"/>
+      </g>
+      <text x="70" y="156" text-anchor="middle">1</text><text x="150" y="156" text-anchor="middle">2</text><text x="230" y="156" text-anchor="middle">3</text><text x="310" y="156" text-anchor="middle">4</text>
+      <text x="70" y="34" text-anchor="middle">52 s</text><text x="310" y="88" text-anchor="middle">22 s</text>
+    </svg>
+    <p class="note">build time for four versions: the last one halves it</p>
+    <p class="marks inline"><span class="sr">the data colours, five at most, from the characters:</span>
+      <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-blue)" stroke-width="2.6" stroke-linecap="round"/></svg>blue</span>
+      <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-red)" stroke-width="2.6" stroke-linecap="round"/></svg>red</span>
+      <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-slate)" stroke-width="2.6" stroke-linecap="round"/></svg>slate</span>
+      <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-ochre)" stroke-width="2.6" stroke-linecap="round"/></svg>ochre</span>
+      <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-pink)" stroke-width="2.6" stroke-linecap="round"/></svg>pink</span>
+    </p>
+    <p class="note">the data is the only saturated thing, and a series keeps its colour</p>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#3-the-kit">STYLE.md §3</a>, and how to use the kit, <a href="lib/style/site/README.md">its README</a>.</p>
+
+    <hr>
+
+    <h2 id="s4">4. pieces</h2>
+    <h3>a frame, composed</h3>
+    <div class="set thumbs" style="--cell: 8em">
+      <div><div class="pic" data-paper="sketchbook" id="t-scale"></div><span class="what">scale doing the work</span></div>
+      <div><div class="pic" data-paper="sketchbook" id="t-empty"></div><span class="what">mostly empty</span></div>
+      <div><div class="pic" data-paper="sketchbook" id="t-off"></div><span class="what">off centre</span></div>
+      <div><div class="pic grey" data-paper="sketchbook" id="t-grey"></div><span class="what">turned grey, still clear</span></div>
+    </div>
+    <h3>light falls on the place, never on a character</h3>
+    <div class="set thumbs" style="--cell: 10em">
+      <div><div class="pic" data-paper="sketchbook" id="t-glow"><span class="glow" aria-hidden="true"></span><span class="verdict" aria-hidden="true"></span></div><span class="what">a glow, filtered on</span></div>
+      <div><div class="pic" data-paper="sketchbook" id="t-pool"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">a pool of light, drawn</span></div>
+    </div>
+    <h3>cut to the music</h3>
+    <svg class="beats" viewBox="0 0 640 96" role="img" aria-label="four phrases of four bars, with a cue at the start of each phrase rather than on every beat">
+      <g fill="none" stroke-linecap="round">
+        <path id="beat-ticks" stroke="var(--ink-3)" stroke-width="1.1"/>
+        <path id="bar-ticks" stroke="var(--ink-2)" stroke-width="1.3"/>
+        <path id="cues" stroke="var(--ink)" stroke-width="1.5"/>
+      </g>
+      <text x="0" y="92">bar 1</text><text x="160" y="92">5</text><text x="320" y="92">9</text><text x="480" y="92">13</text>
+    </svg>
+    <p class="note">every cue written against the music's data; motion lands on phrases, not on every beat</p>
+    <h3>whose music</h3>
+    <ul class="ticks">
+      <li><span class="sr">yes: </span>public domain in the US, the recording as well as the score</li>
+      <li><span class="sr">yes: </span>CC0, CC BY or CC BY-NC</li>
+      <li><span class="sr">yes: </span>CC BY-SA, only where phy alone is on screen</li>
+      <li class="no"><span class="sr">no: </span>ND</li>
+      <li class="no"><span class="sr">no: </span>music the agent making the film composes or generates</li>
+      <li class="no"><span class="sr">no: </span>a commercial song on a page</li>
+    </ul>
+    <p class="note">the composer is credited, and a video names its people once, written large</p>
+    <p class="full">In full, with the references: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#4-pieces">STYLE.md §4</a>.</p>
+
+    <hr>
+
+    <h2 id="s5">5. working with phy</h2>
+    <ol>
+      <li>discuss before building, and wait for a yes</li>
+      <li>three ideas, one of them outside the house look</li>
+      <li>a sketch, from a source that is kept, with the command that builds it</li>
+      <li>the options rendered side by side</li>
+      <li>an adversarial review, checked finding by finding</li>
+      <li>phy publishes, each time</li>
+    </ol>
+    <ul class="duties">
+      <li class="rule"><strong>phy reviews before anything is published.</strong> Pushing, posting and sharing are phy's call.</li>
+      <li class="rule"><strong>Private stays private:</strong> personal references live in a git-ignored folder and never reach a public page.</li>
+    </ul>
+    <p class="note">the casebook keeps one line per finished piece, so that the next can do something else</p>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#5-working-with-phy">STYLE.md §5</a>.</p>
+
+    <hr>
+
+    <h2 id="fwiends">the fwiends</h2>
+    <h3>drawn by the factory, from a spec</h3>
+    <div class="set" style="--cell: 8em">
+      <div><div class="pic" id="flat" style="--rules: 4"></div><span class="what">the spec's shapes, flat</span></div>
+      <div><div class="pic" id="pencilled" style="--rules: 4"></div><span class="what">one pencil over all</span></div>
+    </div>
+    <p class="note">no outline, no nose, no mouth by default; the paper shows through</p>
+    <h3>every colour one phy has, and one shade</h3>
+    <ul class="palette" id="palette" aria-label="phy's colours, each with its one shade"></ul>
+    <h3>one figure sits and stands</h3>
+    <div class="rise">
+      <div class="pic" id="riser"></div>
+      <div class="row">
+        <label for="rise-to">from seated to standing, through every height</label>
+        <input type="range" id="rise-to" min="0" max="1" step="0.01" value="0">
+      </div>
+    </div>
+    <h3>turning, a quarter at a time</h3>
+    <div class="set" id="turns" style="--cell: 7.5em"></div>
+    <h3>feelings, from the pose</h3>
+    <div class="set" id="feelings" style="--cell: 7.5em"></div>
+    <h3>only phy speaks in words</h3>
+    <div class="speech">
+      <div><p class="said">that's me</p><span class="what">phy, in words</span></div>
+      <div><p class="marks-said"><span aria-hidden="true">! ? !? … z ??</span><span class="sr">!, ?, !?, an ellipsis, z and ??</span></p><span class="what">the others, in marks</span></div>
+    </div>
+    <p class="note">nobody is given a line, a trait or a fact its owner didn't give it</p>
+    <h3>who knows whom</h3>
+    <div class="knows">
+      <div>
+        <p class="who">strangers</p>
+        <ul class="ticks">
+          <li><span class="sr">yes: </span>share a scene, look, react</li>
+          <li class="no"><span class="sr">no: </span>stand close, talk, hand over</li>
+          <li class="no"><span class="sr">no: </span>touch, compete, tease</li>
+        </ul>
+      </div>
+      <div>
+        <p class="who">know each other</p>
+        <ul class="ticks">
+          <li><span class="sr">yes: </span>share a scene, look, react</li>
+          <li><span class="sr">yes: </span>stand close, talk, hand over</li>
+          <li class="ask">touch, compete, tease, only if both owners opt in</li>
+        </ul>
+      </div>
+    </div>
+    <ul class="duties">
+      <li class="rule"><strong>Consent is per medium.</strong> An owner who agreed to the gallery has not agreed to films or games; until they do, the work says "draft" in a corner.</li>
+      <li class="rule"><strong>Nobody is hurt,</strong> frightened for a laugh or beaten by another fwiend; a game is won against the clock.</li>
+    </ul>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/FWIENDS.md#drawing-a-friend">FWIENDS.md</a>, and the code, <a href="lib/fwiends/README.md">its README</a>.</p>
   </article>
 </main>
 
@@ -291,5 +579,209 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
     <li>source: <a href="https://github.com/rareone0602/phy_friends" aria-label="github.com/rareone0602/phy_friends">github.com/<wbr>rareone0602/<wbr>phy_friends</a></li>
   </ul>
 </footer>
+
+<script src="lib/fwiends/src/phyfriends.js"></script>
+<script src="lib/fwiends/characters/phy/phy.js"></script>
+<script src="lib/fwiends/src/anim.js"></script>
+<script src="lib/fwiends/src/emotion.js"></script>
+<script src="lib/fwiends/src/live.js"></script>
+<script src="lib/fwiends/src/workings.js"></script>
+<script>
+  // The drawings: phy alone, alive beside the title and drawn by the library wherever a rule needs a picture, so that
+  // every picture is the factory's own and changes as phy's spec does. For screenshots, ?px=..&py=.. (CSS pixels)
+  // fixes a simulated pointer.
+  const $ = selector => document.querySelector(selector);
+  const params = new URLSearchParams(location.search);
+  const moving = !PhyFriends.live.still.matches;
+  const announcer = $('.announcer');
+
+  // The portrait, which watches the cursor and answers a hi, as the friends on the gallery do.
+  const portrait = $('.portrait');
+  const stage = PhyFriends.live.stage({ root: document.body, announcer,
+    pointer: params.has('px') ? { x: +params.get('px'), y: +params.get('py') } : null });
+  stage.add(portrait, 'phy', { label: 'phy', bg: 'page' });
+
+  const ground = PhyFriends.groundOf('phy');
+  const view = { w: 300, h: 300, x: 150, y: 300 - ground - 12, scale: 1.02, rotate: 0 };
+  const tall = { w: 360, h: 380, x: 180, y: 380 - ground - 12, scale: 1.02, rotate: 0 };
+  const draw = (box, options = {}) => {
+    box.insertAdjacentHTML('beforeend', PhyFriends.render('phy', { view, bg: 'page', ...options }));
+    const svg = box.lastElementChild;
+    svg.setAttribute('aria-hidden', 'true');
+    return svg;
+  };
+  draw($('#mark-whole'));
+  draw($('#subject'));
+  for (const sheet of document.querySelectorAll('.sheet')) draw(sheet);
+
+  // Blue pencil: a second phy, alive so that the construction is drawn through its own camera, takes the workings,
+  // laid on tracing paper, on request.
+  const sitter = stage.add($('#built'), 'phy', { label: 'phy', bg: 'page', interactive: false });
+  stage.start();
+  PhyFriends.workings.attach({ button: $('#workings'), stage, friends: [sitter], tracing: $('#built') });
+
+  // The dial: the select sets --informal on the root, which notebook.css turns into every letter's informality and
+  // bounce. It starts at the page's own value, so that a reload returns the page to it.
+  const root = document.documentElement, dial = $('#informal');
+  dial.value = getComputedStyle(root).getPropertyValue('--informal').trim();
+  dial.addEventListener('change', () => root.style.setProperty('--informal', dial.value));
+
+  // A photo stays a photo (the house close-up on its own dark ground); a character is drawn on the page.
+  const img = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  $('#photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));
+  const placeholder = $('#drawing');
+  placeholder.insertAdjacentHTML('afterend', PhyFriends.render('phy', { view, bg: 'page', pose: { eyes: 'closed', tail: -40 } }));
+  placeholder.nextElementSibling.setAttribute('role', 'img');
+  placeholder.nextElementSibling.setAttribute('aria-label', placeholder.alt);
+  placeholder.remove();
+
+  // §4's thumbnails: the same phy, composed four ways, and lit two ways, with the light drawn as a pale shape.
+  const thumb = (id, x, y, size, extra = '') => {
+    const box = document.getElementById(id);
+    box.insertAdjacentHTML('beforeend', extra);
+    const svg = draw(box);
+    Object.assign(svg.style, { left: `${x}%`, bottom: `${y}%`, height: `${size}%` });
+    return svg;
+  };
+  const moon = '<svg viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true" style="position: absolute; right: -14%; top: -30%; height: 120%; width: auto"><circle cx="50" cy="50" r="46" fill="#fbf9f3" fill-opacity=".55" filter="url(#graphite)"/></svg>';
+  thumb('t-scale', 8, 4, 30, moon);
+  thumb('t-empty', 6, 4, 26);
+  thumb('t-off', 58, 4, 70);
+  thumb('t-grey', 8, 4, 30, moon);
+  thumb('t-glow', 18, 4, 72);
+  const pool = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: 2%; bottom: 0; width: 96%; height: 34%"><path d="M14 40c10-22 70-32 120-28s64 18 58 30-60 18-110 14S6 54 14 40Z" fill="#fbf9f3" fill-opacity=".6" filter="url(#graphite)"/></svg>';
+  thumb('t-pool', 18, 4, 72, pool);
+
+  // Cut to the music: four bars of four beats to a phrase, and a cue at the start of each phrase.
+  const beats = [], bars = [], cues = [];
+  for (let beat = 0; beat <= 64; beat++) {
+    const x = 4 + beat * 9.7;
+    (beat % 4 ? beats : bars).push(`M${x.toFixed(1)} ${beat % 4 ? 58 : 50}V68`);
+    if (beat % 16 === 0 && beat < 64) cues.push(`M${x.toFixed(1)} 40V18M${(x - 6).toFixed(1)} 26L${x.toFixed(1)} 18L${(x + 6).toFixed(1)} 26`);
+  }
+  $('#beat-ticks').setAttribute('d', beats.join(''));
+  $('#bar-ticks').setAttribute('d', bars.join(''));
+  $('#cues').setAttribute('d', cues.join(''));
+
+  // The fwiends: phy flat and in pencil; their colours, each with its one shade, read from the spec; standing up by
+  // degrees; the four quarter turns; and a few feelings, each a still of its face.
+  draw($('#flat'), { pencil: false });
+  draw($('#pencilled'));
+  const palette = PhyFriends.palette('phy'), seen = new Set();
+  const stroke = color => `<svg viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round"/></svg>`;
+  for (const [name, color] of Object.entries(palette)) {
+    if (name === 'bg' || name.endsWith('Shade') || typeof color !== 'string' || !color.startsWith('#') || seen.has(color)) continue;
+    seen.add(color);
+    const shade = palette[`${name}Shade`] || PhyFriends.shadeOf(color);
+    $('#palette').insertAdjacentHTML('beforeend', `<li>${stroke(color)}${stroke(shade)}${name}</li>`);
+  }
+  const riser = PhyFriends.mount($('#riser'), 'phy', { view: tall, bg: 'page' });
+  riser.svg.setAttribute('aria-hidden', 'true');
+  $('#rise-to').addEventListener('input', event => riser.setPose({ stance: 'sit', rise: +event.target.value }));
+  const cell = (set, label, rules = 4) => {
+    const box = document.createElement('div');
+    box.innerHTML = `<div class="pic" style="--rules: ${rules}"></div><span class="what">${label}</span>`;
+    $(set).append(box);
+    return box.firstElementChild;
+  };
+  for (const [facing, label] of [[0, 'facing you'], [90, 'side-on'], [180, 'away'], [270, 'the other side']]) {
+    draw(cell('#turns', label), { view: tall, pose: { facing, stance: 'stand' } });
+  }
+  const E = PhyFriends.emotion;
+  // A feeling lifts the ears and swings the tail, so its camera leaves room for both.
+  const feelings = { w: 340, h: 330, x: 160, y: 180, scale: 1.02, rotate: 0 };
+  for (const feeling of ['happy', 'surprised', 'curious', 'sad', 'cross', 'sleepy']) {
+    draw(cell('#feelings', feeling, 5), { view: feelings, pose: PhyFriends.anim.sample(E.face(feeling)) });
+  }
+
+  // A correction strikes its first line out and then writes the next, once, as it comes into view.
+  const once = (elements, play, margin = '0px 0px -12% 0px') => {
+    const seen = new IntersectionObserver(entries => {
+      for (const entry of entries) if (entry.isIntersecting) { play(entry.target); seen.unobserve(entry.target); }
+    }, { rootMargin: margin });
+    for (const element of elements) seen.observe(element);
+  };
+  if (moving && 'IntersectionObserver' in window) {
+    const edits = document.querySelectorAll('.edits');
+    edits.forEach(list => list.classList.add('pending'));
+    once(edits, list => list.classList.remove('pending'));
+  }
+
+  // The marks: each one, read from the kit's own token, is drawn as a stroke, once, as the sheet comes into view.
+  const glyphs = [...document.querySelectorAll('.glyph')];
+  function inline(glyph, hidden) {
+    const value = getComputedStyle(glyph).getPropertyValue(`--mark-${glyph.dataset.mark}`).trim();
+    const source = decodeURIComponent(value.replace(/^url\(\s*["']?data:image\/svg\+xml;utf8,/, '').replace(/["']?\s*\)$/, ''));
+    const svg = new DOMParser().parseFromString(source, 'image/svg+xml').documentElement;
+    if (!svg.getAttribute('viewBox')) svg.setAttribute('viewBox', `0 0 ${svg.getAttribute('width')} ${svg.getAttribute('height')}`);
+    svg.removeAttribute('width');
+    svg.removeAttribute('height');
+    svg.querySelectorAll('style').forEach(style => style.remove());
+    glyph.replaceChildren(svg);
+    glyph.style.background = 'none';
+    const box = glyph.getBoundingClientRect(), [, , w, h] = svg.getAttribute('viewBox').split(/\s+/).map(Number);
+    const stretch = Math.max(1, box.width / w, box.height / h);
+    for (const path of svg.querySelectorAll('path')) {
+      const length = path.getTotalLength() * stretch * 1.05 + 2;
+      path.style.strokeDasharray = `${length} ${length}`;
+      path.style.strokeDashoffset = hidden ? length : 0;
+    }
+    return svg;
+  }
+  if (moving && 'IntersectionObserver' in window) {
+    glyphs.forEach(glyph => inline(glyph, true));
+    once([$('.marks-sheet')], () => glyphs.forEach((glyph, i) => {
+      for (const path of glyph.querySelectorAll('path')) {
+        path.style.transition = `stroke-dashoffset .7s cubic-bezier(.45, 0, .35, 1) ${i * 0.14}s`;
+        path.style.strokeDashoffset = 0;
+      }
+    }));
+    // The kit's marks change ink with the sheet, so a drawn mark is read again when the system's scheme changes.
+    matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => glyphs.forEach(glyph => {
+      glyph.style.background = '';
+      glyph.replaceChildren();
+      inline(glyph, false);
+    }));
+  }
+
+  // The small tool: counts the rules a drawing of a given height takes up.
+  const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
+  const rules = n => `${n < words.length ? words[n] : n} rule${n === 1 ? '' : 's'}`;
+  const height = $('#h'), error = $('#h-err'), spacing = $('#s'), up = $('#up');
+  const result = $('#result'), exact = $('#exact'), empty = $('#empty'), saved = $('#saved');
+  $('#loading').hidden = true;
+  result.hidden = exact.hidden = true;
+  function valid() {
+    const text = height.value.trim(), ok = text === '' || /^\d+(\.\d+)?$/.test(text);
+    height.setAttribute('aria-invalid', String(!ok));
+    error.hidden = ok;
+    return ok && text !== '';
+  }
+  height.addEventListener('input', valid);
+  $('#count').addEventListener('click', () => {
+    if (!valid()) { height.focus(); return; }
+    const px = +height.value.trim(), ratio = px / +spacing.value;
+    const n = up.checked ? Math.ceil(ratio) : Math.round(ratio);
+    result.textContent = rules(n);
+    exact.textContent = `${ratio.toFixed(1)} rules, ${up.checked ? 'rounded up' : 'rounded'}`;
+    result.hidden = false;
+    exact.hidden = Number.isInteger(ratio);
+    const item = document.createElement('li');
+    item.textContent = `${px}px: ${rules(n)}`;
+    saved.append(item);
+    saved.hidden = false;
+    empty.hidden = true;
+    announcer.textContent = `${rules(n)}, saved.`;
+  });
+  $('#again').addEventListener('click', () => {
+    height.value = '';
+    valid();
+    result.hidden = exact.hidden = true;
+    saved.replaceChildren();
+    saved.hidden = true;
+    empty.hidden = false;
+    height.focus();
+  });
+</script>
 </body>
 </html>

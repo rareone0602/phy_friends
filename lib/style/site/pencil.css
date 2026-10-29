@@ -1,7 +1,7 @@
 /* The pencil layer: everything drawn on the paper. Load it after notebook.css (phy.css loads both),
    and load graphite.js first in the body, which writes the #graphite filter into the page. Every block
    is a whole number of rules tall, and text is shifted onto the rules. See README.md;
-   specimen.html shows the components at work, all but a title that is a link (h1 a), a
+   style.html shows the components at work, all but a title that is a link (h1 a), a
    scan that blends into the paper (img.drawing) and a disabled field or button.
 
    Classes:

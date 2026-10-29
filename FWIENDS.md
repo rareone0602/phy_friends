@@ -15,19 +15,20 @@ every copy matches, and in one material, the gallery's: coloured pencil
 without an outline, exactly one shade layer, and paper cut to the outline
 wherever the ground is not paper. Another material is for a one-off, with the
 owner's yes. However free a piece is (`STYLE.md` §4), it stages its characters
-and never redraws them. The site's `style.html` shows both, one after the other, and section N of
-`STYLE.md` stays at `style.html#sN`. Run `python3 tools/pf.py style` after
-editing either.
+and never redraws them. The site's `style.html` draws both, one after the
+other: section N of `STYLE.md` at `style.html#sN`, and this file at
+`style.html#fwiends`. It is drawn by hand, so a change to a rule it pictures
+redraws the picture; where a drawing and the text disagree, the text wins.
 
 ---
 
 ## the gallery page
 
-`index.html` (the gallery), `style.html` (the guides) and `specimen.html`
-(the kit at work) all wear the kit, and turn to the dark sheet where the
-reader's system asks for it (`STYLE.md` §3). The paper is design C of the
-mockups in `design/`; A and B are kept in `design/backup/`. The specimen
-sits at `50`, and its dial turns the face, never the case, to `0` or `100`
+`index.html` (the gallery) and `style.html` (the style guide, with the kit
+at work) both wear the kit, and turn to the dark sheet where the reader's
+system asks for it (`STYLE.md` §3). The paper is design C of the mockups in
+`design/`; A and B are kept in `design/backup/`. The style guide sits at
+`50`, and its dial turns the face, never the case, to `0` or `100`
 until a reload. The gallery is a hobby project, so it sits at `100`
 (`STYLE.md` §3).
 
@@ -36,7 +37,7 @@ The page has five parts, in this order:
    people read it (`phy_friends` is only the repository's and the code's).
 2. One line of intro: "a few fwiends in coloured pencil, each one drawn from a
    hundred-odd lines of code." The last words show the page's workings (below).
-3. The nav, as on the other two pages: fwiends, style guide, specimen.
+3. The nav, as on the style guide: fwiends, style guide.
 4. **The stage**, a group photo: the fwiends stand together on pencilled
    ground and all watch the cursor.
 5. The footer: "characters belong to the people named under them"; a credit
@@ -135,8 +136,8 @@ onto a second rule rather than run into a neighbour.
 Each friend is a button with a short name (`aria-label`), "say hi to Terry",
 so that a screen reader or a voice gets to the point; what it looks like is a
 hidden description (`aria-describedby`): "a yellow plush toy with huge floppy
-ears, a fluffy bib and dark felt soles". The specimen's portrait is named and
-described the same way.
+ears, a fluffy bib and dark felt soles". The style guide's portrait is named
+and described the same way.
 
 The cast (`lib/fwiends/characters/cast.js`) is the source of each name,
 species, credit and consent. The page repeats them by hand (the labels, the
@@ -207,9 +208,10 @@ the parts of the page (the title's size and its pen, the nav's ring, the
 note's tilt, the margin and the rules), each read from the page as it stands;
 and a note on the library says what each part of `lib/` does and gives the two
 lines that link it, beside the title on a wide screen and under the nav on a
-narrower one. Pressing the phrase again, or Escape, puts everything back. The
-gallery loads `lib/fwiends/src/workings.js` for this, and a page that does not
-load it has none of it.
+narrower one. All of it lies on a sheet of tracing paper laid over the
+fwiends, through which the rules show faded. Pressing the phrase again, or
+Escape, puts everything back. The gallery loads `lib/fwiends/src/workings.js`
+for this, and a page that does not load it has none of it.
 
 **The opening.** The first time the page opens in a tab, the title writes
 itself and the fwiends come in by roll call. A reload, a step back through
