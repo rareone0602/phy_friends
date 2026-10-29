@@ -37,6 +37,24 @@ everywhere goes into the recommendation, so that the next machine starts from
 it. `python3 tools/pf.py test` fails while the recommendation does not parse,
 or while a dotfile names one machine's home folder rather than `~`.
 
+## Automatic compaction
+
+Claude Code and Codex use a 400,000-token compaction default. Apply only these
+settings, without changing permissions, models or other machine settings:
+
+```sh
+python3 ~/.dotfiles/lib/dotfiles/compact.py
+```
+
+The script keeps the original files as `settings.json.before-compaction` and
+`config.toml.before-compaction`, once. It sets Claude Code's `autoCompactWindow`
+and any existing per-model compaction overrides, and Codex's
+`model_auto_compact_token_limit`. It never enlarges a model's context window.
+A model with less context may compact earlier. Restart existing sessions after
+applying. Environment, project or profile overrides may take precedence; the
+script refuses conflicting compaction environment variables rather than
+silently ignoring them. This command does not install either agent.
+
 ## What stays on each machine
 
 The login (the Keychain on macOS, `~/.claude/.credentials.json` elsewhere),
