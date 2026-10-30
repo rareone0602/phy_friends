@@ -76,10 +76,27 @@
   :is([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: inline !important; }
   [data-paper]:not([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: none !important; }
 
-  /* §1: the favicon at its sizes, one hand on its dial, and what a design tool lays on, crossed out over the pencil's
-     way of doing the same job. */
+  /* §1: the signature, its head at its sizes, its colour and three studies; one hand on its dial; and what a design
+     tool lays on, crossed out over the pencil's way of doing the same job. */
   .set .pic.favicons { display: flex; align-items: flex-end; gap: 14px; }
   .set .pic.favicons > img { position: static; height: auto; }
+  /* The signature: the words in the hand, and phy seated beside them in a box twice their size, on a pencilled
+     line at their baseline (the kit's portrait). --s is the words' size. */
+  .signature { --hand: 50; --s: 40px; display: inline-flex; align-items: baseline; gap: calc(var(--s) * .44);
+    font: 300 var(--s)/1 var(--face); white-space: nowrap; }
+  .signature .sitter { position: relative; flex: none; width: calc(var(--s) * 2); height: calc(var(--s) * 2); }
+  .signature .sitter svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .signature .sitter::after { content: ''; position: absolute; left: -12%; width: 124%; top: calc(100% - 4px); height: 8px;
+    background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
+  .set .pic > .signature { position: absolute; left: 0; bottom: 0; }
+  .doc .meta + h3 { margin-top: var(--L); }  /* The handle's line, unlike a date line, is not part of what follows. */
+  .set .pic.hue svg { position: static; width: 64px; height: 22px; }
+  .doc .signed { display: flex; flex-wrap: wrap; gap: var(--L) 1.2em; margin-top: var(--L); }
+  .signed > div { width: min-content; }
+  .signed .pic { position: relative; height: calc(var(--L) * 5); aspect-ratio: var(--ratio); top: calc(-1 * var(--lift));
+    overflow: hidden; container-type: size; }
+  .signed .signature { position: absolute; }
+  .signed .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
   .doc ul.hands { list-style: none; padding: 0; }
   .hands li { font-size: 37px; line-height: calc(var(--L) * 2); height: calc(var(--L) * 2); white-space: nowrap; overflow: hidden;
     position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
@@ -291,10 +308,19 @@
       <li><del><span class="sr">not: </span>Phy</del><span class="do">phy, even at the start of a sentence</span></li>
     </ul>
     <ul class="meta"><li><code>rareone0602</code> on GitHub and X</li><li>a credit links to <a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">LinkedIn</a></li></ul>
-    <div class="set" style="--cell: 13em">
-      <div><div class="pic favicons" style="--rules: 2"><img src="lib/style/site/icon.svg" style="width: 64px" alt="phy's head"><img src="lib/style/site/icon.svg" style="width: 32px" alt=""><img src="lib/style/site/icon.svg" style="width: 16px" alt=""></div><span class="what">a favicon, down to 16 pixels</span></div>
-      <div><div class="pic" id="mark-whole" style="--rules: 4"></div><span class="what">the whole, where there is room</span></div>
+    <h3>the signature, the same everywhere</h3>
+    <div class="set ends" style="--cell: 13em">
+      <div><div class="pic" style="--rules: 3"><span class="signature"><span class="words">phy</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">phy beside the words, twice their size, on one line</span></div>
+      <div><div class="pic favicons" style="--rules: 2"><img src="lib/style/site/icon.svg" style="width: 64px" alt="phy's head"><img src="lib/style/site/icon.svg" style="width: 32px" alt=""><img src="lib/style/site/icon.svg" style="width: 16px" alt=""></div><span class="what">without room, the head, drawn for 16 pixels</span></div>
+      <div><div class="pic hue" id="phy-green" style="--rules: 1"></div><span class="what">its colour: the green of phy's eyes</span></div>
     </div>
+    <h3>signed: three studies</h3>
+    <div class="signed">
+      <div><div class="pic" data-paper="notebook" style="--ratio: 16 / 9"><span class="signature" style="--s: 12cqh; left: 9%; top: 12%"><span class="words">how phy makes things</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a slide: beside its title</span></div>
+      <div><div class="pic" data-paper="kraft" style="--ratio: 3 / 4"><span class="signature" style="--s: 8.5cqh; left: 9%; bottom: 7%"><span class="words">style guide</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a poster: small, in a corner</span></div>
+      <div><div class="pic" data-paper="graphite" data-ruling="plain" style="--ratio: 16 / 9"><span class="signature" style="--s: 15cqh; left: 50%; top: 52%; transform: translate(-50%, -50%)"><span class="words">say hi</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a film's title card: on the dark</span></div>
+    </div>
+    <p class="note">the paper, the scale and the place change; phy beside the words does not</p>
 
     <h3>one hand</h3>
     <ul class="hands">
@@ -754,7 +780,10 @@
     svg.setAttribute('aria-hidden', 'true');
     return svg;
   };
-  draw($('#mark-whole'));
+  // The signatures: phy seated, the feet on the bottom of the box, which is the words' baseline.
+  const seated = { w: 300, h: 300, x: 150, y: 300 - ground, scale: 1.02, rotate: 0 };
+  for (const sitter of document.querySelectorAll('.signature .sitter'))
+    sitter.insertAdjacentHTML('beforeend', PhyFriends.render('phy', { view: seated, bg: 'page' }));
   draw($('#subject'));
   for (const sheet of document.querySelectorAll('.sheet')) draw(sheet);
 
@@ -880,6 +909,7 @@
   Object.assign($('#prop').lastElementChild.style, { height: '62%' });
   const palette = PhyFriends.palette('phy'), seen = new Set();
   const stroke = color => `<svg viewBox="0 0 40 14" aria-hidden="true"><path d="M3 8.5c9-4.5 23-6 34-3" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/></svg>`;
+  $('#phy-green').innerHTML = stroke(palette.iris);  // The signature's colour (§1).
   // A colour that is itself a shade (the body, in the fur's) shows only as that shade, since there are no second steps.
   const entries = Object.entries(palette).filter(([name, color]) => name !== 'bg' && typeof color === 'string' && color.startsWith('#'));
   const shades = new Set(entries.filter(([name]) => name.endsWith('Shade')).map(([, color]) => color));

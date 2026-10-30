@@ -57,7 +57,7 @@ every name a page linking it may use.
 | `tools/layout.py` | where each part of the repository lives, and the checks that every link resolves and that dependencies run one way |
 | `tools/kit_api.py` | the kit's promise to the pages that link it: the check that it keeps every name the published kit defines |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
-| `tools/site_assets.py` | rebuilds the site's icons and link preview (the title over every friend, in rows at one size) after a character changes |
+| `tools/site_assets.py` | rebuilds the site's icons (phy's head, drawn for 16 pixels) and link preview (a title that leads, over every friend in rows at one size) after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title (`lib/fwiends/src/title-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
 | `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours, and every other sheet's inks and marks, from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |

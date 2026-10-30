@@ -257,17 +257,19 @@ The parts:
   stays still; an empty state is one note, then a few blank rules.
 - **A portrait:** an about page may have one character standing beside the
   title, a rule taller than it. It stands on the title's rule, reaches up into
-  the blank band, and may watch the cursor.
+  the blank band, and may watch the cursor. phy there is phy's signature
+  (`STYLE.md` §1).
 - **Print:** plain paper. The rules, margin line, tooth, nav and portrait drop
   out; the ink stays.
 
 ## Other places
 
-- **Favicon:** phy's head on everything phy makes, unless the work is about
-  another character.
+- **Favicon:** phy's head, drawn for 16 pixels (`STYLE.md` §1), on everything
+  phy makes, unless the work is about another character.
 - **Link preview:** the page's own paper, title and characters, set to fill
-  `1200×630` with every character at one size; not a designed card, with no
-  extra text and no logo.
+  `1200×630` with every character at one size, under a title large enough to
+  lead at a feed's 300 pixels wide; not a designed card, with no extra text
+  and no logo.
 - **README:** GitHub strips CSS, so the style lives in the words, in sentence
   case: a title, one honest line, the preview picture and short plain
   sections. No badges, no emoji and no feature lists.

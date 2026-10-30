@@ -247,12 +247,13 @@ preview show everything in place.
   come brings everyone in at once; scrolling does not.
 
 **The favicon and link preview** come from `python3 tools/site_assets.py`, run
-after any character changes: the favicon is phy's head, and the preview
-(1200×630) sets the title over every fwiend, in the gallery's order and at
-one size, standing in rows on the rules of the same paper. The rows
-(`LAYOUT` in the script) are three of seven: the widest row fills the frame's
-width, so that the box is as large as the frame allows, and the script fails
-until the rows seat every fwiend. The title is kept clear of the ears below
+after any character changes: the favicon is phy's head drawn for its size
+(`STYLE.md` §1; `SMALL` in the script), and the preview (1200×630) sets the
+title, large enough to lead at a feed's 300 pixels wide, over every fwiend, in
+the gallery's order and at one size, standing in rows on the rules of the same
+paper. The rows (`LAYOUT` in the script) are three of seven: the widest row
+fills the frame's width, so that the box is as large as the room under the
+title allows, and the script fails until the rows seat every fwiend. The title is kept clear of the ears below
 it, and the picture is saved as a palette PNG, about half the size of a
 full-colour one, with the pencil's grain kept.
 

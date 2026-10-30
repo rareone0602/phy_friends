@@ -7,12 +7,13 @@ Run this after a character changes:
 
 Outputs:
 
-  lib/style/site/icon.svg              The favicon: phy's head, with the tail tucked away. The icons are drawn
-                             flat, because they are too small to hold the pencil texture.
+  lib/style/site/icon.svg              The favicon: phy's head alone, drawn for a tab's 16 px (see SMALL). The icons
+                             are drawn flat, because they are too small to hold the pencil texture.
   lib/style/site/icon-32.png           The same icon as a PNG, for browsers without SVG favicons.
-  lib/style/site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square).
-  preview.png           1200x630 link preview image: the title over every friend, standing in the gallery's
-                             order in rows on the gallery's paper, as large as the frame allows (see LAYOUT).
+  lib/style/site/apple-touch-icon.png  180 px, on the paper color (iOS requires an opaque square), with every part.
+  preview.png           1200x630 link preview image: the title, large enough to lead at a feed's 300 px, over
+                             every friend at one size, standing in the gallery's order in rows on the gallery's
+                             paper (see LAYOUT).
 """
 import json
 import tempfile
@@ -29,7 +30,12 @@ from layout import KIT
 ROOT = Path(__file__).resolve().parent.parent
 
 POSE = {'tail': -75}
-ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 47, 'scale': 0.31}
+ICON = {'w': 64, 'h': 64, 'x': 32, 'y': 45.5, 'scale': 0.34}
+# The favicon is drawn for its size, as a type designer draws a caption size: the head fills the square, the parts too
+# fine to read at 16 px (the blush, the tuft on top and everything below the chin) are left out, and each eye is
+# widened by a stroke of its own color, `eyes` head units wide, so that the ears, the face and the eyes still read.
+SMALL = {'leave_out': ('blush', 'hair', 'tail', 'body', 'legs', 'feet', 'armsBehind', 'armsBeside', 'armsOver', 'armsUnder',
+                       'pawsUnder', 'tuck', 'scarf'), 'eyes': 10}
 TOUCH = {'w': 180, 'h': 180, 'x': 90, 'y': 132, 'scale': 0.75}
 PREVIEW = (1200, 630)        # The link preview's size.
 # The preview's composition, in rules: a rule is the paper's line spacing in px, and a friend's box is five rules, as
@@ -39,7 +45,7 @@ PREVIEW = (1200, 630)        # The link preview's size.
 # in px and the rule it stands on; the paper's rules begin at the rule after `band`; `top` is how far down the frame
 # the paper's first rule is moved, in px, to balance the blank paper above and below; and `margin` is the red line's
 # distance from the left edge, in px.
-LAYOUT = {'rule': 27, 'rows': (7, 7, 7), 'first': 10, 'band': 2, 'top': 4, 'margin': 24, 'title': {'size': 88, 'rule': 3}}
+LAYOUT = {'rule': 24, 'rows': (7, 7, 7), 'first': 13, 'band': 2, 'top': 4, 'margin': 24, 'title': {'size': 132, 'rule': 4}}
 EARS = 1                     # Rules kept above each row's box for the tallest ears.
 SIDE = 16                    # Space between the margin line and the first slot, and between the last slot and the edge, in px.
 POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so that they look out at the viewer.
@@ -144,19 +150,32 @@ def photograph(layout, out):
         quantize(Image.open(shot)).save(out, optimize=True)
 
 
-def still(view, out, bg=False):
-    js = (f"document.getElementById('root').innerHTML = PhyFriends.render('phy', "
-          f"{{ view: {json.dumps(view)}, pose: {json.dumps(POSE)}, bg: {json.dumps(bg)}, pencil: false }});")
-    pf.shoot(pf.page(js), view['w'], view['h'], out)
+def icon(view, uid='i'):
+    """A JavaScript expression for phy's head as the favicon draws it (SMALL), as an SVG string."""
+    parts = ', '.join(f'[data-pf="{part}"]' for part in SMALL['leave_out'])
+    return f"""(() => {{
+      const svg = PhyFriends.render('phy', {{ view: {json.dumps(view)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: '{uid}' }});
+      const doc = new DOMParser().parseFromString(svg, 'image/svg+xml');
+      doc.querySelectorAll('{parts}').forEach(part => part.remove());
+      doc.querySelectorAll('[data-pf="eyeLopen"] rect, [data-pf="eyeRopen"] rect').forEach(eye => {{
+        eye.setAttribute('stroke', eye.getAttribute('fill')); eye.setAttribute('stroke-width', {SMALL['eyes']});
+      }});
+      return new XMLSerializer().serializeToString(doc.documentElement);
+    }})()"""
+
+
+def still(view, out, bg=False, small=False):
+    drawing = icon(view) if small else (f"PhyFriends.render('phy', {{ view: {json.dumps(view)}, pose: {json.dumps(POSE)}, "
+                                        f"bg: {json.dumps(bg)}, pencil: false }})")
+    pf.shoot(pf.page(f"document.getElementById('root').innerHTML = {drawing};"), view['w'], view['h'], out)
     print(out)
 
 
 def main():
     with pf.session():  # One Chrome for the icon's drawing and every still's check.
-        svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {json.dumps(ICON)}, pose: {json.dumps(POSE)}, bg: false, pencil: false, uid: 'i' }})")
-        (KIT / 'icon.svg').write_text(svg)
+        (KIT / 'icon.svg').write_text(pf.evaluate(icon(ICON)))
         print(KIT / 'icon.svg')
-        still({**ICON, 'w': 32, 'h': 32, 'x': 16, 'y': 23.5, 'scale': 0.155}, KIT / 'icon-32.png')
+        still({key: value / 2 for key, value in ICON.items()}, KIT / 'icon-32.png', small=True)
         still(TOUCH, KIT / 'apple-touch-icon.png', bg='#fbf9f3')
         photograph(LAYOUT, ROOT / 'preview.png')
         print(ROOT / 'preview.png')

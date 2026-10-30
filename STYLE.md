@@ -35,9 +35,19 @@ they are drawn and staged.
 
 **phy**, always lower case, even at the start of a sentence. The handle is
 `rareone0602` on GitHub and X; a credit to phy links to
-[LinkedIn](https://www.linkedin.com/in/po-hung-yeh-6a8134116). phy's mark is
-phy's avatar, an Eevee in the colours of phy's tuxedo cat: the head alone for
-a favicon, the whole character where there is room.
+[LinkedIn](https://www.linkedin.com/in/po-hung-yeh-6a8134116).
+
+**The signature** is the one thing that stays the same in everything phy
+makes: phy's avatar, an Eevee in the colours of phy's tuxedo cat, seated
+beside the words (a title or the name, in lower case and in the hand) on one
+short pencilled line at their baseline, in a box twice the words' size (the
+portrait in the kit's README). Where there is no room, the head alone stands for it,
+drawn for its size rather than shrunk: at 16 pixels it keeps the ears, the
+white face and the green eyes, and leaves the rest out. Its colour is the
+green of phy's eyes; where a work takes one colour of its own, it is that
+green. It signs a work once, beside the title or in a corner, and the paper,
+the scale, the place and the light round it are free. A work about other
+people's characters, such as the gallery, leaves it out.
 
 **What makes a work phy's.** Whatever else changes, four things stay:
 - **One hand.** Every word is in **Shantell Sans**, a hand drawn with one even
@@ -60,8 +70,9 @@ most likely choice is the boring one: the template, the stock phrase, the
 default chart, the formal tone put on for show, and phy's own last piece.
 Before calling a piece finished, describe its look in one sentence; if the
 sentence also fits phy's last piece of the same kind (the casebook, §5),
-redraw. A piece made to delight should surprise, and then, on a second look,
-seem the only way it could have gone.
+redraw. The signature stays out of the sentence, since it is meant to repeat.
+A piece made to delight should surprise, and then, on a second look, seem the
+only way it could have gone.
 
 **The kit is a tool.** Everything else, from the ruled paper and the dial to
 the marks, the layout, the inks, light and motion (§3, §4), is good defaults,
