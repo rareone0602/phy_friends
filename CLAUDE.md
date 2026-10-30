@@ -1,6 +1,6 @@
 # Working in phy_friends
 
-Before making anything, read `STYLE.md` (the look, the words and the duties)
+Before making anything, read `STYLE.md` (the look, the words and the way of working)
 and, for anything with the fwiends in it, `FWIENDS.md`. `README.md` says where
 each part of the repository lives, and `lib/fwiends/README.md` documents the
 code. These rules are for agents working here, most important first.

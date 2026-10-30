@@ -40,35 +40,73 @@
   .edits del { transition: background-size .45s cubic-bezier(.4, 0, .4, 1); }
   .edits .do { clip-path: inset(-4px -20px -8px 0); transition: clip-path .7s cubic-bezier(.4, 0, .4, 1) .5s; }
   .edits li + li.pair-start { margin-top: var(--L); }
+  /* A correction on one line writes its second part as one box, so that a part that wraps is written whole. */
   .inline-edits del { margin-right: .35em; }
+  .inline-edits .do { display: inline-block; }
   .struck-row { display: flex; flex-wrap: wrap; column-gap: 1.2em; }
   @media print, (forced-colors: active) { .doc del { text-decoration: line-through; background: none; } }
 
-  /* Sets of small pictures, each with a word or two beneath it, a whole number of rules tall. */
+  /* Sets of small pictures, each with a word or two beneath it, a whole number of rules tall. A set whose pictures
+     differ in height lines them up on their last rule (.ends). */
   .doc .set { display: grid; grid-template-columns: repeat(auto-fill, minmax(var(--cell, 8.5em), 1fr)); column-gap: 1.2em; row-gap: var(--L); }
+  .doc .set.ends { align-items: end; }
   .set > div { position: relative; }
   .set .pic { position: relative; height: calc(var(--L) * var(--rules, 4)); top: calc(-1 * var(--lift)); }
   .set .pic > svg, .set .pic > img { position: absolute; left: 0; bottom: 0; height: 100%; width: auto; max-width: 100%; overflow: visible; }
   .set .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
   /* A picture on a sheet of its own, or one that reaches above its box, keeps a blank rule under its heading. */
-  .doc :is(.thumbs, .papers, .sheets-figure, .built), .doc h3 + .set { margin-top: var(--L); }
+  .doc :is(.thumbs, .papers, .sheets-figure, .built, .slide-figure, .paper-figure, .palette-sheet), .doc h3 + .set { margin-top: var(--L); }
 
-  /* §1: one hand, and what a design tool lays on, each crossed out. */
-  .hands { display: flex; flex-wrap: wrap; column-gap: 1.4em; align-items: baseline; }
-  .hands span { --hand: 0; font-size: 37px; line-height: calc(var(--L) * 2); position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
-  .doc ul.leave-out { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 0 2.2em; min-height: calc(var(--L) * 2); align-items: center; }
-  .leave-out li { position: relative; font: 400 14px/1.2 system-ui, sans-serif; }
-  .leave-out li::after { content: ''; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; translate: -50% -50%; background: var(--mark-cross) center / contain no-repeat; }
-  .leave-out .pill { padding: 3px 10px; border-radius: 999px; background: #e7e9f5; color: #4b55a8; }
-  .leave-out .burger { display: inline-block; vertical-align: middle; width: 22px; height: 16px; background: linear-gradient(#555 0 0) 0 0 / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 50% / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 100% / 100% 2.5px no-repeat; }
-  .leave-out .card { padding: 8px 14px; border-radius: 10px; background: #fff; color: #333; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
-  .leave-out .cta { padding: 6px 14px; border-radius: 8px; color: #fff; font-weight: 600; background: linear-gradient(135deg, #7b5cff, #20c5d9); box-shadow: 0 0 12px rgba(123, 92, 255, .55); }
-  .leave-out .glass { padding: 6px 14px; border-radius: 12px; color: #2b3a55; background: linear-gradient(160deg, rgba(255, 255, 255, .85), rgba(200, 215, 240, .55)); box-shadow: inset 0 1px 0 #fff, 0 2px 8px rgba(40, 60, 120, .2); }
-  .leave-out .hero { font: 800 19px/1.1 system-ui, sans-serif; letter-spacing: -.02em; color: #111; }
-  .leave-out .gear { display: inline-block; width: 22px; height: 22px; vertical-align: middle; border-radius: 50%; border: 5px dotted #667; box-sizing: border-box; }
-  @media (forced-colors: active) { .leave-out { display: none; } }
+  /* A frame of a picture: its layers (the world, the props and phy) share one viewBox and fill the frame, cropped
+     alike. A frame's verdict, a tick or a cross, sits in its corner. */
+  .set .pic.frame { overflow: hidden; }
+  .set .pic.frame > svg { inset: 0; width: 100%; height: 100%; max-width: none; overflow: hidden; }
+  .verdict { position: absolute; right: 6px; top: 6px; z-index: 3; width: 22px; height: 22px; background: var(--mark-cross) center / 18px 18px no-repeat; }
+  .verdict.yes { background: var(--mark-tick) center / 22px 22px no-repeat; }
+  .grey { filter: url(#lightness); }
+  /* Compositions, two to a row and large enough to be read as pictures. */
+  .doc .set.compose { --rules: 7; grid-template-columns: repeat(2, 1fr); }
+  .doc .set.looks { --rules: 5; }
+  /* The paper under a prop, cut to its outline, shows only where the page's own paper cannot: on a dark sheet. */
+  .prop-cut { display: none; }
+  .prop-cut * { fill: #fbf9f3; stroke: #fbf9f3; stroke-width: 5; stroke-linejoin: round; }
+  @media screen and (prefers-color-scheme: dark) {
+    :root:has(meta[name="color-scheme"][content~="dark"]) .prop-cut { display: inline; }
+  }
+  :is([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: inline !important; }
+  [data-paper]:not([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: none !important; }
 
-  /* §2: British prose beside American code, and case following the dial. */
+  /* §1: the favicon at its sizes, one hand on its dial, and what a design tool lays on, crossed out over the pencil's
+     way of doing the same job. */
+  .set .pic.favicons { display: flex; align-items: flex-end; gap: 14px; }
+  .set .pic.favicons > img { position: static; height: auto; }
+  .doc ul.hands { list-style: none; padding: 0; }
+  .hands li { font-size: 37px; line-height: calc(var(--L) * 2); height: calc(var(--L) * 2); white-space: nowrap; overflow: hidden;
+    position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
+  .hands .n { display: inline-block; width: 2.6rem; font-size: 15px; color: var(--ink-2); }
+  .doc ul.instead { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--L) 1.2em; }
+  .instead li { display: grid; grid-template-rows: calc(var(--L) * 2) var(--L); }
+  .instead .not { position: relative; display: flex; align-items: center; justify-self: start; font: 400 14px/1.2 system-ui, sans-serif; }
+  .instead .not::after { content: ''; position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; translate: -50% -50%; background: var(--mark-cross) center / contain no-repeat; }
+  .instead .yes { white-space: nowrap; }
+  .instead .yes .btn { margin-left: -.75em; }
+  .instead .hand-said { --hand: 50; font: 300 22px/var(--L) var(--face); }
+  .instead .small { font-size: 15px; color: var(--ink-2); }
+  .instead .ringed { position: relative; margin: 0 1.2em 0 .9em; color: var(--ink); }
+  .instead .ringed::after { content: ''; position: absolute; inset: -8px -16px -9px -14px; background: var(--mark-ring) 0 0 / 100% 100% no-repeat; }
+  .instead .pill { padding: 3px 10px; border-radius: 999px; background: #e7e9f5; color: #4b55a8; }
+  .instead .burger { display: inline-block; vertical-align: middle; width: 22px; height: 16px; background: linear-gradient(#555 0 0) 0 0 / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 50% / 100% 2.5px no-repeat, linear-gradient(#555 0 0) 0 100% / 100% 2.5px no-repeat; }
+  .instead .card { padding: 8px 14px; border-radius: 10px; background: #fff; color: #333; box-shadow: 0 4px 14px rgba(0, 0, 0, .18); }
+  .instead .cta { padding: 6px 14px; border-radius: 8px; color: #fff; font-weight: 600; background: linear-gradient(135deg, #7b5cff, #20c5d9); box-shadow: 0 0 12px rgba(123, 92, 255, .55); }
+  .instead .hero { font: 800 19px/1.1 system-ui, sans-serif; letter-spacing: -.02em; color: #111; }
+  .instead .gear { display: inline-block; width: 22px; height: 22px; vertical-align: middle; border-radius: 50%; border: 5px dotted #667; box-sizing: border-box; }
+  @media screen and (prefers-color-scheme: dark) {
+    :root:has(meta[name="color-scheme"][content~="dark"]) .instead :is(.hero, .burger) { filter: invert(1); }
+  }
+  @media (forced-colors: active) { .instead .not { display: none; } }
+
+  /* §2: British prose beside American code, case following the dial, and the awkward things said as the work says
+     them. */
   .doc table.two td:last-child code { font-size: 15px; }
   .doc table.two th:first-child, .doc table.two td:first-child { min-width: 7.5em; }
   .cases { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.6em; }
@@ -76,8 +114,11 @@
   .cases .btn { margin-top: var(--L); }
   .cases .note { font-size: 18px; }
   .cases h3 { font-size: 26px; }
+  .said-as { display: grid; grid-template-columns: repeat(auto-fill, minmax(17em, 1fr)); gap: var(--L) 1.6em; }
+  .said-as > div > * + * { margin-top: 0; }
+  .said-as .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
 
-  /* §3: the inks, the two sheets, the dial, the sizes, the marks and the data colours. */
+  /* §3: the inks, the two sheets, the dial, the sizes, the marks, a sample page and its states, and the figures. */
   .swatch { display: inline-block; width: 30px; height: 10px; vertical-align: 1px; margin-right: .5em; }
   .inks td:first-child { white-space: nowrap; }
   .sheets { display: grid; grid-template-columns: 1fr 1fr; flex-basis: 100%; }
@@ -89,16 +130,18 @@
   .sheet .name { --hand: 50; position: absolute; left: 58%; bottom: calc(var(--L) * 2); height: var(--L); font: 300 26px/var(--L) var(--face); transform: translateY(calc(var(--sit) + 1px)); }
   .sheet .sub { position: absolute; left: 58%; bottom: var(--L); height: var(--L); font-size: 15px; line-height: var(--L); color: var(--ink-2); transform: translateY(calc(var(--sit) + 1px)); }
   .sheets .sheet { --sheet-ruling: repeating-linear-gradient(transparent 0 calc(var(--L) - 1px), var(--rule) calc(var(--L) - 1px) var(--L)); }
-  .sheet.on-graphite .pf-cutout { display: inline !important; }
-  .sheet.on-paper .pf-cutout { display: none !important; }
   @media (forced-colors: active) { .sheets { display: none; } }
-  .papers { display: grid; grid-template-columns: repeat(auto-fill, minmax(13em, 1fr)); gap: var(--L) 1.2em; }
-  .papers > div { height: calc(var(--L) * 4); padding: 0 12px 0 calc(var(--L) * .75 + 10px); overflow: hidden; }
+  /* The other sheets, kept small: a sheet's name and when it earns its place. */
+  .papers { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(9em, calc(50% - .6em)), 1fr)); gap: var(--L) 1.2em; }
+  .papers > div { height: calc(var(--L) * 3); padding: 0 6px 0 calc(var(--L) * .75 + 6px); overflow: hidden; }
+  .papers h3 { font-size: 22px; }
+  .papers p { font-size: 15px; }
   .papers [data-paper=score] p { margin-top: var(--L); }  /* Words go on every other rule, between the staves. */
-  .papers [data-paper=tracing] { position: absolute; inset: -6px -6px -6px 52%; padding-left: 12px; color: var(--blue-pencil); }
+  .papers [data-paper=tracing] { position: absolute; inset: -6px -6px -6px 52%; padding-left: 10px; color: var(--blue-pencil); }
   .built { width: calc(var(--L) * 5); height: calc(var(--L) * 5); position: relative; top: calc(-1 * var(--lift)); }
   .built svg { display: block; width: 100%; height: 100%; overflow: visible; position: relative; z-index: 1; }  /* Over the tracing paper. */
   .doc table.dial td.w { --hand: 50; font: 300 26px/var(--L) var(--face); position: relative; top: calc(var(--sit) - var(--lift)); }
+  .doc table.dial td.w small { --hand: 0; font: 300 15px/1 var(--face); color: var(--ink-2); margin-left: .5em; }
   .doc table.dial td.label { color: var(--ink-2); font-size: 15px; white-space: nowrap; }
   .slant { display: inline-block; transform: skewX(-12deg); }
   .doc ul.sizes { list-style: none; padding-left: 0; }
@@ -122,38 +165,72 @@
   .marks.inline { font-size: 15px; color: var(--ink-2); }
   .marks.inline span:not(.mark) { white-space: nowrap; margin-right: .9em; }
   .marks.inline .mark { margin-right: .3em; }
+  /* A sample page, set in from the guide's own column: its title, its writing, its tool and its footer. */
+  .sample { padding-left: 1.6em; }
+  .sample > * + * { margin-top: var(--L); }
+  .sample :is(.meta, .sample-title) + * { margin-top: 0; }
+  .sample .sample-title { --hand: 50; font: 300 37px/calc(var(--L) * 2) var(--face); position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
+  .sample .intro { margin-top: 0; top: calc(var(--sit) - var(--lift)); }
+  .sample .sample-foot { font-size: 15px; color: var(--ink-2); }
+  .states .field { max-width: 100%; }
+  .states .empty { min-height: 0; }
+  .states .error { min-height: calc(var(--L) * 2); }
   /* The data colours, from lib/style/figures (its README), on paper and on the dark sheet. */
   :root { --data-blue: #1092ca; --data-red: #a74126; --data-slate: #4d6295; --data-ochre: #a98f12; --data-pink: #d56b75; }
   @media screen and (prefers-color-scheme: dark) {
     :root:has(meta[name="color-scheme"][content~="dark"]) { --data-blue: #1d97cf; --data-red: #fca88e; --data-slate: #a7b9f2; --data-ochre: #9d840e; --data-pink: #d46b75; }
   }
-  .chart { --informal: 0; display: block; width: 100%; max-width: 28em; height: calc(var(--L) * 5); position: relative; top: calc(-1 * var(--lift)); overflow: visible; }
-  .chart text { font: 300 15px var(--face); fill: var(--ink-2); }
+  /* A slide: the notebook page at 1.5 times, on its own sheet of paper, scaled to the column in whole rules. */
+  .slide { --informal: 50; height: calc(var(--L) * 12); aspect-ratio: 16 / 9; max-width: 100%; position: relative; top: calc(-1 * var(--lift)); }
+  .slide svg { display: block; width: 100%; height: 100%; }
+  .slide text, .chart text, .print text { font-family: var(--face); font-weight: 300; }
+  .slide .s-title { --hand: 50; font-size: 96px; fill: var(--ink); }
+  .slide .s-chart { --informal: 0; }
+  .slide .s-chart text { font-size: 30px; fill: var(--ink-2); }
+  .slide .s-note { --hand: 50; font-size: 33px; fill: var(--ink-2); }
+  .slide .s-small { font-size: 22.5px; fill: var(--ink-2); }
+  @media (max-width: 860px) { .slide { height: calc(var(--L) * 9); } }
+  @media (max-width: 720px) { .slide { height: calc(var(--L) * 6); } }
+  /* Small charts on blank paper: one series to a colour, whatever its rank. */
+  .chart { --informal: 0; }
+  .chart text { font-size: 15px; fill: var(--ink-2); }
+  .chart .ink { fill: var(--ink); }
+  /* A paper's main diagram, on white at the size it prints; the white turns to paper as a scan's does. */
+  .print[data-paper] { --paper: #fff; --sheet-grain: none; width: 317px; max-width: 100%; height: calc(var(--L) * 6); position: relative; top: calc(-1 * var(--lift)); }
+  .print svg { display: block; width: 100%; height: 100%; }
+  .print .d-word { --informal: 0; font-size: 10.67px; fill: var(--ink); }
+  .print .d-note { --hand: 50; font-size: 12px; fill: var(--ink-2); }
+  .print .d-math, .print .d-caption { font-family: 'STIX Two Text', 'Times New Roman', Times, serif; font-weight: 400; fill: #111; }
+  .print .d-math { font-style: italic; font-size: 12px; }
+  .print .d-caption { font-size: 10.67px; }
 
-  /* §4: thumbnails on toned paper, each with its one idea. */
+  /* §4: frames composed and lit, a hi frame by frame, and a track measured into phrases. */
   .thumbs .pic { overflow: hidden; }
   .thumbs .pic[data-paper] { padding: 0; }
   .thumbs .pic > svg { left: auto; }
-  .thumbs .grey { filter: grayscale(1); }
   .thumbs .glow { position: absolute; inset: 0; background: radial-gradient(circle at 42% 48%, rgba(255, 240, 190, .9), rgba(255, 240, 190, 0) 38%); mix-blend-mode: screen; z-index: 2; }
-  .verdict { position: absolute; right: 6px; top: 6px; z-index: 3; width: 22px; height: 22px; background: var(--mark-cross) center / 18px 18px no-repeat; }
-  .verdict.yes { background: var(--mark-tick) center / 22px 22px no-repeat; }
-  .beats { display: block; width: 100%; height: calc(var(--L) * 3); position: relative; top: calc(-1 * var(--lift)); overflow: visible; }
-  .beats text { font: 300 15px var(--face); fill: var(--ink-2); }
-  /* A list ticked or crossed item by item; a caret is a choice someone else makes. */
+  .motion .pic::after { content: ''; position: absolute; left: 0; right: 8%; bottom: calc(3.1% - 4px); height: 8px; background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
+  .beats { display: block; width: 100%; height: calc(var(--L) * 4); position: relative; top: calc(-1 * var(--lift)); overflow: visible; }
+  .beats text { font: 300 19px var(--face); fill: var(--ink-2); }
+  .beats .name { --hand: 50; }
+  /* A list ticked or crossed item by item; an item that depends on someone has no mark, and says so. */
   .doc ul.ticks { list-style: none; padding-left: 0; }
   .ticks li { padding-left: 1.8em; position: relative; }
   .ticks li::before { content: ''; position: absolute; left: 0; top: 4px; width: 22px; height: 22px; background: var(--mark-tick) center / 20px 20px no-repeat; }
   .ticks li.no::before { background: var(--mark-cross) center / 16px 16px no-repeat; }
-  .ticks li.ask::before { background: var(--mark-caret) center / 14px 10px no-repeat; }
+  .ticks li.if::before { content: none; }
   .knows { display: grid; grid-template-columns: repeat(auto-fill, minmax(15em, 1fr)); gap: var(--L) 1.6em; }
   .knows > div > * + * { margin-top: 0; }
   .knows .who { font: 300 22px/var(--L) var(--face); color: var(--ink-2); margin: 0; }
 
-  /* The fwiends: phy in pencil and flat, their colours and shades, standing up, turning round and feeling. */
-  .doc ul.palette { list-style: none; padding-left: 0; display: flex; flex-wrap: wrap; column-gap: 1.1em; }
-  .palette li { font-size: 15px; color: var(--ink-2); white-space: nowrap; }
-  .palette svg { width: 34px; height: 10px; vertical-align: -1px; margin-right: .35em; }
+  /* The fwiends: phy built up, their colours and shades on their own paper, standing up, turning round and feeling. */
+  .factory .pf-construction * { fill: none; stroke: var(--ink-2); stroke-width: 1.2px; vector-effect: non-scaling-stroke; }
+  .factory .pf-construction .pf-faint { stroke-opacity: .6; stroke-dasharray: 3 4; }
+  .factory .faded > :not(.pf-construction) { opacity: .26; }
+  .palette-sheet { height: calc(var(--L) * 4); padding: 0 12px 0 calc(var(--L) * .75 + 10px); top: calc(-1 * var(--lift)); }
+  .doc .palette-sheet ul { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5em, 1fr)); column-gap: 1.2em; position: relative; top: var(--lift); }
+  .palette-sheet li { font-size: 15px; color: var(--ink-2); white-space: nowrap; }
+  .palette-sheet svg { width: 40px; height: 14px; vertical-align: -2px; margin-right: .2em; }
   .rise { display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 1.6em; }
   .rise .pic { width: calc(var(--L) * 5); height: calc(var(--L) * 6); position: relative; top: calc(-1 * var(--lift)); }
   .rise .pic svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -167,19 +244,26 @@
 
   @media (max-width: 720px) {
     /* "style guide" and the portrait beside it share a phone's line, so the title gives way. */
-    .titleline h1 { font-size: min(54px, calc((100vw - 160px) / 5.3)); }
+    .titleline h1 { font-size: min(54px, calc((100vw - 176px) / 5.3)); }
     .cases { column-gap: 1em; }
     .cases h3 { font-size: 22px; }
     .sheet .name { font-size: 22px; }
     .sheets { grid-template-columns: 1fr; }
-    .doc ul.leave-out { min-height: 0; row-gap: var(--L); padding: calc(var(--L) / 2) 0; }
-    .hands span { font-size: 31px; }
+    .hands li { font-size: 25px; }
+    .doc ul.instead { grid-template-columns: repeat(2, 1fr); }
+    .sample { padding-left: 1em; }
+    .sample .sample-title { font-size: 31px; }
+    .doc .set.compose { --rules: 4; }
+    .doc .set.looks { --rules: 7; }
   }
   @media (prefers-reduced-motion: reduce) { .edits del, .edits .do { transition: none; } }
 </style>
 </head>
 <body>
 <script src="lib/style/site/graphite.js"></script>
+<!-- Turned grey by CIELAB L* alone: L* depends on luminance only, so a grey of the same luminance, worked in linear
+     light, has the colour's own L*. -->
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="lightness" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/></filter></svg>
 
 <header>
   <div class="titleline">
@@ -207,45 +291,42 @@
       <li><del><span class="sr">not: </span>Phy</del><span class="do">phy, even at the start of a sentence</span></li>
     </ul>
     <ul class="meta"><li><code>rareone0602</code> on GitHub and X</li><li>a credit links to <a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">LinkedIn</a></li></ul>
-    <div class="set" style="--cell: 10em">
-      <div><div class="pic" style="--rules: 2"><img src="lib/style/site/icon.svg" alt="phy's head"></div><span class="what">a favicon</span></div>
+    <div class="set" style="--cell: 13em">
+      <div><div class="pic favicons" style="--rules: 2"><img src="lib/style/site/icon.svg" style="width: 64px" alt="phy's head"><img src="lib/style/site/icon.svg" style="width: 32px" alt=""><img src="lib/style/site/icon.svg" style="width: 16px" alt=""></div><span class="what">a favicon, down to 16 pixels</span></div>
       <div><div class="pic" id="mark-whole" style="--rules: 4"></div><span class="what">the whole, where there is room</span></div>
     </div>
 
     <h3>one hand</h3>
-    <div class="hands">
-      <span style="--informal: 0">phy</span><span style="--informal: 50">phy</span><span style="--informal: 100">phy</span>
-    </div>
-    <p class="note">one face, at 0, 50 and 100 on its dial; only code, and a host's own type, are in another</p>
+    <ul class="hands">
+      <li style="--informal: 0"><span class="n">0</span>quick sketches of a gift</li>
+      <li style="--informal: 50"><span class="n">50</span>quick sketches of a gift</li>
+      <li style="--informal: 100"><span class="n">100</span>quick sketches of a gift</li>
+    </ul>
+    <p class="note">one face on its dial: past 50 the s grows towards a capital and the line loosens; only code, and a host's own type, are in another</p>
     <h3>drawn, not designed</h3>
-    <ul class="leave-out" aria-label="what a design tool lays on, left out">
-      <li><span class="cta" aria-hidden="true">Get started</span><span class="sr">no gradients, glows or calls to action</span></li>
-      <li><span class="glass" aria-hidden="true">Glass</span><span class="sr">no glass</span></li>
-      <li><span class="card" aria-hidden="true">Feature</span><span class="sr">no cards or drop shadows</span></li>
-      <li><span class="hero" aria-hidden="true">Unleash it.</span><span class="sr">no hero copy</span></li>
-      <li><span class="gear" aria-hidden="true"></span><span class="sr">no stock icons</span></li>
-      <li><span class="pill" aria-hidden="true">#pencils</span><span class="sr">no pills</span></li>
-      <li><span class="burger" aria-hidden="true"></span><span class="sr">no menus</span></li>
+    <ul class="instead" aria-label="what a design tool lays on, and the pencil's way of doing the same job">
+      <li><span class="not"><span class="cta" aria-hidden="true">Get started</span><span class="sr">not a glowing gradient button, but </span></span><span class="yes"><button class="btn" type="button" tabindex="-1" aria-hidden="true">count</button><span class="sr">the word in a pencil box</span></span></li>
+      <li><span class="not"><span class="card" aria-hidden="true">Feature</span><span class="sr">not a card with a shadow, but </span></span><span class="yes">a feature, in words</span></li>
+      <li><span class="not"><span class="hero" aria-hidden="true">Unleash it.</span><span class="sr">not hero copy, but </span></span><span class="yes hand-said">that's me</span></li>
+      <li><span class="not"><span class="gear" aria-hidden="true"></span><span class="sr">not a stock icon, but </span></span><span class="yes">settings</span></li>
+      <li><span class="not"><span class="pill" aria-hidden="true">#pencils</span><span class="sr">not a pill, but </span></span><span class="yes small">pencils</span></li>
+      <li><span class="not"><span class="burger" aria-hidden="true"></span><span class="sr">not a menu, but </span></span><span class="yes small"><span class="ringed">fwiends</span> style guide</span></li>
     </ul>
     <h3>colour goes to the subject</h3>
-    <div class="set" style="--cell: 13em">
+    <div class="set ends" style="--cell: 13em">
       <div><div class="pic" id="subject" style="--rules: 3"></div><span class="what">phy, in colour; the ground, quiet</span></div>
-      <div><div class="pic" style="--rules: 3"><p class="error" style="position: absolute; bottom: 0">that needs to be a number</p></div><span class="what">red, only for an error</span></div>
+      <div><p class="error">that needs to be a number</p><span class="what">red, only for an error</span></div>
     </div>
     <h3>never the same twice</h3>
-    <ul class="edits">
-      <li><del><span class="sr">not: </span>the template, the stock phrase, phy's last piece</del></li>
-      <li class="do">describe the look in one sentence; if it fits the last piece, redraw</li>
-    </ul>
+    <p class="note">one brief, a birthday card, drawn three ways, each described in one sentence</p>
+    <div class="set looks" style="--cell: 12em">
+      <div><div class="pic frame" data-paper="notebook" id="n-last"><span class="verdict" aria-hidden="true"></span></div><span class="what"><span class="sr">redrawn: </span>on ruled paper, phy beside a cake: it fits the last card, so redraw</span></div>
+      <div><div class="pic frame" data-paper="kraft" id="n-balloon"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">on kraft, one balloon three times phy's height</span></div>
+      <div><div class="pic frame" data-paper="graphite" data-ruling="plain" id="n-candle"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">at night, one candle's light rubbed out of the dark</span></div>
+    </div>
 
-    <h3>duties, whatever the style</h3>
-    <ul class="duties">
-      <li class="rule"><strong>The owners' say.</strong> People and their characters appear only as their owners give them: name, species, colours, pronoun and a credit. An owner's wish beats a house rule.</li>
-      <li class="rule"><strong>Private things</strong> stay private.</li>
-      <li class="rule"><strong>Licences</strong> are kept: the face's, the music's, and those of any picture, data or code.</li>
-      <li class="rule"><strong>Light and dark</strong> follow the reader's system. A page never offers a switch, and a print is on paper.</li>
-    </ul>
-    <p class="note">everything after the duties is a default, not a rule: a working page keeps it, and a piece takes what it needs</p>
+    <h3>the kit is a tool</h3>
+    <p class="note">one hand, drawn by hand, colour to the subject and the words (§2) hold; the rest (§3, §4) is defaults: a working page keeps them, and a piece takes what it needs</p>
     <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#1-phy">STYLE.md §1</a>.</p>
 
     <hr>
@@ -283,6 +364,14 @@
       <li class="do">that's me</li>
       <li class="pair-start struck-row"><del><span class="sr">not: </span>magical</del> <del><span class="sr">not: </span>seamless</del> <del><span class="sr">not: </span>leverage</del> <del><span class="sr">not: </span>welcome</del> <del><span class="sr">not: </span>an exclamation mark</del> <del><span class="sr">not: </span>emoji</del></li>
     </ul>
+
+    <h3>the awkward things, said plainly</h3>
+    <div class="said-as">
+      <div><span class="what">an instruction</span><p>Type the height in pixels, then count.</p></div>
+      <div><span class="what">a result it isn't sure of</span><p class="result">about eight rules</p><p class="note">the height was read off a photo</p></div>
+      <div><span class="what">an error it can recover from</span><p class="error">not saved: the disk is full. nothing is lost; make room, then save again.</p></div>
+      <div><span class="what">a credit</span><ul class="meta"><li>phy</li><li>a tuxedo eevee</li><li><a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">rareone0602</a></li></ul></div>
+    </div>
 
     <h3>case follows the dial</h3>
     <div class="cases">
@@ -338,22 +427,23 @@
     <h3>the dark sheet</h3>
     <figure class="sheets-figure">
       <div class="sheets" role="img" aria-label="phy on paper, and on the dark sheet: the paper and the ink swap, and phy keeps their own colours on a sheet of paper cut to their outline">
-        <div class="sheet on-paper" data-paper="notebook"><div class="ground"></div><p class="name">paper</p><p class="sub">ink in graphite</p></div>
-        <div class="sheet on-graphite" data-paper="graphite"><div class="ground"></div><p class="name">graphite</p><p class="sub">ink in white pencil</p></div>
+        <div class="sheet" data-paper="notebook"><div class="ground"></div><p class="name">paper</p><p class="sub">ink in graphite</p></div>
+        <div class="sheet" data-paper="graphite"><div class="ground"></div><p class="name">graphite</p><p class="sub">ink in white pencil</p></div>
       </div>
       <figcaption>nothing is inverted: a character keeps its own paper</figcaption>
     </figure>
+    <p class="note">the reader's system picks the sheet: a page offers no switch, and a print is on paper</p>
 
-    <h3>other sheets</h3>
+    <h3>other sheets, for a piece</h3>
     <div class="papers">
       <div data-paper="graph"><h3>graph</h3><p>a diagram, at 0</p></div>
-      <div data-paper="score"><h3>score</h3><p>between the staves</p></div>
-      <div data-paper="sketchbook"><h3>sketchbook</h3><p>toned, unruled</p></div>
-      <div data-paper="kraft"><h3>kraft</h3><p>for a card or a gift</p></div>
+      <div data-paper="score"><h3>score</h3><p>between staves</p></div>
+      <div data-paper="sketchbook"><h3>sketchbook</h3><p>a picture, toned</p></div>
+      <div data-paper="kraft"><h3>kraft</h3><p>a card or a gift</p></div>
       <div data-paper="card"><h3>card</h3><p>one small thing</p></div>
-      <div data-paper="cyanotype"><h3>cyanotype</h3><p>a sun print of a sheet</p></div>
-      <div data-paper="notebook"><h3>tracing</h3><p>laid over</p><div data-paper="tracing"><p>the workings</p></div></div>
-      <div data-ruling="grid"><h3>a ruling</h3><p>on the page's own paper</p></div>
+      <div data-paper="cyanotype"><h3>cyanotype</h3><p>a sun print</p></div>
+      <div data-paper="notebook"><h3>tracing</h3><div data-paper="tracing"><p>workings</p></div></div>
+      <div data-ruling="grid"><h3>a ruling</h3><p>on this paper</p></div>
     </div>
     <p class="note">a light sheet turns dark with the page; a dark or toned one is a piece's look, never a working page's</p>
 
@@ -364,13 +454,13 @@
 
     <h3>the dial</h3>
     <div class="row">
-      <label for="informal">turn it, and this whole page follows</label>
+      <label for="informal">turn it: this page's hand follows, and its case stays at 50</label>
       <select class="field" id="informal"><option value="0">0, a paper's diagram</option><option value="50" selected>50, a site</option><option value="100">100, a hobby project</option></select>
     </div>
     <table class="dial">
       <thead><tr><th></th><th>written</th><th>set</th></tr></thead>
       <tbody>
-        <tr style="--informal: 0"><td class="label">0, a diagram</td><td class="w">notes</td><td>phy sketches</td></tr>
+        <tr style="--informal: 0"><td class="label">0, a diagram</td><td class="w">notes<small>at 50</small></td><td>phy sketches</td></tr>
         <tr style="--informal: 50"><td class="label">50, a site</td><td class="w">notes</td><td>phy sketches</td></tr>
         <tr style="--informal: 100"><td class="label">100, a hobby</td><td class="w">notes</td><td>phy sketches</td></tr>
       </tbody>
@@ -398,60 +488,107 @@
       <li><span class="glyph box" data-mark="box"></span><span class="what">the one button</span></li>
       <li><span class="glyph tick" data-mark="tick"></span><span class="what">a tick</span></li>
       <li><span class="glyph cross" data-mark="cross"></span><span class="what">an error</span></li>
-      <li><span class="glyph caret" data-mark="caret"></span><span class="what">a choice</span></li>
+      <li><span class="glyph caret" data-mark="caret"></span><span class="what">on a select</span></li>
     </ul>
     <p class="note">a mark tilts anticlockwise, never more than 2°; the grain goes over the title, the ground and the arrow</p>
 
     <h3>a page</h3>
-    <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
-    <p>One column against the margin line. Links are <a href="index.html">underlined in pencil</a>, and <strong>bold</strong> is the only emphasis that shows from across the room. Long words and <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a> break rather than push the page sideways.</p>
-    <ul>
-      <li>one idea to a line</li>
-      <li>a dash for a bullet, in the lightest ink</li>
-    </ul>
-    <blockquote><p>measure twice, cut once.<br>a carpenter's rule</p></blockquote>
-    <pre><code>:root {
+    <div class="sample" role="group" aria-label="a sample page">
+      <p class="sample-title">rules</p>
+      <p class="intro">how many rules a drawing needs.</p>
+      <ul class="meta"><li><time datetime="2026-09-28">28 sep 2026</time></li><li>pencils</li><li>paper</li></ul>
+      <p>One column against the margin line. Links are <a href="index.html">underlined in pencil</a>, and <strong>bold</strong> is the only emphasis that shows from across the room. Long words and <a href="https://github.com/rareone0602/phy_friends">github.com/rareone0602/phy_friends</a> break rather than push the page sideways.</p>
+      <ul>
+        <li>one idea to a line</li>
+        <li>a dash for a bullet, in the lightest ink</li>
+      </ul>
+      <blockquote><p>measure twice, cut once.<br>a carpenter's rule</p></blockquote>
+      <pre><code>:root {
   --L: 32px;       /* one rule */
   --ink: #3d3c39;  /* graphite */
 }</code></pre>
-    <figure style="--rules: 5">
-      <img id="photo" alt="phy's close-up, head tipped, on a near-black background, drawn by the library">
-      <img id="drawing" alt="phy asleep, drawn by the library straight onto the paper">
-      <figcaption>a photo stays a photo; a character is drawn straight onto the paper</figcaption>
+      <div class="row">
+        <label for="h">height, in pixels</label>
+        <input class="field" id="h" value="250" inputmode="decimal" autocomplete="off" aria-describedby="h-err">
+        <p class="error" id="h-err" hidden>that needs to be a number, like 250</p>
+      </div>
+      <div class="row">
+        <label for="s">rule spacing</label>
+        <select class="field" id="s"><option value="32">32px, on a screen</option><option value="30">30px, on a phone</option></select>
+      </div>
+      <label class="check"><input type="checkbox" id="up" checked> round up to a whole rule</label>
+      <div class="actions"><button class="btn" type="button" id="count">count</button><button class="btn quiet" type="button" id="again">start again</button></div>
+      <p class="result" id="result">eight rules</p>
+      <p class="note" id="exact">7.8 rules, rounded up</p>
+      <h3>saved</h3>
+      <p class="empty" id="empty" hidden>nothing saved yet.</p>
+      <ul id="saved"><li>250px: eight rules</li></ul>
+      <ul class="meta sample-foot"><li><a href="index.html">back</a></li><li>source</li></ul>
+    </div>
+    <h3>its states</h3>
+    <div class="set ends states" style="--cell: 15em">
+      <div><p class="empty">nothing saved yet.</p><span class="what">empty</span></div>
+      <div><p class="error">that needs to be a number, like 250</p><span class="what">wrong</span></div>
+      <div><p class="loading">counting…</p><span class="what">a wait</span></div>
+      <div><p class="result">eight rules</p><span class="what">done</span></div>
+    </div>
+    <p class="note">no menus, pills, frames or borders; an empty state is one note, a wait one word</p>
+
+    <h3>a slide</h3>
+    <figure class="slide-figure">
+      <div class="slide" data-paper="notebook" data-ruling="plain">
+        <svg viewBox="0 0 1280 720" role="img" aria-label="a slide titled v4 is twice as fast: build times of 52, 48, 45 and 22 seconds for versions 1 to 4, a note, the cache, pointing at the last, and the source at the bottom">
+          <path d="M0 47.25H1280M0 95.25H1280M0 143.25H1280M0 191.25H1280M0 239.25H1280M0 287.25H1280M0 335.25H1280M0 383.25H1280M0 431.25H1280M0 479.25H1280M0 527.25H1280M0 575.25H1280M0 623.25H1280M0 671.25H1280" fill="none" stroke="var(--rule)" stroke-width="1.5"/>
+          <path d="M132 0V720" stroke="var(--margin)" stroke-width="1.5"/>
+          <text class="s-title" x="174" y="138">v4 is twice as fast</text>
+          <rect x="150" y="200" width="1090" height="420" fill="var(--paper)"/>
+          <g class="s-chart">
+            <path d="M262 568H968" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round"/>
+            <path d="M330 567V268M520 567V291M710 567V308M900 567V441" fill="none" stroke="var(--data-blue)" stroke-width="90"/>
+            <text x="330" y="250" text-anchor="middle">52 s</text><text x="520" y="273" text-anchor="middle">48 s</text><text x="710" y="290" text-anchor="middle">45 s</text><text x="900" y="423" text-anchor="middle">22 s</text>
+            <text x="330" y="606" text-anchor="middle">v1</text><text x="520" y="606" text-anchor="middle">v2</text><text x="710" y="606" text-anchor="middle">v3</text><text x="900" y="606" text-anchor="middle">v4</text>
+          </g>
+          <text class="s-note" x="1010" y="350">the cache</text>
+          <path d="M1036 368C1020 396 990 412 962 424M962 424l15-1M962 424l9-12" fill="none" stroke="var(--ink-2)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" filter="url(#graphite)"/>
+          <text class="s-small" x="174" y="667">source: invented for this guide; one run each, no error bars</text>
+        </svg>
+      </div>
+      <figcaption>the point as its title, the chart on blank paper, one note with its arrow, the source in small print</figcaption>
     </figure>
-    <p>How many rules does a drawing need?</p>
-    <div class="row">
-      <label for="h">height, in pixels</label>
-      <input class="field" id="h" value="two hundred" inputmode="decimal" autocomplete="off" aria-invalid="true" aria-describedby="h-err">
-      <p class="error" id="h-err">that needs to be a number, like 250</p>
-    </div>
-    <div class="row">
-      <label for="s">rule spacing</label>
-      <select class="field" id="s"><option value="32">32px, on a screen</option><option value="30">30px, on a phone</option></select>
-    </div>
-    <label class="check"><input type="checkbox" id="up" checked> round up to a whole rule</label>
-    <div class="actions"><button class="btn" type="button" id="count">count</button><button class="btn quiet" type="button" id="again">start again</button></div>
-    <p class="result" id="result">eight rules</p>
-    <p class="note" id="exact">7.4 rules, rounded up</p>
-    <p class="loading" id="loading">counting…</p>
-    <h3>saved</h3>
-    <p class="empty" id="empty">nothing saved yet.</p>
-    <ul id="saved" hidden></ul>
-    <p class="note">no menus, pills, frames or borders; an empty state is one note</p>
 
-    <h3>motion, calm</h3>
-    <p class="note">phy, beside the title, breathes, blinks and glances: nothing bounces all the time</p>
+    <h3>a series keeps its colour</h3>
+    <div class="set" style="--cell: 8.5em">
+      <div><div class="pic" style="--rules: 5"><svg class="chart" viewBox="0 0 220 160" role="img" aria-label="build time: 45 seconds without the cache, 22 with it"><rect width="220" height="160" fill="var(--paper)"/><text x="4" y="18">build time, s</text><path d="M36 130H200" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M80 129V44M160 129V87" fill="none" stroke-width="46"/><path d="M80 129V44" stroke="var(--data-blue)" stroke-width="46"/><path d="M160 129V87" stroke="var(--data-red)" stroke-width="46"/><text x="80" y="36" text-anchor="middle">45</text><text x="160" y="79" text-anchor="middle">22</text><text class="ink" x="80" y="150" text-anchor="middle">without</text><text class="ink" x="160" y="150" text-anchor="middle">with</text></svg></div><span class="what">time: the cache is the shorter</span></div>
+      <div><div class="pic" style="--rules: 5"><svg class="chart" viewBox="0 0 220 160" role="img" aria-label="memory: 310 megabytes without the cache, 420 with it"><rect width="220" height="160" fill="var(--paper)"/><text x="4" y="18">memory, MB</text><path d="M36 130H200" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M80 129V63" stroke="var(--data-blue)" stroke-width="46"/><path d="M160 129V40" stroke="var(--data-red)" stroke-width="46"/><text x="80" y="55" text-anchor="middle">310</text><text x="160" y="32" text-anchor="middle">420</text><text class="ink" x="80" y="150" text-anchor="middle">without</text><text class="ink" x="160" y="150" text-anchor="middle">with</text></svg></div><span class="what">memory: the same colours, the cache now taller</span></div>
+      <div><div class="pic grey" style="--rules: 5"><svg class="chart" viewBox="0 0 220 160" role="img" aria-label="the build time chart again, in grey"><rect width="220" height="160" fill="var(--paper)"/><text x="4" y="18">build time, s</text><path d="M36 130H200" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M80 129V44" stroke="var(--data-blue)" stroke-width="46"/><path d="M160 129V87" stroke="var(--data-red)" stroke-width="46"/><text x="80" y="36" text-anchor="middle">45</text><text x="160" y="79" text-anchor="middle">22</text><text class="ink" x="80" y="150" text-anchor="middle">without</text><text class="ink" x="160" y="150" text-anchor="middle">with</text></svg></div><span class="what">printed in grey, the labels still say which</span></div>
+    </div>
+    <p class="note">build time and memory, without and with the cache: half the time, for a third more memory (invented numbers)</p>
 
-    <h3>a chart</h3>
-    <svg class="chart" viewBox="0 0 420 160" role="img" aria-label="build time for four versions, in seconds: 52, 48, 45 and 22">
-      <g fill="none" stroke-linecap="round">
-        <path d="M40 136h360" stroke="var(--ink-3)" stroke-width="1.2"/>
-        <path d="M70 136V44M150 136V52M230 136V58M310 136V98" stroke="var(--data-blue)" stroke-width="22" stroke-linecap="butt"/>
-      </g>
-      <text x="70" y="156" text-anchor="middle">1</text><text x="150" y="156" text-anchor="middle">2</text><text x="230" y="156" text-anchor="middle">3</text><text x="310" y="156" text-anchor="middle">4</text>
-      <text x="70" y="34" text-anchor="middle">52 s</text><text x="310" y="88" text-anchor="middle">22 s</text>
-    </svg>
-    <p class="note">build time for four versions: the last one halves it</p>
+    <h3>a paper's main diagram, at the size it prints</h3>
+    <figure class="paper-figure">
+      <div class="print drawing" data-paper="notebook" data-ruling="plain">
+        <svg viewBox="0 0 317 192" role="img" aria-label="a paper's diagram on white: spec, shapes, one shade and a pencil mask in a row of boxes, the last in blue as the new part; the pose p t feeds the shapes; a note, stays put as phy moves, points at the mask; and the caption beneath, in the paper's type">
+          <g fill="none" stroke="var(--ink)" stroke-width=".93" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3.5 21.7Q25.7 21.7 48.4 21.9M47.7 21.5Q47.6 35 47.7 48.3M48.3 47.8Q26 48.3 3.7 48.3M4.3 48.1Q4.1 34.8 4.2 21.3"/>
+            <path d="M65.3 22.2Q93.6 21.7 122.2 22M122 21.2Q122.1 34.9 121.7 48.3M122.4 48.1Q94.2 47.9 65.6 47.9M65.8 48.4Q66.3 35.1 66 21.6"/>
+            <path d="M139.7 21.8Q175.1 21.8 210.4 22.2M209.7 21.6Q209.7 35 210.2 48.5M210.6 48.1Q175.4 47.8 139.6 48M140 48.5Q140.3 35.3 139.7 21.5"/>
+            <path d="M49 35Q56.4 35.3 64 35M59.5 37.2L64 35L59.5 32.8M123 35Q130.9 34.7 138 35M133.5 37.2L138 35L133.5 32.8M211 35Q218.2 34.8 226 35M221.5 37.2L226 35L221.5 32.8M94 74Q93.8 62.5 94 51M96.2 55.5L94 51L91.8 55.5"/>
+          </g>
+          <rect x="228" y="22" width="84" height="26" fill="var(--data-blue)" fill-opacity=".16"/>
+          <path d="M227.6 21.9Q270 22.4 312.3 22.1M311.8 21.3Q311.6 35 311.7 48.7M312.4 48.2Q269.7 47.8 227.3 48M228.2 48.6Q228 35.2 227.9 21.3" fill="none" stroke="var(--data-blue)" stroke-width=".93" stroke-linecap="round"/>
+          <text class="d-word" x="26" y="38.7" text-anchor="middle">Spec</text>
+          <text class="d-word" x="94" y="38.7" text-anchor="middle">Shapes</text>
+          <text class="d-word" x="175" y="38.7" text-anchor="middle">One shade</text>
+          <text class="d-word" x="270" y="38.7" text-anchor="middle">Pencil mask</text>
+          <text class="d-math" x="94" y="88" text-anchor="middle">p<tspan font-size="8.5" dy="2.5">t</tspan></text>
+          <text class="d-note" x="218" y="104" text-anchor="end">stays put as phy moves</text>
+          <path d="M222 98Q249.3 87.8 262 54M262 59L262 54L258.1 57.1" fill="none" stroke="var(--ink-2)" stroke-width=".93" stroke-linecap="round" stroke-linejoin="round"/>
+          <text class="d-caption" x="4" y="148">Figure 1: The factory. A spec becomes shapes, posed by <tspan class="d-math" font-size="10.67">p</tspan><tspan font-size="7.5" dy="2">t</tspan><tspan dy="-2">, then</tspan></text>
+          <text class="d-caption" x="4" y="162">one shade; a pencil mask, fixed to the picture, lies over all.</text>
+        </svg>
+      </div>
+      <figcaption>on white, 3.3 inches across, words at 8 points; the caption carries it, in the paper's type</figcaption>
+    </figure>
     <p class="marks inline"><span class="sr">the data colours, five at most, from the characters:</span>
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-blue)" stroke-width="2.6" stroke-linecap="round"/></svg>blue</span>
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-red)" stroke-width="2.6" stroke-linecap="round"/></svg>red</span>
@@ -459,42 +596,38 @@
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-ochre)" stroke-width="2.6" stroke-linecap="round"/></svg>ochre</span>
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-pink)" stroke-width="2.6" stroke-linecap="round"/></svg>pink</span>
     </p>
-    <p class="note">the data is the only saturated thing, and a series keeps its colour</p>
-    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#3-the-kit">STYLE.md §3</a>, and how to use the kit, <a href="lib/style/site/README.md">its README</a>.</p>
+    <p class="note">the data is the only saturated thing, and the colours go in this order</p>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#3-the-kit">STYLE.md §3</a>, and how to use the kit, <a href="lib/style/site/README.md">its README</a> and the figures', <a href="lib/style/figures/README.md">theirs</a>.</p>
 
     <hr>
 
     <h2 id="s4">4. pieces</h2>
     <h3>a frame, composed</h3>
-    <div class="set thumbs" style="--cell: 8em">
-      <div><div class="pic" data-paper="sketchbook" id="t-scale"></div><span class="what">scale doing the work</span></div>
-      <div><div class="pic" data-paper="sketchbook" id="t-empty"></div><span class="what">mostly empty</span></div>
-      <div><div class="pic" data-paper="sketchbook" id="t-off"></div><span class="what">off centre</span></div>
-      <div><div class="pic grey" data-paper="sketchbook" id="t-grey"></div><span class="what">turned grey, still clear</span></div>
+    <div class="set thumbs compose">
+      <div><div class="pic frame" data-paper="sketchbook" id="c-scale"></div><span class="what">the gramophone first, then phy: scale</span></div>
+      <div><div class="pic frame" data-paper="sketchbook" id="c-empty"></div><span class="what">phy, then where phy looks: the empty paper is the sky</span></div>
+      <div><div class="pic frame" data-paper="sketchbook" id="c-crop"></div><span class="what">the eyes, close: the crop brings you in</span></div>
+      <div><div class="pic frame grey" data-paper="sketchbook" id="c-grey"></div><span class="what">in grey, still the gramophone, then phy</span></div>
     </div>
     <h3>light falls on the place, never on a character</h3>
     <div class="set thumbs" style="--cell: 10em">
       <div><div class="pic" data-paper="sketchbook" id="t-glow"><span class="glow" aria-hidden="true"></span><span class="verdict" aria-hidden="true"></span></div><span class="what">a glow, filtered on</span></div>
       <div><div class="pic" data-paper="sketchbook" id="t-pool"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">a pool of light, drawn</span></div>
     </div>
+    <h3>motion, calm: a hi, then still</h3>
+    <div class="set motion" id="motion" style="--cell: 4.8em"></div>
+    <p class="note">phy breathes and blinks; a hi is two hops, then phy is still again</p>
     <h3>cut to the music</h3>
-    <svg class="beats" viewBox="0 0 640 96" role="img" aria-label="four phrases of four bars, with a cue at the start of each phrase rather than on every beat">
-      <g fill="none" stroke-linecap="round">
-        <path id="beat-ticks" stroke="var(--ink-3)" stroke-width="1.1"/>
-        <path id="bar-ticks" stroke="var(--ink-2)" stroke-width="1.3"/>
-        <path id="cues" stroke="var(--ink)" stroke-width="1.5"/>
-      </g>
-      <text x="0" y="92">bar 1</text><text x="160" y="92">5</text><text x="320" y="92">9</text><text x="480" y="92">13</text>
-    </svg>
-    <p class="note">every cue written against the music's data; motion lands on phrases, not on every beat</p>
+    <svg class="beats" id="beats" viewBox="0 0 640 128" preserveAspectRatio="xMinYMax meet" role="img"></svg>
+    <p class="note" id="beats-note">every cue written against the music's data, never by ear</p>
     <h3>whose music</h3>
     <ul class="ticks">
-      <li><span class="sr">yes: </span>public domain in the US, the recording as well as the score</li>
-      <li><span class="sr">yes: </span>CC0, CC BY or CC BY-NC</li>
-      <li><span class="sr">yes: </span>CC BY-SA, only where phy alone is on screen</li>
-      <li class="no"><span class="sr">no: </span>ND</li>
+      <li><span class="sr">yes: </span>anything a non-commercial film may legally use</li>
+      <li><span class="sr">yes: </span>public domain where the film is published, the recording as well as the score</li>
+      <li><span class="sr">yes: </span>SA, which passes to the film</li>
+      <li class="no"><span class="sr">no: </span>ND: setting music to a film adapts it</li>
+      <li class="no"><span class="sr">no: </span>a commercial song on a page, outside a platform's own library</li>
       <li class="no"><span class="sr">no: </span>music the agent making the film composes or generates</li>
-      <li class="no"><span class="sr">no: </span>a commercial song on a page</li>
     </ul>
     <p class="note">the composer is credited, and a video names its people once, written large</p>
     <p class="full">In full, with the references: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#4-pieces">STYLE.md §4</a>.</p>
@@ -510,7 +643,7 @@
       <li>an adversarial review, checked finding by finding</li>
       <li>phy publishes, each time</li>
     </ol>
-    <ul class="duties">
+    <ul>
       <li class="rule"><strong>phy reviews before anything is published.</strong> Pushing, posting and sharing are phy's call.</li>
       <li class="rule"><strong>Private stays private:</strong> personal references live in a git-ignored folder and never reach a public page.</li>
     </ul>
@@ -521,13 +654,16 @@
 
     <h2 id="fwiends">the fwiends</h2>
     <h3>drawn by the factory, from a spec</h3>
-    <div class="set" style="--cell: 8em">
-      <div><div class="pic" id="flat" style="--rules: 4"></div><span class="what">the spec's shapes, flat</span></div>
+    <div class="set factory" style="--cell: 8.5em">
+      <div><div class="pic" id="construction" style="--rules: 4"></div><span class="what">its construction</span></div>
+      <div><div class="pic" id="flat" style="--rules: 4"></div><span class="what">its shapes, and one shade</span></div>
       <div><div class="pic" id="pencilled" style="--rules: 4"></div><span class="what">one pencil over all</span></div>
+      <div><div class="pic" id="prop" style="--rules: 4"></div><span class="what">a prop, the same way</span></div>
     </div>
     <p class="note">no outline, no nose, no mouth by default; the paper shows through</p>
-    <h3>every colour one phy has, and one shade</h3>
-    <ul class="palette" id="palette" aria-label="phy's colours, each with its one shade"></ul>
+    <h3>phy's colours, and one shade</h3>
+    <div class="palette-sheet" data-paper="notebook"><ul id="palette" aria-label="phy's colours, each with the one shade it takes, if any"></ul></div>
+    <p class="note">a shade is one step darker, never two: the body is the fur's shade</p>
     <h3>one figure sits and stands</h3>
     <div class="rise">
       <div class="pic" id="riser"></div>
@@ -539,7 +675,7 @@
     <h3>turning, a quarter at a time</h3>
     <div class="set" id="turns" style="--cell: 7.5em"></div>
     <h3>feelings, from the pose</h3>
-    <div class="set" id="feelings" style="--cell: 7.5em"></div>
+    <div class="set" id="feelings" style="--cell: 10em"></div>
     <h3>only phy speaks in words</h3>
     <div class="speech">
       <div><p class="said">that's me</p><span class="what">phy, in words</span></div>
@@ -561,15 +697,17 @@
         <ul class="ticks">
           <li><span class="sr">yes: </span>share a scene, look, react</li>
           <li><span class="sr">yes: </span>stand close, talk, hand over</li>
-          <li class="ask">touch, compete, tease, only if both owners opt in</li>
+          <li class="if">only if both owners opt in: touch, compete, tease</li>
         </ul>
       </div>
     </div>
     <ul class="duties">
+      <li class="rule"><strong>The owners' say.</strong> People and their characters appear only as their owners give them: name, species, colours, pronoun and a credit. An owner's wish beats a house rule.</li>
       <li class="rule"><strong>Consent is per medium.</strong> An owner who agreed to the gallery has not agreed to films or games; until they do, the work says "draft" in a corner.</li>
+      <li class="rule"><strong>Share-alike music</strong> passes its licence to the film, and the other fwiends are not phy's to license: it goes only where phy alone is on screen.</li>
       <li class="rule"><strong>Nobody is hurt,</strong> frightened for a laugh or beaten by another fwiend; a game is won against the clock.</li>
     </ul>
-    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/FWIENDS.md#drawing-a-friend">FWIENDS.md</a>, and the code, <a href="lib/fwiends/README.md">its README</a>.</p>
+    <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/FWIENDS.md">FWIENDS.md</a>, and the code, <a href="lib/fwiends/README.md">its README</a>.</p>
   </article>
 </main>
 
@@ -586,6 +724,12 @@
 <script src="lib/fwiends/src/emotion.js"></script>
 <script src="lib/fwiends/src/live.js"></script>
 <script src="lib/fwiends/src/workings.js"></script>
+<script src="lib/fwiends/film/props.js"></script>
+<script src="lib/fwiends/props/balloon.js"></script>
+<script src="lib/fwiends/props/cake.js"></script>
+<script src="lib/fwiends/props/candle.js"></script>
+<script src="lib/fwiends/props/gramophone.js"></script>
+<script src="demo/say-hi/beats.js"></script>
 <script>
   // The drawings: phy alone, alive beside the title and drawn by the library wherever a rule needs a picture, so that
   // every picture is the factory's own and changes as phy's spec does. For screenshots, ?px=..&py=.. (CSS pixels)
@@ -614,6 +758,46 @@
   draw($('#subject'));
   for (const sheet of document.querySelectorAll('.sheet')) draw(sheet);
 
+  // A frame of a picture, 360 by 240: the world's own shapes at the back, then the props, then phy, each layer in
+  // the frame's own units, so that phy and a prop share one scale wherever they stand. A prop is the factory's, in
+  // its pencil, with paper cut to its outline under it for a dark sheet; phy stands with their feet on `ground`.
+  const W = 360, H = 240;
+  const layer = (box, svg) => {
+    box.insertAdjacentHTML('beforeend', svg);
+    const element = box.lastElementChild;
+    element.removeAttribute('width');
+    element.removeAttribute('height');
+    element.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    element.setAttribute('aria-hidden', 'true');
+  };
+  function frame(id, { world = '', props = [], phy = null }) {
+    const box = document.getElementById(id);
+    if (world) layer(box, `<svg viewBox="0 0 ${W} ${H}">${world}</svg>`);
+    for (const { name, x, ground: y, scale, state = [] } of props) {
+      const prop = PhyFriends.props.drawing(name, { scale, state });
+      const placed = `<g transform="translate(${x - prop.w / 2} ${y - prop.h})">${prop.svg}</g>`;
+      layer(box, PhyFriends.pencil.svg(placed, { w: W, h: H }).replace('</defs>', `</defs><g class="prop-cut">${placed}</g>`));
+    }
+    if (phy) {
+      const camera = { w: W, h: H, x: phy.x, y: phy.ground - ground * phy.scale, scale: phy.scale, rotate: 0 };
+      layer(box, PhyFriends.render('phy', { view: camera, bg: 'page', pose: phy.pose || {} }));
+    }
+  }
+  const glowOf = (cx, cy, rx, ry, opacity) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fbf9f3" fill-opacity="${opacity}" filter="url(#graphite)"/>`;
+
+  // Never the same twice: one birthday card three ways, the first as the last card was drawn.
+  frame('n-last', { props: [{ name: 'cake', x: 228, ground: 214, scale: 0.62 }], phy: { x: 130, ground: 214, scale: 0.42 } });
+  frame('n-balloon', { props: [{ name: 'balloon', x: 236, ground: 226, scale: 0.92 }], phy: { x: 118, ground: 226, scale: 0.24, pose: { lookX: 0.5, lookY: -0.6, turnX: 0.25 } } });
+  frame('n-candle', { world: glowOf(222, 214, 96, 15, 0.4), props: [{ name: 'candle', x: 236, ground: 214, scale: 1.3, state: ['lit'] }],
+    phy: { x: 128, ground: 216, scale: 0.4, pose: { lookX: 0.6, turnX: 0.2, lid: 0.15 } } });
+
+  // A frame, composed: what the eye meets first, and why; and the first, turned grey.
+  const scaled = { props: [{ name: 'gramophone', x: 238, ground: 228, scale: 0.8 }], phy: { x: 70, ground: 228, scale: 0.26, pose: { lookX: 0.7, lookY: -0.4, turnX: 0.3 } } };
+  frame('c-scale', scaled);
+  frame('c-grey', scaled);
+  frame('c-empty', { props: [{ name: 'balloon', x: 300, ground: 92, scale: 0.2 }], phy: { x: 62, ground: 230, scale: 0.24, pose: { lookX: 0.7, lookY: -0.8, turnX: 0.3, turnY: -0.2 } } });
+  frame('c-crop', { phy: { x: 84, ground: 330, scale: 1.45, pose: { lookX: 0.7, turnX: 0.3, lookY: -0.1 } } });
+
   // Blue pencil: a second phy, alive so that the construction is drawn through its own camera, takes the workings,
   // laid on tracing paper, on request.
   const sitter = stage.add($('#built'), 'phy', { label: 'phy', bg: 'page', interactive: false });
@@ -626,16 +810,7 @@
   dial.value = getComputedStyle(root).getPropertyValue('--informal').trim();
   dial.addEventListener('change', () => root.style.setProperty('--informal', dial.value));
 
-  // A photo stays a photo (the house close-up on its own dark ground); a character is drawn on the page.
-  const img = svg => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  $('#photo').src = img(PhyFriends.render('phy', { view: 'ref', size: 480 }));
-  const placeholder = $('#drawing');
-  placeholder.insertAdjacentHTML('afterend', PhyFriends.render('phy', { view, bg: 'page', pose: { eyes: 'closed', tail: -40 } }));
-  placeholder.nextElementSibling.setAttribute('role', 'img');
-  placeholder.nextElementSibling.setAttribute('aria-label', placeholder.alt);
-  placeholder.remove();
-
-  // §4's thumbnails: the same phy, composed four ways, and lit two ways, with the light drawn as a pale shape.
+  // §4's light: the same phy lit two ways, with the light drawn as a pale shape.
   const thumb = (id, x, y, size, extra = '') => {
     const box = document.getElementById(id);
     box.insertAdjacentHTML('beforeend', extra);
@@ -643,55 +818,88 @@
     Object.assign(svg.style, { left: `${x}%`, bottom: `${y}%`, height: `${size}%` });
     return svg;
   };
-  const moon = '<svg viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true" style="position: absolute; right: -14%; top: -30%; height: 120%; width: auto"><circle cx="50" cy="50" r="46" fill="#fbf9f3" fill-opacity=".55" filter="url(#graphite)"/></svg>';
-  thumb('t-scale', 8, 4, 30, moon);
-  thumb('t-empty', 6, 4, 26);
-  thumb('t-off', 58, 4, 70);
-  thumb('t-grey', 8, 4, 30, moon);
   thumb('t-glow', 18, 4, 72);
   const pool = '<svg viewBox="0 0 200 60" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: 2%; bottom: 0; width: 96%; height: 34%"><path d="M14 40c10-22 70-32 120-28s64 18 58 30-60 18-110 14S6 54 14 40Z" fill="#fbf9f3" fill-opacity=".6" filter="url(#graphite)"/></svg>';
   thumb('t-pool', 18, 4, 72, pool);
 
-  // Cut to the music: four bars of four beats to a phrase, and a cue at the start of each phrase.
-  const beats = [], bars = [], cues = [];
-  for (let beat = 0; beat <= 64; beat++) {
-    const x = 4 + beat * 9.7;
-    (beat % 4 ? beats : bars).push(`M${x.toFixed(1)} ${beat % 4 ? 58 : 50}V68`);
-    if (beat % 16 === 0 && beat < 64) cues.push(`M${x.toFixed(1)} 40V18M${(x - 6).toFixed(1)} 26L${x.toFixed(1)} 18L${(x + 6).toFixed(1)} 26`);
-  }
-  $('#beat-ticks').setAttribute('d', beats.join(''));
-  $('#bar-ticks').setAttribute('d', bars.join(''));
-  $('#cues').setAttribute('d', cues.join(''));
-
-  // The fwiends: phy flat and in pencil; their colours, each with its one shade, read from the spec; standing up by
-  // degrees; the four quarter turns; and a few feelings, each a still of its face.
-  draw($('#flat'), { pencil: false });
-  draw($('#pencilled'));
-  const palette = PhyFriends.palette('phy'), seen = new Set();
-  const stroke = color => `<svg viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" stroke="${color}" stroke-width="4" stroke-linecap="round"/></svg>`;
-  for (const [name, color] of Object.entries(palette)) {
-    if (name === 'bg' || name.endsWith('Shade') || typeof color !== 'string' || !color.startsWith('#') || seen.has(color)) continue;
-    seen.add(color);
-    const shade = palette[`${name}Shade`] || PhyFriends.shadeOf(color);
-    $('#palette').insertAdjacentHTML('beforeend', `<li>${stroke(color)}${stroke(shade)}${name}</li>`);
-  }
-  const riser = PhyFriends.mount($('#riser'), 'phy', { view: tall, bg: 'page' });
-  riser.svg.setAttribute('aria-hidden', 'true');
-  $('#rise-to').addEventListener('input', event => riser.setPose({ stance: 'sit', rise: +event.target.value }));
+  // Motion: the hi that every page gives, frame by frame, then as reduced motion gives it, the smile alone.
+  const A = PhyFriends.anim, E = PhyFriends.emotion;
   const cell = (set, label, rules = 4) => {
     const box = document.createElement('div');
     box.innerHTML = `<div class="pic" style="--rules: ${rules}"></div><span class="what">${label}</span>`;
     $(set).append(box);
     return box.firstElementChild;
   };
+  const hi = E.greeting('phy');
+  for (const [t, label] of [[0, '0 s'], [0.28, '0.3 s, up'], [0.55, '0.55 s, down'], [0.83, '0.8 s, up'], [hi.duration, `${hi.duration} s, still`]]) {
+    draw(cell('#motion', label), { pose: A.sample(hi, t) });
+  }
+  draw(cell('#motion', 'kept still: the smile'), { pose: E.smile('phy') });
+
+  // Cut to the music: the first phrases of say hi's track, measured once (demo/say-hi/beats.js), with the strongest
+  // hits of its music map, for the cues that want to land on them. A narrow column takes the first three phrases, so that the words keep their size.
+  const B = SayHi.beats, barX = bar => 10 + (bar - 1) * 17, beatsSvg = $('#beats');
+  function ruler() {
+    const last = beatsSvg.clientWidth < 520 ? 20 : 36;
+    const phrases = B.SECTIONS.filter(s => s.bars[1] <= last);
+    const hits = B.HITS.map(hit => +hit.split('.')[0]).filter(bar => bar <= last);
+    let marks = '';
+    for (let bar = 1; bar <= last + 1; bar++) {
+      const starts = phrases.some(s => s.bars[0] === bar) || bar === last + 1;
+      marks += `<path d="M${barX(bar)} ${starts ? 82 : 92}V102" stroke="var(${starts ? '--ink-2' : '--ink-3'})" stroke-width="${starts ? 1.4 : 1.1}"/>`;
+    }
+    for (const { name, bars: [from, to] } of phrases) {
+      const x0 = barX(from) + 3, x1 = barX(to + 1) - 3;
+      marks += `<path d="M${x0} 46Q${(x0 + x1) / 2} 26 ${x1} 46" fill="none" stroke="var(--ink-2)" stroke-width="1.3"/>`;
+      marks += `<text class="name" x="${x0}" y="20">${name}</text><text x="${barX(from)}" y="124">${from}</text>`;
+    }
+    for (const bar of hits) {
+      const x = barX(bar);
+      marks += `<path d="M${x} 52V76M${x - 5} 69L${x} 76L${x + 5} 69" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/>`;
+    }
+    beatsSvg.setAttribute('viewBox', `0 0 ${barX(last + 1) + 12} 128`);
+    beatsSvg.innerHTML = `<g stroke-linecap="round">${marks}</g>`;
+    beatsSvg.setAttribute('aria-label', `the first ${last} bars of say hi's track, in phrases (${phrases.map(s => s.name).join(', ')}), and its strongest hits, at bars ${hits.join(', ')}`);
+  }
+  ruler();
+  matchMedia('(max-width: 720px)').addEventListener('change', ruler);
+  $('#beats-note').textContent = `say hi, cut to ${B.TRACK.author}'s track (${B.TRACK.licence.replace(' 1.0', '')}), measured once into phrases and its strongest hits, against which every cue is written, never by ear`;
+
+  // The fwiends: phy's construction, flat and in pencil, and a prop by the same rules; their colours, each with its
+  // one shade, read from the spec; standing up by degrees; the four quarter turns; and a few feelings, each a still
+  // of its face, with what changes.
+  const built = draw($('#construction'));
+  built.classList.add('faded');
+  const drawing = built.querySelector('[id$="-drawing"]');
+  built.insertAdjacentHTML('beforeend', `<g class="pf-construction" transform="${drawing.getAttribute('transform')}">${PhyFriends.workings.construction('phy')}</g>`);
+  draw($('#flat'), { pencil: false });
+  draw($('#pencilled'));
+  const cake = PhyFriends.props.drawing('cake', { state: ['lit'] });
+  layer($('#prop'), PhyFriends.pencil.svg(cake.svg, { w: cake.w, h: cake.h }).replace('</defs>', `</defs><g class="prop-cut">${cake.svg}</g>`));
+  $('#prop').lastElementChild.setAttribute('preserveAspectRatio', 'xMinYMax meet');
+  Object.assign($('#prop').lastElementChild.style, { height: '62%' });
+  const palette = PhyFriends.palette('phy'), seen = new Set();
+  const stroke = color => `<svg viewBox="0 0 40 14" aria-hidden="true"><path d="M3 8.5c9-4.5 23-6 34-3" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/></svg>`;
+  // A colour that is itself a shade (the body, in the fur's) shows only as that shade, since there are no second steps.
+  const entries = Object.entries(palette).filter(([name, color]) => name !== 'bg' && typeof color === 'string' && color.startsWith('#'));
+  const shades = new Set(entries.filter(([name]) => name.endsWith('Shade')).map(([, color]) => color));
+  for (const [name, color] of entries) {
+    if (name.endsWith('Shade') || shades.has(color) || seen.has(color)) continue;
+    seen.add(color);
+    const shade = entries.find(([other, value]) => value === color && palette[`${other}Shade`]);
+    $('#palette').insertAdjacentHTML('beforeend', `<li>${stroke(color)}${shade ? stroke(palette[`${shade[0]}Shade`]) : ''}${name}</li>`);
+  }
+  const riser = PhyFriends.mount($('#riser'), 'phy', { view: tall, bg: 'page' });
+  riser.svg.setAttribute('aria-hidden', 'true');
+  $('#rise-to').addEventListener('input', event => riser.setPose({ stance: 'sit', rise: +event.target.value }));
   for (const [facing, label] of [[0, 'facing you'], [90, 'side-on'], [180, 'away'], [270, 'the other side']]) {
     draw(cell('#turns', label), { view: tall, pose: { facing, stance: 'stand' } });
   }
-  const E = PhyFriends.emotion;
   // A feeling lifts the ears and swings the tail, so its camera leaves room for both.
   const feelings = { w: 340, h: 330, x: 160, y: 180, scale: 1.02, rotate: 0 };
-  for (const feeling of ['happy', 'surprised', 'curious', 'sad', 'cross', 'sleepy']) {
-    draw(cell('#feelings', feeling, 5), { view: feelings, pose: PhyFriends.anim.sample(E.face(feeling)) });
+  for (const [feeling, change] of [['happy', 'eyes in arcs, ears up'], ['surprised', 'eyes wide, head back'], ['curious', 'head tipped, one ear turned'],
+    ['cross', 'lids low at the middle, a frown'], ['sad', 'lids high at the middle, ears down'], ['sleepy', 'lids half shut, ears low']]) {
+    draw(cell('#feelings', `${feeling}: ${change}`, 5), { view: feelings, pose: A.sample(E.face(feeling)) });
   }
 
   // A correction strikes its first line out and then writes the next, once, as it comes into view.
@@ -744,13 +952,12 @@
     }));
   }
 
-  // The small tool: counts the rules a drawing of a given height takes up.
+  // The sample page's tool: counts the rules a drawing of a given height takes up. It starts counted, as a page
+  // shows its tool at work; its other states are drawn beside it.
   const words = ['no', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve'];
   const rules = n => `${n < words.length ? words[n] : n} rule${n === 1 ? '' : 's'}`;
   const height = $('#h'), error = $('#h-err'), spacing = $('#s'), up = $('#up');
   const result = $('#result'), exact = $('#exact'), empty = $('#empty'), saved = $('#saved');
-  $('#loading').hidden = true;
-  result.hidden = exact.hidden = true;
   function valid() {
     const text = height.value.trim(), ok = text === '' || /^\d+(\.\d+)?$/.test(text);
     height.setAttribute('aria-invalid', String(!ok));

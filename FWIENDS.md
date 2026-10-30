@@ -20,6 +20,13 @@ other: section N of `STYLE.md` at `style.html#sN`, and this file at
 `style.html#fwiends`. It is drawn by hand, so a change to a rule it pictures
 redraws the picture; where a drawing and the text disagree, the text wins.
 
+**The owners' say.** People and their characters appear only with their
+owners' say-so, as the owners give them: name, species, colours, pronoun and
+a credit linking to the owner. An owner's wish beats a house rule, `STYLE.md`'s
+included, since the character is theirs. It holds whatever the style, in
+everything with a friend in it, and an ideas agent for such a piece is briefed
+with it.
+
 ---
 
 ## the gallery page
@@ -532,6 +539,9 @@ to break them.
   `lib/fwiends/characters/cast.js`). Until they do, work that shows their
   fwiend carries the word "draft" in a corner, and `pf.py film` refuses to
   film it without `--draft`.
+- **Share-alike music** (`STYLE.md` §4) passes its licence to the film, and
+  the other fwiends are not phy's to license, so a CC BY-SA track goes only
+  where phy alone is on screen.
 - **Getting about.** Seated fwiends hop. Standing ones walk: facing us, the
   foot on the side they go to steps out and the other closes up, and the body
   glides on up to twice as far as the feet, at a little under half a hop's

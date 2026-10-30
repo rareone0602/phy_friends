@@ -5,8 +5,8 @@ posters to READMEs, hobby projects and code. Hand it to anyone, or any agent,
 making something for phy. A paper's text has its own guide; from a paper, this
 one covers only the main diagram (§3).
 
-It is a short programme, not a rulebook. A few things make a work phy's, and
-a few duties hold in everything (§1); the words have rules of their own (§2).
+It is a short programme, not a rulebook. A few things make a work phy's (§1),
+and the words have rules of their own (§2).
 The rest is a kit of good defaults (§3), a way into pieces made to be enjoyed
 (§4) and a way of working (§5). The kit is a tool: work that keeps to it out
 of habit has missed the point, since phy's work should not look the same
@@ -62,16 +62,6 @@ Before calling a piece finished, describe its look in one sentence; if the
 sentence also fits phy's last piece of the same kind (the casebook, §5),
 redraw. A piece made to delight should surprise, and then, on a second look,
 seem the only way it could have gone.
-
-**Duties.** These hold whatever the style, and no idea outranks them:
-- **The owners' say.** People and their characters appear only with their
-  owners' say-so, as the owners give them: name, species, colours, pronoun
-  and a credit linking to the owner. An owner's wish beats a house rule.
-- **Private things** stay private (§5).
-- **Licences:** the face's (§3), whose music a film may use (§4), and those
-  of any picture, data or code a work takes in.
-- **Light and dark** follow the reader's system: a page never offers a
-  switch, and a print is always on paper.
 
 **The kit is a tool.** Everything else, from the ruled paper and the dial to
 the marks, the layout, the inks, light and motion (§3, §4), is good defaults,
@@ -139,7 +129,9 @@ words to red for errors.
   the ink swap: the sheet is graphite, and the words are in the paper's
   colour, like white pencil on black paper. Nothing is inverted: a character
   keeps its own paper, and a scan its own white. On a dark host the page
-  doesn't control, a slide say, lay a sheet of paper on it.
+  doesn't control, a slide say, lay a sheet of paper on it. The reader's
+  system decides: a page never offers a switch, and a print is always on
+  paper.
 - **Other sheets** (`lib/style/site/papers.css`): graph paper, a score, a
   toned sketchbook, kraft, an index card, a cyanotype, and tracing paper laid
   over another, each with inks that keep the paper's contrasts. A light sheet
@@ -199,8 +191,8 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 ## 4. pieces
 
 A piece made to delight (a picture, a film, a game) is looked at before it is
-read, and starts free (§1). What follows are ways in, not requirements;
-whatever the piece, the duties hold.
+read, and starts free (§1). What follows are ways in, not requirements,
+except where it says a thing is fixed.
 
 **The picture.** A frame is composed, not filled. Some ways that have worked:
 - one thing to look at first, and everything else quieter than it;
@@ -234,14 +226,14 @@ chosen before the story, measured once into data beside the film (its bars
 and beats, or, where the tempo is free, its moments), and every cue written
 against that data, never by ear. Motion lands on phrases, not on every beat.
 Two things are fixed:
-- **Whose music.** Never music that the agent making the film composes or
-  generates; music someone else made with AI only where it is good. The
-  licence must let a hobby film set it to pictures: public domain in the US,
-  where the site is served (the recording as well as the score), CC0, CC BY
-  or CC BY-NC. CC BY-SA only where phy alone is on screen, since the other
-  characters are not phy's to license; never ND. Credit the composer even
-  where nothing requires it. A commercial song goes only through a
-  platform's own library, never on a page.
+- **Whose music.** Anything a non-commercial film may legally use. Never
+  music that the agent making the film composes or generates; music someone
+  else made with AI only where it is good. Legal is narrower than it looks:
+  setting music to pictures adapts it, so an ND licence rules it out and an
+  SA one passes to the film; public domain must hold where the film is
+  published, for the recording as well as the score; and a commercial song
+  goes only through a platform's own library, never on a page. Credit the
+  composer even where nothing requires it.
 - **Credits once, large.** A link in a picture cannot be clicked, so a video
   names the people and characters in it once, written large, and the post
   that carries it links them.
@@ -271,12 +263,12 @@ Two things are fixed:
   and why.
 - **Three ideas first.** For a piece, think first of what the viewer will
   enjoy, and sketch three ideas before choosing, one of which leaves the house
-  look entirely; an ideas agent is briefed with the duties (§1) alone, never
-  this whole guide. The first idea to come is presumed the boring one (§1),
+  look entirely; an ideas agent is briefed with the piece and its limits
+  alone, never with this guide. The first idea to come is presumed the boring one (§1),
   judged against phy's recent pieces as well as everyone else's, and stays
   only if it beats the other two. Then draw the best: the kit gives way to the
   idea. Where §1 or §2 blocks a good idea, propose changing the rule rather
-  than dropping the idea; the duties never change.
+  than dropping the idea.
 - **Private stays private.** Personal references (photos of a real pet, say)
   live in a git-ignored folder and never reach a public page. Quote phy's own
   words only where a piece needs them.

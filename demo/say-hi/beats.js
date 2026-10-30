@@ -10,7 +10,8 @@
  *   at(25, 2.5)    the "and" of beat 2
  *   at('25.2.5')   the same, as a string
  *
- * Loads as a classic script before demo/say-hi/core.js (SayHi.beats).
+ * Loads as a classic script before demo/say-hi/core.js (SayHi.beats). style.html loads it as well, to draw the
+ * track's phrases and hits.
  */
 (function (root) {
   'use strict';

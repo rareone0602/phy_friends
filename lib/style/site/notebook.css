@@ -141,7 +141,7 @@ footer a:hover { color: var(--ink); }
   /* The graphite was laid on in strokes rising to the right, and the paper's tooth shows through it in light specks. */
   :root:has(meta[name="color-scheme"][content~="dark"]) body::before { mix-blend-mode: screen; opacity: .22;
     background-image: var(--speckle); }
-  :root:has(meta[name="color-scheme"][content~="dark"]) body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9; mix-blend-mode: screen; opacity: .07;
+  :root:has(meta[name="color-scheme"][content~="dark"]) body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9; mix-blend-mode: screen; opacity: .035;
     background: var(--streaks) 0 0 / 1600px 1600px; }
 }
 /* Forced colors are the system's, neither the paper nor the dark sheet, so neither texture (the dark sheet's is kept
