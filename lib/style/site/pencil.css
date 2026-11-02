@@ -19,6 +19,7 @@
      .error .result .loading .empty    Tool feedback.
      .mark.arrow|ring|squiggle|tick|cross|caret    A mark inside running text.
      .titleline, .portrait              A character beside the title; role="button" makes it one to say hi to.
+     .titleline.signed, .signature      phy's signature: beside a page's title, and anywhere else (--s, .words, .sitter).
      .announcer           A live region (role="status") that says what happened, for screen readers only. */
 
 /* The marks, defined once. A data URI cannot read var(), so each one hard-codes its ink
@@ -198,6 +199,29 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 .portrait[role="button"]:focus-visible::before { content: ''; position: absolute; inset: -5.5px -4px; pointer-events: none;
   border: 1.5px dashed var(--ink-2); border-radius: 3px; }
 
+/* phy's signature (STYLE.md §1): the words in the hand, and phy seated beside them in a box twice their size, on one
+   pencilled line that runs under both, at the words' baseline. Beside a page's title it is a portrait of phy in a
+   signed titleline, whose line runs under the title too; the portrait then never hides. Anywhere else (a slide, a
+   card, a poster) it is <span class="signature"><span class="words">...</span><span class="sitter"></span></span>,
+   whose --s is the words' size. The sitter holds phy, feet on its bottom edge, which is the words' baseline: drawn by
+   the library, or signature.svg where there is none. */
+.titleline.signed { position: relative; width: fit-content; }
+.titleline.signed .portrait::after { content: none; }
+.signature { --hand: 50; --s: 40px; position: relative; display: inline-flex; align-items: baseline; gap: calc(var(--s) * .44);
+  font: 300 var(--s)/1 var(--face); white-space: nowrap; }
+.signature .words { filter: url(#graphite); }
+.signature .sitter { position: relative; flex: none; width: calc(var(--s) * 2); height: calc(var(--s) * 2); }
+.signature .sitter svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* signature.svg is drawn a quarter of the box wider on each side and above it, since a picture cannot reach out of its
+   frame, and the ears and the tail do. */
+:is(.portrait, .signature .sitter) > img { position: absolute; left: -25%; top: -25%; width: 150%; height: 125%; }
+/* The line: from just before the words to a little past the box. The sitter rises highest, so the baseline lies
+   twice the words' size below the signature's top. */
+:is(.titleline.signed, .signature)::after { content: ''; position: absolute; height: 8px; pointer-events: none;
+  background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
+.titleline.signed::after { left: -6px; right: calc(var(--L) * -.48); top: calc(100% - 5px); }
+.signature::after { left: calc(var(--s) * -.06); right: calc(var(--s) * -.24); top: calc(var(--s) * 2 - 4px); }
+
 /* A live region that says what happened (a hi, say) is for screen readers only, so it is hidden from view. */
 .announcer { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
@@ -217,15 +241,18 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
   .doc th, .doc figcaption, .note, .empty, .doc ol > li::before { font-size: 18px; }
   .titleline { gap: 16px; }
   .portrait { --size: calc(var(--L) * 3); }
+  .titleline.signed::after { right: calc(var(--L) * -.36); }
 }
 /* The smallest phones: the title needs the full width, so the portrait is hidden, and a
    table header may wrap onto a second rule. */
-@media (max-width: 359px) { .portrait { display: none; } .doc th { white-space: normal; } }
+@media (max-width: 359px) { .titleline:not(.signed) .portrait { display: none; } .doc th { white-space: normal; } }
 
-/* Print: plain paper. The rules, margin line, texture, navigation and portrait are removed; the ink remains. */
+/* Print: plain paper. The rules, margin line, texture, navigation and portrait (and with it a signed title's line)
+   are removed; the ink remains. */
 @media print {
   html, body { background: none; }
   body::before, header nav, .portrait { display: none; }
+  .titleline.signed::after { content: none; }
   main, body > header { padding: 0; max-width: none; }
   body > footer { margin-inline: -4px; max-width: none; }
 }

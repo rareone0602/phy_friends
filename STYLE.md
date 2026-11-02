@@ -39,9 +39,9 @@ they are drawn and staged.
 
 **The signature** is the one thing that stays the same in everything phy
 makes: phy's avatar, an Eevee in the colours of phy's tuxedo cat, seated
-beside the words (a title or the name, in lower case and in the hand) on one
-short pencilled line at their baseline, in a box twice the words' size (the
-portrait in the kit's README). Where there is no room, the head alone stands for it,
+beside the words (a title or the name, in lower case and in the hand) in a box
+twice the words' size, with one short pencilled line under both at the words'
+baseline (the signature in the kit's README). Where there is no room, the head alone stands for it,
 drawn for its size rather than shrunk: at 16 pixels it keeps the ears, the
 white face and the green eyes, and leaves the rest out. Its colour is the
 green of phy's eyes; where a work takes one colour of its own, it is that

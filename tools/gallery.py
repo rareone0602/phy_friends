@@ -388,14 +388,15 @@ def page_drift(cast, measures):
     return problems
 
 
-# How the gallery's head script and lib/fwiends/src/live.js name the key under which "keep still" is remembered: the head script
-# reads it before live.js loads.
+# How the head scripts of the pages with an opening (the gallery's and phy's page's) and lib/fwiends/src/live.js name the key
+# under which "keep still" is remembered: a head script reads it before live.js loads.
 STILL_KEY = re.compile(r"const STILL_KEY = '([^']+)'")
+OPENINGS = (GALLERY, ROOT / 'phy.html')
 
 
-def still_key_drift(gallery=GALLERY, live=SRC / 'live.js'):
-    """A line if the gallery's head script and lib/fwiends/src/live.js name different keys for "keep still", or either names none."""
-    keys = {path: STILL_KEY.search(path.read_text(encoding='utf-8')) for path in (gallery, live)}
+def still_key_drift(pages=OPENINGS, live=SRC / 'live.js'):
+    """A line if the pages' head scripts and lib/fwiends/src/live.js name different keys for "keep still", or any names none."""
+    keys = {path: STILL_KEY.search(path.read_text(encoding='utf-8')) for path in (*pages, live)}
     if all(keys.values()) and len({key[1] for key in keys.values()}) == 1:
         return []
     found = '; '.join(f'{path.relative_to(ROOT)} has {key[1] if key else "none"}' for path, key in keys.items())
@@ -452,6 +453,8 @@ class GalleryLabels(html.parser.HTMLParser):
                 friend['aria-label'] = attrs.get('aria-label') or ''
             if 'credit' in classes:
                 part = 'credit line'  # Its text outside the link, such as phy's "that's me", is not the credit.
+            elif 'me' in classes:
+                part = 'me'  # phy's "that's me", which links to phy's page rather than to an owner.
             elif tag == 'a' and part == 'credit line':
                 friend['credit link'], part = attrs.get('href') or '', 'credit'
             else:

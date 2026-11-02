@@ -14,6 +14,9 @@ Outputs:
   preview.png           1200x630 link preview image: the title, large enough to lead at a feed's 300 px, over
                              every friend at one size, standing in the gallery's order in rows on the gallery's
                              paper (see LAYOUT).
+  lib/style/site/signature.svg         phy seated, as the kit's signature holds it (STYLE.md §1), in pencil, for a page
+                             or a slide without the library, and for phy.html before its script runs.
+  phy-preview.png       1200x630 link preview of phy's page: the signature alone, large, on the paper (see SIGNED).
 """
 import json
 import tempfile
@@ -45,7 +48,7 @@ PREVIEW = (1200, 630)        # The link preview's size.
 # in px and the rule it stands on; the paper's rules begin at the rule after `band`; `top` is how far down the frame
 # the paper's first rule is moved, in px, to balance the blank paper above and below; and `margin` is the red line's
 # distance from the left edge, in px.
-LAYOUT = {'rule': 24, 'rows': (7, 7, 7), 'first': 13, 'band': 2, 'top': 4, 'margin': 24, 'title': {'size': 132, 'rule': 4}}
+LAYOUT = {'rule': 24, 'rows': (7, 7, 7), 'first': 13, 'band': 2, 'top': 4, 'margin': 24, 'title': {'size': 120, 'rule': 5}}
 EARS = 1                     # Rules kept above each row's box for the tallest ears.
 SIDE = 16                    # Space between the margin line and the first slot, and between the last slot and the edge, in px.
 POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so that they look out at the viewer.
@@ -53,6 +56,14 @@ POINTER = (PREVIEW[0] // 2, 900)  # The simulated pointer, below the middle, so 
 # palette is trained on the colors with their populations flattened (count ** FLATTEN), so that the small bright
 # things (eyes, a bandana, a cheek) keep their colors beside the great areas of paper and fur.
 PALETTE = {'colors': 224, 'flatten': 0.2, 'refinements': 3}
+# phy's page's preview: the signature alone (the kit's .signature) on the same paper, "phy" at `size` px beside phy in a
+# box twice that, the line under both on the rule `ground` px down the frame, and the words `left` px in.
+SIGNED = {'size': 200, 'ground': 470, 'left': 150}
+FRAME = 0.25  # How far signature.svg's frame reaches beyond phy's box, as a share of the box.
+# The cut paper under phy on the dark sheet (CUTOUT_STYLE in lib/fwiends/src/phyfriends.js), for signature.svg, which no
+# page's rules reach: shown wherever the system asks for dark, since on paper it lies on paper and is not seen.
+CUTOUT = ('<style>.pf-cutout { display: none; stroke: var(--pf-cut); stroke-width: 5; stroke-linejoin: round; }'
+          ' @media (prefers-color-scheme: dark) { .pf-cutout { display: inline; } }</style>')
 
 
 def gallery_slots():
@@ -130,6 +141,43 @@ def composition(layout=LAYOUT):
 """
 
 
+def signed(layout=SIGNED):
+    """phy's page's link preview as a page: the paper, and on it the signature alone, phy looking out at the viewer."""
+    width, height = PREVIEW
+    scripts = '\n'.join(f'<script src="{path.as_uri()}"></script>' for path in pf.scripts())
+    return f"""<!doctype html>
+<html lang="en-GB"><head><meta charset="utf-8">
+<link rel="stylesheet" href="{(KIT / 'notebook.css').as_uri()}">
+<link rel="stylesheet" href="{(KIT / 'pencil.css').as_uri()}">
+<style>
+  :root {{ --L: {LAYOUT['rule']}px; --margin-x: {LAYOUT['margin']}px; --band: 0; }}
+  html, body {{ width: {width}px; height: {height}px; margin: 0; overflow: hidden; }}
+  body {{ background-position: var(--margin-x) 0, 0 {layout['ground'] % LAYOUT['rule']}px, 0 0; }}
+  .signature {{ --s: {layout['size']}px; position: absolute; left: {layout['left']}px; top: {layout['ground'] - 2 * layout['size']}px; }}
+</style>
+{scripts}
+</head><body>
+<script src="{(KIT / 'graphite.js').as_uri()}"></script>
+<span class="signature"><span class="words">phy</span><span class="sitter"></span></span>
+<script>
+  const stage = PhyFriends.live.stage({{ root: document.body, pointer: {{ x: {width // 2}, y: {height + 300} }} }});
+  stage.add(document.querySelector('.sitter'), 'phy', {{ bg: 'page', interactive: false }});
+  stage.start();
+</script>
+</body></html>
+"""
+
+
+def signature():
+    """phy seated as the kit's signature holds it, drawn as a live stage draws it (PhyFriends.standingView), as an SVG.
+    The frame reaches a quarter of the box (FRAME) beyond it on each side and above it, for the ears and the tail, which
+    a picture would otherwise cut off; the kit places it so (lib/style/site/pencil.css)."""
+    view = (f"(() => {{ const v = PhyFriends.standingView('phy'), m = v.w * {FRAME}; "
+            "return { ...v, w: v.w + 2 * m, h: v.h + m, x: v.x + m, y: v.y + m }; })()")
+    svg = pf.evaluate(f"PhyFriends.render('phy', {{ view: {view}, bg: 'page', uid: 's' }})")
+    return svg.replace('>', '>' + CUTOUT, 1)
+
+
 def quantize(image, colors=PALETTE['colors'], flatten=PALETTE['flatten'], refinements=PALETTE['refinements']):
     """The image in at most `colors` colors, without dithering (which would smooth the paper's grain away), from a
     palette trained on its colors, each repeated by the `flatten` power of its count."""
@@ -141,11 +189,11 @@ def quantize(image, colors=PALETTE['colors'], flatten=PALETTE['flatten'], refine
     return image.quantize(palette=palette, dither=Image.Dither.NONE)
 
 
-def photograph(layout, out):
-    """Photograph the composition of `layout` at the preview's size and save it into out as a palette PNG."""
+def photograph(html, out):
+    """Photograph the page `html` at the preview's size and save it into out as a palette PNG."""
     with pf.session() as shared, tempfile.TemporaryDirectory(prefix='pf-preview-') as work:
         page, shot = Path(work) / 'preview.html', Path(work) / 'shot.png'
-        page.write_text(composition(layout), encoding='utf-8')
+        page.write_text(html, encoding='utf-8')
         shoot.shoot(page, shot, *PREVIEW, chrome=shared.chrome)
         quantize(Image.open(shot)).save(out, optimize=True)
 
@@ -177,8 +225,12 @@ def main():
         print(KIT / 'icon.svg')
         still({key: value / 2 for key, value in ICON.items()}, KIT / 'icon-32.png', small=True)
         still(TOUCH, KIT / 'apple-touch-icon.png', bg='#fbf9f3')
-        photograph(LAYOUT, ROOT / 'preview.png')
+        (KIT / 'signature.svg').write_text(signature())
+        print(KIT / 'signature.svg')
+        photograph(composition(LAYOUT), ROOT / 'preview.png')
         print(ROOT / 'preview.png')
+        photograph(signed(), ROOT / 'phy-preview.png')
+        print(ROOT / 'phy-preview.png')
 
 
 if __name__ == '__main__':

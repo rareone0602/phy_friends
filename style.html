@@ -80,23 +80,17 @@
      tool lays on, crossed out over the pencil's way of doing the same job. */
   .set .pic.favicons { display: flex; align-items: flex-end; gap: 14px; }
   .set .pic.favicons > img { position: static; height: auto; }
-  /* The signature: the words in the hand, and phy seated beside them in a box twice their size, on a pencilled
-     line at their baseline (the kit's portrait). --s is the words' size. */
-  .signature { --hand: 50; --s: 40px; display: inline-flex; align-items: baseline; gap: calc(var(--s) * .44);
-    font: 300 var(--s)/1 var(--face); white-space: nowrap; }
-  .signature .sitter { position: relative; flex: none; width: calc(var(--s) * 2); height: calc(var(--s) * 2); }
-  .signature .sitter svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .signature .sitter::after { content: ''; position: absolute; left: -12%; width: 124%; top: calc(100% - 4px); height: 8px;
-    background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
+  /* The signature is the kit's (.signature); here it stands at the foot of its picture, and in each study where the
+     study puts it. */
   .set .pic > .signature { position: absolute; left: 0; bottom: 0; }
   .doc .meta + h3 { margin-top: var(--L); }  /* The handle's line, unlike a date line, is not part of what follows. */
   .set .pic.hue svg { position: static; width: 64px; height: 22px; }
-  .doc .signed { display: flex; flex-wrap: wrap; gap: var(--L) 1.2em; margin-top: var(--L); }
-  .signed > div { width: min-content; }
-  .signed .pic { position: relative; height: calc(var(--L) * 5); aspect-ratio: var(--ratio); top: calc(-1 * var(--lift));
+  .doc .studies { display: flex; flex-wrap: wrap; gap: var(--L) 1.2em; margin-top: var(--L); }
+  .studies > div { width: min-content; }
+  .studies .pic { position: relative; height: calc(var(--L) * 5); aspect-ratio: var(--ratio); top: calc(-1 * var(--lift));
     overflow: hidden; container-type: size; }
-  .signed .signature { position: absolute; }
-  .signed .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
+  .studies .signature { position: absolute; }
+  .studies .what { display: block; font-size: 15px; line-height: var(--L); color: var(--ink-2); }
   .doc ul.hands { list-style: none; padding: 0; }
   .hands li { font-size: 37px; line-height: calc(var(--L) * 2); height: calc(var(--L) * 2); white-space: nowrap; overflow: hidden;
     position: relative; top: calc(var(--sit) + var(--L) / 2 - var(--lift)); }
@@ -283,7 +277,7 @@
 <svg width="0" height="0" style="position: absolute" aria-hidden="true"><filter id="lightness" color-interpolation-filters="linearRGB"><feColorMatrix type="matrix" values=".2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  .2126 .7152 .0722 0 0  0 0 0 1 0"/></filter></svg>
 
 <header>
-  <div class="titleline">
+  <div class="titleline signed">
     <h1>style guide</h1>
     <div class="portrait" role="button" tabindex="0" aria-label="say hi to phy" aria-describedby="looks-phy"></div>
     <p id="looks-phy" hidden>a tuxedo eevee</p>
@@ -292,6 +286,7 @@
   <p class="intro">how phy makes things, drawn rather than told.</p>
   <nav aria-label="pages">
     <ul>
+      <li><a href="phy.html">phy</a></li>
       <li><a href="index.html">fwiends</a></li>
       <li><span aria-current="page">style guide</span></li>
     </ul>
@@ -315,7 +310,7 @@
       <div><div class="pic hue" id="phy-green" style="--rules: 1"></div><span class="what">its colour: the green of phy's eyes</span></div>
     </div>
     <h3>signed: three studies</h3>
-    <div class="signed">
+    <div class="studies">
       <div><div class="pic" data-paper="notebook" style="--ratio: 16 / 9"><span class="signature" style="--s: 12cqh; left: 9%; top: 12%"><span class="words">how phy makes things</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a slide: beside its title</span></div>
       <div><div class="pic" data-paper="kraft" style="--ratio: 3 / 4"><span class="signature" style="--s: 8.5cqh; left: 9%; bottom: 7%"><span class="words">style guide</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a poster: small, in a corner</span></div>
       <div><div class="pic" data-paper="graphite" data-ruling="plain" style="--ratio: 16 / 9"><span class="signature" style="--s: 15cqh; left: 50%; top: 52%; transform: translate(-50%, -50%)"><span class="words">say hi</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a film's title card: on the dark</span></div>

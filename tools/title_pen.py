@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Derive the pen strokes that write the gallery's title, and write lib/fwiends/src/title-pen.js.
+"""Derive the pen strokes that write the titles that write themselves, and write them into lib/fwiends/src/.
 
   python3 tools/title_pen.py            # Requires numpy, scipy, Pillow and Google Chrome.
-  python3 tools/title_pen.py --check    # Also writes out/design/title-pen.png, the strokes over the title.
+  python3 tools/title_pen.py --check    # Also writes out/design/<pen>.png, the strokes over each title.
 
-Headless Chrome sets the title exactly as the gallery does (Shantell Sans from lib/style/site/fonts/, weight 300, INFM 100
-and BNCE 50), large and upright, and the ink is thinned to its centerlines. Each letter's strokes are
-given below as a few waypoints, in the order and direction a hand writes them; a stroke follows the
-centerline from one waypoint to the next. The gallery reveals its title along these strokes
-(lib/fwiends/src/pen.js; FWIENDS.md, "the opening"), as does the roll-call film. Run this again whenever the title, the face or its axes change: it
-fails if the strokes leave any of the ink unwritten.
+The titles (TITLES): the gallery's, "phy's fwiends" (lib/fwiends/src/title-pen.js), and phy's page's, "phy"
+(lib/fwiends/src/signature-pen.js). Headless Chrome sets each exactly as its page does (Shantell Sans from
+lib/style/site/fonts/, weight 300, on its page's dial), large and upright, and the ink is thinned to its centerlines. Each
+letter's strokes are given below as a few waypoints, in the order and direction a hand writes them; a stroke follows the
+centerline from one waypoint to the next. The pages reveal their titles along these strokes (lib/fwiends/src/pen.js;
+FWIENDS.md, "the opening"), as does the roll-call film. Run this again whenever a title, the face or its axes change:
+it fails if the strokes leave any of the ink unwritten.
 """
 import argparse
 import io
@@ -28,7 +29,20 @@ from layout import KIT, SRC
 
 ROOT = Path(__file__).resolve().parent.parent
 
-TITLE = "phy's fwiends"
+# Each title that writes itself: its text, the dial its page sets (--informal, which sets a hand-lettered title's axes),
+# the file its strokes go to and the name they take there, and the strokes of any letter that the dial sets differently
+# from STROKES, which are taken on the gallery's.
+TITLES = (
+    {'text': "phy's fwiends", 'informal': 100, 'page': 'index.html', 'what': "the gallery's title", 'name': 'TITLE_PEN',
+     'out': SRC / 'title-pen.js'},
+    {'text': 'phy', 'informal': 50, 'page': 'phy.html', 'what': "phy's page's title", 'name': 'SIGNATURE_PEN',
+     'out': SRC / 'signature-pen.js', 'strokes': {
+         # Without the bounce the p and the y reach further down, and the y's arms further up.
+         'p': [[(0.10, -0.45), (0.145, -0.12), (0.10, 0.24)],
+               [(0.10, -0.46), (0.30, -0.49), (0.46, -0.25), (0.145, -0.12)]],
+         'y': [[(0.11, -0.47), (0.2175, -0.025), (0.4125, -0.175), (0.41, -0.47), (0.405, 0.15), (0.12, 0.18)]],
+     }},
+)
 SIZE = 400                    # The font size, in px, at which the title is set and measured.
 VIEWPORT = (3600, 700)
 EM = 1000                     # Output lengths are in thousandths of an em.
@@ -36,8 +50,7 @@ MARGIN = 0.012                # Added to each side of a stroke's width beyond th
 SIMPLIFY = 0.004              # How far a simplified stroke may stray from the centerline, in em.
 REACH = 0.15                  # How far past its own box, in em, a letter's strokes may look for its centerline.
 UNWRITTEN_LIMIT = 0.001       # The share of the ink the strokes may leave uncovered.
-OUT = SRC / 'title-pen.js'
-CHECK = ROOT / 'out' / 'design' / 'title-pen.png'
+CHECKS = ROOT / 'out' / 'design'  # Where --check draws each pen's strokes, as <pen>.png.
 
 # Each letter's strokes, in writing order. A waypoint is (x, y) in em from the letter's origin on the
 # baseline, y downward; a stroke runs along the centerline through its waypoints in turn.
@@ -66,14 +79,14 @@ STROKES = {
 # The second s bounces differently from the first, so it has waypoints of its own.
 SECOND_S = [[(0.3475, -0.5925), (0.0975, -0.45), (0.385, -0.1875), (0.0725, -0.10)]]
 
-PAGE = f'''<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
-<link rel="stylesheet" href="{(KIT / 'notebook.css').as_uri()}">
+PAGE = '''<!doctype html><html lang="en-GB"><head><meta charset="utf-8">
+<link rel="stylesheet" href="{stylesheet}">
 <style>
-  :root {{ --informal: 100; }}  /* As index.html sets it. */
+  :root {{ --informal: {informal}; }}  /* As {page} sets it. */
   html, body {{ margin: 0; padding: 0; background: #fff !important; }}
-  h1 {{ font-size: {SIZE}px; line-height: {SIZE * 3 // 2}px; height: auto; top: 0; padding: 0 {SIZE // 4}px;
+  h1 {{ font-size: {size}px; line-height: {line}px; height: auto; top: 0; padding: 0 {pad}px;
        color: #000; filter: none; transform: none; white-space: nowrap; }}
-</style></head><body><h1>{TITLE}</h1></body></html>'''
+</style></head><body><h1>{text}</h1></body></html>'''
 
 TWO_FRAMES_JS = 'new Promise(done => requestAnimationFrame(() => requestAnimationFrame(() => done(true))))'
 
@@ -96,34 +109,41 @@ MEASURE_JS = '''(() => {
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    parser.add_argument('--check', action='store_true', help='draw the strokes over the title in out/design/')
+    parser.add_argument('--check', action='store_true', help='draw the strokes over each title in out/design/')
     args = parser.parse_args()
-    ink, layout = set_title()
+    for title in TITLES:
+        pen(title, args.check)
+
+
+def pen(title, check):
+    """Derive the strokes that write one title (an entry of TITLES), and write them to its file."""
+    ink, layout = set_title(title)
     origin = (layout['letters'][0]['left'], layout['baseline'])  # The start of the text on its baseline, in px.
     centerline = np.argwhere(thin(ink))  # (row, column) of every centerline pixel.
     graph, half_width = pixel_graph(centerline), ndimage.distance_transform_edt(ink)
     strokes = [trace(centerline, graph, half_width, origin, layout['letters'][index], index, waypoints)
-               for index, waypoints in writing_order(layout)]
+               for index, waypoints in writing_order(layout, {**STROKES, **title.get('strokes', {})})]
     unwritten = unwritten_share(ink, strokes, origin)
-    if args.check:
-        draw_check(ink, strokes, origin)
+    if check:
+        draw_check(ink, strokes, origin, CHECKS / title['out'].with_suffix('.png').name)
     if unwritten > UNWRITTEN_LIMIT:
-        sys.exit(f'title_pen: the strokes leave {unwritten:.2%} of the ink unwritten; adjust STROKES')
+        sys.exit(f'title_pen: the strokes leave {unwritten:.2%} of "{title["text"]}" unwritten; adjust STROKES')
     letters = layout['letters']
-    write_module(strokes, layout['axes'], (letters[-1]['right'] - letters[0]['left']) / SIZE)
-    print(f'{OUT.relative_to(ROOT)}: {len(strokes)} strokes, {unwritten:.3%} of the ink unwritten')
+    write_module(title, strokes, layout['axes'], (letters[-1]['right'] - letters[0]['left']) / SIZE)
+    print(f'{title["out"].relative_to(ROOT)}: {len(strokes)} strokes, {unwritten:.3%} of the ink unwritten')
 
 
-def set_title():
-    """Set the title in headless Chrome; return its ink (a boolean image) and where its letters are."""
-    page = ROOT / 'out' / 'design' / 'title-pen.html'
+def set_title(title):
+    """Set a title in headless Chrome; return its ink (a boolean image) and where its letters are."""
+    page = CHECKS / 'title-pen.html'
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(PAGE)
+    page.write_text(PAGE.format(stylesheet=(KIT / 'notebook.css').as_uri(), informal=title['informal'], page=title['page'],
+                                size=SIZE, line=SIZE * 3 // 2, pad=SIZE // 4, text=title['text']))
     face = f'300 {SIZE}px "Shantell Sans"'
     with HeadlessChrome(*VIEWPORT) as chrome:
         chrome.open(str(page))
         loaded = chrome.evaluate(f"document.fonts.load({json.dumps(face)}).then(() => document.fonts.ready)"
-                                 f".then(() => document.fonts.check({json.dumps(face)}, {json.dumps(TITLE)}))")
+                                 f".then(() => document.fonts.check({json.dumps(face)}, {json.dumps(title['text'])}))")
         if not loaded:
             sys.exit('title_pen: Shantell Sans did not load from lib/style/site/fonts/, so the title would be set in another face')
         chrome.evaluate(TWO_FRAMES_JS)  # Lets the page paint with the face in place.
@@ -158,17 +178,18 @@ def thin(ink):
     return image.astype(bool)
 
 
-def writing_order(layout):
-    """Yield (letter index, waypoints in px) for every stroke, in the order the title is written."""
+def writing_order(layout, strokes_of):
+    """Yield (letter index, waypoints in px) for every stroke, in the order the title is written, from each letter's
+    strokes (strokes_of)."""
     seen_s = False
     for index, letter in enumerate(layout['letters']):
         char = letter['char']
         if char == ' ':
             continue
         if char == 's':
-            strokes, seen_s = (SECOND_S if seen_s else STROKES['s']), True
-        elif char in STROKES:
-            strokes = STROKES[char]
+            strokes, seen_s = (SECOND_S if seen_s else strokes_of['s']), True
+        elif char in strokes_of:
+            strokes = strokes_of[char]
         else:
             sys.exit(f'title_pen: no strokes for {char!r}; add its waypoints to STROKES')
         for waypoints in strokes:
@@ -248,7 +269,7 @@ def to_pixels(point, origin):
     return (origin[0] + point[0] * SIZE, origin[1] + point[1] * SIZE)
 
 
-def draw_check(ink, strokes, origin):
+def draw_check(ink, strokes, origin, out):
     """Draw each stroke over the ink, numbered in writing order, with a dot where it starts."""
     image = Image.fromarray(np.where(ink, 205, 255).astype(np.uint8)).convert('RGB')
     draw = ImageDraw.Draw(image)
@@ -258,30 +279,30 @@ def draw_check(ink, strokes, origin):
         x, y = xy[0]
         draw.ellipse([x - 7, y - 7, x + 7, y + 7], fill=(40, 90, 200))
         draw.text((x + 9, y - 22), str(number), fill=(40, 90, 200))
-    CHECK.parent.mkdir(parents=True, exist_ok=True)
-    image.save(CHECK)
-    print(CHECK.relative_to(ROOT))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    image.save(out)
+    print(out.relative_to(ROOT))
 
 
-def write_module(strokes, axes, width):
+def write_module(title, strokes, axes, width):
     lines = []
     for stroke in strokes:
         points = [(round(x * EM), round(y * EM)) for x, y in stroke['points']]
         path = 'M' + 'L'.join(f'{x} {y}' for x, y in points)
         length = sum(np.hypot(x1 - x0, y1 - y0) for (x0, y0), (x1, y1) in zip(points, points[1:]))
         lines.append(f"    {{ letter: {stroke['letter']}, width: {round(stroke['width'] * EM)}, length: {round(length)}, d: '{path}' }},")
-    OUT.write_text(f'''/*
- * The pen strokes that write the gallery's title, made by tools/title_pen.py; do not edit by hand.
+    title['out'].write_text(f'''/*
+ * The pen strokes that write {title['what']}, made by tools/title_pen.py; do not edit by hand.
  *
- * Each stroke follows the centerline of a letter of "{TITLE}" in the order and direction a hand
- * writes it, as Shantell Sans sets the title in the gallery ({axes}, weight 300).
+ * Each stroke follows the centerline of a letter of "{title['text']}" in the order and direction a hand
+ * writes it, as Shantell Sans sets the title on {title['page']} ({axes}, weight 300).
  * Lengths are in thousandths of an em, from the start of the text on its baseline, y downward.
  * width is the text's width in em, by which lib/fwiends/src/pen.js checks that the face still matches. For each
  * stroke, letter indexes the character in the text, width is how wide a pen reveals the whole
  * letter, and length is how long the stroke is.
  */
-self.TITLE_PEN = Object.freeze({{
-  text: {json.dumps(TITLE)},
+self.{title['name']} = Object.freeze({{
+  text: {json.dumps(title['text'])},
   width: {width:.4f},
   strokes: [
 {chr(10).join(lines)}

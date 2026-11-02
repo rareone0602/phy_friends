@@ -97,7 +97,7 @@ def examples(name):
 
 def scripts():
     """Return the scripts a page loads: library files, then character definitions, then --with scripts."""
-    libs = [SRC / 'phyfriends.js'] + sorted(p for p in SRC.glob('*.js') if p.name not in ('phyfriends.js', 'title-pen.js'))
+    libs = [SRC / 'phyfriends.js'] + sorted(p for p in SRC.glob('*.js') if p.name not in ('phyfriends.js', 'title-pen.js', 'signature-pen.js'))
     return libs + [CHARACTERS / n / f'{n}.js' for n in characters()] + [Path(x).resolve() for x in EXTRA]
 
 
@@ -838,7 +838,7 @@ TEST_TIMEOUT = 120  # Seconds for the whole run; the harness stops a test that w
 TEST_RESULTS_JS = 'window.testsDone ? window.testsDone.then(() => window.testResults) : null'
 DEMOS = ROOT / 'demo' / 'index.html'  # Lists the demos, each as <a href="<folder>/index.html">.
 # The pages whose theme colors must be the paper's, and the dark sheet's where a page has one.
-THEMED_PAGES = [ROOT / 'index.html', ROOT / 'style.html']
+THEMED_PAGES = [ROOT / 'index.html', ROOT / 'style.html', ROOT / 'phy.html']
 OPENED_VIEWPORT = (1280, 800)  # The window in which every page is opened.
 
 # The checks of the pages against the cast (tools/gallery.py) and of the derived files, each a test of its own.

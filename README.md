@@ -25,8 +25,8 @@ lib/                      the library: what other work uses
   style/site/             the kit, phy's CSS library: the stylesheets, the face, the graphite filter and the icons
   style/figures/          the house style for charts and diagrams
   dotfiles/               phy's setup on every machine: the vimrc, and Claude Code's settings and status line
-index.html  style.html  preview.png
-                          the site (GitHub Pages serves it from the root), and its link preview
+index.html  style.html  phy.html  preview.png  phy-preview.png
+                          the site (GitHub Pages serves it from the root), and its link previews
 demo/                     one-off pieces, each in a folder of its own
 design/                   page mockups, and the candidates not taken
 tools/                    the command line, the checks, and the scripts that derive what is derived
@@ -45,7 +45,7 @@ every name a page linking it may use.
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `preview.png` | the site: the gallery, with its link preview; and the style guide, `STYLE.md` and `FWIENDS.md` drawn by hand, with the kit at work and its dial (`--informal`) to turn |
+| `index.html`, `style.html`, `phy.html`, `preview.png`, `phy-preview.png` | the site: the gallery, with its link preview; the style guide, `STYLE.md` and `FWIENDS.md` drawn by hand, with the kit at work and its dial (`--informal`) to turn; and phy's page, phy's signature over phy's handles and work, with its link preview |
 | `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `papers.css`, loaded after them, gives a piece other sheets (graph paper, a score, kraft, tracing paper and more); `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
 | `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
 | `lib/style/CASEBOOK.md` | phy's finished pieces, one line each: what it is, its look in one sentence and a link, so that the next piece can do something else |
@@ -57,8 +57,8 @@ every name a page linking it may use.
 | `tools/layout.py` | where each part of the repository lives, and the checks that every link resolves and that dependencies run one way |
 | `tools/kit_api.py` | the kit's promise to the pages that link it: the check that it keeps every name the published kit defines |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
-| `tools/site_assets.py` | rebuilds the site's icons (phy's head, drawn for 16 pixels) and link preview (a title that leads, over every friend in rows at one size) after a character changes |
-| `tools/title_pen.py` | derives the strokes that write the gallery's title (`lib/fwiends/src/title-pen.js`) |
+| `tools/site_assets.py` | rebuilds the site's icons (phy's head, drawn for 16 pixels), the gallery's link preview (a title that leads, over every friend in rows at one size), phy seated for the signature (`lib/style/site/signature.svg`) and phy's page's link preview after a character changes |
+| `tools/title_pen.py` | derives the strokes that write the gallery's title and phy's page's (`lib/fwiends/src/title-pen.js`, `signature-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
 | `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours, and every other sheet's inks and marks, from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |
 | `tools/palette.py`, `tools/colormath.py` | derive the data colours from the fwiends' own and test them (needs numpy) |

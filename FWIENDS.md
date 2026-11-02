@@ -31,20 +31,20 @@ with it.
 
 ## the gallery page
 
-`index.html` (the gallery) and `style.html` (the style guide, with the kit
-at work) both wear the kit, and turn to the dark sheet where the reader's
-system asks for it (`STYLE.md` §3). The paper is design C of the mockups in
+`index.html` (the gallery), `style.html` (the style guide, with the kit at
+work) and `phy.html` (phy's page, below) all wear the kit, and turn to the
+dark sheet where the reader's system asks for it (`STYLE.md` §3). The paper is design C of the mockups in
 `design/`; A and B are kept in `design/backup/`. The style guide sits at
-`50`, and its dial turns the face, never the case, to `0` or `100`
-until a reload. The gallery is a hobby project, so it sits at `100`
-(`STYLE.md` §3).
+`50`, as does phy's page, and its dial turns the face, never the case, to
+`0` or `100` until a reload. The gallery is a hobby project, so it sits at
+`100` (`STYLE.md` §3).
 
 The page has five parts, in this order:
 1. The title, `phy's fwiends`, in the hand: the project's name wherever
    people read it (`phy_friends` is only the repository's and the code's).
 2. One line of intro: "a few fwiends in coloured pencil, each one drawn from a
    hundred-odd lines of code." The last words show the page's workings (below).
-3. The nav, as on the style guide: fwiends, style guide.
+3. The nav, as on the style guide and phy's page: phy, fwiends, style guide.
 4. **The stage**, a group photo: the fwiends stand together on pencilled
    ground and all watch the cursor.
 5. The footer: "characters belong to the people named under them"; a credit
@@ -136,8 +136,8 @@ The page has five parts, in this order:
 `22px` on the smallest), a step above an h3, since it is read from further
 away; the species in small print, two or three lower-case words ("tuxedo
 eevee"); and the owner's handle in small print, linking to their page (phy's
-reads "that's me · linkedin", and "linkedin" alone on the narrowest phones,
-where the ring says the rest). On the smallest phones a long species or handle wraps
+reads "that's me · linkedin", "that's me" linking to phy's page, and
+"linkedin" alone on the narrowest phones, where the ring says the rest). On the smallest phones a long species or handle wraps
 onto a second rule rather than run into a neighbour.
 
 Each friend is a button with a short name (`aria-label`), "say hi to Terry",
@@ -256,6 +256,26 @@ fills the frame's width, so that the box is as large as the room under the
 title allows, and the script fails until the rows seat every fwiend. The title is kept clear of the ears below
 it, and the picture is saved as a palette PNG, about half the size of a
 full-colour one, with the pencil's grain kept.
+
+**phy's page**, `phy.html`, is where a link to phy leads: phy's signature
+(`STYLE.md` §1) made large, "phy" with phy seated beside it on the line, alive
+as the style guide's portrait is; under it phy's handles, what phy makes and
+how, each a link; and one dry line in the corner. phy alone is on it; the
+fwiends are a link away. While one of phy's handles is pointed at or focused,
+phy looks at it and smiles.
+- A visit that follows a link opens with phy signing the page: the pen writes
+  "phy" (`python3 tools/title_pen.py` derives its strokes,
+  `lib/fwiends/src/signature-pen.js`, as it does the gallery's), the line is
+  drawn under it, and phy hops in along the line from beyond the screen's
+  right edge, over the blank paper rather than the title, and sits, in about
+  two and a half seconds. The page keeps nothing to remember the visit by, so
+  a reload, a step back, a link into the page, reduced motion, "keep still"
+  and forced colours show everything in place, and a click, a tap, Escape or
+  tabbing to phy ends the signing at once.
+- `python3 tools/site_assets.py` draws its link preview, `phy-preview.png`:
+  the signature alone, large, on the same paper, with phy looking out. It
+  also draws `lib/style/site/signature.svg`, phy seated as the signature
+  holds it, which the page shows until its script runs.
 
 ## drawing a friend
 
