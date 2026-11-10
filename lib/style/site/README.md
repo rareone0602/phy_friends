@@ -15,7 +15,7 @@ it changes as the style does (see [Keeping step](#keeping-step)).
 | `fonts/` | the face, Shantell Sans: a Latin subset of about 170 KB with all three axes (`tools/font_subset.py` makes it), and its licence; it stays beside `notebook.css` |
 | `graphite.js` | writes the graphite filter into the page |
 | `icon.svg`, `icon-32.png`, `apple-touch-icon.png` | the favicon: phy's head (`tools/site_assets.py` draws them) |
-| `signature.svg` | phy seated, as the signature holds it, for a page or a slide without the fwiends' library (`tools/site_assets.py` draws it) |
+| `signature.svg` | phy seated, as the sign-off holds it, for a page or a slide without the fwiends' library (`tools/site_assets.py` draws it) |
 
 ## A page
 
@@ -174,9 +174,6 @@ page's, as a character does. `style.html` shows each.
 - A title is about 12 letters, what fits on a phone's line. It sits on the
   first rule, with the rule under it left blank for its tails; too long for a
   phone, it shrinks rather than wraps.
-- **CJK text** adds `'LXGW WenKai TC'` (Google Fonts, a pencil-like hand)
-  after the face, loaded only on pages that need it, with the text marked by
-  `lang`.
 
 ## Marks
 
@@ -259,26 +256,27 @@ The parts:
 - **A portrait:** an about page may have one character standing beside the
   title, a rule taller than it. It stands on the title's rule, reaches up into
   the blank band, and may watch the cursor.
-- **The signature** (`STYLE.md` §1): beside a page's title, a portrait of phy
-  in a signed titleline (`<div class="titleline signed">`), whose pencilled
-  line runs under the title as well as phy, and which never hides. Anywhere
-  else, on a slide, a card or a poster, `<span class="signature"><span
-  class="words">style guide</span><span class="sitter"></span></span>`, with
-  `--s` the words' size: phy sits in a box twice that, feet on the words'
-  baseline, and the line runs under both. The sitter holds phy as the
-  fwiends' library draws it, or `<img src="signature.svg" alt="">` without
-  it.
+- **The signature and the sign-off** (`STYLE.md` §1): `<span
+  class="signature"><span class="words">phy</span></span>` is the name alone,
+  in the hand, with `--s` its size. A sitter after the words, `<span
+  class="sitter"></span>`, adds the sign-off, for informal work: phy sits in a
+  box twice the words' size, feet on their baseline, and a pencilled line runs
+  under both. The sitter holds phy as the fwiends' library draws it, or `<img
+  src="signature.svg" alt="">` without it. Beside a page's title, the sign-off
+  is a portrait of phy in a signed titleline (`<div class="titleline
+  signed">`), whose line runs under the title as well as phy, and which never
+  hides.
 - **Print:** plain paper. The rules, margin line, tooth, nav and portrait (with
   a signed title's line) drop out; the ink stays.
 
 ## Other places
 
-- **Favicon:** phy's head, drawn for 16 pixels (`STYLE.md` §1), on everything
+- **Favicon:** phy's head, drawn for 16 pixels (`STYLE.md` §1), on every site
   phy makes, unless the work is about another character.
 - **Link preview:** the page's own paper, title and characters, set to fill
   `1200×630` with every character at one size, under a title large enough to
   lead at a feed's 300 pixels wide; not a designed card, with no extra text
-  and no logo. A page about phy alone shows the signature alone, large.
+  and no logo. A page about phy alone shows the name and its sign-off alone, large.
 - **README:** GitHub strips CSS, so the style lives in the words, in sentence
   case: a title, one honest line, the preview picture and short plain
   sections. No badges, no emoji and no feature lists.

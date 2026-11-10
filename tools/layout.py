@@ -12,12 +12,14 @@ films in demo/ and the mockups in design/. tools/ and test/ serve both.
   link nothing of the fwiends, so that each can be used without the others.
 - dotfiles_drift: the dotfiles fit every machine. Claude Code's recommended settings parse, and no dotfile names one
   machine's home folder.
+- cjk_drift: no tracked file holds Chinese, Japanese or Korean text, in its name or in its text.
 """
 import json
 import os
 import posixpath
 import re
 import subprocess
+import unicodedata
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -170,4 +172,51 @@ def dotfiles_drift():
         for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), 1):
             if HOME_FOLDER.search(line):
                 problems.append(f"{path.relative_to(ROOT)}:{number} names one machine's home folder: write ~ instead")
+    return problems
+
+
+# The code points of Chinese, Japanese and Korean text, as (first, last) pairs. They are written as numbers, so that
+# this file holds none of the text it forbids.
+CJK_RANGES = (
+    (0x1100, 0x11FF),    # Hangul Jamo.
+    (0x2E80, 0x9FFF),    # Radicals, CJK punctuation, kana, Bopomofo, compatibility letters and the unified ideographs.
+    (0xA960, 0xA97F),    # Hangul Jamo Extended-A.
+    (0xAC00, 0xD7FF),    # Hangul syllables and Hangul Jamo Extended-B.
+    (0xF900, 0xFAFF),    # Compatibility ideographs.
+    (0xFE30, 0xFE4F),    # Compatibility forms, the punctuation of vertical text.
+    (0xFF00, 0xFFEF),    # Halfwidth and fullwidth forms.
+    (0x1AFF0, 0x1B16F),  # Kana extensions and supplements.
+    (0x1F200, 0x1F2FF),  # The enclosed ideographic supplement.
+    (0x20000, 0x323AF),  # The ideographs of the supplementary planes.
+)
+CJK = re.compile('[' + ''.join(f'{chr(first)}-{chr(last)}' for first, last in CJK_RANGES) + ']')
+
+
+def code_point(character):
+    """A character as a message names it: its code point and its Unicode name, never the character itself."""
+    return f'U+{ord(character):04X}, {unicodedata.name(character, "unnamed")}'
+
+
+def cjk_drift():
+    """Every tracked file whose name or text holds CJK text: one line for a name, and one for each line of text, at
+    its first such character. A file that is not UTF-8 text (a picture, a font) is checked by its name alone. A
+    message gives code points and escapes a name, so that the report holds no CJK text either."""
+    problems = []
+    for name in sorted(tracked()):
+        shown = name.encode('ascii', 'backslashreplace').decode('ascii')
+        found = CJK.search(name)
+        if found:
+            problems.append(f"{shown}: the file's name holds CJK text ({code_point(found.group())}): "
+                            'rename it in Latin letters')
+        try:
+            text = (ROOT / name).read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            continue
+        for number, line in enumerate(text.split('\n'), 1):
+            found = CJK.search(line)
+            if found:
+                count = len(CJK.findall(line))
+                more = '' if count == 1 else f', the first of {count}'
+                problems.append(f'{shown}:{number}:{found.start() + 1} holds CJK text ({code_point(found.group())}'
+                                f'{more}): write it in Latin letters or in translation')
     return problems

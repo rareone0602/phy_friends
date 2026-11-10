@@ -65,7 +65,7 @@
   .verdict.yes { background: var(--mark-tick) center / 22px 22px no-repeat; }
   .grey { filter: url(#lightness); }
   /* Compositions, two to a row and large enough to be read as pictures. */
-  .doc .set.compose { --rules: 7; grid-template-columns: repeat(2, 1fr); }
+  .doc .set.compose { --rules: 5; grid-template-columns: repeat(3, 1fr); }
   .doc .set.looks { --rules: 5; }
   /* The paper under a prop, cut to its outline, shows only where the page's own paper cannot: on a dark sheet. */
   .prop-cut { display: none; }
@@ -76,8 +76,18 @@
   :is([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: inline !important; }
   [data-paper]:not([data-paper=graphite], [data-paper=cyanotype]) :is(.prop-cut, .pf-cutout) { display: none !important; }
 
-  /* §1: the signature, its head at its sizes, its colour and three studies; one hand on its dial; and what a design
-     tool lays on, crossed out over the pencil's way of doing the same job. */
+  /* §1: the five principles (one point; quiet ground, one loud thing; one hand, as exact as the reader's task; same
+     hand, new idea; it travels alone), the four duties and the signature. What a tool offers is crossed out over the
+     pencil's way of doing the same job. */
+  .exact .pic > p { position: absolute; left: 0; bottom: 0; margin: 0; }
+  .exact .loose { --informal: 100; --hand: 50; font-size: 26px; color: var(--ink); }
+  .travels text { font-family: var(--face); font-weight: 300; }
+  .travels .t-title { --hand: 50; font-size: 16px; fill: var(--ink); }
+  .travels .t-num { --informal: 0; font-size: 9px; fill: var(--ink-2); }
+  .travels .t-name { --hand: 50; font-size: 12px; fill: var(--ink); }
+  .travels .t-small { font-size: 8px; fill: var(--ink-2); }
+  .travels .pic > svg { overflow: hidden; }
+  #t-crop > svg { width: calc(var(--L) * 5); }
   .set .pic.favicons { display: flex; align-items: flex-end; gap: 14px; }
   .set .pic.favicons > img { position: static; height: auto; }
   /* The signature is the kit's (.signature); here it stands at the foot of its picture, and in each study where the
@@ -264,7 +274,7 @@
     .doc ul.instead { grid-template-columns: repeat(2, 1fr); }
     .sample { padding-left: 1em; }
     .sample .sample-title { font-size: 31px; }
-    .doc .set.compose { --rules: 4; }
+    .doc .set.compose { --rules: 6; grid-template-columns: 1fr; }
     .doc .set.looks { --rules: 7; }
   }
   @media (prefers-reduced-motion: reduce) { .edits del, .edits .do { transition: none; } }
@@ -300,32 +310,39 @@
 
     <h2 id="s1">1. phy</h2>
     <ul class="edits inline-edits">
-      <li><del><span class="sr">not: </span>Phy</del><span class="do">phy, even at the start of a sentence</span></li>
+      <li><del><span class="sr">not: </span>Phy</del><span class="do">phy, even at the start of a sentence, and they</span></li>
     </ul>
     <ul class="meta"><li><code>rareone0602</code> on GitHub and X</li><li>a credit links to <a href="https://www.linkedin.com/in/po-hung-yeh-6a8134116">LinkedIn</a></li></ul>
-    <h3>the signature, the same everywhere</h3>
-    <div class="set ends" style="--cell: 13em">
-      <div><div class="pic" style="--rules: 3"><span class="signature"><span class="words">phy</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">phy beside the words, twice their size, on one line</span></div>
-      <div><div class="pic favicons" style="--rules: 2"><img src="lib/style/site/icon.svg" style="width: 64px" alt="phy's head"><img src="lib/style/site/icon.svg" style="width: 32px" alt=""><img src="lib/style/site/icon.svg" style="width: 16px" alt=""></div><span class="what">without room, the head, drawn for 16 pixels</span></div>
-      <div><div class="pic hue" id="phy-green" style="--rules: 1"></div><span class="what">its colour: the green of phy's eyes</span></div>
-    </div>
-    <h3>signed: three studies</h3>
-    <div class="studies">
-      <div><div class="pic" data-paper="notebook" style="--ratio: 16 / 9"><span class="signature" style="--s: 12cqh; left: 9%; top: 12%"><span class="words">how phy makes things</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a slide: beside its title</span></div>
-      <div><div class="pic" data-paper="kraft" style="--ratio: 3 / 4"><span class="signature" style="--s: 8.5cqh; left: 9%; bottom: 7%"><span class="words">style guide</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a poster: small, in a corner</span></div>
-      <div><div class="pic" data-paper="graphite" data-ruling="plain" style="--ratio: 16 / 9"><span class="signature" style="--s: 15cqh; left: 50%; top: 52%; transform: translate(-50%, -50%)"><span class="words">say hi</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a film's title card: on the dark</span></div>
-    </div>
-    <p class="note">the paper, the scale and the place change; phy beside the words does not</p>
+    <h3>one point</h3>
+    <ul class="edits">
+      <li><del><span class="sr">not: </span>build times</del></li>
+      <li class="do">v4 is twice as fast</li>
+      <li class="pair-start"><del><span class="sr">not: </span>this talk is about the cache</del></li>
+      <li class="do">the cache halves the build</li>
+    </ul>
+    <p class="note">the title is the claim; a point that needs two sentences is two pieces</p>
 
-    <h3>one hand</h3>
+    <h3>quiet ground, one loud thing</h3>
+    <div class="set ends" style="--cell: 10em">
+      <div><div class="pic" id="subject" style="--rules: 3"></div><span class="what">phy, in colour; the ground, quiet</span></div>
+      <div><div class="pic grey" id="subject-small" style="--rules: 1"></div><span class="what">in grey and small, still phy first</span></div>
+      <div><div class="pic hue" id="phy-green" style="--rules: 1"></div><span class="what">with no colour of its own to spend, a work takes this green</span></div>
+    </div>
+
+    <h3>one hand, as exact as the reader's task</h3>
     <ul class="hands">
       <li style="--informal: 0"><span class="n">0</span>quick sketches of a gift</li>
       <li style="--informal: 50"><span class="n">50</span>quick sketches of a gift</li>
       <li style="--informal: 100"><span class="n">100</span>quick sketches of a gift</li>
     </ul>
     <p class="note">one face on its dial: past 50 the s grows towards a capital and the line loosens; only code, and a host's own type, are in another</p>
-    <h3>drawn, not designed</h3>
-    <ul class="instead" aria-label="what a design tool lays on, and the pencil's way of doing the same job">
+    <div class="set ends exact" style="--cell: 10em">
+      <div><div class="pic" style="--rules: 2"><p class="loose">look here first</p></div><span class="what">a note: loose</span></div>
+      <div><div class="pic" style="--rules: 2"><svg class="chart" viewBox="0 0 220 60" role="img" aria-label="an axis from 0 to 30 seconds, ruled straight"><path d="M10 22H210M10 22v6M73.3 22v6M136.7 22v6M200 22v6" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><text x="10" y="46" text-anchor="middle">0</text><text x="73.3" y="46" text-anchor="middle">10</text><text x="136.7" y="46" text-anchor="middle">20</text><text x="200" y="46" text-anchor="middle">30 s</text></svg></div><span class="what">an axis: exact</span></div>
+      <div><div class="pic" style="--rules: 2"><p><code>build(cache=True)</code></p></div><span class="what">code: exact</span></div>
+    </div>
+    <p class="note">loose where you look, exact where you measure</p>
+    <ul class="instead" aria-label="what a tool offers, and the pencil's way of doing the same job">
       <li><span class="not"><span class="cta" aria-hidden="true">Get started</span><span class="sr">not a glowing gradient button, but </span></span><span class="yes"><button class="btn" type="button" tabindex="-1" aria-hidden="true">count</button><span class="sr">the word in a pencil box</span></span></li>
       <li><span class="not"><span class="card" aria-hidden="true">Feature</span><span class="sr">not a card with a shadow, but </span></span><span class="yes">a feature, in words</span></li>
       <li><span class="not"><span class="hero" aria-hidden="true">Unleash it.</span><span class="sr">not hero copy, but </span></span><span class="yes hand-said">that's me</span></li>
@@ -333,21 +350,48 @@
       <li><span class="not"><span class="pill" aria-hidden="true">#pencils</span><span class="sr">not a pill, but </span></span><span class="yes small">pencils</span></li>
       <li><span class="not"><span class="burger" aria-hidden="true"></span><span class="sr">not a menu, but </span></span><span class="yes small"><span class="ringed">fwiends</span> style guide</span></li>
     </ul>
-    <h3>colour goes to the subject</h3>
-    <div class="set ends" style="--cell: 13em">
-      <div><div class="pic" id="subject" style="--rules: 3"></div><span class="what">phy, in colour; the ground, quiet</span></div>
-      <div><p class="error">that needs to be a number</p><span class="what">red, only for an error</span></div>
-    </div>
-    <h3>never the same twice</h3>
-    <p class="note">one brief, a birthday card, drawn three ways, each described in one sentence</p>
+    <p class="note">nothing is there because the tool offered it</p>
+
+    <h3>same hand, new idea</h3>
+    <p class="note">one brief, a birthday card: three ideas, each in one sentence</p>
     <div class="set looks" style="--cell: 12em">
-      <div><div class="pic frame" data-paper="notebook" id="n-last"><span class="verdict" aria-hidden="true"></span></div><span class="what"><span class="sr">redrawn: </span>on ruled paper, phy beside a cake: it fits the last card, so redraw</span></div>
-      <div><div class="pic frame" data-paper="kraft" id="n-balloon"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">on kraft, one balloon three times phy's height</span></div>
-      <div><div class="pic frame" data-paper="graphite" data-ruling="plain" id="n-candle"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">at night, one candle's light rubbed out of the dark</span></div>
+      <div><div class="pic frame" data-paper="notebook" id="n-last"><span class="verdict" aria-hidden="true"></span></div><span class="what"><span class="sr">thought again: </span>phy brings a cake: the last card's idea, so think again</span></div>
+      <div><div class="pic frame" data-paper="kraft" id="n-balloon"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">the present is a balloon, far too big to hand over</span></div>
+      <div><div class="pic frame" data-paper="graphite" data-ruling="plain" id="n-candle"><span class="verdict yes" aria-hidden="true"></span></div><span class="what">one candle, and the dark it leaves</span></div>
     </div>
+    <p class="note">the hand and the quiet ground are in all three; no idea is in two</p>
+
+    <h3>it travels alone</h3>
+    <div class="set ends travels" style="--cell: 12em">
+      <div><div class="pic" id="t-whole" style="--rules: 5"></div><span class="what">whole</span></div>
+      <div><div class="pic" id="t-crop" style="--rules: 5"></div><span class="what">cropped to a square</span></div>
+      <div><div class="pic" id="t-shot" style="--rules: 5"></div><span class="what">in someone else's page</span></div>
+    </div>
+    <p class="note">in each, the claim and phy's name can still be read: a label on the bar, not in a legend</p>
+
+    <h3>four duties</h3>
+    <ul>
+      <li class="rule"><strong>The owners' say.</strong> People and their characters appear only as their owners give them, in the media they agreed to.</li>
+      <li class="rule"><strong>Private stays private:</strong> personal references live in a git-ignored folder and never reach a public page.</li>
+      <li class="rule"><strong>Licences.</strong> What a piece takes, it takes within its licence, and credits its maker.</li>
+      <li class="rule"><strong>The reader's light.</strong> Light and dark follow the reader's system; a page never offers a switch.</li>
+    </ul>
+
+    <h3>signed</h3>
+    <div class="set ends" style="--cell: 10em">
+      <div><div class="pic" style="--rules: 2"><span class="signature"><span class="words">phy</span></span></div><span class="what">the signature: the name, once</span></div>
+      <div><div class="pic" style="--rules: 3"><span class="signature"><span class="words">phy</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a sign-off, for informal work</span></div>
+      <div><div class="pic favicons" style="--rules: 2"><img src="lib/style/site/icon.svg" style="width: 64px" alt="phy's head"><img src="lib/style/site/icon.svg" style="width: 32px" alt=""><img src="lib/style/site/icon.svg" style="width: 16px" alt=""></div><span class="what">without room, the head, drawn for 16 pixels</span></div>
+    </div>
+    <div class="studies">
+      <div><div class="pic" data-paper="notebook" style="--ratio: 16 / 9"><span class="signature" style="--s: 12cqh; left: 9%; top: 12%"><span class="words">caches, briefly</span></span><span class="signature" style="--s: 8cqh; left: 9%; bottom: 8%"><span class="words">phy</span></span></div><span class="what">a talk: the name alone</span></div>
+      <div><div class="pic" data-paper="kraft" style="--ratio: 3 / 4"><span class="signature" style="--s: 8.5cqh; left: 9%; bottom: 7%"><span class="words">style guide</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a poster: small, in a corner</span></div>
+      <div><div class="pic" data-paper="graphite" data-ruling="plain" style="--ratio: 16 / 9"><span class="signature" style="--s: 15cqh; left: 50%; top: 52%; transform: translate(-50%, -50%)"><span class="words">say hi</span><span class="sitter" aria-hidden="true"></span></span></div><span class="what">a film's title card: on the dark</span></div>
+    </div>
+    <p class="note">the hand signs everything; the avatar signs off only informal work</p>
 
     <h3>the kit is a tool</h3>
-    <p class="note">one hand, drawn by hand, colour to the subject and the words (§2) hold; the rest (§3, §4) is defaults: a working page keeps them, and a piece takes what it needs</p>
+    <p class="note">the five principles and the four duties hold everywhere; the rest (§3, §4) is defaults: a working page keeps them, and a piece takes what its idea needs</p>
     <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#1-phy">STYLE.md §1</a>.</p>
 
     <hr>
@@ -565,7 +609,8 @@
           <rect x="150" y="200" width="1090" height="420" fill="var(--paper)"/>
           <g class="s-chart">
             <path d="M262 568H968" fill="none" stroke="var(--ink-2)" stroke-width="2" stroke-linecap="round"/>
-            <path d="M330 567V268M520 567V291M710 567V308M900 567V441" fill="none" stroke="var(--data-blue)" stroke-width="90"/>
+            <path d="M330 567V268M520 567V291M710 567V308" fill="none" stroke="var(--ink-3)" stroke-width="90"/>
+            <path d="M900 567V441" fill="none" stroke="var(--data-blue)" stroke-width="90"/>
             <text x="330" y="250" text-anchor="middle">52 s</text><text x="520" y="273" text-anchor="middle">48 s</text><text x="710" y="290" text-anchor="middle">45 s</text><text x="900" y="423" text-anchor="middle">22 s</text>
             <text x="330" y="606" text-anchor="middle">v1</text><text x="520" y="606" text-anchor="middle">v2</text><text x="710" y="606" text-anchor="middle">v3</text><text x="900" y="606" text-anchor="middle">v4</text>
           </g>
@@ -574,7 +619,7 @@
           <text class="s-small" x="174" y="667">source: invented for this guide; one run each, no error bars</text>
         </svg>
       </div>
-      <figcaption>the point as its title, the chart on blank paper, one note with its arrow, the source in small print</figcaption>
+      <figcaption>the point as its title, only its series in colour, the chart on blank paper, one note with its arrow, the source in small print</figcaption>
     </figure>
 
     <h3>a series keeps its colour</h3>
@@ -583,7 +628,7 @@
       <div><div class="pic" style="--rules: 5"><svg class="chart" viewBox="0 0 220 160" role="img" aria-label="memory: 310 megabytes without the cache, 420 with it"><rect width="220" height="160" fill="var(--paper)"/><text x="4" y="18">memory, MB</text><path d="M36 130H200" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M80 129V63" stroke="var(--data-blue)" stroke-width="46"/><path d="M160 129V40" stroke="var(--data-red)" stroke-width="46"/><text x="80" y="55" text-anchor="middle">310</text><text x="160" y="32" text-anchor="middle">420</text><text class="ink" x="80" y="150" text-anchor="middle">without</text><text class="ink" x="160" y="150" text-anchor="middle">with</text></svg></div><span class="what">memory: the same colours, the cache now taller</span></div>
       <div><div class="pic grey" style="--rules: 5"><svg class="chart" viewBox="0 0 220 160" role="img" aria-label="the build time chart again, in grey"><rect width="220" height="160" fill="var(--paper)"/><text x="4" y="18">build time, s</text><path d="M36 130H200" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/><path d="M80 129V44" stroke="var(--data-blue)" stroke-width="46"/><path d="M160 129V87" stroke="var(--data-red)" stroke-width="46"/><text x="80" y="36" text-anchor="middle">45</text><text x="160" y="79" text-anchor="middle">22</text><text class="ink" x="80" y="150" text-anchor="middle">without</text><text class="ink" x="160" y="150" text-anchor="middle">with</text></svg></div><span class="what">printed in grey, the labels still say which</span></div>
     </div>
-    <p class="note">build time and memory, without and with the cache: half the time, for a third more memory (invented numbers)</p>
+    <p class="note">in print, build time and memory, without and with the cache: half the time, for a third more memory (invented numbers)</p>
 
     <h3>a paper's main diagram, at the size it prints</h3>
     <figure class="paper-figure">
@@ -617,7 +662,7 @@
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-ochre)" stroke-width="2.6" stroke-linecap="round"/></svg>ochre</span>
       <span><svg class="swatch" viewBox="0 0 34 10" aria-hidden="true"><path d="M2 6c8-3 20-4 30-2" fill="none" style="stroke: var(--data-pink)" stroke-width="2.6" stroke-linecap="round"/></svg>pink</span>
     </p>
-    <p class="note">the data is the only saturated thing, and the colours go in this order</p>
+    <p class="note">in print the data is the only saturated thing, and the colours go in this order; on a slide, only the point's series</p>
     <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#3-the-kit">STYLE.md §3</a>, and how to use the kit, <a href="lib/style/site/README.md">its README</a> and the figures', <a href="lib/style/figures/README.md">theirs</a>.</p>
 
     <hr>
@@ -628,7 +673,6 @@
       <div><div class="pic frame" data-paper="sketchbook" id="c-scale"></div><span class="what">the gramophone first, then phy: scale</span></div>
       <div><div class="pic frame" data-paper="sketchbook" id="c-empty"></div><span class="what">phy, then where phy looks: the empty paper is the sky</span></div>
       <div><div class="pic frame" data-paper="sketchbook" id="c-crop"></div><span class="what">the eyes, close: the crop brings you in</span></div>
-      <div><div class="pic frame grey" data-paper="sketchbook" id="c-grey"></div><span class="what">in grey, still the gramophone, then phy</span></div>
     </div>
     <h3>light falls on the place, never on a character</h3>
     <div class="set thumbs" style="--cell: 10em">
@@ -658,17 +702,16 @@
     <h2 id="s5">5. working with phy</h2>
     <ol>
       <li>discuss before building, and wait for a yes</li>
-      <li>three ideas, one of them outside the house look</li>
+      <li>three ideas, one of them outside the kit, all in the hand</li>
       <li>a sketch, from a source that is kept, with the command that builds it</li>
-      <li>the options rendered side by side</li>
+      <li>the options rendered side by side, with a pick</li>
       <li>an adversarial review, checked finding by finding</li>
       <li>phy publishes, each time</li>
     </ol>
     <ul>
-      <li class="rule"><strong>phy reviews before anything is published.</strong> Pushing, posting and sharing are phy's call.</li>
-      <li class="rule"><strong>Private stays private:</strong> personal references live in a git-ignored folder and never reach a public page.</li>
+      <li class="rule"><strong>phy reviews before anything is published.</strong> Committing, pushing, posting and sharing are phy's call.</li>
     </ul>
-    <p class="note">the casebook keeps one line per finished piece, so that the next can do something else</p>
+    <p class="note">the casebook keeps each finished piece's idea in a sentence, so that the next can have another</p>
     <p class="full">In full: <a href="https://github.com/rareone0602/phy_friends/blob/main/STYLE.md#5-working-with-phy">STYLE.md §5</a>.</p>
 
     <hr>
@@ -780,6 +823,7 @@
   for (const sitter of document.querySelectorAll('.signature .sitter'))
     sitter.insertAdjacentHTML('beforeend', PhyFriends.render('phy', { view: seated, bg: 'page' }));
   draw($('#subject'));
+  draw($('#subject-small'));
   for (const sheet of document.querySelectorAll('.sheet')) draw(sheet);
 
   // A frame of a picture, 360 by 240: the world's own shapes at the back, then the props, then phy, each layer in
@@ -809,16 +853,32 @@
   }
   const glowOf = (cx, cy, rx, ry, opacity) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#fbf9f3" fill-opacity="${opacity}" filter="url(#graphite)"/>`;
 
-  // Never the same twice: one birthday card three ways, the first as the last card was drawn.
+  // Same hand, new idea: one birthday card, three ideas, the first the last card's.
   frame('n-last', { props: [{ name: 'cake', x: 228, ground: 214, scale: 0.62 }], phy: { x: 130, ground: 214, scale: 0.42 } });
   frame('n-balloon', { props: [{ name: 'balloon', x: 236, ground: 226, scale: 0.92 }], phy: { x: 118, ground: 226, scale: 0.24, pose: { lookX: 0.5, lookY: -0.6, turnX: 0.25 } } });
   frame('n-candle', { world: glowOf(222, 214, 96, 15, 0.4), props: [{ name: 'candle', x: 236, ground: 214, scale: 1.3, state: ['lit'] }],
     phy: { x: 128, ground: 216, scale: 0.4, pose: { lookX: 0.6, turnX: 0.2, lid: 0.15 } } });
 
-  // A frame, composed: what the eye meets first, and why; and the first, turned grey.
+  // It travels alone: one slide whole, cropped to a square, and shrunk into someone else's page. Its point, the
+  // label on the one coloured bar and phy's name all sit in the left 180 units, which the square keeps.
+  const bars = [[36, 52], [76, 48], [116, 45], [156, 22]].map(([x, seconds], index) => {
+    const top = 150 - seconds * 1.73, point = index === 3;
+    return `<path d="M${x} 149V${top}" stroke="var(${point ? '--data-blue' : '--ink-3'})" stroke-width="26"/>`
+      + `<text class="t-num" x="${x}" y="${top - 5}" text-anchor="middle">${seconds} s</text>`;
+  }).join('');
+  const slide = `<rect x=".5" y=".5" width="319" height="179" fill="var(--paper)" stroke="var(--ink-3)"/><text class="t-title" x="16" y="32">v4 is twice as fast</text>`
+    + `<path d="M18 150H174" fill="none" stroke="var(--ink-2)" stroke-width="1.2" stroke-linecap="round"/>${bars}`
+    + '<text class="t-name" x="16" y="172">phy</text><text class="t-small" x="304" y="172" text-anchor="end">one run each</text>';
+  $('#t-whole').innerHTML = `<svg viewBox="0 0 320 180" aria-hidden="true">${slide}</svg>`;
+  $('#t-crop').innerHTML = `<svg viewBox="0 0 320 180" preserveAspectRatio="xMinYMid slice" aria-hidden="true">${slide}</svg>`;
+  const lines = [52, 66, 80, 94, 108, 122, 136].map(y => `<path d="M16 ${y}H${y % 28 ? 112 : 96}" stroke="var(--ink-3)" stroke-width="5" stroke-linecap="round" opacity=".5"/>`).join('');
+  $('#t-shot').innerHTML = `<svg viewBox="0 0 320 180" aria-hidden="true"><rect x=".5" y=".5" width="319" height="179" fill="var(--paper)" stroke="var(--ink-3)"/>`
+    + `<path d="M16 26H150" stroke="var(--ink-3)" stroke-width="9" stroke-linecap="round"/>${lines}`
+    + `<rect x="131.5" y="43.5" width="173" height="98" fill="none" stroke="var(--ink-3)"/><svg x="132" y="44" width="172" height="97" viewBox="0 0 320 180">${slide}</svg></svg>`;
+
+  // A frame, composed: what the eye meets first, and why.
   const scaled = { props: [{ name: 'gramophone', x: 238, ground: 228, scale: 0.8 }], phy: { x: 70, ground: 228, scale: 0.26, pose: { lookX: 0.7, lookY: -0.4, turnX: 0.3 } } };
   frame('c-scale', scaled);
-  frame('c-grey', scaled);
   frame('c-empty', { props: [{ name: 'balloon', x: 300, ground: 92, scale: 0.2 }], phy: { x: 62, ground: 230, scale: 0.24, pose: { lookX: 0.7, lookY: -0.8, turnX: 0.3, turnY: -0.2 } } });
   frame('c-crop', { phy: { x: 84, ground: 330, scale: 1.45, pose: { lookX: 0.7, turnX: 0.3, lookY: -0.1 } } });
 
@@ -904,7 +964,7 @@
   Object.assign($('#prop').lastElementChild.style, { height: '62%' });
   const palette = PhyFriends.palette('phy'), seen = new Set();
   const stroke = color => `<svg viewBox="0 0 40 14" aria-hidden="true"><path d="M3 8.5c9-4.5 23-6 34-3" fill="none" stroke="${color}" stroke-width="7" stroke-linecap="round"/></svg>`;
-  $('#phy-green').innerHTML = stroke(palette.iris);  // The signature's colour (§1).
+  $('#phy-green').innerHTML = stroke(palette.iris);  // phy's green (§1).
   // A colour that is itself a shade (the body, in the fur's) shows only as that shade, since there are no second steps.
   const entries = Object.entries(palette).filter(([name, color]) => name !== 'bg' && typeof color === 'string' && color.startsWith('#'));
   const shades = new Set(entries.filter(([name]) => name.endsWith('Shade')).map(([, color]) => color));

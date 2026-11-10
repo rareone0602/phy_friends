@@ -40,24 +40,24 @@ taken up alone. Pages elsewhere link the library where GitHub Pages publishes
 it rather than copy it, so that nothing is kept twice; for the same reason,
 everything one file derives from another is written by a tool, never by hand.
 `python3 tools/pf.py test` checks that every link resolves, that dependencies
-run one way, that everything derived is up to date, and that the kit keeps
-every name a page linking it may use.
+run one way, that everything derived is up to date, that the kit keeps every
+name a page linking it may use, and that no tracked file holds CJK text.
 
 | path | what |
 |---|---|
-| `index.html`, `style.html`, `phy.html`, `preview.png`, `phy-preview.png` | the site: the gallery, with its link preview; the style guide, `STYLE.md` and `FWIENDS.md` drawn by hand, with the kit at work and its dial (`--informal`) to turn; and phy's page, phy's signature over phy's handles and work, with its link preview |
+| `index.html`, `style.html`, `phy.html`, `preview.png`, `phy-preview.png` | the site: the gallery, with its link preview; the style guide, `STYLE.md` and `FWIENDS.md` drawn by hand, with the kit at work and its dial (`--informal`) to turn; and phy's page, phy's name, signed off, over phy's handles and work, with its link preview |
 | `lib/style/site/` | the kit, phy's CSS library (its README lists the tokens, type, marks and classes): `phy.css` loads `notebook.css`, the paper (and the dark sheet), and `pencil.css`, everything drawn on it; `papers.css`, loaded after them, gives a piece other sheets (graph paper, a score, kraft, tracing paper and more); `graphite.js` writes the graphite filter into a page; `fonts/` holds the face (a Latin subset of Shantell Sans, served from the site, not by a font service); and the icons are phy's head |
 | `lib/style/figures/` | the house style for charts, slides and a paper's diagram (its README lists the data colours and the rules): matplotlib styles; `phy-diagram.sty`, for a paper's TikZ diagram (`diagram.tex` is an example); and `fonts/`, the house face, Shantell Sans, with its licence |
-| `lib/style/CASEBOOK.md` | phy's finished pieces, one line each: what it is, its look in one sentence and a link, so that the next piece can do something else |
+| `lib/style/CASEBOOK.md` | phy's finished pieces, one line each: what it is, its idea in one sentence and a link, so that the next piece can do something else |
 | `lib/fwiends/` | the fwiends' library: the factory that draws a friend from its spec, animation, feelings, friends alive on a page, the film kit, the props and the characters; its README is the reference |
 | `lib/dotfiles/` | phy's setup, one set of files for every machine (its README says how to set one up): `vimrc` (Google's indents and line lengths, in the house inks); Claude Code's recommended settings and its status line (`claude/`); and `install.sh`, which links the vimrc and the status line from a clone of their own, so that a `git pull` updates them |
 | `demo/` | one-off pieces, each in its own folder: `index.html` lists the films (`roll-call/`, `card/`, `say-hi/`), which are made with the film kit |
 | `design/` | page mockups: `index.html` lists them (C, the notebook, became the real page; A and B are kept as backups in `design/backup/`) |
 | `tools/pf.py` | CLI: render stills, compare with a reference, export animations, film pages (with sound) and run the tests (headless Chrome + ffmpeg) |
-| `tools/layout.py` | where each part of the repository lives, and the checks that every link resolves and that dependencies run one way |
+| `tools/layout.py` | where each part of the repository lives, and the checks that every link resolves, that dependencies run one way and that no tracked file holds CJK text |
 | `tools/kit_api.py` | the kit's promise to the pages that link it: the check that it keeps every name the published kit defines |
 | `tools/cdp.py` | a small client for the Chrome DevTools Protocol, with which `pf.py` drives headless Chrome for its drawings, films and tests |
-| `tools/site_assets.py` | rebuilds the site's icons (phy's head, drawn for 16 pixels), the gallery's link preview (a title that leads, over every friend in rows at one size), phy seated for the signature (`lib/style/site/signature.svg`) and phy's page's link preview after a character changes |
+| `tools/site_assets.py` | rebuilds the site's icons (phy's head, drawn for 16 pixels), the gallery's link preview (a title that leads, over every friend in rows at one size), phy seated for the sign-off (`lib/style/site/signature.svg`) and phy's page's link preview after a character changes |
 | `tools/title_pen.py` | derives the strokes that write the gallery's title and phy's page's (`lib/fwiends/src/title-pen.js`, `signature-pen.js`) |
 | `tools/font_subset.py` | subsets the house face, `lib/style/figures/fonts/`, to the WOFF2 in `lib/style/site/fonts/` and copies its licence beside it (needs fontTools and brotli) |
 | `tools/dark_sheet.py` | derives the dark sheet's inks, marks and data colours, and every other sheet's inks and marks, from the paper's (`lib/style/site/README.md`, `lib/style/figures/README.md`) and writes them into the kit, the figures' README and the dotfiles |
@@ -68,7 +68,7 @@ every name a page linking it may use.
 | `tools/props.html` | a review sheet of every prop in each of its states, standing on the rules beside phy at the gallery's size (`?rules=10` for twice that), and the party hat in Yuda's cyan |
 | `tools/tune.html`, `tools/lorem.js` | the tuning page: sliders for the body plan that every friend shares (the core's `STAND_FIT`, `STAND_DEFAULT`, `ONIGIRI`, `BODY` and `TURN`), with every friend that stands, seated, standing and moving, then side-on, from behind and turning round, and the values to paste back into the code. It opens on the values in the code. `lorem.js` is the plain placeholder friend it shows first, which is not in the cast. `pf.py tune` writes it out as one file, `out/tune.html`, to send to an artist |
 | `test/` | in-browser tests: `index.html` loads the library, `harness.js` and every `*.test.js`; `film-stub.html` is the smallest page `pf.py film` can film |
-| `STYLE.md` | phy's style guide, a short programme for everything phy makes (the fixed rules, the words, the kit, pieces and how to work with phy), written to be handed to anyone, or any agent, making something for phy |
+| `STYLE.md` | phy's style guide, a short programme for everything phy makes (five principles and four duties, the words, the kit, pieces and how to work with phy), written to be handed to anyone, or any agent, making something for phy |
 | `FWIENDS.md` | what only this project adds to it: the gallery page, the rules for drawing a friend, and the rules for scenes |
 | `out/` | generated output, git-ignored: `out/<name>/` per character (stills, `compare/`, `anim/`), `out/design/` for page mockups, `out/props/` for the props' sheet, `out/tune.html` for the tuning page to send, `out/scratch/` for experiments |
 | `LICENSE` | the GNU Affero General Public License, version 3, which covers everything here but the fwiends and the font (see [Licence](#licence)) |
@@ -185,7 +185,8 @@ that draws in pencil pastes a graphite filter of its own or does not load
 into `out/` excepted, which a page looks for only with a fallback), while the
 library links anything outside it or phy's style anything of the fwiends
 (`tools/layout.py`), and while the kit drops a name that the published kit,
-on `origin/main`, defines (`tools/kit_api.py`). Finally it opens the site's
+on `origin/main`, defines (`tools/kit_api.py`), and while a tracked file holds
+CJK text, in its name or in its text (`tools/layout.py`). Finally it opens the site's
 pages, every tool page and every demo that `demo/index.html` lists, from disk
 as a reader's browser does (unable to read the files beside a page) and with
 requests to other hosts refused, so that a page that breaks shows up. Each page error names its page,

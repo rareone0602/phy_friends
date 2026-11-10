@@ -70,7 +70,11 @@ tools/dark_sheet.py` writes that column, and both sets into the dotfiles.
 A slide is the notebook page `×1.5`: at `1280×720` the rules are `48px` apart,
 15 to a slide, and the title is `96px`. A chart on a slide takes the slides
 overlay's sizes instead.
-- The title states the point, not the topic.
+- The title is the slide's point, as a claim (`STYLE.md` §1).
+- Only the series that carries the point takes its data colour. A baseline,
+  a reference or an earlier result is graphite: its line in `--ink-2`, its
+  fill in `--ink-3` and its label in `--ink-2`. A chart for print keeps a
+  colour for every series, since there the reader compares them.
 - A chart sits on blank paper, since rules behind it would read as gridlines;
   the overlay's paper-toned figure covers them.
 - One note with an arrow may point at the one thing to see.

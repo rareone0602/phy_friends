@@ -23,9 +23,9 @@ redraws the picture; where a drawing and the text disagree, the text wins.
 **The owners' say.** People and their characters appear only with their
 owners' say-so, as the owners give them: name, species, colours, pronoun and
 a credit linking to the owner. An owner's wish beats a house rule, `STYLE.md`'s
-included, since the character is theirs. It holds whatever the style, in
-everything with a friend in it, and an ideas agent for such a piece is briefed
-with it.
+included, since the character is theirs. It is the first of the guide's four
+duties (`STYLE.md` §1): it holds whatever the style, in everything with a
+friend in it, and an ideas agent for such a piece is briefed with it.
 
 ---
 
@@ -257,8 +257,8 @@ title allows, and the script fails until the rows seat every fwiend. The title i
 it, and the picture is saved as a palette PNG, about half the size of a
 full-colour one, with the pencil's grain kept.
 
-**phy's page**, `phy.html`, is where a link to phy leads: phy's signature
-(`STYLE.md` §1) made large, "phy" with phy seated beside it on the line, alive
+**phy's page**, `phy.html`, is where a link to phy leads: phy's signature and
+sign-off (`STYLE.md` §1) made large, "phy" with phy seated beside it on the line, alive
 as the style guide's portrait is; under it phy's handles, what phy makes and
 how, each a link; and one dry line in the corner. phy alone is on it; the
 fwiends are a link away. While one of phy's handles is pointed at or focused,
@@ -273,8 +273,8 @@ phy looks at it and smiles.
   and forced colours show everything in place, and a click, a tap, Escape or
   tabbing to phy ends the signing at once.
 - `python3 tools/site_assets.py` draws its link preview, `phy-preview.png`:
-  the signature alone, large, on the same paper, with phy looking out. It
-  also draws `lib/style/site/signature.svg`, phy seated as the signature
+  the name and its sign-off alone, large, on the same paper, with phy looking out. It
+  also draws `lib/style/site/signature.svg`, phy seated as the sign-off
   holds it, which the page shows until its script runs.
 
 ## drawing a friend

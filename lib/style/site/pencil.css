@@ -19,7 +19,7 @@
      .error .result .loading .empty    Tool feedback.
      .mark.arrow|ring|squiggle|tick|cross|caret    A mark inside running text.
      .titleline, .portrait              A character beside the title; role="button" makes it one to say hi to.
-     .titleline.signed, .signature      phy's signature: beside a page's title, and anywhere else (--s, .words, .sitter).
+     .signature, .titleline.signed      phy's name (--s, .words); a .sitter adds the sign-off, and a signed titleline puts it beside a page's title.
      .announcer           A live region (role="status") that says what happened, for screen readers only. */
 
 /* The marks, defined once. A data URI cannot read var(), so each one hard-codes its ink
@@ -215,9 +215,9 @@ select.field { width: auto; min-width: 12em; padding-right: 28px; cursor: pointe
 /* signature.svg is drawn a quarter of the box wider on each side and above it, since a picture cannot reach out of its
    frame, and the ears and the tail do. */
 :is(.portrait, .signature .sitter) > img { position: absolute; left: -25%; top: -25%; width: 150%; height: 125%; }
-/* The line: from just before the words to a little past the box. The sitter rises highest, so the baseline lies
-   twice the words' size below the signature's top. */
-:is(.titleline.signed, .signature)::after { content: ''; position: absolute; height: 8px; pointer-events: none;
+/* The line belongs to the sign-off: from just before the words to a little past the box. The sitter rises highest,
+   so the baseline lies twice the words' size below the signature's top. The name alone has no line. */
+:is(.titleline.signed, .signature:has(.sitter))::after { content: ''; position: absolute; height: 8px; pointer-events: none;
   background: var(--mark-ground) 0 0 / 100% 100% no-repeat; filter: url(#graphite); }
 .titleline.signed::after { left: -6px; right: calc(var(--L) * -.48); top: calc(100% - 5px); }
 .signature::after { left: calc(var(--s) * -.06); right: calc(var(--s) * -.24); top: calc(var(--s) * 2 - 4px); }
