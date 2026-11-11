@@ -50,6 +50,16 @@
     assert(times[0].sleepyAt !== 10 || times[1].sleepyAt !== 10 + L.DOZE.spread / 11, 'not in the order of the page');
   });
 
+  test('woken by a key, the sleepers start one after another, in a seeded order, within a fraction of a second', () => {
+    const after = L.wakeSchedule(12);
+    assertEqual(after, L.wakeSchedule(12), 'the same every time');
+    const sorted = [...after].sort((a, b) => a - b);
+    assertEqual([sorted[0], sorted.at(-1)], [0, L.DOZE.stagger]);
+    assert(sorted.every((s, i) => i === 0 || s - sorted[i - 1] >= 1 / 60), 'none in the same frame as another');
+    assert(after.some((s, i) => s !== sorted[i]), 'not in the order of the page');
+    assertEqual(L.wakeSchedule(1), [0], 'one alone starts at once');
+  });
+
   test('what a screen reader hears when the friends doze and wake', () => {
     assertEqual(L.dozeAnnouncement(['Howdi', 'phy'], ['Claude']), 'Everyone but Claude falls asleep.');
     assertEqual(L.dozeAnnouncement(['phy']), 'phy falls asleep.');
@@ -185,7 +195,7 @@
 
   test('the stage tells the page how long a friend has been stroked, until the stroking stops', () => {
     const reports = [];
-    withStage(['phy'], { ...moving, onStroke: (friend, seconds) => reports.push([friend.name, seconds]) }, (stage, [phy]) => {
+    withStage(['phy'], { ...moving, onStroke: (friend, seconds, held) => reports.push([friend.name, seconds, held]) }, (stage, [phy]) => {
       const rub = () => {
         for (const x of [100, 120, 140, 110, 90, 120, 150]) phy.rig.el.dispatchEvent(new PointerEvent('pointermove', { pointerType: 'mouse', clientX: x }));
       };
@@ -194,7 +204,7 @@
       stage.draw(0.5);
       rub();
       stage.draw(0.9);
-      assertEqual(reports, [['phy', 0], ['phy', 0.5]]);
+      assertEqual(reports, [['phy', 0, false], ['phy', 0.5, false]], 'a stroke that moves is not held');
       stage.draw(0.5 + L.STROKE.linger + 0.1);
       stage.draw(3);
       assertEqual(reports.length, 2, 'no more once the stroking has stopped');
@@ -255,9 +265,9 @@
     const box = document.createElement('div');
     Object.assign(box.style, { position: 'relative', width: '160px', height: '160px' });
     document.body.appendChild(box);
-    const said = [];
+    const said = [], reports = [];
     try {
-      const stage = L.stage({ announce: text => said.push(text), ...moving });
+      const stage = L.stage({ announce: text => said.push(text), onStroke: (friend, seconds, held) => reports.push([seconds, held]), ...moving });
       const alfie = stage.add(box, 'alfie', { label: 'Alfie' });
       const touches = x => [new Touch({ identifier: 1, target: box, clientX: x, clientY: 80 })];
       stage.draw(0);
@@ -266,9 +276,12 @@
       assertEqual(alfie.feeling, 'content', 'content while the finger stays');
       stage.draw(3);
       assertEqual(alfie.feeling, 'content', 'for as long as it stays');
+      assertEqual(reports.at(-1), [3, true], 'and the page is told that the stroke is held');
       box.dispatchEvent(new TouchEvent('touchend', { touches: [], bubbles: true }));
       box.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       assertEqual(said, ['Alfie looks content.'], 'no hi');
+      stage.draw(3 + L.STROKE.linger / 2);
+      assertEqual(reports.at(-1)[1], true, 'still held while it lingers after the finger lifts');
       stage.draw(3 + L.STROKE.linger + 0.1);
       assertEqual(alfie.feeling, null, 'calm a moment after it lifts');
       box.dispatchEvent(new TouchEvent('touchstart', { touches: touches(80), bubbles: true }));
@@ -322,7 +335,11 @@
       assertEqual(said, ['Everyone but Claude falls asleep.']);
       stage.noteInput(null);
       assertEqual(said.at(-1), 'Everyone wakes up.');
-      stage.draw(stage.seconds + 0.2);
+      const woke = stage.seconds;
+      stage.draw(woke + 0.2);
+      const first = [howdi.feeling, phy.feeling];
+      assert(first.includes('surprised') && first.includes('asleep'), `one after another, not in the same frame (${first})`);
+      stage.draw(woke + L.DOZE.stagger + 0.2);
       assertEqual([howdi.feeling, phy.feeling], ['surprised', 'surprised']);
       assert(!howdi.hi(), 'a friend waking with a start ignores a hi');
     });
@@ -430,6 +447,79 @@
       stage.draw(t + 0.1);
       stage.draw(t + 3600);
       assert(phy.rig.el.querySelectorAll('.pf-live-mark').length <= 2, 'only the marks of the moment');
+    });
+  });
+
+  test('each friend is drawn at the pace it needs: every frame while it acts, on fours while it breathes, not at all at rest', () => {
+    withStage(['phy', 'howdi'], moving, (stage, [phy, howdi]) => {
+      stage.draw(0);
+      stage.draw(0.1);
+      assertEqual([stage.pace(phy), stage.pace(howdi)], ['calm', 'calm'], 'breathing and glancing about, on fours');
+      phy.hi();
+      stage.draw(0.2);
+      assertEqual(stage.pace(phy), 'now', 'saying hi, every frame');
+      phy.travel = () => ({ dir: 1, squash: 0, lean: 0 });
+      stage.draw(5);
+      assertEqual(stage.pace(phy), 'now', 'on its way, every frame');
+    });
+    withStage(['phy'], still, (stage, [phy]) => {
+      stage.draw(0);
+      stage.draw(0.5);
+      assertEqual(stage.pace(phy), 'rest', 'keeping still with nothing on its face, not at all');
+      phy.feel('content');
+      stage.draw(0.6);
+      assertEqual(stage.pace(phy), 'boil', 'keeping still, with a feeling on its face, as often as the pencil boils');
+    });
+  });
+
+  test('a page may play a clip over a friend, and hush the idle motion around it', () => {
+    withStage(['phy'], moving, (stage, [phy]) => {
+      stage.draw(0);
+      phy.play(PF.anim.make.blink(), { at: 1, hush: 0.5 });
+      stage.draw(0.3);
+      assertEqual(stage.pace(phy), 'calm', 'on fours until just before it plays');
+      for (const t of [0.6, 0.8]) {
+        stage.draw(t);
+        assertEqual(phy.rig.pose.blink || 0, 0, `no idle blink at ${t} s, in the hush before it`);
+      }
+      stage.draw(1.09);
+      assert(phy.rig.pose.blink > 0.9, 'the blink plays, the eyes shut at its middle');
+      assertEqual(stage.pace(phy), 'now', 'drawn on every frame while it plays');
+      for (const t of [1.35, 1.5, 1.7]) {
+        stage.draw(t);
+        assertEqual(phy.rig.pose.blink || 0, 0, `no idle blink at ${t} s, in the hush after it`);
+      }
+    });
+  });
+
+  test('a friend drawn on fours eases its gaze by its own time, however often a neighbour is drawn', () => {
+    // The same friend, drawn at the same moments with the same thing to watch, once alone and once beside a friend
+    // drawn on every frame, as the frame loop draws only the friends that are due.
+    const gaze = everyFrame => {
+      let lookX = null;
+      withStage(['phy', 'howdi'], moving, (stage, [phy, howdi]) => {
+        const box = phy.rig.el.getBoundingClientRect();
+        phy.watch = () => ({ x: box.right + 1000, y: box.top + box.height / 2 });
+        for (let frame = 0; frame <= 24; frame++) {
+          const t = frame / 60, due = frame % 4 === 0;
+          if (due || everyFrame) stage.draw(t, due ? (everyFrame ? [phy, howdi] : [phy]) : [howdi]);
+        }
+        lookX = phy.rig.pose.lookX;
+      });
+      return lookX;
+    };
+    const alone = gaze(false), beside = gaze(true);
+    assert(alone > 0.5, `the gaze has gone most of the way to the right in 0.4 s (${alone})`);
+    assert(Math.abs(beside - alone) < 1e-9, `and as far beside a friend drawn on every frame (${beside} against ${alone})`);
+  });
+
+  test('a friend first drawn stands as it was mounted, so that it takes a written drawing\'s place unmoved, and its idle motion grows in', () => {
+    withStage(['phy', 'fruit'], moving, (stage, friends) => {
+      const mounted = friends.map(friend => friend.rig.svg.outerHTML);
+      stage.draw(3.7);
+      for (const [i, friend] of friends.entries()) assert(friend.rig.svg.outerHTML === mounted[i], `${friend.name}'s first frame is its drawing as mounted`);
+      stage.draw(4.7);
+      assert(friends.every((friend, i) => friend.rig.svg.outerHTML !== mounted[i]), 'and a second later each moves with its idle motion');
     });
   });
 

@@ -1035,6 +1035,8 @@
     root.film = {
       width: FRAME.width, height: FRAME.height, fps: FRAME.fps, duration: B.DURATION,
       get unagreed() { return loaded.cast ? unagreed() : []; },
+      // What the film's own checks have reported (fail), as tools/pf.py test reads them.
+      get failures() { return failures.map(f => `${f.owner}, ${f.phase}${f.t == null ? '' : ` at ${f.t.toFixed(3)} s`}: ${f.message}`); },
       ready: ready.then(() => undefined),
       seek: t => seek(t),
     };

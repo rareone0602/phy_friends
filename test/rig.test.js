@@ -208,9 +208,33 @@
     assert(same(at({ stance: 'sit' }), at({ stance: 'stand', rise: -1 })), 'sitting is standing risen by -1');
     assert(same(at({ stance: 'stand' }), at({ stance: 'sit', rise: 1 })), 'standing is sitting risen by 1');
     assert(same(at({ stance: 'sit', rise: 3 }), at({ stance: 'stand' })), 'it rises no further than standing');
-    const lift = PF.standLift(STANDER);
-    assertEqual([0, 0.5, 1].map(rise => PF.riseOf(STANDER, { rise })), [0, lift / 2, lift], 'its head rises with it');
+    const lift = PF.standLift(STANDER), heights = Array.from({ length: 21 }, (_, i) => PF.riseOf(STANDER, { rise: i / 20 }));
+    assert(heights[0] === 0 && heights[20] === lift && heights.every((h, i) => i === 0 || h >= heights[i - 1]), `its head rises with it (${heights})`);
+    assertEqual(PF.riseOf(STANDER, { rise: PF.RISE.hips[0] }), 0, 'once its feet have come in under it, and not before');
     assertEqual(PF.riseOf(STANDER, { stance: 'stand', crouch: 5 }), lift - 5, 'and a crouch lowers it');
+  });
+
+  test('standing up and sitting down, the hips move no faster than when they kept pace with the rise, and settle on the seat', () => {
+    const A = PF.anim, FPS = 600, FRAME = FPS / 30, clamp = u => Math.min(1, Math.max(0, u));
+    for (const name of support.houseFriends().filter(n => PF.standFor(n))) {
+      const lift = PF.standLift(name);
+      for (const [move, stance] of [['standUp', 'sit'], ['sitDown', 'stand']]) {
+        const clip = A.layer(A.still({ stance }), A.make[move]()), n = Math.round(clip.duration * FPS);
+        const poses = Array.from({ length: n + 1 }, (_, i) => A.sample(clip, i / FPS));
+        // The height of the hips, and its height when they kept pace with the rise (the stance plus its rise).
+        const height = poses.map(p => PF.riseOf(name, p)), kept = poses.map(p => {
+          const up = clamp((p.stance === 'stand' ? 1 : 0) + (p.rise || 0));
+          return lift - Math.min(lift, (p.crouch || 0) * up + lift * (1 - up));
+        });
+        // The largest change of each over a frame at 30 frames a second, and the change over the frame in which the
+        // hips leave or reach the seat.
+        const steps = h => h.slice(FRAME).map((v, i) => Math.abs(v - h[i])), most = h => Math.max(...steps(h));
+        const seated = height.map(h => h <= 1e-9), at = move === 'standUp' ? seated.lastIndexOf(true) : seated.indexOf(true);
+        const landing = Math.abs(height[at] - height[move === 'standUp' ? at + FRAME : at - FRAME]);
+        assert(most(height) <= most(kept) + 1e-9, `${name} ${move}: the hips move ${most(height).toFixed(2)} in a frame, against ${most(kept).toFixed(2)}`);
+        assert(landing <= most(height) / 5, `${name} ${move}: the hips move ${landing.toFixed(2)} in the frame at the seat, against ${most(height).toFixed(2)} at most`);
+      }
+    }
   });
 
   test('as it sits, its limbs fold: feet out beside its base, paws in front, and nothing jumps', () => {
@@ -237,7 +261,50 @@
         const [a, b] = [at((i - 1) / 40), at(i / 40)];
         step = Math.max(step, ...a.map((p, k) => Math.hypot(p[0] - b[k][0], p[1] - b[k][1])));
       }
-      assert(step < 3, `${label}: a fortieth of the way up moves a paw or a foot at most ${step.toFixed(2)} units`);
+      // Each foot steps in over a quarter of the rise or so (half of PF.RISE.feet), eased, so it moves fastest there.
+      assert(step < 6.5, `${label}: a fortieth of the way up moves a paw or a foot at most ${step.toFixed(2)} units`);
+    }
+  });
+
+  test('standing up, each foot steps in, the left and then the right, lifted as it goes, and a foot on the ground stays put', () => {
+    const stand = PF.standFor(STANDER), ground = stand.ground - stand.legs.L.ankle, n = 400;
+    const frames = Array.from({ length: n + 1 }, (_, i) => {
+      const t = PF.poseState(STANDER, { rise: i / n }).transform;
+      return ['footL', 'footR'].map(part => placeOf(t[part]));
+    });
+    const lifted = frames.map(feet => feet.map(([, y]) => y < ground - 1e-6));
+    for (const [k, S] of [[0, 'L'], [1, 'R']]) {
+      for (let i = 1; i <= n; i++) {
+        if (lifted[i][k] || lifted[i - 1][k]) continue;
+        assert(Math.abs(frames[i][k][0] - frames[i - 1][k][0]) < 1e-6, `foot ${S} slides along the ground at rise ${i / n}`);
+      }
+      const top = ground - Math.min(...frames.map(feet => feet[k][1]));
+      assert(Math.abs(top - PF.RISE.step) < 0.5, `foot ${S} lifts ${top.toFixed(2)} as it steps`);
+    }
+    const lastL = lifted.map(feet => feet[0]).lastIndexOf(true), firstR = lifted.findIndex(feet => feet[1]);
+    assert(lastL > 0 && firstR > lastL && firstR / n < PF.RISE.feet[1],
+      `the left foot steps in (to rise ${lastL / n}), then the right (from ${firstR / n}), and sitting down the other way round`);
+  });
+
+  test('standing up, its feet come in under it before its hips rise, its paws go up with it, and its legs never splay', () => {
+    const SEATED_PAWS = { ...SEATED, name: 'test-rising' };
+    const at = rise => {
+      const t = PF.poseState(SEATED_PAWS, { rise }).transform, [foot, paw] = ['footL', 'pawL'].map(part => placeOf(t[part]));
+      return { foot, paw, height: PF.riseOf(SEATED_PAWS, { rise }) };
+    };
+    const [sat, stood] = [at(0), at(1)], gathered = at(PF.RISE.feet[1]);
+    assert(Math.abs(gathered.foot[0] - stood.foot[0]) < 1e-6 && gathered.height < stood.height / 2,
+      `its feet are under it (${gathered.foot[0]}) before its hips are halfway up (${gathered.height.toFixed(2)} of ${stood.height})`);
+    for (let i = 0; i <= 20; i++) {
+      const rise = PF.RISE.arms[0] * i / 20, now = at(rise);
+      assertEqual(now.paw, sat.paw, `until it is halfway up, its paws keep their place on the body (rise ${rise})`);
+      assert(Math.abs(now.foot[0]) <= Math.abs(sat.foot[0]) + 1e-6, `and its feet never go out further than seated (rise ${rise})`);
+    }
+    let last = sat.foot[0];
+    for (let i = 1; i <= 40; i++) {
+      const x = at(i / 40).foot[0];
+      assert(Math.abs(x) <= Math.abs(last) + 1e-6, `its feet come in and never go back out (${last} to ${x} at rise ${i / 40})`);
+      last = x;
     }
   });
 
@@ -279,13 +346,16 @@
       // How much of its height the sole keeps (its frame's vertical scale about the foot's lower edge).
       const sole = () => Number(rig.parts.footLsole.getAttribute('transform').match(/scale\(1 ([-\d.]+)\)/)[1]);
       assert(sole() === 1 && rig.parts.footLsole.getBoundingClientRect().height > 5, 'its sole faces us');
-      rig.setPose({ rise: 0.5 });
-      const half = sole();
+      rig.setPose({ rise: 0.2 });
+      const early = sole();
+      rig.setPose({ rise: PF.RISE.feet[1] });
+      const gathered = sole();
       rig.setPose({ stance: 'stand' });
       const paw = PF.standFor(seated).arms.L.paw;
       const [kx, ky] = rig.parts.pawLseat.getAttribute('transform').match(/scale\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
       assert(Math.abs(kx * 12 - paw.rx) < 0.2 && Math.abs(ky * 22 - paw.ry) < 0.2, 'standing, the paw is the template\'s');
-      assert(half === 0.5 && sole() === 0, `the sole flattens as it rises, to nothing (${half} of it halfway)`);
+      assert(early > 0 && early < 1 && gathered === 0 && sole() === 0,
+        `the sole flattens as the feet come in under it, to nothing once they have (${early} of it a fifth of the way up)`);
     }, seated);
   }));
 
@@ -309,12 +379,15 @@
       const { body, scarf, head, armsUnder, armsOver } = rig.parts, svg = rig.svg;
       assert(after(body, scarf) && after(scarf, head) && after(head, armsUnder) && after(armsUnder, armsOver), 'body, scarf, head, arms, then an arm over all');
       const mask = rig.parts.tuck.getAttribute('data-pf-mask'), held = svg.querySelector(`mask[id="${mask.slice(5, -1)}"]`);
-      assert(held && held.querySelector(`use[href="#${scarf.id}"]`) && held.querySelector(`use[href="#${head.id}"]`), 'the arms are masked where the scarf or the head is drawn');
+      const copies = () => [scarf, head].map(part => held.querySelector(`use[data-pf-href="#${part.id}"]`));
+      assert(held && copies().every(Boolean), 'the arms are masked where the scarf or the head is drawn');
+      assert(copies().every(n => !n.hasAttribute('href')), 'its copies of them point at nothing while the friend sits, when a copy would cost every frame for nothing');
       assert(rig.parts.tuck.contains(armsUnder) && !rig.parts.tuck.hasAttribute('mask'), 'but not while the friend sits, when the mask would hide nothing');
       assert(!/<g data-pf="tuck"[^>]* mask=/.test(PF.render(SCARFED)) && /<g data-pf="tuck"[^>]* mask=/.test(PF.render(SCARFED, { pose: { rise: 0.1 } })),
         'a still takes it only once the friend has risen too');
       rig.setPose({ stance: 'stand' });
       assertEqual(rig.parts.tuck.getAttribute('mask'), mask, 'standing, they take it');
+      assertEqual(copies().map(n => n.getAttribute('href')), [`#${scarf.id}`, `#${head.id}`], 'and its copies point at the scarf and the head');
       const tuck = PF.standFor(SCARFED).tuck, arm = PF.standFor(SCARFED).arms.L;
       const radius = () => +/scale\(([\d.]+)\)/.exec(rig.parts.tuckL.getAttribute('transform'))[1];
       assert(rig.parts.tuckL && radius() == +(arm.length * tuck).toFixed(2), 'within the tuck of the shoulder');
@@ -323,14 +396,16 @@
       rig.setPose({ stance: 'sit', rise: 0.5 });
       assert(radius() >= arm.width / 2, `on the way up, the tuck takes in the round end of the hose (${radius()})`);
       const ink = () => rig.parts.tuckInk.getAttribute('opacity');
-      assert(held.contains(rig.parts.tuckInk) && ink() === '1', 'halfway up, the arms tuck fully');
-      rig.setPose({ rise: 0.2 });
-      assertEqual(ink(), '0.4', 'and lower, only partly, so that they slide under the scarf as the friend rises');
+      assert(held.contains(rig.parts.tuckInk) && ink() === '0', 'halfway up, the arms keep their seated fold in front of the scarf, untucked');
+      rig.setPose({ rise: 0.75 });
+      assertEqual(ink(), '1', 'halfway down to the sides, they tuck fully');
+      rig.setPose({ rise: 0.6 });
+      assertEqual(ink(), '0.21', 'and before that only partly, so that they slide under the scarf as they come down');
       rig.setPose({ stance: 'stand', rise: 0, over: 'armL' });
       assertEqual(rig.parts.armL.parentNode.getAttribute('data-pf'), 'armsOver', 'an arm that over names lies whole over everything');
       assertEqual(order(rig), [['armR'], ['pawR'], ['armL', 'pawL']], 'its paw with it');
       rig.setPose({ over: 'armR armL' });
-      assertEqual(order(rig), [[], [], ['armL', 'pawL', 'armR', 'pawR']]);
+      assertEqual(order(rig), [[], [], ['armL', 'armR', 'pawL', 'pawR']], 'both arms over everything, then both paws, so that paws clasped together lie on the arms');
       rig.setPose({ over: null });
       assertEqual(order(rig), [['armL', 'armR'], ['pawL', 'pawR'], []], 'and back, in the order a render draws them');
     }, SCARFED);
@@ -357,11 +432,64 @@
     assert(PF.shapes.bendFor(L, L) < 1e-6, 'a straight limb');
   });
 
-  test('seated, a friend ignores the arm, leg, lean and crouch fields', () => {
+  test('seated, a friend ignores the arm, leg, tip and crouch fields', () => {
     const at = pose => JSON.stringify(PF.poseState(STANDER, pose));
-    assertEqual(at({ stance: 'sit', armL: 120, elbowR: -60, legL: 20, stepR: 6, lean: 10, crouch: -4 }), at({ stance: 'sit' }));
+    assertEqual(at({ stance: 'sit', armL: 120, elbowR: -60, legL: 20, stepR: 6, tip: 10, crouch: -4 }), at({ stance: 'sit' }));
     assertEqual(PF.riseOf(STANDER, { stance: 'sit', crouch: -4 }), 0, 'a crouch that would raise it leaves its head where it sits');
   });
+
+  const middleOf = rect => [(rect.left + rect.right) / 2, (rect.top + rect.bottom) / 2];
+
+  test('seated, a friend leans from its seat, head and all, its base and its forepaws staying where they rest, as far as its arms reach', () => {
+    withRig(rig => {
+      const unit = rig.svg.getBoundingClientRect().height / PF.STANDING_BOX, parts = ['head', 'pawL', 'pawR', 'body'];
+      const [head, pawL, pawR] = parts.map(part => rectOf(rig, part));
+      // The bottom of the body, where the page has it: a box about the turned body would reach lower than the body.
+      const box = rig.parts.body.getBBox(), base = () => new DOMPoint(box.x + box.width / 2, box.y + box.height).matrixTransform(rig.parts.body.getScreenCTM());
+      const rested = base();
+      rig.setPose({ lean: 10 });
+      const moved = (now, then) => Math.hypot(...middleOf(now).map((v, i) => (v - middleOf(then)[i]) / unit));
+      assert((middleOf(rectOf(rig, 'head'))[0] - middleOf(head)[0]) / unit > 10, 'the head leans to the right');
+      // The arm on the side it leans away from stretches (STRETCH) to keep its paw down, and lifts it a little once it
+      // can stretch no further.
+      for (const [part, then] of [['pawL', pawL], ['pawR', pawR]]) assert(moved(rectOf(rig, part), then) < 3, `${part} stays planted (moved ${moved(rectOf(rig, part), then).toFixed(1)} units)`);
+      assert(Math.hypot(base().x - rested.x, base().y - rested.y) / unit < 1, 'the body rests on its base');
+    }, SEATED);
+  });
+
+  test('standing, tip turns the whole figure about its planted feet, and counts for nothing while it sits', () => {
+    withRig(rig => {
+      rig.setPose({ stance: 'stand' });
+      const unit = rig.svg.getBoundingClientRect().height / PF.STANDING_BOX, [left, right, head, body] = ['footL', 'footR', 'head', 'body'].map(part => rectOf(rig, part));
+      rig.setPose({ tip: 10 });
+      for (const [part, before] of [['footL', left], ['footR', right]]) {
+        const now = rectOf(rig, part);
+        assert(Math.abs(now.left - before.left) < 0.5 && Math.abs(now.bottom - before.bottom) < 0.5, `${part} stays put`);
+      }
+      const shift = (part, then) => (middleOf(rectOf(rig, part))[0] - middleOf(then)[0]) / unit;
+      assert(shift('body', body) > 3 && shift('head', head) > shift('body', body), `the body goes with it (${shift('body', body).toFixed(1)}), the head further (${shift('head', head).toFixed(1)})`);
+    }, STANDER);
+  });
+
+  test('standing, squash is the body\'s: the head keeps its size and rides the top of the body, while Claude squashes whole', () => {
+    withRig(rig => {
+      rig.setPose({ stance: 'stand' });
+      const [head, body] = ['head', 'body'].map(part => rectOf(rig, part));
+      for (const squash of [0.1, -0.1]) {
+        rig.setPose({ squash });
+        const [h, b] = ['head', 'body'].map(part => rectOf(rig, part));
+        assert(Math.abs(h.width - head.width) < 0.5 && Math.abs(h.height - head.height) < 0.5, `at ${squash}, the head keeps its size`);
+        assert(Math.sign(b.height - body.height) === Math.sign(squash), `at ${squash}, the body stretches or squashes`);
+        // The head rides on its neck, a little way into the body, so it moves nearly as far as the body's top.
+        const rode = h.bottom - head.bottom, top = b.top - body.top;
+        assert(Math.abs(rode - top) <= 0.2 * Math.abs(b.height - body.height), `at ${squash}, the head rides the top of the body (it moved ${rode.toFixed(1)} px, the body's top ${top.toFixed(1)} px)`);
+      }
+    }, STANDER);
+    const root = PF.poseState(PF.get('claude'), { squash: 0.1 }).transform.root;
+    assert(root.includes('scale(0.95 1.1)'), `Claude squashes whole, by the squash alone (${root})`);
+  });
+
+
 
   test('a tail with a standing place of its own moves there as the friend rises, from where it sits', () => {
     const own = PF.get('yuanyuan'), plain = { ...own, name: 'test-plain-tail', stand: { ...own.stand, tail: null } };
@@ -380,20 +508,20 @@
   };
   const TUCKER_VIEW = { w: 300, h: 300, x: 150, y: 170, scale: 1, rotate: 0 };
 
-  // What is drawn at each head-space point [x, y] (already lifted as the pose lifts it) of a flat render: the
-  // arm, the head, or the color found.
-  async function drawnAt(pose, points) {
-    const svg = PF.render(TUCKER, { view: TUCKER_VIEW, pose, pencil: false, bg: false });
+  // What is drawn at each head-space point [x, y] (already lifted as the pose lifts it) of a flat render of TUCKER, or
+  // of the spec given: the arm, the head, or the color found. Drawn at `zoom` pixels a unit.
+  async function drawnAt(pose, points, spec = TUCKER, zoom = 1) {
+    const svg = PF.render(spec, { view: TUCKER_VIEW, pose, pencil: false, bg: false });
     const img = new Image();
     img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     await img.decode();
     const canvas = document.createElement('canvas');
-    canvas.width = TUCKER_VIEW.w;
-    canvas.height = TUCKER_VIEW.h;
+    canvas.width = TUCKER_VIEW.w * zoom;
+    canvas.height = TUCKER_VIEW.h * zoom;
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, TUCKER_VIEW.w, TUCKER_VIEW.h);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     return points.map(([x, y]) => {
-      const d = ctx.getImageData(Math.round(TUCKER_VIEW.x + x), Math.round(TUCKER_VIEW.y + y), 1, 1).data;
+      const d = ctx.getImageData(Math.round((TUCKER_VIEW.x + x) * zoom), Math.round((TUCKER_VIEW.y + y) * zoom), 1, 1).data;
       return d[0] > 200 && d[1] < 60 ? 'arm' : d[0] > 100 && d[0] < 160 && Math.abs(d[0] - d[1]) < 8 ? 'head' : `rgb(${d[0]}, ${d[1]}, ${d[2]})`;
     });
   }
@@ -406,6 +534,33 @@
     assert(Math.hypot(paw[0] / 90, paw[1] / 95) < 1, 'the paw lies over the head');
     assertEqual(await drawnAt(pose, [paw, shoulder]), ['arm', 'head'], 'the paw in front, the shoulder under the head');
     assertEqual(await drawnAt({ ...pose, over: 'armL' }, [paw, shoulder]), ['arm', 'arm'], 'over draws the shoulder in front too');
+  });
+
+  test('an arm takes its paper edge once its paw is raised to the figure, and never at rest, in the walk or in the idle', () => {
+    const A = PF.anim, stand = A.still({ stance: 'stand' }), edges = pose => {
+      const { state } = PF.poseState(TUCKER, A.sample(pose));
+      return [state.edgeL, state.edgeR];
+    };
+    assertEqual(edges({ stance: 'stand' }), ['off', 'off'], 'at rest');
+    for (const u of [0.1, 0.3, 0.55, 0.8]) assertEqual(edges({ ...A.walking(u, 4, { distance: 48 }).pose, stance: 'stand' }), ['off', 'off'], `at ${u} of a walk`);
+    const idle = A.layer(stand, A.make.idle({ seed: 1 }));
+    for (const t of [0, 0.7, 1.9, 3.3]) assertEqual(edges(A.sample(idle, t)), ['off', 'off'], `at ${t} s of the idle`);
+    assertEqual(edges({ stance: 'stand', armL: 150, elbowL: -30 }), ['under', 'off'], 'a paw raised to the face, with the arms that tuck');
+    assertEqual(edges({ stance: 'stand', armL: 150, elbowL: -30, over: 'armL' }), ['over', 'off'], 'or with those drawn over everything');
+    assertEqual(edges({ stance: 'stand', facing: 180, armL: 150, elbowL: -30 }), ['off', 'off'], 'but not from behind, where the arms hang beside the body');
+  });
+
+  test('a paw raised over a head of its own color is cut out of it by a lip of paper', async () => {
+    const spec = { ...TUCKER, name: 'test-cut', palette: { fur: '#808080', chest: '#404040' }, stand: undefined };
+    const pose = { stance: 'stand', armL: 150, elbowL: -30 }, lift = PF.standFor(spec).lift;
+    const [px, py] = PF.poseState(spec, pose).transform.pawL.match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
+    // What is drawn on the way up from the paw's middle, a quarter of a unit (a pixel) at a time, into the head.
+    const seen = await drawnAt(pose, Array.from({ length: 120 }, (_, i) => [px, py - lift - i / 4]), spec, 4);
+    const paper = PF.pencil.settings.paper.match(/\w\w/g).map(h => parseInt(h, 16));
+    const isPaper = c => /^rgb/.test(c) && c.match(/\d+/g).every((v, i) => Math.abs(v - paper[i]) < 12);
+    const cut = seen.findIndex(isPaper);
+    // At least three quarters of a unit of paper, a pixel or two on the pages.
+    assert(cut > 0 && seen.slice(cut).filter(isPaper).length >= 3 && seen[seen.length - 1] === 'head', `paw, then paper, then head: ${seen.join(', ')}`);
   });
 
   // The width of a leg's outline and where its foot rests, standing at a crouch, on a friend mounted in a standing box.

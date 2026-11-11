@@ -12,6 +12,14 @@ main { max-width: 1720px; }
 .film { container-type: inline-size; margin-top: calc(var(--L) * 2); }
 .stage { height: round(down, 100cqw * 9 / 16, var(--L)); aspect-ratio: 16 / 9; max-width: 100%; }
 :root:not(.pf-filming) .stage { border: 1px solid var(--rule); }
+/* The film plays once nine tenths of its stage is in view (film.js), so on a window tall enough the
+   stage is no taller than the first screen leaves it under the page's header (eleven rules, with an
+   intro of two lines), and the film starts as the page opens. A window under 600px tall, a phone on
+   its side say, would leave a stage smaller than a phone's, so there the stage keeps its width and
+   plays once it is scrolled to. */
+@media (min-height: 600px) {
+  .stage { height: round(down, min(100cqw * 9 / 16, 100svh - var(--L) * 11), var(--L)); }
+}
 .film .doc { margin-top: 0; }
 .film .credits + * { margin-top: var(--L); }  /* The kit leaves no blank rule after a .meta line; the button wants one. */
 .nojs { margin: 0; color: var(--ink-2); }

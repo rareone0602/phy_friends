@@ -5,11 +5,15 @@
   python3 tools/dark_sheet.py
 
 On the dark sheet the paper and the ink swap: the sheet is the graphite ink and the words are in
-the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3, the red and the blue
-pencil) keeps its CIELAB hue and chroma and moves to the lightness at which it has the same contrast
+the paper's color. Every other ink (the rules, the margin line, ink-2, ink-3, the red, the blue
+pencil and the green) keeps its CIELAB hue and chroma and moves to the lightness at which it has the same contrast
 with the dark sheet as it has with the paper, and so does each data color. The marks in lib/style/site/pencil.css
 hard-code their inks, since a data URI cannot read var(), so their dark set is the same marks with
 each ink replaced by its dark one.
+
+An ink that was deepened from a color of its own to hold its floor on the paper (OWN: the green, from phy's iris)
+returns on a dark sheet from there towards its own color, in CIELAB, as far as it keeps its floor (MINIMUM) and stays
+as far from the red and the blue pencil (APART), under every kind of color vision, as it is on the paper.
 
 The other sheets (lib/style/site/papers.css) give their paper, and some their rule. Every other ink of a sheet keeps
 its hue and chroma on the paper and moves to the lightness at which it has the same contrast with the sheet as with
@@ -30,6 +34,7 @@ contrasts that the kit's README and the style guide (style.html) give, and the s
 shown_drift().
 """
 import html.parser
+import math
 import re
 from pathlib import Path
 
@@ -53,7 +58,7 @@ TERMINAL_SERIES = ['blue', 'slate', 'ochre', 'pink']
 # for paper alone keep it. Print always stays on paper.
 OPT_IN = ':root:has(meta[name="color-scheme"][content~="dark"])'
 MEDIA = '@media screen and (prefers-color-scheme: dark)'
-INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red', 'blue-pencil']  # The inks that keep their contrast; ink and paper swap.
+INKS = ['rule', 'margin', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'green']  # The inks that keep their contrast; ink and paper swap.
 
 INKS_BEGIN = ("/* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */")
 INKS_END = "/* The end of the dark sheet's inks. */"
@@ -67,8 +72,8 @@ PAPERS_END = "/* The end of every sheet's inks. */"
 # own colours, so their inks are written also for a page that declares both schemes, outweighing the dark sheet's.
 LIGHT_PAPERS = ['notebook', 'graph', 'score', 'card']
 PAPERS_ORDER = ['notebook', 'graphite', 'graph', 'score', 'sketchbook', 'kraft', 'card', 'cyanotype']
-SHEET_INKS = ['rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']
-MINIMUM = {'ink': 7, 'ink-2': 4.5, 'ink-3': 2.2, 'red': 4.5, 'blue-pencil': 4.5}  # What a sheet must give each ink.
+SHEET_INKS = ['rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'green']
+MINIMUM = {'ink': 7, 'ink-2': 4.5, 'ink-3': 2.2, 'red': 4.5, 'blue-pencil': 4.5, 'green': 3}  # What a sheet must give each ink.
 REACH = 0.96  # The share of a sheet's greatest contrast that an ink may take where it cannot keep the paper's.
 FILM = '#fdfdfb'  # The tracing sheet's film over a sheet with dark words, a milky white.
 TRACING = 0.6  # The tracing film's opacity where the words on it need it no thinner.
@@ -80,7 +85,17 @@ VIM_END = '    " The end of the inks.'
 PYTHON_BEGIN = "# The inks, written by `python3 tools/dark_sheet.py` from the kit's and the figures' (lib/style): edit those and run it."
 PYTHON_END = '# The end of the inks.'
 TABLE_HEAD = '| series | colour | shade |'
-WORD_INKS = ['ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']  # The inks whose contrast the README and the guide give.
+# An ink deepened from a color of its own to hold its floor on the paper, and where that color is given: the file and
+# the key it is written under.
+OWN = {'green': (ROOT / 'lib' / 'fwiends' / 'characters' / 'phy' / 'phy.js', 'iris')}
+APART = ['red', 'blue-pencil']  # The inks with a meaning, from which a returning ink keeps its distance.
+KINDS = ['normal', 'protan', 'deutan', 'tritan']  # The kinds of color vision a distance is checked under.
+CVD = {  # Machado, Oliveira and Fernandes (2009) at full severity, on linear sRGB, as in tools/colormath.py.
+    'protan': ((0.152286, 1.052583, -0.204868), (0.114503, 0.786281, 0.099216), (-0.003882, -0.048116, 1.051998)),
+    'deutan': ((0.367322, 0.860646, -0.227968), (0.280085, 0.672501, 0.047413), (-0.011820, 0.042940, 0.968881)),
+    'tritan': ((1.255528, -0.076749, -0.178779), (-0.078411, 0.930809, 0.147602), (0.004733, 0.691367, 0.303900)),
+}
+WORD_INKS = ['ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'green']  # The inks whose contrast the README and the guide give.
 README_CONTRAST = re.compile(r'^\| `--([\w-]+)` \|.*?`([\d.]+):1`', re.M)
 GUIDE_CONTRAST = re.compile(r'<tr data-ink="([\w-]+)">.*?<td class="n">([\d.]+) : 1</td>')
 GUIDE_DATA = re.compile(r'--data-(\w+): (#[0-9a-f]{6});')
@@ -121,7 +136,10 @@ M_INV = [(3.2404542, -1.5371385, -0.4985314), (-0.9692660, 1.8760108, 0.0415560)
 
 
 def lab_of(hex_color):
-    rgb = [to_linear(c) for c in rgb_of(hex_color)]
+    return lab_of_linear([to_linear(c) for c in rgb_of(hex_color)])
+
+
+def lab_of_linear(rgb):
     xyz = [sum(m * c for m, c in zip(row, rgb)) / w for row, w in zip(M, WHITE)]
     f = [t ** (1 / 3) if t > 216 / 24389 else (24389 / 27 * t + 16) / 116 for t in xyz]
     return 116 * f[1] - 16, 500 * (f[0] - f[1]), 200 * (f[1] - f[2])
@@ -159,17 +177,84 @@ def at_contrast(color, sheet, target, darker=False):
     raise ValueError(f'no color at contrast {target} with {sheet}')
 
 
+# ---- Color vision and color difference, as tools/colormath.py has them but without numpy, which the test lacks
+
+def lab_seen(hex_color, kind):
+    """A color's CIELAB as a reader with the given kind of color vision sees it."""
+    rgb = [to_linear(c) for c in rgb_of(hex_color)]
+    if kind != 'normal':
+        rgb = [min(1, max(0, sum(m * c for m, c in zip(row, rgb)))) for row in CVD[kind]]
+    return lab_of_linear(rgb)
+
+
+def de2000(lab1, lab2):
+    """The CIEDE2000 color difference between two CIELAB colors."""
+    (l1, a1, b1), (l2, a2, b2) = lab1, lab2
+    c_mean = (math.hypot(a1, b1) + math.hypot(a2, b2)) / 2
+    g = 0.5 * (1 - math.sqrt(c_mean ** 7 / (c_mean ** 7 + 25 ** 7)))
+    a1, a2 = a1 * (1 + g), a2 * (1 + g)
+    c1, c2 = math.hypot(a1, b1), math.hypot(a2, b2)
+    h1 = math.degrees(math.atan2(b1, a1)) % 360 if c1 else 0.0
+    h2 = math.degrees(math.atan2(b2, a2)) % 360 if c2 else 0.0
+    dh = 0.0 if c1 * c2 == 0 else (h2 - h1 + 180) % 360 - 180
+    d_hue = 2 * math.sqrt(c1 * c2) * math.sin(math.radians(dh / 2))
+    l_mean, c_mean = (l1 + l2) / 2, (c1 + c2) / 2
+    if c1 * c2 == 0:
+        h_mean = h1 + h2
+    elif abs(h1 - h2) <= 180:
+        h_mean = (h1 + h2) / 2
+    else:
+        h_mean = (h1 + h2 + 360) / 2 if h1 + h2 < 360 else (h1 + h2 - 360) / 2
+    cos = lambda degrees: math.cos(math.radians(degrees))
+    t = 1 - 0.17 * cos(h_mean - 30) + 0.24 * cos(2 * h_mean) + 0.32 * cos(3 * h_mean + 6) - 0.20 * cos(4 * h_mean - 63)
+    rotation = -math.sin(math.radians(60 * math.exp(-((h_mean - 275) / 25) ** 2))) * 2 * math.sqrt(c_mean ** 7 / (c_mean ** 7 + 25 ** 7))
+    s_l = 1 + 0.015 * (l_mean - 50) ** 2 / math.sqrt(20 + (l_mean - 50) ** 2)
+    s_c, s_h = 1 + 0.045 * c_mean, 1 + 0.015 * c_mean * t
+    dl, dc, dhh = (l2 - l1) / s_l, (c2 - c1) / s_c, d_hue / s_h
+    return math.sqrt(dl ** 2 + dc ** 2 + dhh ** 2 + rotation * dc * dhh)
+
+
+def separation(a, b):
+    """The least CIEDE2000 difference between two colors under any kind of color vision."""
+    return min(de2000(lab_seen(a, kind), lab_seen(b, kind)) for kind in KINDS)
+
+
+def own_color(name):
+    """The color of its own that an ink in OWN was deepened from."""
+    path, key = OWN[name]
+    return re.search(rf"\b{key}: '(#[0-9a-f]{{6}})'", path.read_text(encoding='utf-8')).group(1)
+
+
+def returned(name, day, inks):
+    """An ink in OWN on a sheet darker than its ink: from the color the contrast rule gave it (inks[name]) towards its own
+    color, in CIELAB, as far as it keeps its floor on the sheet (MINIMUM) and stays as far from each ink in APART, under
+    every kind of color vision, as it is on the paper."""
+    keep = {other: separation(day[name], day[other]) for other in APART}
+    start, end = lab_of(inks[name]), lab_of(own_color(name))
+    best = inks[name]
+    for step in range(1, 101):
+        rgb = rgb_of_lab(*(s + step / 100 * (e - s) for s, e in zip(start, end)))
+        color = hex_of(rgb)
+        if (not in_gamut(rgb) or contrast(color, inks['paper']) < MINIMUM[name]
+                or any(separation(color, inks[other]) < keep[other] for other in APART)):
+            break
+        best = color
+    return best
+
+
 # ---- The kit
 
 def day_inks():
     root = re.search(r':root \{(.*?)\n\}', NOTEBOOK.read_text(), re.S).group(1)
-    return dict(re.findall(r'--(paper|rule|margin|ink|ink-2|ink-3|red|blue-pencil): (#[0-9a-f]{6});', root))
+    return dict(re.findall(r'--(paper|rule|margin|ink|ink-2|ink-3|red|blue-pencil|green): (#[0-9a-f]{6});', root))
 
 
 def dark_inks(day):
     dark = {'paper': day['ink'], 'ink': day['paper']}
     for name in INKS:
         dark[name] = at_contrast(day[name], dark['paper'], contrast(day[name], day['paper']))
+    for name in OWN:
+        dark[name] = returned(name, day, dark)
     return dark
 
 
@@ -199,6 +284,10 @@ def sheet_inks(day, paper, given):
         if contrast(inks[name], paper) < MINIMUM.get(name, 1):
             raise SystemExit(f'the sheet {paper} gives {name} only {contrast(inks[name], paper):.2f}:1, '
                              f'short of {MINIMUM[name]}:1: choose a lighter or a darker paper')
+    if not darker:
+        for name in OWN:
+            if name not in given:
+                inks[name] = returned(name, day, inks)
     rule = inks['rule']
     inks['rule-faint'] = at_contrast(rule, paper, 1 + (contrast(rule, paper) - 1) / 2, luminance(rule) < luminance(paper))
     inks['tracing'] = tracing_film(inks, day)
@@ -251,7 +340,7 @@ def with_papers(text, pencil, day):
     """lib/style/site/papers.css's text with every sheet's inks and marks written in."""
     marks = re.findall(r'^  (--mark-[a-z-]+): (url\(".*?"\));$', re.search(r':root \{\n(.*?)\n\}', pencil, re.S).group(1), re.M)
     sheets = every_sheet(day)
-    order = ['paper', 'rule', 'margin', 'rule-faint', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'tracing']
+    order = ['paper', 'rule', 'margin', 'rule-faint', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'green', 'tracing']
 
     def declarations(inks, indent):
         swap = {day[name][1:]: inks[name][1:] for name in ('ink', 'ink-2', 'ink-3', 'red')}
@@ -323,7 +412,7 @@ def replace_block(text, begin, end, body):
 
 def with_inks(text, dark):
     """lib/style/site/notebook.css's text with the dark sheet's inks written in."""
-    order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil']
+    order = ['paper', 'rule', 'margin', 'ink', 'ink-2', 'ink-3', 'red', 'blue-pencil', 'green']
     tokens = ' '.join(f'--{name}: {dark[name]};' for name in order)
     return replace_block(text, INKS_BEGIN, INKS_END, f'{MEDIA} {{\n  {OPT_IN} {{ {tokens} }}\n}}\n')
 

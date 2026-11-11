@@ -58,6 +58,52 @@
     });
   });
 
+  test('a friend\'s travel weighs on it the same at a time however the scene got there, and keeps to its cues\' times', () => {
+    // Walks 300 at the walk's pace; hops where 600 in a second is too far to walk; hops back.
+    const cue = scene => scene.add('phy', { x: 300, stance: 'stand' }).moveTo(600, { at: 0.2 }).moveTo(1200, { at: 4, duration: 1 })
+      .moveTo(900, { at: 5.5, hop: true });
+    for (const t of [1.1, 3.5, 4.6]) {
+      let direct;
+      withScene({}, (scene, el) => { cue(scene); scene.seek(t); direct = snapshot(el); });
+      withScene({}, (scene, el) => { cue(scene); scene.seek(6).seek(0.4).seek(t + 0.5).seek(t); assertEqual(snapshot(el), direct, `at ${t} s`); });
+    }
+    withScene({}, scene => {
+      const phy = cue(scene), walk = phy.state(1), rush = phy.state(4.56);
+      assert(walk.walk && walk.lift === 0 && !rush.walk && rush.lift > 0, 'it walks at its pace, and hops where its time is short');
+      assertEqual([phy.state(3.44).moving, phy.state(3.46).moving], [true, false], 'the walk takes its pace\'s time: 13 steps\' worth');
+      assertEqual([phy.state(4.99).moving, phy.state(5.01).moving, phy.state(5.01).x], [true, false, 1200], 'the hops take the time cued');
+    });
+  });
+
+  test('a friend standing walks a short way and hops only past some distance: the choice goes one way as the distance grows', () => {
+    // Each move out and back is far from the next, and is looked at as it starts: walking, or hopping.
+    const distances = Array.from({ length: 96 }, (_, k) => 10 + 2 * k);
+    for (const name of PhyFriends.list()) {
+      for (const time of [undefined, 0.5, 1]) {
+        withScene({}, scene => {
+          const friend = scene.add(name, { x: 400, stance: 'stand' });
+          distances.forEach((d, k) => friend.moveTo(400 + d, { at: 10 * k, duration: time }).moveTo(400, { at: 10 * k + 5, duration: time }));
+          const walks = distances.map((d, k) => !!friend.state(10 * k + 0.05).walk);
+          const hops = walks.indexOf(false);
+          assert(hops < 0 || walks.slice(hops).every(w => !w), `${name}, ${time ? `in ${time} s` : 'at its pace'}: walks ${distances.filter((d, k) => walks[k]).join(' ')}`);
+          if (time === undefined && PhyFriends.standLift(name) > 0) assert(hops < 0, `${name} walks any distance at its pace, but hops ${distances[hops]}`);
+        });
+      }
+    }
+  });
+
+  test('a friend put in its place at once is not shaken by the jump: a move of no time is a cut', () => {
+    for (const t of [0.05, 0.4]) {
+      let placed;
+      withScene({}, (scene, el) => { scene.add('yuda', { x: 900 }); scene.seek(t); placed = snapshot(el); });
+      withScene({}, (scene, el) => {
+        scene.add('yuda', { x: 300 }).moveTo(900, { at: 0, duration: 0 });
+        scene.seek(t);
+        assertEqual(snapshot(el), placed, `at ${t} s`);
+      });
+    }
+  });
+
   test('a friend added standing has its eyes raised by its lift', () => {
     withScene({}, scene => {
       const phy = scene.add('phy', { x: 500 }), yuda = scene.add('yuda', { x: 1100, stance: 'stand' });

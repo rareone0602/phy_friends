@@ -14,6 +14,22 @@
   font-family: 'Shantell Sans'; font-style: normal; font-weight: 300 800; font-display: swap;
   src: url('fonts/ShantellSans-Latin.woff2') format('woff2');
 }
+/* The stand-in, which shows until the face arrives: a face that most readers already have, set so that the swap moves
+   nothing. It is Arial, or a face with Arial's widths: Helvetica on Apple's systems, Liberation Sans on Linux and Arimo
+   on ChromeOS. Roboto, Android's face, has widths of its own, so it is not one of them, and Android keeps its system
+   face. The stand-in is scaled so that a line of the pages' text is about as long in it as in the face (size-adjust;
+   the face runs 8 to 10 percent wider than Arial at the same size, measured in Chrome over the gallery, phy's page and
+   the style guide), so that it wraps where the face will, and it takes the face's ascent and descent (1.02em and
+   0.32em, with no line gap), so that it sits on the rules where the face will. Each override is a share of the scaled
+   size, so it is the face's metric divided by 1.09. A reader who has none of these faces gets the next in --face. A
+   page that waits for the face waits for the house face alone, since loading a list that names a face the reader
+   lacks fails. */
+@font-face {
+  font-family: 'Shantell Sans stand-in'; font-style: normal; font-weight: 300 800;
+  src: local('Arial'), local('ArialMT'), local('Helvetica'), local('Liberation Sans'), local('LiberationSans'),
+    local('Arimo'), local('Arimo Regular'), local('Arimo-Regular');
+  size-adjust: 109%; ascent-override: 93.58%; descent-override: 29.36%; line-gap-override: 0%;
+}
 
 :root {
   --L: 32px;                /* Rule spacing. */
@@ -26,10 +42,11 @@
   --ink-3: #97938a;         /* For marks only, never for text. */
   --red: #a64a3f;           /* For errors only: a darker margin red. */
   --blue-pencil: #1c77ad;   /* An illustrator's non-photo blue, deepened to be read: a page's workings, shown on request. */
+  --green: #7c930c;         /* phy's eye color, one house shade step deeper to hold 3:1: for a work with no color of its own. */
   --band: 4;                /* Blank header band, in rules; the title sits on the first rule. */
   /* One typeface on one dial (STYLE.md §3). --informal sets how informal the work is:
      0 for a paper's diagram, 50 for a site, 100 for a hobby project. */
-  --face: 'Shantell Sans', ui-rounded, system-ui, sans-serif;
+  --face: 'Shantell Sans', 'Shantell Sans stand-in', ui-rounded, system-ui, sans-serif;
   --informal: 50;
 }
 * { box-sizing: border-box; }
@@ -120,8 +137,10 @@ footer a:hover { color: var(--ink); }
 }
 /* Phones in landscape: a shorter header keeps the characters on the first screen. It is
    the phone's header: the title and the intro step down one, and the title's two rules
-   give its descenders room, so the intro follows at once. */
-@media (max-height: 500px) and (orientation: landscape) {
+   give its descenders room, so the intro follows at once. A phone on its side is at least
+   568px wide; a narrower window as short, such as a desktop window zoomed to 400%, keeps
+   the header of a phone held upright, whose title fits its width. */
+@media (max-height: 500px) and (orientation: landscape) and (min-width: 568px) {
   :root { --band: 2; }
   main, body > header { padding-top: var(--L); }
   h1 { font-size: 54px; height: calc(var(--L) * 2); line-height: calc(var(--L) * 2); top: calc(var(--sit) + var(--L) / 2); }
@@ -134,7 +153,7 @@ footer a:hover { color: var(--ink); }
    contrast with the sheet. A page made for paper alone, and any print, stays on paper. */
 /* The dark sheet's inks, written by `python3 tools/dark_sheet.py` from the paper's above: edit those and run it. */
 @media screen and (prefers-color-scheme: dark) {
-  :root:has(meta[name="color-scheme"][content~="dark"]) { --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; --blue-pencil: #66afe8; }
+  :root:has(meta[name="color-scheme"][content~="dark"]) { --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; --blue-pencil: #66afe8; --green: #8ca02b; }
 }
 /* The end of the dark sheet's inks. */
 @media screen and (prefers-color-scheme: dark) and (forced-colors: none) {

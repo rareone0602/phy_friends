@@ -10,9 +10,11 @@
 % venue) so that symbols and digits in the diagram match the text. The font is in
 % fonts/ next to this file, together with its license.
 %
-% One typeface, Shantell Sans, on one dial: informal is 0 for a paper, 50 for a site
-% and 100 for a hobby project (STYLE.md §3).
-%   \usepackage[informal=50]{phy-diagram}   a diagram for a site or slides
+% One typeface, Shantell Sans, on one dial (STYLE.md §3). A diagram's own words are at 0
+% wherever it is shown, since the reader measures them, and its single note is in the hand
+% at 50 (lib/style/figures/README.md), so a diagram keeps the default. The informal option
+% is for a drawing that the reader does not measure, such as one on a card:
+%   \usepackage[informal=100]{phy-diagram}
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{phy-diagram}[2026/09/28 phy's pencil for diagrams]
 

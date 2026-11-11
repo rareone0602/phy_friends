@@ -9,7 +9,7 @@ it changes as the style does (see [Keeping step](#keeping-step)).
 | file | what it is |
 |---|---|
 | `phy.css` | the library: the paper, then everything drawn on it |
-| `notebook.css` | the paper: the tokens, the face, the rules, the margin line, the tooth and the dark sheet |
+| `notebook.css` | the paper: the tokens, the face and its stand-in, the rules, the margin line, the tooth and the dark sheet |
 | `pencil.css` | everything drawn on the paper; its opening comment lists the classes |
 | `papers.css` | other sheets, optional, loaded after the rest: see [Papers](#papers) |
 | `fonts/` | the face, Shantell Sans: a Latin subset of about 170 KB with all three axes (`tools/font_subset.py` makes it), and its licence; it stays beside `notebook.css` |
@@ -45,6 +45,15 @@ it changes as the style does (see [Keeping step](#keeping-step)).
   a font preloaded from beside the page (one from the site is fine), so a page
   in this repository adds the preload from a script that leaves it out for a
   `file:` page, as `index.html` does.
+- **The stand-in** shows until the face arrives: Arial, or a face with its
+  widths (Helvetica, Liberation Sans, Arimo), made as wide as the face and
+  given its ascent and descent (`size-adjust` and the overrides on
+  `'Shantell Sans stand-in'`, which `--face` names second), so that text wraps
+  and sits where the face will put it and the swap moves nothing. A reader
+  with none of them, as on Android, gets the system's face, as before. A
+  script that waits for the face loads the house face alone (the first name
+  in `--face`, from `getComputedStyle`), never the whole list: a list that
+  names a face the reader lacks fails to load.
 - **The dial:** set `--informal` on `:root` where the work is not at `50`, and
   mark hand-written text with `.hand`.
 - **The dark sheet:** `<meta name="color-scheme" content="light dark">` turns
@@ -81,6 +90,7 @@ The tokens, in `notebook.css`, on the paper and on the dark sheet:
 | `--ink-3` | `#97938a` | `#86837a` | `2.9:1`: marks only (dashes, squiggles, the quote line, disabled controls); never words someone needs to read |
 | `--red` | `#a64a3f` | `#fe9c8c` | `5.4:1`: errors, and nothing else; the margin's red, pressed harder |
 | `--blue-pencil` | `#1c77ad` | `#66afe8` | `4.6:1`: a page's workings (the construction under a drawing, notes on how the page is made), shown only when the reader asks |
+| `--green` | `#7c930c` | `#8ca02b` | `3.3:1`: a work with no colour of its own (`STYLE.md` §1), as a fill or a line, never words; phy's eye colour a house step deeper. Never beside the data colours: under red-green colour blindness it is the ochre |
 
 - The paper's tooth is a fine fractal noise at `40%`, multiplied over
   everything (`--tooth`; the dark sheet's specks and strokes are `--speckle`
@@ -88,7 +98,11 @@ The tokens, in `notebook.css`, on the paper and on the dark sheet:
 - On the dark sheet every ink but the paper and graphite keeps its hue and its
   contrast with the sheet, as the table's numbers say; `python3
   tools/dark_sheet.py` derives them again and writes them, and the marks, into
-  the kit. The tooth shows through the graphite as light specks, and the
+  the kit. An ink deepened from a colour of its own to hold its floor on the
+  paper returns on a dark sheet towards that colour, as far as it keeps the
+  floor and stays as far from the red and the blue pencil, under every kind of
+  colour vision, as it is on the paper: the green, phy's iris (`#9cac47`), is
+  `3.3:1` on the paper and `3.8:1` on the dark sheet, where the red stops it. The tooth shows through the graphite as light specks, and the
   graphite lies in strokes rising to the right.
 
 ## Papers
@@ -143,7 +157,7 @@ page's, as a character does. `style.html` shows each.
 
 - **The print** sits at the work's number `d` (`INFM d`) and never bounces.
   **The hand** is never neater than `50` and bounces in the top half: `INFM
-  max(d, 50)`, `BNCE max(d − 50, 0)`. A chart's words are all at `0`. Past
+  max(d, 50)`, `BNCE max(d − 50, 0)`. Past
   `50` a lower-case s grows towards a capital: a site stops there, so "saved"
   still reads as "saved", and a hobby project goes all the way. Bounce stops
   at `50`: any more lifts a p or an s to capital height, and "phy" reads
@@ -232,7 +246,9 @@ The parts:
 - **Lists, quotes and code.** A list item starts with a dash in `--ink-3`, and
   a numbered one with its number in the hand. A quote is indented, in
   `--ink-2`, with the side line. Code is one line to a rule; a block is
-  indented like a list, with no box, and wraps rather than scrolls.
+  indented like a list, with no box, and wraps rather than scrolls. Code in a
+  sentence never breaks, so a flag such as `--color` stays whole on a phone;
+  anything longer than a phone's line goes in a block.
 - **Pictures** are a whole number of rules tall (`figure style="--rules: 6"`),
   with top and bottom on rules. A scan or a line drawing on white is laid in
   with `multiply` (`img.drawing`), so its white becomes the paper, and keeps
@@ -271,8 +287,10 @@ The parts:
 
 ## Other places
 
-- **Favicon:** phy's head, drawn for 16 pixels (`STYLE.md` §1), on every site
-  phy makes, unless the work is about another character.
+- **Favicon:** phy's head, drawn for its size rather than shrunk: at 16
+  pixels it keeps the ears, the white face and the green eyes, and leaves the
+  rest out. It goes on every site phy makes, unless the work is about another
+  character.
 - **Link preview:** the page's own paper, title and characters, set to fill
   `1200×630` with every character at one size, under a title large enough to
   lead at a feed's 300 pixels wide; not a designed card, with no extra text

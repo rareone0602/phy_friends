@@ -368,7 +368,7 @@
     // own idle (breathing, blinking), looking at the viewer, its pencil boiling with the film's. A copy of
     // its spec is made for each set of the era's values, so that no figure the library caches outlives them.
     function standIn(page, local, spec, { x, y, phase, from, to }) {
-      const idle = A.idleOf(local), copies = new Map();
+      const idle = A.idleOf(local, { spec }), copies = new Map();  // Its own idle, by its film-local name and its build.
       let rig = null, mountedFor = null;
       k.draw(page.over, from, to, (el, t) => {
         const key = JSON.stringify(k.era.values(t));

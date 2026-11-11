@@ -36,7 +36,7 @@ classic script (`window.PhyFriends`, or CommonJS), so pages work straight from
 | `lib/fwiends/src/pen.js`, `lib/fwiends/src/title-pen.js`, `lib/fwiends/src/signature-pen.js` | text that writes itself stroke by stroke, and the strokes with which the gallery's title and phy's page's write themselves |
 | `lib/fwiends/src/cast.js` | the rules for friends together: who knows whom, who may speak, and what they may do together |
 | `lib/fwiends/film/scene.js` | scenes: several friends on one sheet of ruled paper, with props, handwriting and a camera, for films and games |
-| `lib/fwiends/film/film.js`, `lib/fwiends/film/film.css` | a film on a page: it plays once when it scrolls into view, with a button to play it again, and boils as it plays; the stage, and the credits and controls under it |
+| `lib/fwiends/film/film.js`, `lib/fwiends/film/film.css` | a film on a page: it plays once when it scrolls into view, with a button to play it again, and boils as it plays; the stage, no taller than the first screen leaves it on a window at least 600px tall, so that the film starts as the page opens, and the credits and controls under it |
 | `lib/fwiends/film/props.js` | props as specs, as friends are: a palette, a box and parts, drawn with the core's shapes and pencil; states (a cake's candles lit) that a scene switches on cue, and colours a scene may override (a party hat in a friend's colour) |
 | `lib/fwiends/props/<name>.js` | the shared props, one spec each (`PhyFriends.props.define(name, spec)`): `cake`, `candle`, `partyHat`, `balloon`, `gift`, `medal`, `pencil` and `gramophone` |
 | `lib/fwiends/characters/cast.js` | the cast itself: each friend's name, pronoun, owner's credit and the media the owner has agreed to, and which owners know each other |
@@ -118,7 +118,27 @@ is a pose: the pose's `rise` is added to its stance (0 for `sit`, 1 for
 `stand`) and the sum held between 0 and 1, so an animation eases `rise` to
 stand a friend up or sit it down, and can catch it halfway. Nothing appears or
 vanishes on the way, and `PhyFriends.riseOf(spec, pose)` says how far a pose
-has raised its head.
+has raised its head. Rising is a movement, not a stretch: its feet step in
+under it first, while its hips stay down, so that its weight is over them;
+then its hips rise; and its arms keep their seated fold, the paws going up
+with the body rather than sliding out over the ground, until it is most of
+the way up, when they come down to hang at its sides. Each part has its share
+of the rise (`PhyFriends.RISE`: the feet from 0 to 0.45, the hips from 0.2 to
+1, the arms from 0.5 to 1), eased in and out. The hips' share is one of the
+change's time rather than of its height: standUp and sitDown ease `rise` in
+and out, so the middle of the height passes quickest, and hips that kept to a
+share of it would drop through it. Paced, they move no further in a frame
+than when they kept pace with the rise itself, and land on the seat softly.
+The feet step rather than slide: the left in the first half of their share and the right in the
+second, each lifted `RISE.step` (6 units) at its step's middle, so that a
+foot on the ground never moves along it. Sitting down runs it all backwards:
+the arms come forward, the hips sink, and the feet step out, the right first.
+The tail's root lies a little outside the body, where the seated feet or the
+hanging paws lie over it. Over the first tenth of the rise (`RISE.tuck`) it
+draws in to the nearest point of the body's outline and 2.5 units past it
+(`TUCK.depth`), and over the last tenth it goes back, so that the tail stays on
+the friend in between. A root further out than 18 units (`TUCK.reach`) is set
+on the head rather than the hips, and stays where it is.
 
 The seat (`stand.seat`) is the friend's own seated drawing: `seat.paw` and
 `seat.foot` are the forepaw and the hind foot it sits with, the left ones, as
@@ -149,9 +169,22 @@ does and stands just as well.
 
 An arm is posed by its angles; a leg reaches from its hip to its foot, which
 stays planted while the hips drop (`crouch`), lean (`lean`) or the foot steps
-up (`stepL`). A plush leg (the default, `knees: false`) squashes to take up the
-slack, where one with knees (`knees: true`) bows out; a leg that cannot reach
-stretches a little before its foot leaves the ground.
+up (`stepL`), and while the whole figure tips about the ground between its feet
+(`tip`), hips, head and all. A plush leg (the default, `knees: false`) squashes
+to take up the slack, where one with knees (`knees: true`) bows out; a leg that
+cannot reach stretches a little before its foot leaves the ground. Seated, a
+friend leans from its seat, head and all, its base staying on the ground: an
+arm reaches back to its paw as a leg reaches for its foot, so the forepaws stay
+where they rest, as far as the arm can stretch. A sway of a degree or less, as
+the idle's breath, the upper body takes alone, the limbs riding with it as they
+are, so that it costs a seated friend no outline; from three degrees the limbs
+plant fully (`planted` in the code).
+
+Squash and stretch are the body's. A friend that stands or sits on its limbs
+squashes its body `PhyFriends.SQUASH.body` times as much as the pose's
+`squash` (2.5, so that a hop reads as it did when the whole friend squashed),
+while its head keeps its size and rides on its neck, carried by the body's top.
+Claude, having no such body, squashes whole.
 
 From the back, a friend is drawn as its body with its clothes, its scarf, its
 head, whose chin lies over the scarf and the collar, and then its arms, in
@@ -162,12 +195,33 @@ under the arms, and a sleeve takes its cloth's house shade, so that it shows
 against the garment's front. Only the shoulder end of each arm
 (`STAND_FIT.tuck`, 0.6 of its length) tucks under the scarf and the head, so
 the arms come out from under the fur; the paws never do. Seated, the arms hang
-in front of the scarf, a bib of fur included, and the tuck fades in as the
-friend rises, fully by halfway, so that they slide under it. The pose's
-`over` draws an arm whole in front of everything, shoulder too. An arm and its
+in front of the scarf, a bib of fur included, and the tuck fades in as they
+come down to the friend's sides, fully once they are halfway there (three
+quarters of the way up), so that they slide under it. The pose's
+`over` draws an arm whole in front of everything, shoulder too; naming both,
+it draws both arms and then both paws, so that paws clasped together lie on
+the arms. An arm and its
 paw take their colours' house shades as the paw comes in front of the head or
 the face, fading in over a paw's breadth either side of their edge, so that a
-paw the colour of the face still shows against it without an outline. Claude
+paw the colour of the face still shows against it without an outline; once
+raised, as it comes in front of the body or the tail as well.
+
+A raised arm is laid over the friend as a piece cut out of paper, in the idiom
+of the dark sheet's cut-out (`CUTOUT_STYLE`): round the arm, its bands and its
+paw, a lip of paper half a pencil's width wide (`LIP`, half of `CUT`), shown
+only where the head, the scarf, the body or the tail lie under it. The arms and
+paws in front are one piece: every edge is drawn before any of them, so that
+only the rim of what they cover together shows, never a loop inside it where a
+paw lies on its arm or on the other paw. So an arm across a body of its own
+colour shows, and a paw beside a cheek of its own colour is cut from it. The edge comes in once the paw has
+moved a paw's breadth from where it hangs (`EDGE.raised`, 14 to 20 units), so
+the walk's swing and the idle's breath never draw it, and as the paw comes
+within a paw's radius of the head, the body or the tail (`EDGE.near`). An arm
+that hangs behind or beside the body, turned, takes none. While no edge is
+drawn, a pose works none of it out and writes none of it, and the mask's
+copies of the parts point at nothing (`data-pf-link`), as the tuck's do while
+the arms do not tuck: a copy of a part (`<use>`) is worked out afresh every
+time the part changes, even where nothing shows it. Claude
 stands already, on the glyphs' four legs, so its spec sets `stand: false` and
 it keeps its shape in either stance, as does any spec without a body, or with
 one that is not an ellipse, on which the limbs could not be fitted.
@@ -249,7 +303,14 @@ bandana. A mounted rig draws a friend afresh when it turns, into the same
 `<svg>`, keeping `rig.parts` and its pencil texture, since a turned friend is
 drawn in another order; every other change of pose rewrites a few transforms,
 as before. `PhyFriends.anim.make.turn({ quarters })` turns a friend round a
-quarter at a time, each turn landing with a small hop.
+quarter at a time, each turn landing with a small hop. A turn has a lead
+(`anim.TURN_LEAD`): the eyes go first (`lookX`), then the head (`turnX`), and
+then the view snaps round, after which the head, left a little behind in the
+new view, settles, and the eyes come back to the front. The eyes lead only in
+a view that shows them: from behind, the head leads alone, from the start.
+Laid over a friend already turned, the turn is told where it starts
+(`make.turn({ quarters, from: 180 })`), since that decides which views show
+the eyes.
 
 ## Spec
 
@@ -308,7 +369,9 @@ with what they all share besides: the legs in the house shade (`palette.leg:
 (`body.onigiri: 1`), the ground (`rig.ground: 131`) and the close-up view
 (`views.closeup`). Claude, off the template, extends `friend` alone. The
 abstract friends are never listed (`PhyFriends.list()`), and `PhyFriends.get`
-reads them like any friend.
+reads them like any friend. `PhyFriends.get` throws for a name nothing
+defines; `PhyFriends.find` gives null instead, for code that can go on without
+the spec, as a friend's idle, weight and gait do, taking the house's.
 
 Every character file is laid out the same way, so two specs read side by side:
 - a one-line header comment naming the character and its reference pictures;
@@ -456,9 +519,18 @@ about their roots, below them, so that a positive ear rotation turns them out.
 The one ear that turns otherwise does so by design: cowosus's folded ear, drawn
 as the flap that hangs from its fold, turns about the fold, above it, so that a
 positive rotation swings it in against the head, and the test names it, so that
-no other ear hangs from a pivot above it by mistake. And a paw raised in front
+no other ear hangs from a pivot above it by mistake. A paw raised in front
 of the face shows against it, even where it is the face's colour, since it
-takes its house shade there (no outline being the house's rule).
+takes its house shade there (no ink outline being the house's rule). At the key
+pose of every gesture the library offers (the wave, the cheer, the jump, the
+stretch, the point and the beckon, each where it holds an arm highest, and each
+feeling's standing gesture, held), every paw that the gesture moves a paw's
+breadth shows at least half its outline against what lies round it, the head,
+the body, the tail and the other paw included, by the paper edge where it must
+(see [Standing](#standing)); where a paw meets its own arm, about a quarter of
+its outline, nothing can show. And posing any friend through a second of its
+idle writes no more attributes than the contract's `IDLE_WRITES` allows,
+seated and standing, so that what a pose costs a page cannot creep up.
 
 Claude keeps the shape of Claude Code's mascot, and its spec the names it had
 before the roles (`body`, `eye`). A spec without a role draws its part as one
@@ -511,9 +583,19 @@ is added standing (`scene.add('yuda', { stance: 'stand' })`) or stands up on
 cue (`yuda.stand({ at: 1 })`, and `sit()` to sit down again). It rises through
 every height in between (the pose's `rise`), and its eyes, and the marks and
 words above them, rise with it. While it stands it walks where a seated friend
-hops: its feet take the walk's small steps (`PhyFriends.anim.WALK` and
-`walking`) while its body glides on up to twice as far, at a little under half
-a hop's speed. `moveTo(x, { hop: true })` hops all the same.
+hops (`PhyFriends.anim.WALK` and `walking`), and never skates: its step
+follows the distance it has gone, so a planted foot stays where it was put.
+Facing the viewer the foot on the side it goes to steps out and the other
+closes up; side-on, its legs swing forward and back. A walk keeps the time its
+cue gives, at no more than five steps a second (`WALK.cadence`): where the time
+is short, it lengthens its stride as far as the friend's legs reach
+(`anim.gaitOf(spec)`, `anim.walkSteps`), and where they cannot reach, it hops,
+so that the further it goes in the time, the sooner it hops, and never the other
+way. Given no time, it walks at the walk's pace however far it goes, taking a
+little longer only where its legs need more steps than the pace allows.
+`moveTo(x, { hop: true })` hops all the same; a hop gathers itself first and
+squashes as it lands. However a friend gets about, its moves weigh on the rest
+of it (see [Pose](#pose)).
 `lib/fwiends/src/cast.js` holds the rules for friends together (FWIENDS.md,
 "scenes"), and the scene enforces them: two friends are strangers unless
 `lib/fwiends/characters/cast.js` says their owners know each other, strangers
@@ -526,7 +608,8 @@ owner alone (`PhyFriends.scene.create(el, { madeFor: 'yuda' })`) lets that
 owner's friend say and write a few drafted lines as well. A broken rule
 throws, saying what would allow it, and its error's `code` is
 `PhyFriends.cast.BROKEN`, which tells it from a slip in a page's own code.
-Each frame credits the owners of the friends in it, and a friend whose owner
+Without the cast's data loaded, its rules throw too; `PhyFriends.cast.installed`
+says whether it is, for code that can go on without it. Each frame credits the owners of the friends in it, and a friend whose owner
 has not agreed to films or games marks the scene "draft". `credits: false`
 turns the frame's credits off: a game that runs only in the page then links
 each owner in the page's small print, and a film names the owners once,
@@ -576,20 +659,28 @@ Every field is optional:
 { x, y, squash, tilt, headX, headY, turnX, turnY, lookX, lookY, blink, widen, lid, lidTilt, earL, earR, hair, tail,
   blush, flush, eyes: 'open' | 'happy' | 'closed' | 'squint' | 'swirl', eyeL, eyeR,
   mouth: 'none' | 'w' | 'smile' | 'frown' | 'o' | 'v' | 'flat' | 'wobble' | 'open', show: 'laptop side',
-  stance: 'sit' | 'stand', rise, crouch, lean, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR',
+  stance: 'sit' | 'stand', rise, crouch, lean, tip, armL, armR, elbowL, elbowR, legL, legR, stepL, stepR, over: 'armL armR',
   facing: 0 | 90 | 180 | 270 }
 ```
+
+`squash` stretches (+) or squashes (−) the friend about the ground: the body
+alone, by `PhyFriends.SQUASH.body` times as much, for a friend with limbs, its
+head keeping its size; the whole of Claude.
 
 `rise` adds to the stance (0 for `sit`, 1 for `stand`), the sum held between 0
 and 1, and the friend is caught at that height. The rest of the last line moves
 the limbs (see [Standing](#standing)): a friend takes less of it the lower it
-is, and none seated. `armL` raises the left arm (the viewer's left) in
+is, and none seated, but for `lean`. `armL` raises the left arm (the viewer's left) in
 degrees, 0 hanging and 90 held out level, and `elbowL` bends it further along:
 + carries on the way it raises, as in a wave, and − curls the paw in towards
 the chest. `legL` swings a leg out at the hip, `stepL` lifts its foot (head
 units), `crouch` drops the hips with the feet planted, and `lean` tips the upper
-body about the hips (+ to the viewer's right, as `tilt` tips the head). `over`
-names the arms drawn whole in front of everything, shoulder too.
+body about the hips (+ to the viewer's right, as `tilt` tips the head), or,
+seated, about its seat, head and all. `tip` tips the whole standing figure about
+the ground between its feet, which stay planted (+ to the viewer's right, in
+degrees, which `PhyFriends.anim` clamps to ±15°): the hips go with it, and the legs reach
+back to the feet. `over` names the arms drawn whole in front of everything,
+shoulder too.
 
 `lid` brings a lid down over the open eyes, cut straight across (0 up, 1 shut),
 and `lidTilt` slants it: + lowers its inner end, for a cross look, − raises it,
@@ -605,16 +696,17 @@ hangs from its fold, as cowosus's folded ear does, turns about the fold
 instead, so + lays it against the head and − lifts it away.
 
 `tail` wags the tail about its base, in degrees: + swings the tip outward and
-− tucks it in behind the body. The clips keep it within about ±12°, and
-`PhyFriends.anim` clamps it to ±45°.
+− tucks it in behind the body. The clips keep it within about ±12°, a quick
+move's weight (below) swings it further, and `PhyFriends.anim` clamps it to
+±45°.
 
 `facing` turns the whole friend round, a quarter at a time (see
 [Turning](#turning)); like the other numbers, it adds up when clips are
 layered, so a clip that turns a friend by 90 turns one already side-on to face
 away. Side-on, a positive `armL`, `elbowL` or `legL` swings that limb forward,
 on either side, so a wave reaches forward and a walk strides
-(`PhyFriends.anim.walking(u, steps, { distance, facing })` keeps the planted
-foot still side-on as well); from behind, the friend being its own mirror image,
+(`PhyFriends.anim.walking(u, steps, { distance, gait, facing })` keeps the
+planted foot still side-on as well); from behind, the friend being its own mirror image,
 `armL` is the arm on the viewer's right.
 
 A head turn (`turnX`, `turnY`) is faked with per-layer parallax: ears and the
@@ -625,6 +717,58 @@ convincing 2.5D head turn for look-at effects.
 const rig = PhyFriends.mount(document.querySelector('#box'), 'howdi');
 rig.setPose({ lookX: 0.8, turnX: 0.5, eyes: 'happy' });
 ```
+
+A friend at rest is posed by its idle, `PhyFriends.anim.idleOf(name)`, which
+pages and scenes play under everything else. It is a stream that never
+repeats, and still, on a given page, a function of the friend and the time
+alone, so any moment can be drawn on its own (its tempo, below, depends on
+which friends the page defines): its breath wanders a little in tempo and in depth; its
+head, its weight and its tail sway on slow waves whose lengths share no period;
+and its blinks, glances, ear flicks and tail swishes come at times drawn afresh
+for each stretch of a few seconds. Each friend breathes at a tempo of its own
+(`anim.BREATH`), about every 2.7 seconds for a figure of the house's build,
+more slowly the heavier its build (`anim.buildOf(spec)`, from its body, its
+head and its tail, never its name) and faster or slower by up to 8% as its seed
+has it. Where that leaves two friends of the cast within 1.2% of each other,
+the cast's tempos are spread (`anim.breathOf(name)`), each moved as little as
+can be and their order kept, so that no two breathe in step. The spread takes
+the cast's friends that the page defines (every friend it defines, where no
+cast is loaded); any other (a film's working copy, the tuning page's
+placeholder) keeps the tempo its build and seed give, and one known by name
+alone, which nothing defines, the house's build (`idleOf(name, { spec })`
+gives it its own). Its ears and its tail sway with each
+breath less the longer they are, and a big head bobs less. Its head follows a
+glance a moment after its eyes. Claude, without the house's figure, takes the
+house's build and keeps its head still while its eyes glance. The library's
+`idle` clip is the same idle looped in 8 s, for exports.
+
+A move weighs on the rest of the friend. Wherever a clip or a scene takes its
+root (`x` and `y`), each loose part hangs on a spring driven by the root's
+acceleration a and its speed (`PhyFriends.anim.inertia(path, { spec })`): the
+standing figure `tip`s by atan(a/g) toward where it speeds up, its head
+(`headX`, `headY`, `tilt`) lags as it sets off and carries on a little as it
+stops, its hips `crouch` on landing as far as the fall was long, and its ears,
+tail and hair sag as the floor pushes it up, float as it falls and trail behind
+the way it goes. Every spring is overdamped (its damping ratio is over 1), so a
+part settles without swinging past its rest, and goes no further than its
+reach. How far and how slowly a part swings comes from the spec, never the
+name (`anim.massesOf(spec)`): the head's share of head and body, and the ears'
+and tail's length against the house's. A part the figure lacks has no spring,
+so Claude, which never stands and has neither head nor tail of the house's, is
+moved in its ears (its arms) alone. The springs are stepped from the first move
+at a fixed step, so a frame is still a function of the time alone, and a
+looping clip loops with the steady swing that it settles into.
+`anim.weighed(clip, { spec })` weighs a clip, once: a clip made of a weighed
+one (`layer`, `seq`, `loop`, `mirror` and the rest) is weighed already, and is
+not weighed again. Every way of playing a clip on a friend weighs it: a player
+(`anim.play(rig, clip)`, for the rig's spec), `parse(clip, { spec })`, a
+friend's stack (`stack({ spec })`), and a scene, which weighs the friend's
+travel too; so the hop and the jump leave their follow-through to it, and the
+walk on the spot, at rest at every whole step, leaves to it what follows the
+body late, which settles when the walk ends. The weight's memory is bounded
+however long a clip plays (`inertia(...).size()`), and it swings a tail no
+further than `INERTIA.tail` either way, so that a long tail never reaches the
+head.
 
 ## Feelings
 
@@ -675,7 +819,15 @@ what a screen reader hears of the greeting (`E.describeGreeting('Howdi')`).
 `anim`'s `parse` understands the four forms, so `pf.py anim howdi --clip
 "layer(idle, hold('content'))"` films one, `tools/animate.html` plays any of
 them on any friend, and `tools/feelings.html` shows every friend in every
-feeling. `PhyFriends.anim.mirror(clip)` plays a clip toward the other side:
+feeling. A page or a scene lays a feeling over a friend's idle on a stack of
+timed layers (`PhyFriends.anim.stack()`), each fading in and out over 0.15 s,
+eased at both ends. A face's eye and mouth shapes cannot fade. The eyes change
+theirs under a blink, fully shut at the moment of the change (`anim.SWAP`), as
+a reaction brings in its face's eyes too; under reduced motion they change at
+the same moment without it. A mouth changes without a blink, at the fade's
+ends: it comes in as its layer starts to fade in and goes as it ends fading
+out (a reaction's, as it starts), and so does an arm laid over everything
+(`over`), while the arm is still where it was. `PhyFriends.anim.mirror(clip)` plays a clip toward the other side:
 what turns one way turns the other, and each arm, leg, ear and eye changes
 places with its pair.
 
@@ -698,8 +850,8 @@ stage.start();
 
 Each friend rests on the bottom edge of its box, seated unless it is added
 with `stance: 'stand'`; then it stays standing through a hi or a feeling, and
-its ears reach further above the box. It breathes and blinks with the idle
-clip, follows the pointer, answers a hi (a click, a tap, Enter or Space), and
+its ears reach further above the box. It breathes and blinks with its own idle
+(`anim.idleOf`, see [Pose](#pose)), follows the pointer, answers a hi (a click, a tap, Enter or Space), and
 feels what a visitor does to it (FWIENDS.md, "Saying hi"); the stage says what
 happened in the page's live region (`.announcer`, in
 `lib/style/site/pencil.css`). A box that is a button takes `role="button"`,
@@ -711,7 +863,8 @@ call moves its friends and turns their eyes through two hooks on each friend,
 `travel` and `watch` (another friend to look at, or a point on the screen),
 and a friend's `smile()` lasts until the function it returns is called, as on
 the gallery while a friend's owner's credit is pointed at. The stage's
-`onStroke(friend, seconds)` tells a page how long a friend has been stroked;
+`onStroke(friend, seconds, held)` tells a page how long a friend has been
+stroked, and whether a finger held still on it has stroked it;
 on the gallery, stroking Terry for five seconds opens the tuning page
 (`tools/tune.html`), on which his owner chose the proportions, and stroking
 every friend that shows feelings, each at least once in one visit, opens the
@@ -719,7 +872,9 @@ feelings sheet (`tools/feelings.html`) once the last one's ♪ has shown.
 Options fix a pointer, a hi or a feeling for screenshots (the gallery's
 `?px=..&py=..`, `?hi=<name>` and `?feel=<feeling>`; a feeling so fixed returns
 after a hi or a stroke) and set how long the friends wait before they doze
-(`?doze=<seconds>`). Under reduced motion the friends keep still but for their
+(`?doze=<seconds>`). Woken, the sleepers start one after another rather than in
+one frame: by a key, in a seeded order over 0.4 s (`live.wakeSchedule`), and by
+the pointer, the nearest first. Under reduced motion the friends keep still but for their
 eyes; `PhyFriends.live.keepStill(checkbox)` gives a reader the same choice
 ("keep still"), remembered on the device in `live.still`, which every stage
 follows unless given a `reducedMotion` of its own. A page loads
@@ -727,6 +882,28 @@ follows unless given a `reducedMotion` of its own. A page loads
 `lib/fwiends/src/emotion.js` and `lib/fwiends/src/live.js`, in that order.
 `stage.sitStill(true)` holds every friend as still as reduced motion does
 until `stage.sitStill(false)`, without touching the reader's setting.
+
+A stage draws a friend only while its box is in view, or while it is on its
+way into view, and only as often as what it is doing needs:
+`stage.pace(friend)` says which. `'now'` is every frame, while it acts (a hi,
+a reaction, a clip it plays, its travel) or its eyes or perk are still easing
+towards what it watches; `'calm'` is fifteen times a second, while it only
+breathes; `'boil'` is as often as the pencil boils, while it dozes, or keeps
+still with a feeling or a mark showing; and `'rest'` is not at all. With every
+friend in view at rest the stage looks in on them four times a second, and
+with none in view, or the tab hidden, it draws nothing. Each friend eases its
+gaze and perk by the time since it was itself last drawn, so a friend drawn on
+fours keeps pace with one drawn every frame; `stage.draw(t, friends)` draws
+the stage at time `t` on its clock, every friend or only those given, as the
+frame loop does. A friend's first frame shows it exactly as it was mounted,
+and its idle motion grows in over 0.8 s from there, so that a still the page
+wrote of it at rest (the gallery's, by `pf.py pages`) gives way to it
+unmoved. `friend.play(clip, {
+at, hush })` plays a clip from `PhyFriends.anim` over the friend's pose from
+stage time `at`, and keeps the idle off the fields the clip moves for `hush`
+seconds either side, so that a blink played so never runs into one of the
+idle's; the gallery's flourish plays its blinks so (FWIENDS.md, "The
+opening").
 
 ## Workings
 

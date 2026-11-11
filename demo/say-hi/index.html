@@ -16,9 +16,10 @@
 <script src="../../lib/style/site/graphite.js"></script>
 
 <div class="sh-host" aria-label="say hi, a film"></div>
-<p class="sh-controls"><button type="button" class="sh-play">play</button><span class="sh-time"></span></p>
-<!-- The music: the local copy where it exists (out/ is not published), else the same file from its source (beats.js). -->
-<audio class="sh-music" preload="auto">
+<p class="sh-controls"><noscript>the film is drawn live, so it needs JavaScript to play.</noscript><button type="button" class="sh-play">play</button><span class="sh-time"></span></p>
+<!-- The music: the local copy where it exists (out/ is not published), else the same file from its source (beats.js).
+     The script below fetches it once the page has loaded, so that it does not hold up the film's own files. -->
+<audio class="sh-music" preload="none">
   <source src="../../out/video/music/candidates/cc-composers/komiku-the-road-we-use-to-travel.mp3" type="audio/mpeg">
   <source src="https://archive.org/download/Komiku-TaleOnTheLate/Komiku_-_03_-_The_road_we_use_to_travel_when_we_were_kids.mp3" type="audio/mpeg">
 </audio>
@@ -58,7 +59,13 @@
 
     const frame = () => host.querySelector('.sh-frame');
     const music = document.querySelector('.sh-music'), button = document.querySelector('.sh-play'), clock = document.querySelector('.sh-time');
-    let playing = false, started = 0, offset = 0, pending = false;
+    const lastSource = music.querySelector('source:last-of-type');
+    const WAIT_LIMIT = 30;  // Seconds the film waits for its music before saying that it has not come.
+    const NO_MUSIC = 'the music did not load, so the film cannot play.';
+    let playing = false, ticking = false, offset = 0, pending = false, waitTimer = null, waitLabel = '';
+
+    // The music is fetched once the page has loaded, so that it is usually ready before play is pressed.
+    addEventListener('load', () => { music.preload = 'auto'; }, { once: true });
 
     // Scales the frame to the window, centered.
     function fit() {
@@ -69,16 +76,11 @@
     }
     addEventListener('resize', fit);
 
-    // The music's clock where it plays, else the page's own.
-    function time() {
-      if (!music.paused && !music.error) return music.currentTime;
-      return offset + (performance.now() - started) / 1000;
-    }
-
+    // The film follows the music's clock, so it holds still whenever the music does.
     function tick() {
-      if (!playing) return;
-      const t = time() % SayHi.beats.DURATION;
-      clock.textContent = SayHi.beats.label(t);
+      if (!ticking) return;
+      const t = music.currentTime % SayHi.beats.DURATION;
+      if (!waitTimer) clock.textContent = SayHi.beats.label(t);
       if (!pending) {
         pending = true;
         SH.seek(t).then(() => { pending = false; });
@@ -86,21 +88,93 @@
       requestAnimationFrame(tick);
     }
 
-    // A pause keeps the time it was made at, within the film, however often the music has looped.
+    // The music is started within the press itself, since Safari allows sound only from a reader's gesture,
+    // and the film starts once the music plays. Until then it waits, under the kit's wait mark, since it is
+    // cut to its music. A pause keeps the time it was made at, within the film, however often the music has
+    // looped.
     function play() {
       playing = !playing;
       button.textContent = playing ? 'pause' : 'play';
       if (!playing) {
-        offset = time() % SayHi.beats.DURATION;
-        music.pause();
+        if (ticking) offset = music.currentTime % SayHi.beats.DURATION;
+        halt();
         return;
       }
-      started = performance.now();
-      music.currentTime = offset;
+      if (music.networkState === HTMLMediaElement.NETWORK_NO_SOURCE) return giveUp();  // Its sources failed before.
+      seekMusic();
       music.loop = true;
-      music.play().catch(() => {});
-      requestAnimationFrame(tick);
+      if (music.readyState < HTMLMediaElement.HAVE_FUTURE_DATA) showWait();
+      music.play().catch(refused);
     }
+
+    // Sets the music to offset; before its metadata has loaded, once it has.
+    function seekMusic() {
+      if (music.readyState === HTMLMediaElement.HAVE_NOTHING) {
+        if (offset > 0.05) music.addEventListener('loadedmetadata', () => { music.currentTime = offset; }, { once: true });
+      } else if (Math.abs(music.currentTime - offset) > 0.05) {
+        music.currentTime = offset;  // A seek, even to where the music is, holds it back for a moment.
+      }
+    }
+
+    // Stops the film and the music where they are.
+    function halt() {
+      ticking = false;
+      hideWait();
+      music.pause();
+    }
+
+    // The music did not come, by an error or within WAIT_LIMIT: the film stops, and the clock's place says so.
+    function giveUp() {
+      if (ticking) offset = music.currentTime % SayHi.beats.DURATION;
+      playing = false;
+      button.textContent = 'play';
+      halt();
+      clock.textContent = NO_MUSIC;
+    }
+
+    // play() was refused or interrupted. A pause pressed before the music began interrupts it (an AbortError),
+    // which is the reader's own doing; anything else, sound not allowed or no music to play, is said.
+    function refused(error) {
+      if (error.name !== 'AbortError') giveUp();
+    }
+
+    function showWait() {
+      if (waitTimer) return;
+      waitLabel = clock.textContent === NO_MUSIC ? '' : clock.textContent;
+      clock.textContent = '';
+      clock.classList.add('loading');
+      waitTimer = setTimeout(giveUp, WAIT_LIMIT * 1000);
+    }
+
+    function hideWait() {
+      if (!waitTimer) return;
+      clearTimeout(waitTimer);
+      waitTimer = null;
+      clock.classList.remove('loading');
+      clock.textContent = waitLabel;
+    }
+
+    // The music plays, from the start or again after running short of data: the film follows it.
+    music.addEventListener('playing', () => {
+      if (!playing) return;
+      hideWait();
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(tick);
+      }
+    });
+    // The music has run short of data: the film holds with it, under the wait mark.
+    music.addEventListener('waiting', () => { if (playing) showWait(); });
+    // The browser paused the music itself (another app took the sound, say), so the film pauses with it.
+    music.addEventListener('pause', () => {
+      if (!playing || !music.paused) return;
+      playing = false;
+      button.textContent = 'play';
+      if (ticking) offset = music.currentTime % SayHi.beats.DURATION;
+      halt();
+    });
+    // Every source of the music, or the file itself, failed.
+    for (const target of [music, lastSource]) target.addEventListener('error', () => { if (playing) giveUp(); });
 
     ready.then(() => {
       fit();

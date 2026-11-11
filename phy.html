@@ -244,7 +244,11 @@
 
     const face = getComputedStyle(title), timeout = new Promise(resolve => setTimeout(resolve, FONT_TIMEOUT_MS, []));
     const fonts = typeof SIGNATURE_PEN === 'undefined' || !PhyFriends.pen ? Promise.resolve([])
-      : Promise.race([document.fonts.load(`${face.fontWeight} ${face.fontSize} ${face.fontFamily}`, SIGNATURE_PEN.text), timeout]);
+      // Only the house face, the first named, is waited for: a stand-in face that the reader lacks
+      // (lib/style/site/notebook.css) would fail the load of the whole list. A face that fails to load is as one
+      // that is late.
+      : Promise.race([document.fonts.load(`${face.fontWeight} ${face.fontSize} ${face.fontFamily.split(',')[0]}`, SIGNATURE_PEN.text)
+        .catch(() => []), timeout]);
     fonts.catch(() => []).then(faces => {
       if (!finishSigning) return;
       // The title may already show: the head script's failsafe. If the face has not arrived or does not match the

@@ -5,7 +5,7 @@ words and the way of working) and, for anything with the fwiends in it,
 `FWIENDS.md`. `README.md` says where each part of the repository lives, and
 `lib/fwiends/README.md` documents the code. These rules are for agents working
 here, most important first. The first three are the guide's duties as this
-repository keeps them; its fourth, the reader's light, is the kit's work.
+repository keeps them; its fourth, the reader's settings, is the kit's work.
 
 1. **Consent comes from the cast.** `lib/fwiends/characters/cast.js` says
    which media each owner has agreed to and which owners know each other.
@@ -29,7 +29,7 @@ repository keeps them; its fourth, the reader's light, is the kit's work.
    feelings.
 6. **One pass.** A change updates every document, page and derived value it
    touches. Generated files are never edited by hand; their tools write them:
-   `python3 tools/pf.py pages` (script tags and the gallery's rows),
+   `python3 tools/pf.py pages` (script tags and the gallery's rows and drawings),
    `tools/dark_sheet.py` (the dark sheet, the papers' and the dotfiles' inks)
    and `tools/site_assets.py` (icons and the link preview). `style.html` is
    drawn by hand from `STYLE.md` and `FWIENDS.md`, so a change to a rule it

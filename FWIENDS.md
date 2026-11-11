@@ -15,7 +15,9 @@ every copy matches, and in one material, the gallery's: coloured pencil
 without an outline, exactly one shade layer, and paper cut to the outline
 wherever the ground is not paper. Another material is for a one-off, with the
 owner's yes. However free a piece is (`STYLE.md` §4), it stages its characters
-and never redraws them. The site's `style.html` draws both, one after the
+and never redraws them. The characters stay as drawn and the world is free,
+as in cel animation: the place around them takes its own colours and its own
+light. The site's `style.html` draws both, one after the
 other: section N of `STYLE.md` at `style.html#sN`, and this file at
 `style.html#fwiends`. It is drawn by hand, so a change to a rule it pictures
 redraws the picture; where a drawing and the text disagree, the text wins.
@@ -125,9 +127,12 @@ The page has five parts, in this order:
   after it comes "skip the fwiends", shown only when tabbed to, which goes to
   the footer, some forty presses of Tab on. While it shows, the note steps
   aside for it; on a phone held sideways it takes the place of "keep still"
-  instead, rather than push it onto the title. Without JavaScript "keep still"
-  is hidden, and the stage reads "the fwiends are drawn live, so they need
-  JavaScript to appear."
+  instead, rather than push it onto the title. Without JavaScript the fwiends
+  stand still as `python3 tools/pf.py pages` drew them into the page, and
+  "keep still" and the note are hidden, since nobody can be greeted; the
+  note's rule stays, so that the fwiends stand where they would with the
+  script. A print leaves the note out too, since nothing on paper can be
+  clicked.
 - Each fwiend has a link of its own to send its owner, `index.html#yuda`, its
   name in lower case (`#k3v1n`): it skips the opening, brings the fwiend into
   view and focus, and the fwiend says hi.
@@ -182,8 +187,9 @@ library:
   pressed in turn on a fwiend tabbed to, and a finger held still on it for
   half a second (the tap that ends a long press is not a hi).
 - Left alone for 30 seconds, the fwiends grow sleepy one by one and fall
-  asleep, a z drifting up now and then. Any input wakes them, with a "!",
-  nearest the pointer first.
+  asleep, a z drifting up now and then. Any input wakes them, with a "!", one
+  after another rather than all in one frame: nearest the pointer first, or,
+  woken by a key, in an order of their own over less than half a second.
 - Claude shows no feelings and stays awake. It perks up, watches and hops
   like the others, and returns a hi with the same smile, which is manners
   rather than a feeling. Its third hi, where the others go shy, plays the
@@ -220,22 +226,38 @@ fwiends, through which the rules show faded. Pressing the phrase again, or
 Escape, puts everything back. The gallery loads `lib/fwiends/src/workings.js`
 for this, and a page that does not load it has none of it.
 
-**The opening.** The first time the page opens in a tab, the title writes
-itself and the fwiends come in by roll call. A reload, a step back through
-the history, a link to a fwiend, reduced motion, "keep still" and the link
-preview show everything in place.
+**The opening.** Every fwiend is drawn into the page (`python3 tools/pf.py
+pages` writes the drawings and their grounds), so the cast and the title stand
+at first paint, without waiting for a script. Each is drawn as the library
+mounts it, on both sheets, so the live fwiend takes its drawing's place
+without a pixel moving, and its idle motion grows in over most of a second
+from there. The first time the page opens in
+a tab, the title writes itself and the fwiends come in by roll call. A reload,
+a step back through the history, a link to a fwiend, reduced motion, "keep
+still" and the link preview show everything in place.
+- The opening waits a second for the page's script, and only that: until a
+  second after the page was asked for, the title and the drawings are hidden
+  and the names stand over blank paper. A script that comes in time plays the
+  opening. Once the second is up, everything shows whether the script has
+  come or not (the stylesheet shows it, not a script), a drawing that
+  arrives later shows as it arrives, and a script that
+  comes later finds everyone standing and plays a flourish instead: a ripple
+  runs through the fwiends in reading order, each one looking out at the
+  reader and blinking, in about a second.
 - The title is written stroke by stroke, in the order a hand writes each
-  letter, in just under three seconds, slowing at each end of a stroke and
+  letter, in under a second and a half, slowing at each end of a stroke and
   lifting between strokes. `lib/fwiends/src/pen.js` writes it; `python3
   tools/title_pen.py` derives the strokes (`lib/fwiends/src/title-pen.js`)
   from the title as the page sets it, and must run again if the title or its
   face changes. If the face is slow or doesn't match the strokes, or colours
   are forced, the title simply shows.
-- As the pen reaches "fwiends", the friends hop in along their row's rule from
-  the nearer edge of the screen, row by row, the one farthest from its edge
-  first, so that nobody hops past anybody standing. The hops are a little
-  lower than a scene's, so that ears clear the labels above, and neighbours
-  watch each one land. The labels are there from the start, so the empty
+- As the pen sets off, the friends hop in along their row's rule from the
+  nearer edge of the screen, row by row, the one farthest from its edge first,
+  so that nobody hops past anybody standing. They come as a quick wave, a
+  fwiend landing about every twelfth of a second in two hops at most, so that
+  a first screen stands whole a couple of seconds after the page opens. The
+  hops are a little lower than a scene's, so that ears clear the labels above,
+  and neighbours watch each one land. The labels are there from the start, so the empty
   places read as the names still to be called; each fwiend's ground is
   drawn as it sets off, from the side it comes from, so that the line is
   there before the fwiend lands on it, and gives as it does.
@@ -337,9 +359,17 @@ and no mouth by default.
   - Elsewhere the shade goes only on a part behind a neighbour of the same
     colour: Terry's ears behind his face, the back layer of a ruff, locks
     behind the mop, the inside of a hood past its rim.
-  - One part in front takes it instead: a raised paw, as far as it has come in
-    front of the head or face (fading in as it crosses their edge), so that a
-    paw the colour of the face still shows against it.
+  - One part in front takes it instead: a raised paw and its arm, as far as
+    the paw has come in front of the head or face (fading in as it crosses
+    their edge), or in front of the body or the tail, so that a paw the colour
+    of the face still shows against it.
+  - A raised arm is also laid over the character as a piece cut from the same
+    paper: a lip of paper, half a pencil's width, round the arms and paws in
+    front taken as one piece, wherever they lie over the character, as the dark
+    sheet's cut runs round the whole of it. So an arm across a body of its own
+    colour, or a paw beside a cheek, still shows, and paws held together have
+    one rim, never a loop inside it. It is the paper, never an ink outline,
+    a shadow or a filter, and an arm that hangs, walks or breathes takes none.
   - A spec sets a shade by hand only where the derived one looks wrong, and
     says so in a comment (mumuyou's gold hair). Where a shade lands on a
     neighbouring colour, the neighbour moves, not the shade: phy's crumb went a
@@ -361,12 +391,23 @@ and no mouth by default.
   so that they stand where its seated paws did. Seated, the same arms hang
   straight down in front as forelegs, to its seated paws (`stand.seat`), and
   the legs fold into its feet, so it stands up and sits down through every
-  height between, with nothing appearing or vanishing.
+  height between, with nothing appearing or vanishing. Standing up is a
+  movement: its feet step in under it, one small step each, the left and then
+  the right, before its hips rise, and its paws go up with it, never sliding
+  out over the ground, until it is most of the way up, when they come down to
+  its sides. Sitting down runs it backwards. A foot on the ground never slides.
+- **The body squashes, the head does not.** Squash and stretch are the body's:
+  the head keeps its size and rides on the body's top. Standing, a friend
+  leans its upper body about the hips, and tips as a whole about its planted
+  feet; seated, it leans from its seat, head and all, its forepaws staying
+  where they rest. Claude squashes whole.
 - From the back: the body and its clothes, the scarf (a ruff or bib of fur, or
   a scarf), the head, whose chin lies over the scarf and collar, then the
   arms, except at the shoulder, which tucks under the scarf and head. A hood
   is clothing, so it lies under the arms, and a sleeve takes its cloth's
-  shade, so that it shows against the garment's front.
+  shade, so that it shows against the garment's front. Two arms held over
+  everything (a fond clasp) come before both paws, so that the paws lie on
+  the arms.
 - A reference in the house template (a 1254px close-up, head tipped 20°, as
   in the Grokbot Icon prompt's examples, which reviewers should know) is
   matched at `scale: 5.5` with the view `{w: 1254, h: 1254, x: 450, y: 835,
@@ -400,6 +441,9 @@ Claude turns as South Park's cut-outs do, a quarter turn at a time
 (`pose.facing`): side-on to either side, or its back to the viewer, by rules
 that every fwiend shares (`PhyFriends.TURN`), so a change to the body plan
 turns with it. Where the true turn looks worse than a cheat, the cheat wins.
+A turn has a lead: the eyes go first, then the head, then the view snaps round,
+and the head, a little behind in the new view, settles. From behind, where the
+eyes do not show, the head leads alone.
 - Side-on, the face slides forwards and narrows, keeping a pale patch wide
   enough to read, with only its near eye (drawn over the hair), mouth, cheek
   and markings; the hair bends from the crown to the face, which a fringe
@@ -474,11 +518,13 @@ side and four short legs.
 
 **Motion**, on the page and in a scene (`STYLE.md` §3), with the eyes smoothed
 so that they never jitter:
-- Idle, the library's clip plays underneath: breathing, blinks at irregular
-  intervals, a slow sway of the head and tail, a glance about now and then and
-  an occasional ear flick, on an 8-second loop that each fwiend starts at a
-  different point. A fwiend standing also breathes with its arms and shifts
-  its weight slowly from foot to foot. The pencil boils: its texture is
+- Idle, each fwiend's own idle plays underneath, and never repeats: breathing
+  at a tempo of its own, slower the heavier its build and never in step with
+  another's, blinks at irregular intervals, a slow sway of the head and tail,
+  a glance about now and then, the head following the eyes, and an occasional
+  ear flick. A fwiend standing also breathes with its arms and shifts its
+  weight slowly from foot to foot. An export loops the same idle in 8
+  seconds. The pencil boils: its texture is
   redrawn 8 times a second, through three versions, as in hand-drawn
   animation (`PhyFriends.pencil.settings.boil`, which pages and films share).
 - Each friend works out the direction from its own head to the pointer, so
@@ -488,6 +534,9 @@ so that they never jitter:
   leaves or rests a while, they drift back to centre or glance about, unless
   one has been tabbed to: then the others look at it. A pen is followed like
   a mouse, and a finger while it touches; there is no gyroscope.
+- A feeling fades in and out over 0.15 s, eased at both ends. The eye shapes,
+  which cannot fade, change under a blink, with the eyes shut; a mouth, which
+  cannot either, changes at the fade's ends, without one.
 - The stage draws at the screen's rate only while something needs it (a
   pointer on the move, the eyes catching up with it, a fwiend reacting) and
   otherwise on fours, 15 frames a second. It stops drawing while none of it is
@@ -563,10 +612,13 @@ to break them.
 - **Share-alike music** (`STYLE.md` §4) passes its licence to the film, and
   the other fwiends are not phy's to license, so a CC BY-SA track goes only
   where phy alone is on screen.
-- **Getting about.** Seated fwiends hop. Standing ones walk: facing us, the
-  foot on the side they go to steps out and the other closes up, and the body
-  glides on up to twice as far as the feet, at a little under half a hop's
-  speed. They turn with `turnX`, never with a mirror image, which would swap
+- **Getting about.** Seated fwiends hop. Standing ones walk, and never skate:
+  a foot stays where it lands until it steps again. Facing us, the foot on the
+  side they go to steps out and the other closes up; side-on, the legs swing
+  forward and back. A walk too quick for its legs, past five steps a second
+  and the longest stride they reach, becomes hops. Every move weighs on the
+  rest of the fwiend: it tips into a start, its ears and tail trail, and it
+  sinks a little as it lands, all from its own build. They turn with `turnX`, never with a mirror image, which would swap
   two-coloured eyes and reverse K3V1N's mark. Each is on its own paper, cut
   to its outline (above).
 - Films boil as the gallery does, 8 times a second. Under

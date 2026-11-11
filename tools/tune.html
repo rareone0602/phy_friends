@@ -263,7 +263,9 @@
       rigs[4].setPose({ stance: 'sit', facing: 90 }, true);
       rigs[5].setPose({ stance: 'stand', facing: 90 }, true);
       rigs[6].setPose({ stance: 'stand', facing: 180 }, true);
-      return { between: rigs[1], moving: rigs[3], loop: loopOf(spec), turner: rigs[7] };
+      // Weighed for the friend, as the library plays a clip everywhere else, and looped, so that its weight wraps round.
+      const weigh = clip => A.weighed(A.loop(clip), { spec });
+      return { between: rigs[1], moving: rigs[3], loop: weigh(loopOf(spec)), turner: rigs[7], turning: weigh(turning) };
     });
     pose();
     for (const [key, [get]] of Object.entries(PARAMS)) {
@@ -311,9 +313,9 @@
   const start = performance.now();
   const frame = now => {
     const t = (now - start) / 1000;
-    for (const { moving, loop, turner } of shown) {
-      moving.setPose(A.sample(loop, t % loop.duration), true);
-      turner.setPose(A.sample(turning, t % turning.duration), true);
+    for (const { moving, loop, turner, turning } of shown) {
+      moving.setPose(A.sample(loop, t), true);
+      turner.setPose(A.sample(turning, t), true);
     }
     requestAnimationFrame(frame);
   };

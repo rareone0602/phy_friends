@@ -105,7 +105,7 @@
 .doc th, .doc td { padding: 0 1.6em 0 0; height: var(--L); text-align: left; vertical-align: baseline; }
 .doc :is(th, td):last-child { padding-right: 0; }  /* Spacing goes between columns, not after the last one. */
 .doc th { font: 300 22px/var(--L) var(--face); color: var(--ink-2); white-space: nowrap; position: relative; top: calc(var(--sit) - var(--lift)); }
-.doc td code { white-space: nowrap; }  /* A token or value never breaks at a hyphen. */
+:not(pre) > code { white-space: nowrap; }  /* Inline code, a token or a value, never breaks at a hyphen; a longer line goes in a pre. */
 .doc :is(th, td).n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 
 /* A picture: a whole number of rules tall (--rules), with its top and bottom on rules
@@ -120,6 +120,7 @@
 /* Small print: the date line, the contents line and the navigation, styled like the footer (15px, ink-2, never ink-3). */
 .meta, .doc .meta { list-style: none; padding: 0; margin-left: -1.4em; display: flex; flex-wrap: wrap; font-size: 15px; color: var(--ink-2);
   clip-path: inset(-8px -5px -8px calc(1.4em - 5px)); }  /* Each item begins with a dot; the clip hides the dot that begins a line, and leaves room for a focus ring. */
+:is(.meta, .doc .meta):not(:has(> li)) { margin-left: 0; clip-path: none; }  /* A date line written as plain text has no dot to hide. */
 .meta li::before { content: '\b7'; content: '\b7' / ''; display: inline-block; width: 1.4em; text-align: center; }  /* Screen readers pass over the dot, as they do the footer's. */
 header nav { font-size: 15px; color: var(--ink-2); min-height: var(--L); position: relative; top: var(--sit); }
 header nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; column-gap: 1.4em; }

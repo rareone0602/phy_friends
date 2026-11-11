@@ -59,6 +59,24 @@
     }
   });
 
+  // A reaction's own movement may change a shape on a beat of its own (the o of a start, a yawn, eyes falling shut),
+  // which it keeps; one whose movement shows the face's eye shapes from its start draws them itself.
+  test('a reaction brings in the eye shapes of the face it holds under a blink, with the eyes shut, and its mouth at once', () => {
+    for (const feeling of E.names) {
+      const face = E.face(feeling), keys = A.EYES.filter(key => face[key] !== undefined);
+      const react = E.react(feeling), frames = Array.from({ length: Math.round(react.duration * 120) + 1 }, (_, i) => react(i / 120));
+      if (face.mouth !== undefined) assert(frames[0].mouth !== undefined, `${feeling} shows its mouth from the start`);
+      if (!keys.length || keys.some(key => frames[0][key] !== undefined)) continue;
+      const at = frames.findIndex(p => keys.some(key => p[key] === face[key])), shut = A.sample(frames[at]).blink;
+      assert(at > 0 && shut > 0.9, `${feeling} changes its eyes ${at / 120} s in, ${shut.toFixed(2)} shut`);
+    }
+    const mouthOnly = E.names.filter(feeling => { const face = E.face(feeling); return face.mouth !== undefined && !A.EYES.some(key => face[key] !== undefined); });
+    assert(mouthOnly.length > 0 && mouthOnly.some(feeling => {
+      const react = E.react(feeling);
+      return Array.from({ length: 61 }, (_, i) => react(i / 120)).every(p => !p.blink);
+    }), `a face that changes its mouth alone comes on without a blink (${mouthOnly})`);
+  });
+
   test('a held feeling loops in a length that divides 8 s, so that it loops with idle', () => {
     for (const feeling of E.names) {
       const hold = E.hold(feeling);

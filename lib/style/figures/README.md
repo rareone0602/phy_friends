@@ -15,6 +15,12 @@ plt.style.use(['phy.mplstyle', 'phy-print.mplstyle'])   # Print: white, in the h
 | `phy-diagram.sty`, `diagram.tex` | TikZ: a paper's main diagram, and an example |
 | `fonts/` | the face, Shantell Sans, for LaTeX, matplotlib and design tools, with its licence |
 
+**A figure's words.** Its own words (axes, ticks, labels and the words in a
+diagram's boxes) are at `0` wherever it sits, since the reader measures them,
+and a note in the hand is written, so at `50`. Its title and its caption
+belong to the page or the slide it sits on, and take that work's number and
+case (`STYLE.md` §3).
+
 ## Data colours
 
 Each comes from one of phy's characters: the character's colour taken down in
@@ -55,8 +61,8 @@ tools/dark_sheet.py` writes that column, and both sets into the dotfiles.
   the series colour at `16%`.
 - Label lines at their ends. A legend goes only where labels would collide,
   and has no frame.
-- The face is at `0`, which is the font file's default, so matplotlib needs no
-  dial; but register it before plotting, or matplotlib falls back to Helvetica
+- `0` is the font file's default instance, so matplotlib needs no dial; but
+  register the face before plotting, or matplotlib falls back to Helvetica
   Neue without a word:
   `font_manager.fontManager.addfont('lib/style/figures/fonts/ShantellSans-Variable.ttf')`.
   A chart inside a document with its own typeface takes that typeface instead
@@ -90,13 +96,12 @@ type. `phy-diagram.sty` carries it for TikZ, and `diagram.tex` is an example.
   the paper builds as usual, arXiv included, without the font. Only LuaLaTeX
   can turn the dial; XeLaTeX stops with a message.
 - It sits on white, with no title: the caption carries it. Its words are in
-  the face at `0`, in sentence case; a box holds a noun or two, and the caption
-  does the explaining. A diagram for a site or slides takes that work's
-  number: `\usepackage[informal=50]{phy-diagram}`.
+  sentence case, wherever it is shown; a box holds a noun or two, and the
+  caption does the explaining.
 - Symbols and values are maths in the paper's own type, so the `z_t` in the
   diagram is the `z_t` in the text: load the paper's text and maths packages
   (`newtxtext` and `newtxmath` for Times) before `phy-diagram`.
-- One note in the hand, at `50`, with an arrow, may point at the new part.
+- One note in the hand, with an arrow, may point at the new part.
 - Draw it at the size it prints, `6.75in` across both columns or `3.3in` in
   one, so words come out at `8pt` and none is smaller than `7pt`.
 - Lines are graphite, `0.7pt`, with round caps and open arrowheads, and wobble

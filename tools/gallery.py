@@ -10,12 +10,17 @@ decide how much room each takes. From them come, without anyone writing them by 
 - each friend's slot (index.html): its reaches past its box on a wide screen and on a phone (--wide-left,
   --wide-right, --phone-left, --phone-right) in its tag, so that the page is laid out as it will stand before its
   script has drawn and measured the friends, and the number of lines in its spec (data-lines), which the page's
-  workings show (with_slots).
+  workings show (with_slots);
+- each friend's drawing and ground (index.html): the friend drawn by the library as the page mounts it, in its box,
+  the ground line that the page draws under it, and the rules that the library adds for a friend drawn on the page's
+  paper, so that the cast stands at the page's first paint, and without JavaScript, before the page's script brings
+  it to life (with_drawings).
 
-`python3 tools/pf.py pages` writes both, and `python3 tools/pf.py test` fails while either is stale, or while the
+`python3 tools/pf.py pages` writes them all, and `python3 tools/pf.py test` fails while any is stale, or while the
 friends do not stand in the rows of the split that the page means for a window either side of where each split
-takes over (row_drift). The labels that the gallery repeats by hand (each friend's name, species and credit) are
-checked against the cast too (label_drift), since they are prose that a person words.
+takes over (row_drift), or while a written drawing differs by a pixel from the live friend that takes its place, or
+stands elsewhere without JavaScript (swap_drift). The labels that the gallery repeats by hand (each friend's name,
+species and credit) are checked against the cast too (label_drift), since they are prose that a person words.
 """
 import html.parser
 import math
@@ -68,6 +73,28 @@ READ_BOX_JS = """(() => {
     ['marginLeft', 'marginRight'].reduce((sum, side) => sum + parseFloat(stage[side]), 0);
   return { box: document.querySelector('.rig').offsetWidth, less };
 })()"""
+# Each friend drawn as lib/fwiends/src/live.js mounts it on the gallery (createFriend, with the page's bg: 'page'): in its
+# standing view, seated, on the page's paper, under ids of its own (drawn-<name>), which no live drawing takes; and the
+# rules that the library adds to a page for a friend drawn on its paper (the cut-out's, lib/fwiends/src/phyfriends.js
+# CUTOUT_STYLE), taken from the library rather than from the page, which holds the copy written last. The page's
+# script mounts the live friend in the drawing's place, and the library then finds its rules already there.
+READ_DRAWINGS_JS = """(names => {
+  document.getElementById('pf-cutout-style')?.remove();
+  const drawings = Object.fromEntries(names.map(name => {
+    const spec = PhyFriends.get(name);
+    const svg = PhyFriends.render(spec, { fluid: true, bg: 'page', view: PhyFriends.standingView(spec), pose: { stance: 'sit' }, uid: `drawn-${name}` });
+    return [name, svg.replace(/ data-pf-uid="[^"]*"/, '').replace('<svg ', '<svg aria-hidden="true" ')];
+  }));
+  return { drawings, style: document.getElementById('pf-cutout-style').outerHTML };
+})"""
+# Each friend's ground as the gallery draws it (index.html drawGround), at rest: its line as drawn, without the clip
+# of the roll call's pen or the dip of a landing.
+READ_GROUNDS_JS = """Object.fromEntries(friends.map(friend => {
+  const svg = friend.ground.svg.cloneNode(true);
+  svg.removeAttribute('style');
+  svg.firstElementChild.setAttribute('d', friend.ground.d);
+  return [friend.name, svg.outerHTML];
+}))"""
 # How many friends stand in each of the gallery's rows, top to bottom, once their slots are fitted.
 READ_ROWS_JS = """document.fonts.ready.then(() => new Promise(requestAnimationFrame)).then(() => {
   const rows = [];
@@ -115,7 +142,7 @@ def measure_gallery(chrome, errors):
     where each split takes over (rows, by window). A gallery that fails to draw a friend has no reach to give for it,
     so it is an error rather than a reach of nothing. errors: a list to which the errors that the gallery reports at
     each window's width are added, as take_errors() adds them."""
-    sizes, reaches = {}, {}
+    sizes, reaches, drawn = {}, {}, {}
     for width in REACH_WINDOWS:
         chrome.set_viewport(width, 900)
         chrome.open(str(GALLERY))
@@ -125,6 +152,9 @@ def measure_gallery(chrome, errors):
         if undrawn:
             raise ValueError(f'{GALLERY.name} drew no {", ".join(undrawn)}, so its rows cannot be measured: '
                              'load every friend (python3 tools/pf.py pages) and see the page errors')
+        if not drawn:
+            drawn = {'grounds': chrome.evaluate(READ_GROUNDS_JS),
+                     **chrome.evaluate(f'({READ_DRAWINGS_JS})({[reach["name"] for reach in measured]!r})')}
         screen = 'phone' if width <= PHONE_WINDOW else 'wide'
         for reach in measured:
             kept = reaches.setdefault(reach['name'], {'name': reach['name'], 'left': 0, 'right': 0,
@@ -135,7 +165,7 @@ def measure_gallery(chrome, errors):
         for label, size in (('narrow', NARROW), ('wide', WIDE)):
             if width == size:
                 sizes[label] = chrome.evaluate(READ_BOX_JS)
-    measures = {'reaches': list(reaches.values()), **sizes}
+    measures = {'reaches': list(reaches.values()), **sizes, **drawn}
     text = GALLERY.read_text(encoding='utf-8')
     if layout_block(text) == layout_css(layout(measures)) and with_slots(text, measures['reaches']) == text:
         measures['rows'] = {}
@@ -279,6 +309,29 @@ def with_slots(text, reaches):
     return text
 
 
+RIG = re.compile(r'(?P<open><div class="rig"[^>]*>).*?</div>', re.S)
+GROUND = re.compile(r'<svg class="ground"[^>]*>.*?</svg>', re.S)
+DRAWING_STYLE = re.compile(r'<style id="pf-cutout-style">.*?</style>\n', re.S)
+
+
+def with_drawings(text, drawings, grounds, style):
+    """The gallery's text with each friend drawn in its box and its ground under it (READ_DRAWINGS_JS and
+    READ_GROUNDS_JS), as they stand before the page's script brings them to life, and the library's rules for
+    those drawings (style) last in its head, where the library would add them."""
+    for tag in reversed(FriendTags(text).tags):  # From the end, so that each tag's place in the text still holds.
+        key, start = tag['key'], tag['start']
+        end = text.find('</li>', start)
+        slot, drawn = RIG.subn(lambda match: match['open'] + drawings[key] + '</div>', text[start:end], count=1)
+        if not drawn:
+            raise ValueError(f'{key}: its slot has no box to draw it in (<div class="rig">)')
+        text = text[:start] + GROUND.sub('', slot) + grounds[key] + text[end:]
+    text = DRAWING_STYLE.sub('', text)
+    head = text.find('</head>')
+    if head < 0:
+        raise ValueError('it has no </head> before which to write the rules for its drawings')
+    return text[:head] + style + '\n' + text[head:]
+
+
 def read_slots(text):
     """Each friend's slot on the gallery, in page order, as (key, reach left, reach right) in head units: the larger
     of its reaches on the two sizes of screen, as with_slots wrote them in its tag, which are what the rows take."""
@@ -352,13 +405,14 @@ def written(page, cast, measures):
             if not block:
                 raise ValueError('it has no rows to write: mark them as layout_css() does')
             new = with_slots(new.replace(block, layout_css(layout(measures))), measures['reaches'])
+            new = with_drawings(new, measures['drawings'], measures['grounds'], measures['style'])
     except ValueError as error:
         raise ValueError(f'{page.relative_to(ROOT)}: {error}') from None
     return text, new
 
 
 def write_pages(cast, measures=None):
-    """Rewrites every page whose script tags or rows are stale (only the script tags, without measures), and returns
+    """Rewrites every page whose script tags, rows or drawings are stale (only the script tags, without measures), and returns
     the pages rewritten."""
     changed = []
     for page in PAGES:
@@ -370,9 +424,9 @@ def write_pages(cast, measures=None):
 
 
 def page_drift(cast, measures):
-    """Every page whose script tags or rows are stale, or that cannot be written, every window in which the
+    """Every page whose script tags, rows or drawings are stale, or that cannot be written, every window in which the
     gallery's rows break (row_drift), and a gallery whose head script looks for "keep still" under another key than
-    lib/fwiends/src/live.js keeps it under, one line each. Without measures, the rows are not checked."""
+    lib/fwiends/src/live.js keeps it under, one line each. Without measures, the rows and drawings are not checked."""
     problems = (row_drift(measures) if measures else []) + still_key_drift()
     for page in PAGES:
         try:
@@ -382,8 +436,13 @@ def page_drift(cast, measures):
             continue
         if new == text:
             continue
-        scripts = with_scripts(text, cast['names']) or text
-        stale = (["its friends' script tags"] if scripts != text else []) + (['its rows, slots and line counts'] if new != scripts else [])
+        # Each writer has a part of the page to itself, so each is checked against the page as it stands.
+        gallery = page == GALLERY and measures
+        stale = ((["its friends' script tags"] if (with_scripts(text, cast['names']) or text) != text else []) +
+                 (['its rows, slots and line counts'] if gallery and (layout_block(text) != layout_css(layout(measures)) or
+                                                                     with_slots(text, measures['reaches']) != text) else []) +
+                 (["its friends' drawings"] if gallery and with_drawings(text, measures['drawings'], measures['grounds'],
+                                                                         measures['style']) != text else []))
         problems.append(f'{page.relative_to(ROOT)}: {" and ".join(stale)} are stale; run python3 tools/pf.py pages')
     return problems
 
@@ -401,6 +460,97 @@ def still_key_drift(pages=OPENINGS, live=SRC / 'live.js'):
         return []
     found = '; '.join(f'{path.relative_to(ROOT)} has {key[1] if key else "none"}' for path, key in keys.items())
     return [f'the key under which "keep still" is remembered (const STILL_KEY) differs: {found}']
+
+
+# ---- The swap: the written drawings against the live friends that take their place -----------
+
+# The windows in which the swap is checked: a phone's and a wide screen's, as wide as the slow phone's and the desktop's
+# of the opening's measures. Each is made as tall as the page, so that every friend is in view and drawn.
+SWAP_WIDTHS = (390, 1440)
+# Holds the moment at which the page's script brings the friends to life: the stage draws its first frame
+# (lib/fwiends/src/live.js, its frame loop, animate) and no later one, and the bitmap that later sharpens a live
+# friend's texture (lib/fwiends/src/phyfriends.js, sharpenTexture), which is not there at that moment, never arrives.
+SWAP_JS = r"""(() => {
+  const request = window.requestAnimationFrame.bind(window);
+  window.pfStageFrames = 0;
+  window.requestAnimationFrame = callback => request(time => {
+    if (callback.name !== 'animate') return callback(time);
+    if (window.pfStageFrames++ === 0) callback(time);
+  });
+  HTMLCanvasElement.prototype.toBlob = () => {};
+})();"""
+# Leaves only the friends and their grounds in sight, moving nothing: the words about them differ with and without the
+# page's script ("keep still", the note), and are not drawings.
+ONLY_FRIENDS_JS = r"""(() => {
+  const style = document.createElement('style');
+  style.textContent = 'body > header, body > footer, .note, figcaption, .disclaimer { visibility: hidden !important; }';
+  document.head.append(style);
+})()"""
+# Each friend's box (its rig), and the part of the page in which it is drawn: its slot across, and down from two rules
+# above its box, into which its ears may reach, to its ground; in CSS px.
+READ_PLACES_JS = r"""(() => {
+  const rule = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'));
+  return [...document.querySelectorAll('.friend')].map(li => {
+    const slot = li.getBoundingClientRect(), box = li.querySelector('.rig').getBoundingClientRect();
+    return { name: li.dataset.friend, box: [box.left, box.top, box.width, box.height],
+             drawn: [slot.left, box.top - 2 * rule, slot.right, box.bottom + rule / 2] };
+  });
+})()"""
+SETTLED_JS = 'document.fonts.ready.then(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))))'
+
+
+def swap_drift(page=GALLERY, widths=SWAP_WIDTHS):
+    """Whether the gallery's written drawings are the live friends that take their place, as a list of problems, one
+    line each: on both sheets and in each window, every friend whose written drawing (the page's script running, the
+    fwiends' library never arriving) differs by a pixel from the live friend at the moment that the page's script brings
+    it to life (SWAP_JS), and every friend that stands elsewhere without JavaScript than with it."""
+    import io
+
+    from PIL import Image, ImageChops
+
+    from cdp import HeadlessChrome
+    problems, held = [], True
+    for width in widths:
+        with HeadlessChrome(width, 900) as chrome:
+            chrome.open(f'{page}#-')
+            height = chrome.evaluate('document.documentElement.scrollHeight')
+        for sheet in ('light', 'dark'):
+            shots, places = {}, {}
+            for way in ('written', 'live', 'without JavaScript'):
+                with HeadlessChrome(width, height) as chrome:
+                    chrome.media(prefers_color_scheme=sheet)
+                    if way == 'written':
+                        chrome.block('*/lib/fwiends/*')
+                    elif way == 'live':
+                        chrome.add_init_script(SWAP_JS)
+                    else:
+                        chrome.send('Emulation.setScriptExecutionDisabled', {'value': True})
+                    chrome.open(f'{page}#-')  # A link into the page, which skips the opening.
+                    chrome.evaluate(SETTLED_JS if way != 'without JavaScript' else 'document.fonts.ready.then(() => null)')
+                    places[way] = chrome.evaluate(READ_PLACES_JS)
+                    if way == 'live' and not chrome.evaluate('window.pfStageFrames'):
+                        held = False
+                    if way != 'without JavaScript':
+                        chrome.evaluate(ONLY_FRIENDS_JS)
+                        chrome.evaluate(SETTLED_JS)
+                        shots[way] = Image.open(io.BytesIO(chrome.screenshot())).convert('RGB')
+            where = f'{Path(page).name} in a {width}px window, on the {sheet} sheet'
+            differs = ImageChops.difference(shots['written'], shots['live']).point(lambda value: 255 if value else 0)
+            for place in places['live']:
+                left, top, right, bottom = (round(value) for value in place['drawn'])
+                count = sum(1 for pixel in differs.crop((max(0, left), max(0, top), right, bottom)).getdata() if any(pixel))
+                if count:
+                    problems.append(f"{where}: {place['name']}'s written drawing differs in {count} pixels from the live "
+                                    'friend that takes its place')
+            for live, bare in zip(places['live'], places['without JavaScript']):
+                if any(abs(a - b) > 0.01 for a, b in zip(live['box'], bare['box'])):
+                    problems.append(f"{where}: without JavaScript, {live['name']} stands at "
+                                    f"({bare['box'][0]:.0f}, {bare['box'][1]:.0f}) px, not at "
+                                    f"({live['box'][0]:.0f}, {live['box'][1]:.0f}) px as with it")
+    if not held:
+        problems.append(f'{Path(page).name}: the stage drew no frame that the check of the swap could hold (SWAP_JS '
+                        "looks for lib/fwiends/src/live.js's frame loop under the name animate)")
+    return problems
 
 
 # ---- The gallery's labels, checked against the cast -----------------------------------------

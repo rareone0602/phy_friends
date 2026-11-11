@@ -116,7 +116,7 @@ python3 tools/pf.py film test/film-stub.html --at 1 -o out/scratch/film/still.pn
 python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4  # A part, with its part of the sound
 python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4  # Twice the pixels each way, at a higher quality
 python3 tools/pf.py test                                    # The in-browser tests, the pages against the cast, the derived files, and every page
-python3 tools/pf.py pages                                   # The friends' script tags and the gallery's rows and slots, written from the cast
+python3 tools/pf.py pages                                   # The friends' script tags, and the gallery's rows, slots and drawings, written from the cast
 python3 tools/pf.py tune                                    # out/tune.html: the tuning page as one file, to send
 ```
 
@@ -138,7 +138,10 @@ which crops it), and `pf.py` seeks it to each frame's time in turn and takes a
 screenshot. The video is therefore frame-exact however slow the machine, and
 filming a page twice gives the same frames, byte for byte. A film with a friend
 whose owner has not agreed to video is refused unless `--draft` is given, in
-which case the page marks it as a draft.
+which case the page marks it as a draft. A film that checks itself, as say hi
+does, lists what its checks report in `film.failures`; `pf.py film` notes each
+one, and `pf.py test` fails on any, at the start, a third and two thirds of the
+way through, and the end of every demo's film.
 
 With `--audio`, `film` puts a sound file under an `.mp4` or `.webm` film. The
 frames are copied rather than encoded again, so they are the same with sound as
@@ -173,9 +176,17 @@ host, the owner's agreement to the gallery, the footer's credit to Terry's owner
 A mismatch is a failure that names the friend and the field. What
 follows from the cast and the drawings is written, not typed: `pf.py pages`
 (`tools/gallery.py`) writes the script tags of every page that loads all the
-friends, in the cast's order, and the gallery's rows and slots, from the
-friends' reaches; `test` fails while either is stale, and `pages` writes no
-rows from a gallery that reports an error. `test` fails, too, while the dark
+friends, in the cast's order, the gallery's rows and slots, from the
+friends' reaches, and each friend's drawing and ground in the gallery, with the
+library's rules for a drawing on the page's paper, so that the cast stands
+before any script runs; `test` fails while any of them is stale, while a
+written drawing differs by a pixel, on either sheet, from the live friend at
+the moment it takes the drawing's place, or stands elsewhere without
+JavaScript, and `pages` writes no rows or drawings from a gallery that reports
+an error. It fails while a reader without the stand-in face would not see the
+gallery's title written, phy's page signed or a film ready, and while a
+drawing that the gallery sends slowly shows later than the opening's grace or
+its own arrival. `test` fails, too, while the dark
 sheet's blocks (`tools/dark_sheet.py`) are stale, while an ink's contrast or a
 data colour that the kit's README or `style.html` gives is not the kit's, while
 a page's theme colour is not the paper's (or the dark sheet's), while a page

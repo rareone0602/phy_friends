@@ -69,7 +69,7 @@
 
   // What a drawing shows of its parts, for comparing a mounted rig with a fresh render: each part's transform,
   // display and opacity, and the part it lies in; the parts of each slot that a pose restacks, in order; whether the
-  // arms take the tuck's mask; each outline; and each toggle.
+  // arms take the tuck's mask; each outline; each toggle; and what each link points at.
   function drawingOf(root) {
     const parts = [...root.querySelectorAll('[data-pf]')], within = n => n.parentNode.closest('[data-pf]');
     const named = n => (n ? n.getAttribute('data-pf') : null);
@@ -81,6 +81,7 @@
       tucked: tuck ? tuck.hasAttribute('mask') : null,
       outlines: [...root.querySelectorAll('[data-pf-d]')].map(n => `${n.getAttribute('data-pf-d')}:${n.getAttribute('d')}`),
       toggles: [...root.querySelectorAll('[data-pf-when], [data-pf-show]')].map(n => n.getAttribute('display')),
+      links: [...root.querySelectorAll('[data-pf-link]')].map(n => (n.getAttribute('href') || '').replace(/^#.*?-/, '#')),  // Without the drawing's uid.
     };
   }
 
@@ -108,6 +109,33 @@
         }
       }
     });
+  });
+
+  // The most attributes that posing a friend through a second of its idle, at the 15 frames a second at which the
+  // pages play it, may write, seated and standing: a browser restyles, and may repaint, for every write, and the
+  // gallery idles a score of friends at once. In November 2026 the friends wrote 195 to 246 seated, as the gallery has
+  // them, and 335 to 568 standing, once a pose wrote nothing to an arm's edge, a tuck or an arms' slot that it does not
+  // draw (poseState).
+  const IDLE_WRITES = { sit: 250, stand: 580 };
+
+  test('posing any friend through a second of its idle writes no more attributes than IDLE_WRITES allows', () => {
+    const over = [];
+    withBoxSync(box => {
+      for (const name of PF.list()) {
+        for (const stance of ['sit', 'stand']) {
+          const rig = PF.mount(box, name, { bitmap: false, pose: { stance } }), idle = A.idleOf(name);
+          const at = t => { const pose = { stance }; A.addIdle(pose, idle, t); return A.sample(pose); };
+          rig.setPose(at(0), true);
+          const observer = new MutationObserver(() => {});
+          observer.observe(rig.svg, { attributes: true, subtree: true });
+          for (let i = 1; i <= 15; i++) rig.setPose(at(i / 15), true);
+          const writes = observer.takeRecords().length;
+          observer.disconnect();
+          if (writes > IDLE_WRITES[stance]) over.push(`${name} ${stance === 'sit' ? 'seated' : 'standing'}: ${writes}`);
+        }
+      }
+    });
+    assertEqual(over, [], 'the friends whose idle writes more than IDLE_WRITES allows');
   });
 
   test('every friend of the house turns to each quarter, sitting and standing, in finite numbers, and keeps its parts', () => {
@@ -187,9 +215,47 @@
     for (const name of houseFriends()) {
       for (const facing of [0, 90]) {
         for (const u of [0.1, 0.3, 0.55, 0.8]) {
-          const pose = A.sample({ ...A.walking(u, 4, { distance: 48, facing }).pose, stance: 'stand', facing });
+          const pose = A.sample({ ...A.walking(u, 4, { distance: 48, facing, gait: A.gaitOf(name) }).pose, stance: 'stand', facing });
           const below = await raster.lowest(name, pose);
           assert(Math.abs(below) <= ON_GROUND, `${name} at ${u} of a walk facing ${facing} has its lowest point ${below.toFixed(1)} units below the ground`);
+        }
+      }
+    }
+  });
+
+  // Where a pose puts a friend's feet, in head units of its cut-out: the point each foot is drawn about (its
+  // translation), carried by the root's transform, which translates and scales (PhyFriends.poseState).
+  function feetOf(spec, pose) {
+    const st = PF.poseState(spec, pose), at = {};
+    assert(!/rotate|matrix/.test(st.transform.root), `a walk's root only translates and scales: ${st.transform.root}`);
+    const ops = [...st.transform.root.matchAll(/(translate|scale)\(([^)]*)\)/g)].map(m => [m[1], m[2].trim().split(/[\s,]+/).map(Number)]).reverse();
+    for (const side of ['L', 'R']) {
+      let [, x, y] = /translate\(([-\d.e]+) ([-\d.e]+)\)/.exec(st.transform[`foot${side}`]).map(Number);
+      for (const [op, [a, b = op === 'scale' ? a : 0]] of ops) [x, y] = op === 'translate' ? [x + a, y + b] : [x * a, y * b];
+      at[side] = [x, y];
+    }
+    return at;
+  }
+
+  test('every friend of the house keeps a planted foot where it was put as it walks, facing the viewer and side-on', () => {
+    const SLIDE = 0.5;  // How far, in head units, a planted foot may move from one sample to the next.
+    for (const name of houseFriends()) {
+      const spec = PF.get(name), gait = A.gaitOf(spec);
+      for (const facing of [0, 90, 270]) {
+        for (const distance of [240, -150]) {
+          const steps = A.walkSteps(distance, 2.5, { gait, facing });
+          assert(steps > 0, `${name} walks ${distance} units in 2.5 s facing ${facing}`);
+          let last = null;
+          for (let i = 0; i <= 240; i++) {
+            const walk = A.walking(i / 240, steps, { distance, gait, facing });
+            const feet = feetOf(spec, A.sample({ ...walk.pose, x: walk.along * distance, stance: 'stand', facing }));
+            for (const side of ['L', 'R']) {
+              if (!last || !walk.planted[side] || !last.planted[side]) continue;
+              const moved = Math.hypot(feet[side][0] - last.feet[side][0], feet[side][1] - last.feet[side][1]);
+              assert(moved < SLIDE, `${name} facing ${facing} going ${distance}: planted foot ${side} moves ${moved.toFixed(2)} at ${(i / 240).toFixed(3)}`);
+            }
+            last = { feet, planted: walk.planted };
+          }
         }
       }
     }
@@ -216,6 +282,92 @@
       if (shares.some(({ area, share }) => area > 0 && share < SHOWN)) lost.push(name);
     }
     assertEqual(lost.sort(), [], 'the friends whose raised paws are lost against the face');
+  });
+
+  // The key poses of every gesture that the library offers, standing, each with the paws it raises: each movement at the
+  // first moment that it holds an arm at its highest, and each feeling's standing gesture, held. A paw counts as
+  // raised once it has moved a paw's breadth from where it hangs; one moved less hangs still, as the test of every
+  // limb above checks it.
+  function keyPoses(name) {
+    const still = STANCES[1], spec = PF.get(name), out = [], MOVED = 20, STEPS = 30;
+    const at = (pose, S) => PF.poseState(spec, pose).transform[`paw${S}`].match(/translate\(([-\d.]+) ([-\d.]+)\)/).slice(1).map(Number);
+    const rest = ['L', 'R'].map(S => at(A.sample(still), S));
+    const raised = pose => ['L', 'R'].filter((S, i) => Math.hypot(...at(pose, S).map((v, k) => v - rest[i][k])) >= MOVED);
+    for (const move of ['wave', 'cheer', 'jump', 'stretch', 'point', 'beckon']) {
+      const clip = A.layer(still, A.make[move]({ spec: name }));
+      const poses = Array.from({ length: STEPS + 1 }, (_, i) => A.sample(clip, clip.duration * i / STEPS));
+      const keys = new Set(['L', 'R'].map(S => {
+        const top = Math.max(...poses.map(p => p[`arm${S}`]));
+        return poses.findIndex(p => p[`arm${S}`] >= top - 1e-6);
+      }));
+      for (const i of keys) out.push([`${move} at ${(clip.duration * i / STEPS).toFixed(2)} s`, poses[i], raised(poses[i])]);
+    }
+    for (const feeling of E.names) out.push([`${feeling}, held`, A.sample(A.layer(still, E.hold(feeling, { spec: name })), 1.5)]);
+    return out.map(([label, pose, paws]) => [label, pose, paws || raised(pose)]).filter(([, , paws]) => paws.length);
+  }
+  // The least share of a gesturing paw's outline that shows against what lies round it (raster.outline): the paper, the
+  // head, the body or the tail. Where it borders on the arms and paws, its own and the other, it does not count, since
+  // those in front are cut out as one piece, with one edge round them (drawLimbs).
+  const OUTLINED = 0.5;
+
+  test('at the key pose of every gesture, every paw it moves shows its outline, against the head and the body too', async () => {
+    const lost = [];
+    for (const name of houseFriends()) {
+      for (const [label, pose, paws] of keyPoses(name)) {
+        const limbs = ['L', 'R'].flatMap(S => [`arm${S}`, `paw${S}`]), apart = paws.map(S => limbs.filter(n => n !== `paw${S}`));
+        const shares = await raster.outline(name, paws.map(S => `paw${S}`), pose, { apart });
+        paws.forEach((S, i) => {
+          if (shares[i].share < OUTLINED) lost.push(`${name} ${label}: ${Math.round(shares[i].share * 100)}% of paw${S}`);
+        });
+      }
+    }
+    assertEqual(lost, [], 'the paws whose outlines are lost at a key pose');
+  });
+
+  test('at the key pose of every gesture, the paper edge lies round the arms and paws in front, never inside them', async () => {
+    const inside = [];
+    let edged = 0;
+    for (const name of houseFriends()) {
+      const spec = PF.get(name);
+      for (const [label, pose] of keyPoses(name)) {
+        const { state } = PF.poseState(spec, pose);
+        if (state.edgeL === 'off' && state.edgeR === 'off') continue;
+        edged++;
+        const front = ['L', 'R'].filter(S => !state.behind.has(`arm${S}`) && !state.beside.has(`arm${S}`)).flatMap(S => [`arm${S}`, `paw${S}`]);
+        const { area, seen } = await raster.within(name, front, 'edges', pose);
+        if (seen) inside.push(`${name} ${label}: ${seen} of ${area} pixels`);
+      }
+    }
+    assert(edged > houseFriends().length, `the key poses that draw an edge: ${edged}`);
+    assertEqual(inside, [], 'the key poses whose paper edge shows inside the arms and paws in front');
+  });
+
+  // How far a tail's root may stand off the rest of the figure and still meet it (raster.rootGap), in head units: a
+  // pixel and a half of the canvas that measures it.
+  const MEETS = 1.5;
+  // The points of a rise at which a tail is tested: through the middle, where the seated feet have stepped in and the
+  // paws have not come down (PF.RISE.tuck), and near either end.
+  const MIDDLE = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9], ENDS = [0.02, 0.05, 0.95, 0.98];
+
+  test('every friend of the house keeps its tail on through a rise: a root that meets the figure at rest meets it all the way', async () => {
+    const off = [];
+    let tails = 0;
+    for (const name of houseFriends()) {
+      if (!PF.get(name).tail || !PF.standFor(name)) continue;
+      tails++;
+      const gap = rise => raster.rootGap(name, 'tail', { stance: 'sit', rise });
+      const rests = [await gap(0), await gap(1)], meets = Math.min(...rests) <= MEETS, most = Math.max(...rests) + MEETS;
+      for (const rise of MIDDLE) {
+        const d = await gap(rise);
+        if (d > (meets ? MEETS : most)) off.push(`${name} at ${rise}: ${d.toFixed(1)} off, against ${rests.map(r => r.toFixed(1)).join(' and ')} at rest`);
+      }
+      for (const rise of ENDS) {
+        const d = await gap(rise);
+        if (d > most) off.push(`${name} at ${rise}: ${d.toFixed(1)} off, against ${rests.map(r => r.toFixed(1)).join(' and ')} at rest`);
+      }
+    }
+    assert(tails > houseFriends().length / 2, `the friends with a tail that stand: ${tails}`);
+    assertEqual(off, [], 'the points of a rise at which a tail stands further off the figure than at rest');
   });
 
   test('every friend of the house waves, points and beckons with the arm away from its tail', () => {

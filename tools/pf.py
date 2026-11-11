@@ -15,7 +15,7 @@
   python3 tools/pf.py film test/film-stub.html --audio out/scratch/music.mp3 --from 0.5 --to 1.5 -o out/scratch/film/part.mp4
   python3 tools/pf.py film test/film-stub.html --scale 2 --crf 12 -o out/scratch/film/master.mp4   # Twice the pixels each way, at a higher quality.
   python3 tools/pf.py test                              # Runs test/index.html headless, checks the pages and the derived files, and opens every page as a reader opens it from disk; exits non-zero on a failure or a page error.
-  python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows and slots (tools/gallery.py).
+  python3 tools/pf.py pages                             # Writes the friends' script tags and the gallery's rows, slots and drawings (tools/gallery.py).
   python3 tools/pf.py tune                              # Writes tools/tune.html, the tuning page, as one file: out/tune.html.
 
 Each character lives in lib/fwiends/characters/<name>/, which holds the spec <name>.js and
@@ -36,11 +36,13 @@ the BT.709 matrix in limited range and tagged so, as players assume for HD video
 so that its colors match the page's; --crf sets its quality.
 
 `test` also checks the pages against the cast in lib/fwiends/characters/cast.js: the labels
-that index.html repeats by hand, and the script tags and rows that `pages` writes
-(tools/gallery.py); and the files derived from others: the dark sheet's blocks
+that index.html repeats by hand, and the script tags, rows and drawings that `pages`
+writes (tools/gallery.py); and the files derived from others: the dark sheet's blocks
 (tools/dark_sheet.py), the theme colors, the inks' contrasts and the data
 colors that the kit's README and style.html give, and the list of test files
-in test/index.html.
+in test/index.html. It opens each demo's film too, and fails when the film's own
+checks (film.failures, in the film contract) report a failure at its start, a
+third and two thirds of the way through, or its end.
 
 Output goes to out/<name>/ for each character (stills, compare/, anim/),
 out/design/ for page mockups, out/tune.html for the tuning page to send, and
@@ -580,7 +582,7 @@ READ_FILM_JS = """(async () => {
   await film.ready;
   await document.fonts.ready;
   return { width: film.width, height: film.height, fps: film.fps, duration: film.duration,
-           unagreed: Array.from(film.unagreed || []) };
+           unagreed: Array.from(film.unagreed || []), failures: Array.from(film.failures || [], String) };
 })()"""
 
 
@@ -597,6 +599,7 @@ def film(page, out, size=None, scale=1, fps=None, start=0, end=None, at=None, dr
         fps,            // Optional preferred frame rate (default 30).
         duration,       // Seconds.
         unagreed,       // Names of friends on screen whose owners have not agreed to video.
+        failures,       // Optional: what the film's own checks report, one message each; empty when all is well.
         ready,          // Promise: resolves when fonts, images and textures are loaded.
         seek(t),        // Draws the frame at t seconds; may return a promise.
       };
@@ -763,6 +766,8 @@ def open_film(page, size=None, scale=1, draft=False):
         chrome.open(page, 'film&draft' if draft else 'film')
         spec = read_film(chrome)
         refuse_unagreed(spec['unagreed'], draft)
+        for failure in spec['failures']:
+            print(f'note: the film reports a failure of its own: {failure}', file=sys.stderr)
         if not size:
             if not (spec['width'] and spec['height']):
                 raise SystemExit('the film gives no width and height: pass --size')
@@ -843,7 +848,7 @@ OPENED_VIEWPORT = (1280, 800)  # The window in which every page is opened.
 
 # The checks of the pages against the cast (tools/gallery.py) and of the derived files, each a test of its own.
 LABEL_TEST = "the gallery's labels agree with the cast"
-PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows and slots fit the friends' reaches"
+PAGES_TEST = "the pages load every friend of the cast, in its order, and the gallery's rows and slots fit the friends' reaches, with each friend drawn"
 DARK_TEST = "the dark sheet's inks and marks, and every theme color, follow from the paper's inks"
 SHOWN_TEST = "the inks' contrasts and the data colors that the kit's README and the style guide give are the kit's"
 TEST_FILES_TEST = 'test/index.html loads every test file'
@@ -853,6 +858,11 @@ DEPENDENCY_TEST = "the library links nothing outside it, and phy's style and dot
 KIT_TEST = 'the kit keeps every name that the published kit defines'
 DOTFILES_TEST = 'the dotfiles fit any machine: the recommended settings parse, and no file names a home folder'
 CJK_TEST = 'no tracked file holds CJK text, in its name or in its text'
+FILMS_TEST = "every demo's film passes its own checks (film.failures) at its start, a third and two thirds of the way, and its end"
+STAND_IN_TEST = "a reader without the stand-in face still sees the gallery's title written, phy's page signed and a film ready"
+GRACE_TEST = "the gallery's drawings show by the end of the opening's grace, or as they arrive if later, on one clock from the navigation"
+SWAP_TEST = ("the gallery's written drawings are, to the pixel and on both sheets, the live friends at the moment they "
+             "take their place, and stand where they do without JavaScript")
 GRAPHITE = KIT / 'graphite.js'
 PENCIL_SHEETS = {KIT / 'pencil.css', KIT / 'phy.css'}  # The kit's stylesheets that draw through the filter.
 
@@ -875,6 +885,8 @@ def run_tests(page=TEST_PAGE):
             unmeasured.append(str(error))
     with HeadlessChrome(*OPENED_VIEWPORT, reader=True) as reader:
         errors += opening_errors(reader, opened_pages())
+    films = film_failures(demo_pages()[1:])
+    stand_in, grace, swap = stand_in_drift(), grace_drift(), gallery.swap_drift()
     if results is None:
         errors.append((relative(page), 'it did not load test/harness.js: window.testsDone is missing'))
         results = {'passed': [], 'failed': []}
@@ -884,7 +896,8 @@ def run_tests(page=TEST_PAGE):
               DARK_TEST: dark_drift(), SHOWN_TEST: dark_sheet.shown_drift(), TEST_FILES_TEST: test_files_drift(page),
               LINKS_TEST: layout.link_drift(found), DEPENDENCY_TEST: layout.dependency_drift(found),
               GRAPHITE_TEST: graphite_drift(found), KIT_TEST: kit_api.kit_drift(),
-              DOTFILES_TEST: layout.dotfiles_drift(), CJK_TEST: layout.cjk_drift()}
+              DOTFILES_TEST: layout.dotfiles_drift(), CJK_TEST: layout.cjk_drift(), FILMS_TEST: films,
+              STAND_IN_TEST: stand_in, GRACE_TEST: grace, SWAP_TEST: swap}
     for name, drift in checks.items():
         results['failed'] += [{'name': name, 'message': message} for message in drift]
         if not drift:
@@ -921,6 +934,172 @@ def opened_pages():
     """The pages that `test` opens to see that they load and draw without errors: the site's, every tool page and
     every demo page."""
     return THEMED_PAGES + sorted((ROOT / 'tools').glob('*.html')) + demo_pages()
+
+
+FILM_CHECKS_AT = (0, 1 / 3, 2 / 3, 1)  # The shares of a film's length at which its own checks are read.
+READ_FAILURES_JS = """(async t => {
+  await window.film.seek(t);
+  return Array.from(window.film.failures || [], String);
+})"""
+
+
+def film_failures(pages):
+    """What the films of the pages given report of their own checks (film.failures in the film contract), seeked to
+    each share of their length in FILM_CHECKS_AT, one line each. A page that defines no window.film is skipped; one
+    whose film does not load says so."""
+    out = []
+    for page in pages:
+        with HeadlessChrome(*FILM_VIEWPORT) as chrome:
+            chrome.block('http://*', 'https://*')
+            chrome.open(page, 'film&draft')
+            if not chrome.evaluate('typeof window.film === "object" && window.film !== null'):
+                continue
+            try:
+                spec = chrome.evaluate(READ_FILM_JS)
+                found = list(spec['failures'])
+                for share in FILM_CHECKS_AT:
+                    t = min(share * spec['duration'], spec['duration'] - 1 / (spec['fps'] or FILM_FPS))
+                    found += chrome.evaluate(f'{READ_FAILURES_JS}({max(0, t)!r})')
+            except (PageError, ChromeTimeout) as error:
+                found = [f'its film failed: {error}']
+        out += [f'{relative(page)}: {failure}' for failure in dict.fromkeys(found)]
+    return out
+
+
+# A reader who lacks the stand-in face (lib/style/site/notebook.css), as a reader of a system without Arial or any face
+# with its widths does: a stand-in that no machine has, named second in --face as the kit names its own. The page's
+# rule is outranked (html:root), and a pen that starts writing is noted, since it may finish before it is looked for.
+MISSING_STAND_IN_JS = r"""(() => {
+  const style = document.createElement('style');
+  style.textContent = "@font-face { font-family: 'pf missing stand-in'; src: local('pf no such face'); } " +
+    "html:root { --face: 'Shantell Sans', 'pf missing stand-in', sans-serif; }";
+  new MutationObserver((records, observer) => {
+    if (!document.head) return;
+    observer.disconnect();
+    document.head.prepend(style);
+  }).observe(document, { childList: true, subtree: true });
+  window.pfPenStarted = false;
+  new MutationObserver(() => { if (document.querySelector('.pf-pen')) window.pfPenStarted = true; })
+    .observe(document, { childList: true, subtree: true });
+})();"""
+# Waits up to `seconds` for a pen to start writing, and says whether one did.
+PEN_STARTED_JS = """(async seconds => {
+  const until = performance.now() + seconds * 1000;
+  while (!window.pfPenStarted && performance.now() < until) await new Promise(resolve => setTimeout(resolve, 50));
+  return window.pfPenStarted;
+})"""
+STAND_IN_SECONDS = 4  # How long a pen has to start, or a film to get ready, in the check of the stand-in.
+
+
+def stand_in_drift(gallery_page=ROOT / 'index.html', signed_page=ROOT / 'phy.html', films=None):
+    """Whether a reader without the stand-in face still sees the gallery write its title, phy's page sign itself and
+    a film get ready, as a list of problems. The gallery's opening may give way to its flourish on a slow machine, so
+    its title is written on request (its writeTitle) on the gallery opened by a link into it, which skips the opening."""
+    problems = []
+    with HeadlessChrome(*OPENED_VIEWPORT) as chrome:
+        chrome.block('http://*', 'https://*')
+        chrome.add_init_script(MISSING_STAND_IN_JS)
+        chrome.open(f'{gallery_page}#-')
+        chrome.evaluate("document.documentElement.classList.add('writing-title'); writeTitle(() => {})")
+        if not chrome.evaluate(f'({PEN_STARTED_JS})({STAND_IN_SECONDS})'):
+            problems.append(f'{relative(gallery_page)}: without the stand-in face, its title is not written')
+        chrome.open(signed_page)
+        if not chrome.evaluate(f'({PEN_STARTED_JS})({STAND_IN_SECONDS})'):
+            problems.append(f'{relative(signed_page)}: without the stand-in face, it does not sign itself')
+        for page in films if films is not None else demo_pages()[1:]:
+            chrome.open(page, 'film&draft')
+            if not chrome.evaluate('typeof window.film === "object" && window.film !== null'):
+                continue
+            try:
+                chrome.evaluate(f'Promise.race([window.film.ready, new Promise((_, reject) => setTimeout(() => '
+                                f'reject(new Error("not ready in {STAND_IN_SECONDS} s")), {STAND_IN_SECONDS * 1000}))])')
+            except PageError as error:
+                problems.append(f'{relative(page)}: without the stand-in face, its film never gets ready: {error}')
+            break  # One film is enough: every film waits for its face in lib/fwiends/film/scene.js.
+    return problems
+
+
+# The check of the opening's grace (index.html): the gallery is served with a pause after its first friends, longer
+# than the grace, and without the fwiends' library, which therefore never comes. Every drawing must then show by the
+# grace's end or as it arrives, whichever is later, give or take a few frames.
+GRACE = {'ms': 1000, 'friends': 12, 'pause': 1.5, 'frames': 250}
+# Notes when each friend's drawing arrives and when it first shows.
+REVEAL_JS = r"""(() => {
+  window.pfReveal = {};
+  new MutationObserver(() => {
+    for (const rig of document.querySelectorAll('.friend .rig')) {
+      const name = rig.closest('.friend').dataset.friend;
+      if (!(name in window.pfReveal) && rig.querySelector('svg')) window.pfReveal[name] = { arrived: performance.now(), shown: null };
+    }
+  }).observe(document, { childList: true, subtree: true });
+  (function frame() {
+    requestAnimationFrame(() => {
+      for (const [name, entry] of Object.entries(window.pfReveal)) {
+        const rig = document.querySelector(`.friend[data-friend="${name}"] .rig`);
+        if (entry.shown === null && rig && getComputedStyle(rig).opacity === '1') entry.shown = performance.now();
+      }
+      frame();
+    });
+  })();
+})();"""
+
+
+@contextmanager
+def slow_gallery(page=ROOT / 'index.html'):
+    """A server of the repository on a free local port, for the check of the grace: it sends the gallery in two parts
+    with GRACE['pause'] seconds between them, the second from its GRACE['friends'] + 1st friend on, and refuses the
+    fwiends' library (lib/fwiends/). Yields the gallery's URL. `page` is the gallery's file, served in its place."""
+    import http.server
+    import threading
+    text = Path(page).read_bytes()
+    cut = [match.start() for match in re.finditer(rb'<li class="friend"', text)][GRACE['friends']]
+
+    class Handler(http.server.SimpleHTTPRequestHandler):
+        def log_message(self, *args):
+            pass
+
+        def do_GET(self):
+            if self.path.split('?')[0] == '/index.html':
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.end_headers()
+                self.wfile.write(text[:cut])
+                self.wfile.flush()
+                time.sleep(GRACE['pause'])
+                self.wfile.write(text[cut:])
+            elif self.path.startswith('/lib/fwiends/'):
+                self.send_error(404)
+            else:
+                super().do_GET()
+
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(Handler, directory=str(ROOT)))
+    server.daemon_threads = True
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    try:
+        yield f'http://127.0.0.1:{server.server_address[1]}/index.html'
+    finally:
+        server.shutdown()
+        server.server_close()
+
+
+def grace_drift(page=ROOT / 'index.html'):
+    """Whether every drawing on the gallery shows by the end of the opening's grace or as it arrives, whichever is
+    later, on a first visit whose library never comes, as a list of problems (GRACE)."""
+    with slow_gallery(page) as url, HeadlessChrome(*OPENED_VIEWPORT) as chrome:
+        chrome.add_init_script(REVEAL_JS)
+        chrome.open(url)
+        time.sleep(0.5)
+        reveal, sampled = chrome.evaluate('[window.pfReveal, performance.now()]')
+    problems = []
+    for name, entry in reveal.items():
+        due = max(GRACE['ms'], entry['arrived'])
+        if entry['shown'] is None or entry['shown'] > due + GRACE['frames']:
+            shown = f"had not shown by {sampled / 1000:.2f} s" if entry['shown'] is None else f"showed at {entry['shown'] / 1000:.2f} s"
+            problems.append(f"index.html: {name}'s drawing arrived at {entry['arrived'] / 1000:.2f} s and {shown}, "
+                            f"later than the grace's end ({GRACE['ms'] / 1000:.2f} s) or its arrival")
+    if len(reveal) < GRACE['friends'] + 1:
+        problems.append(f'index.html: the check of the grace saw only {len(reveal)} drawings arrive')
+    return problems
 
 
 def opening_errors(chrome, pages):
@@ -1118,8 +1297,8 @@ def run(a):
 
 
 def run_pages():
-    """Write the friends' script tags, then the gallery's rows and slots, and print each page written. Rows measured
-    on a gallery that reported errors could be wrong, so they are then not written, and the command fails."""
+    """Write the friends' script tags, then the gallery's rows, slots and drawings, and print each page written. Rows
+    measured on a gallery that reported errors could be wrong, so they are then not written, and the command fails."""
     errors, changed = [], []
     try:
         # The script tags first, so that the gallery measured for the rows draws every friend of the cast.
@@ -1132,7 +1311,7 @@ def run_pages():
     except ValueError as error:
         problem = str(error)
     else:
-        problem = "the pages reported errors, so the gallery's rows and slots were not written" if errors else None
+        problem = "the pages reported errors, so the gallery's rows, slots and drawings were not written" if errors else None
     for page in dict.fromkeys(changed):
         print(page)
     print_page_errors(errors)

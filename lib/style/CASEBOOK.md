@@ -14,3 +14,13 @@ quiet ground stay out of the sentence, since they are meant to repeat.
 | [a card](https://rareone0602.github.io/phy_friends/demo/card/) (scene) | phy carries a cake to someone, and its candles light on cue |
 | [the gallery](https://rareone0602.github.io/phy_friends/) (page) | a group photo that looks back: the fwiends watch the cursor, and the title writes itself as they hop in |
 | [roll call](https://rareone0602.github.io/phy_friends/demo/roll-call/) (scene) | the fwiends hop on one at a time, and each signs in |
+
+**References that have served**, each for one thing, never a whole look
+(`STYLE.md` §4):
+- The Snowman (Raymond Briggs's book and the 1982 film): soft coloured
+  pencil throughout, almost no words, and the pace set by Howard Blake's
+  score.
+- Ernest & Celestine (2012): colour that stops short of the frame's edges,
+  so the paper shows round every scene.
+- Jon Klassen's hat books (2011–16): eyes without mouths doing all the
+  acting, and menace stated flatly.

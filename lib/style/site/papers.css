@@ -110,7 +110,7 @@
   :root:has(meta[name="color-scheme"][content~="dark"]) { --rule-faint: #3d4851; --tracing: rgba(58, 58, 55, 0.6); }
 }
 [data-paper=notebook] {
-  --paper: #fbf9f3; --rule: #cfdbe8; --margin: #e6aaa3; --rule-faint: #dde9f7; --ink: #3d3c39; --ink-2: #6d6a63; --ink-3: #97938a; --red: #a64a3f; --blue-pencil: #1c77ad; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #fbf9f3; --rule: #cfdbe8; --margin: #e6aaa3; --rule-faint: #dde9f7; --ink: #3d3c39; --ink-2: #6d6a63; --ink-3: #97938a; --red: #a64a3f; --blue-pencil: #1c77ad; --green: #7c930c; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%236d6a63' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%236d6a63' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2397938a' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -127,7 +127,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%236d6a63' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=graphite], :root[data-paper=graphite]:has(meta[name="color-scheme"][content~="dark"]) {
-  --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --rule-faint: #3d4851; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; --blue-pencil: #66afe8; --tracing: rgba(58, 58, 55, 0.6);
+  --paper: #3d3c39; --rule: #45505a; --margin: #8b5751; --rule-faint: #3d4851; --ink: #fbf9f3; --ink-2: #b4b1a9; --ink-3: #86837a; --red: #fe9c8c; --blue-pencil: #66afe8; --green: #8ca02b; --tracing: rgba(58, 58, 55, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%23b4b1a9' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%23b4b1a9' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2386837a' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -144,7 +144,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23b4b1a9' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=graph] {
-  --paper: #f4f7ef; --rule: #b5d3bd; --margin: #e3a7a1; --rule-faint: #c7e5cf; --ink: #3b3a38; --ink-2: #6b6862; --ink-3: #949188; --red: #a3483d; --blue-pencil: #1875ab; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #f4f7ef; --rule: #b5d3bd; --margin: #e3a7a1; --rule-faint: #c7e5cf; --ink: #3b3a38; --ink-2: #6b6862; --ink-3: #949188; --red: #a3483d; --blue-pencil: #1875ab; --green: #799107; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%236b6862' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%236b6862' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23949188' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -161,7 +161,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%236b6862' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=score] {
-  --paper: #f8f3e6; --rule: #c6b89c; --margin: #e1a59f; --rule-faint: #decfb3; --ink: #393836; --ink-2: #696660; --ink-3: #938f86; --red: #a2463c; --blue-pencil: #1473a9; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #f8f3e6; --rule: #c6b89c; --margin: #e1a59f; --rule-faint: #decfb3; --ink: #393836; --ink-2: #696660; --ink-3: #938f86; --red: #a2463c; --blue-pencil: #1473a9; --green: #788f05; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%23696660' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%23696660' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23938f86' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -178,7 +178,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23696660' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=sketchbook], :root[data-paper=sketchbook]:has(meta[name="color-scheme"][content~="dark"]) {
-  --paper: #cdc6b8; --rule: #a2adba; --margin: #bb827c; --rule-faint: #aeb9c7; --ink: #181715; --ink-2: #4d4b44; --ink-3: #737067; --red: #812923; --blue-pencil: #10567f; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #cdc6b8; --rule: #a2adba; --margin: #bb827c; --rule-faint: #aeb9c7; --ink: #181715; --ink-2: #4d4b44; --ink-3: #737067; --red: #812923; --blue-pencil: #10567f; --green: #5d6e0a; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%234d4b44' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%234d4b44' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23737067' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -195,7 +195,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%234d4b44' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=kraft], :root[data-paper=kraft]:has(meta[name="color-scheme"][content~="dark"]) {
-  --paper: #cfae80; --rule: #909ca8; --margin: #aa726c; --rule-faint: #9ba7b4; --ink: #080702; --ink-2: #403d37; --ink-3: #656159; --red: #6f1a16; --blue-pencil: #00486e; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #cfae80; --rule: #909ca8; --margin: #aa726c; --rule-faint: #9ba7b4; --ink: #080702; --ink-2: #403d37; --ink-3: #656159; --red: #6f1a16; --blue-pencil: #00486e; --green: #506003; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%23403d37' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%23403d37' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23656159' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -212,7 +212,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%23403d37' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=card] {
-  --paper: #fdfcf8; --rule: #c6d6ea; --margin: #e9aca5; --rule-faint: #d7e7fc; --ink: #3f3d3a; --ink-2: #6f6b64; --ink-3: #99958b; --red: #a84b40; --blue-pencil: #1f78af; --tracing: rgba(253, 253, 251, 0.6);
+  --paper: #fdfcf8; --rule: #c6d6ea; --margin: #e9aca5; --rule-faint: #d7e7fc; --ink: #3f3d3a; --ink-2: #6f6b64; --ink-3: #99958b; --red: #a84b40; --blue-pencil: #1f78af; --green: #7e940f; --tracing: rgba(253, 253, 251, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%236f6b64' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%236f6b64' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2399958b' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -229,7 +229,7 @@
   --mark-drawing: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><style>path{stroke-dasharray:90;animation:d 1.6s ease-in-out infinite}@keyframes d{from{stroke-dashoffset:90}60%25,to{stroke-dashoffset:0}}</style><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%236f6b64' stroke-width='1.3' stroke-linecap='round'/></svg>");
 }
 [data-paper=cyanotype], :root[data-paper=cyanotype]:has(meta[name="color-scheme"][content~="dark"]) {
-  --paper: #244d87; --rule: #3a619a; --margin: #4b73ad; --rule-faint: #2f5891; --ink: #fcfbf7; --ink-2: #cdcac2; --ink-3: #9c988e; --red: #fec1b6; --blue-pencil: #86c7ff; --tracing: rgba(33, 75, 132, 0.6);
+  --paper: #244d87; --rule: #3a619a; --margin: #4b73ad; --rule-faint: #2f5891; --ink: #fcfbf7; --ink-2: #cdcac2; --ink-3: #9c988e; --red: #fec1b6; --blue-pencil: #86c7ff; --green: #9cac47; --tracing: rgba(33, 75, 132, 0.6);
   --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%23cdcac2' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%23cdcac2' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
   --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%239c988e' stroke-width='1.3' stroke-linecap='round'/></svg>");
@@ -247,7 +247,7 @@
 }
 @media print {
   :root[data-paper], :root[data-paper]:has(meta[name="color-scheme"][content~="dark"]) {
-    --paper: #fbf9f3; --rule: #cfdbe8; --margin: #e6aaa3; --rule-faint: #dde9f7; --ink: #3d3c39; --ink-2: #6d6a63; --ink-3: #97938a; --red: #a64a3f; --blue-pencil: #1c77ad; --tracing: rgba(253, 253, 251, 0.6);
+    --paper: #fbf9f3; --rule: #cfdbe8; --margin: #e6aaa3; --rule-faint: #dde9f7; --ink: #3d3c39; --ink-2: #6d6a63; --ink-3: #97938a; --red: #a64a3f; --blue-pencil: #1c77ad; --green: #7c930c; --tracing: rgba(253, 253, 251, 0.6);
     --mark-arrow: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 20'><path d='M2 12C12 4 28 3 44 11M44 11l-5-7.5M44 11l-9 .5' fill='none' stroke='%236d6a63' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/></svg>");
     --mark-ring: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 104 46' preserveAspectRatio='none'><path d='M60 5C30 2 5 10 6 24s28 19 52 17 42-8 40-20S72 3 44 7' fill='none' stroke='%236d6a63' stroke-width='1.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/></svg>");
     --mark-squiggle: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='90' height='10'><path d='M2 6c5-5 9-5 13 0s8 5 13 0 9-5 13 0 8 5 13 0 9-5 13 0 8 4 13 0' fill='none' stroke='%2397938a' stroke-width='1.3' stroke-linecap='round'/></svg>");

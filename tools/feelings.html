@@ -108,7 +108,8 @@
         const rig = PF.mount(box, name, { view, bg: false });
         rig.svg.setAttribute('role', 'img');
         rig.svg.setAttribute('aria-label', `${name}, ${feeling}${stand.checked ? ', standing' : ''}`);
-        const clip = E.feel(feeling, { spec: name }), still = at === null ? E.face(feeling, { spec: name }) : clip(at);
+        // Weighed for the friend (anim.weighed), as a page or a scene plays a feeling: a hop for joy trails its ears.
+        const clip = A.weighed(E.feel(feeling, { spec: name }), { spec: name }), still = at === null ? E.face(feeling, { spec: name }) : clip(at);
         cells.push({ rig, stance, clip, still: A.sample({ ...still, stance }) });
       }
       rows.appendChild(row);

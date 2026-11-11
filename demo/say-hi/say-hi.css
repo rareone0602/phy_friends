@@ -14,7 +14,9 @@
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--frame-bg); }
 body::before { display: none; }  /* The pages carry their own paper grain. */
 
-.sh-host { position: absolute; inset: 0; }
+/* The host clips the frame, which is laid out at its full size before it is scaled: unclipped, a phone's
+   browser would widen the page to hold it, and the frame would be fitted to that wider page. */
+.sh-host { position: absolute; inset: 0; overflow: hidden; }
 .sh-frame { position: absolute; left: 0; top: 0; overflow: hidden; background: var(--paper); transform-origin: 0 0; }
 .sh-pages, .sh-page, .sh-screen-top, .sh-scenes { position: absolute; inset: 0; }
 .sh-page { overflow: hidden; transform-origin: 50% 50%; }
@@ -90,4 +92,8 @@ body::before { display: none; }  /* The pages carry their own paper grain. */
 .sh-controls { position: fixed; left: 12px; bottom: 10px; display: flex; gap: 10px; align-items: center; z-index: 10;
   font: 300 18px/1 var(--face); color: var(--ink-2); }
 .sh-controls button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--rule); border-radius: 6px; padding: 6px 14px; cursor: pointer; }
+.sh-time { line-height: 1.3; }  /* It may say, on two lines on a phone, that the music did not load. */
 html.sh-filming .sh-controls { display: none; }
+/* Without JavaScript the film cannot be drawn, so the line in the controls says so in place of the button, with
+   room between its lines where a phone wraps it. */
+@media (scripting: none) { .sh-play { display: none; } .sh-controls { line-height: 1.4; } }

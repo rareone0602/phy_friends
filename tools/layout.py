@@ -77,7 +77,9 @@ def target(source, link):
     own = OWN_URL.match(link)
     if own:
         base, path = '', own[2]
-    elif EXTERNAL.match(link) or TEMPLATED.search(link):
+    # An anchor may be percent-encoded (%23), as it is inside a picture written as data, such as a friend's pencil
+    # texture, which a drawing written into the gallery carries.
+    elif EXTERNAL.match(link) or EXTERNAL.match(unquote(link)) or TEMPLATED.search(link):
         return None
     else:
         base, path = posixpath.dirname(source), link
